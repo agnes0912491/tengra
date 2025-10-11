@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Blog } from "@/types/blog";
+import type { Blog, BlogCategory } from "@/types/blog";
 
 const BLOGS_API_URL = "http://host:8080/api/blogs";
 
@@ -27,6 +27,22 @@ const requestBlogApi = async (url: string, token: string) => {
     );
   }
 };
+
+export const getAllBlogCategories = async (
+  tokenValue?: string | null
+): Promise<BlogCategory[]> => {
+  const token = ensureToken(tokenValue);
+  const response = await requestBlogApi(`${BLOGS_API_URL}/categories`, token);
+
+  if (!response.ok) {
+    throw new Error(
+      `Blog API isteği ${response.status} durum kodu ile başarısız oldu.`
+    );
+  }
+
+  const categories = (await response.json()) as BlogCategory[];
+  return categories;
+}
 
 export const getAllBlogs = async (tokenValue?: string | null): Promise<Blog[]> => {
   const token = ensureToken(tokenValue);

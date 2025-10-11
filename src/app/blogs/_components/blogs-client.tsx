@@ -4,32 +4,32 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
-import type { Blog } from "@/types/blog";
+import type { Blog, BlogCategory } from "@/types/blog";
 
 interface BlogsClientProps {
   posts: Blog[];
 }
 
 export function BlogsClient({ posts }: BlogsClientProps) {
-  const [activeCategory, setActiveCategory] = useState<string>("All");
+  const [activeCategory, setActiveCategory] = useState<BlogCategory | null>(null);
 
   const categories = useMemo(() => {
-    const unique = new Set<string>();
+    const unique = new Set<BlogCategory>();
     for (const post of posts) {
       for (const category of post.categories) {
         unique.add(category);
       }
     }
 
-    return ["All", ...unique];
+    return [null, ...unique];
   }, [posts]);
 
   const filtered = useMemo(() => {
-    if (activeCategory === "All") {
+    if (!activeCategory) {
       return posts;
     }
 
-    return posts.filter((post) => post.categories.includes(activeCategory));
+    return posts.filter((post) => post.categories.find((cat) => cat.name === activeCategory.name));
   }, [activeCategory, posts]);
 
   return (
@@ -37,7 +37,7 @@ export function BlogsClient({ posts }: BlogsClientProps) {
       <div className="flex flex-wrap justify-center gap-3 mb-10">
         {categories.map((category) => (
           <button
-            key={category}
+            key={category?.name}
             onClick={() => setActiveCategory(category)}
             className={`px-4 py-1 rounded-full text-sm border transition ${
               activeCategory === category
@@ -45,7 +45,7 @@ export function BlogsClient({ posts }: BlogsClientProps) {
                 : "border-gray-700 text-gray-400 hover:border-[rgba(0,167,197,0.3)] hover:text-[color:var(--color-turkish-blue-300)]"
             }`}
           >
-            {category}
+            {category?.name}
           </button>
         ))}
       </div>
@@ -76,10 +76,10 @@ export function BlogsClient({ posts }: BlogsClientProps) {
               <div className="flex flex-wrap gap-2">
                 {post.categories.map((cat) => (
                   <span
-                    key={cat}
+                    key={cat.name}
                     className="text-xs px-2 py-0.5 rounded-full bg-[rgba(0,167,197,0.15)] border border-[rgba(0,167,197,0.3)] text-[color:var(--color-turkish-blue-200)]"
                   >
-                    {cat}
+                    {cat.name}
                   </span>
                 ))}
               </div>

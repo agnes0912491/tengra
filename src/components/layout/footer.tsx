@@ -99,14 +99,7 @@ export default function Footer() {
                   Çıkış Yap
                 </button>
               </div>
-            ) : (
-              <Link
-                href="/login"
-                className="rounded-full border border-[rgba(0,167,197,0.35)] px-3 py-1 text-[11px] uppercase tracking-widest text-[color:var(--color-turkish-blue-100)] transition hover:bg-[rgba(0,167,197,0.12)]"
-              >
-                Giriş Yap
-              </Link>
-            )}
+            ) : <></>}
           </div>
         </div>
 

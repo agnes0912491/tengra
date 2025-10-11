@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { ADMIN_SESSION_COOKIE, verifyAdminSessionToken } from "@/lib/auth";
+import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
+
+const BACKEND_BLOGS = "http://host:8080/api/blogs";
 
 const PUBLIC_PATH_PREFIXES = [
   "/admin/login",
@@ -9,10 +11,17 @@ const PUBLIC_PATH_PREFIXES = [
   "/api/admin/logout",
 ];
 
-const isPublicPath = (pathname: string) =>
-  PUBLIC_PATH_PREFIXES.some((path) =>
+// Allow-listed public paths that do not require admin auth.
+// We intentionally treat root ('/') and '/blogs' as public, but avoid adding
+// '/' to PUBLIC_PATH_PREFIXES because that would match every path.
+const isPublicPath = (pathname: string) => {
+  if (pathname === "/") return true; // homepage is public
+  if (pathname === "/blogs" || pathname.startsWith("/blogs/")) return true; // blogs list and posts are public
+
+  return PUBLIC_PATH_PREFIXES.some((path) =>
     path.endsWith("/") ? pathname.startsWith(path) : pathname === path || pathname.startsWith(`${path}/`)
   );
+};
 
 const isAssetPath = (pathname: string) =>
   pathname.startsWith("/_next") ||
@@ -22,7 +31,7 @@ const isAssetPath = (pathname: string) =>
   pathname === "/robots.txt" ||
   pathname === "/sitemap.xml";
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (isAssetPath(pathname) || isPublicPath(pathname)) {
@@ -31,9 +40,31 @@ export function middleware(request: NextRequest) {
 
   const sessionToken = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
 
-  if (!verifyAdminSessionToken(sessionToken)) {
+  // If no session token set, redirect to login
+  if (!sessionToken) {
     const loginUrl = new URL("/admin/login", request.url);
     loginUrl.searchParams.set("next", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // Validate token by calling a protected backend endpoint. Backend will
+  // return 200 for valid tokens and 401/403 for invalid ones.
+  try {
+    const res = await fetch(BACKEND_BLOGS, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${sessionToken}`, Accept: "application/json" },
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      const loginUrl = new URL("/admin/login", request.url);
+      loginUrl.searchParams.set("next", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+  } catch (_err) {
+    const loginUrl = new URL("/admin/login", request.url);
+    loginUrl.searchParams.set("next", pathname);
+    
     return NextResponse.redirect(loginUrl);
   }
 

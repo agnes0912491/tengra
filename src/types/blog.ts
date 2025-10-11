@@ -1,3 +1,8 @@
+export interface BlogCategory {
+  name: string
+  description: string
+}
+
 export interface Blog {
   id: string
   title: string
@@ -6,6 +11,6 @@ export interface Blog {
   excerpt: string
   content: string
   image: string
-  categories: string[]
+  categories: BlogCategory[]
 }
 

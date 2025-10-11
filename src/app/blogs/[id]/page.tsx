@@ -12,7 +12,7 @@ export default async function BlogPost({
 }: {
   params: { id: string };
 }) {
-  const token = cookies().get(ADMIN_SESSION_COOKIE)?.value;
+  const token = (await cookies()).get(ADMIN_SESSION_COOKIE)?.value;
   const post = await getBlogById(params.id, token);
 
   if (!post) {
