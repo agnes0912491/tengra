@@ -7,7 +7,7 @@ import BlogsClient from "./BlogsClient";
 export default async function BlogsPage() {
   const token = (await cookies()).get(ADMIN_SESSION_COOKIE)?.value;
   const categories = await getAllBlogCategories();
-  const posts = await getAllBlogs(token);
+  const posts = await getAllBlogs();
 
   return <BlogsClient posts={posts} categories={categories} token={token} />;
 

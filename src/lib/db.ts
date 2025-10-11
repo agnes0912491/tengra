@@ -4,21 +4,9 @@ import type { Blog, BlogCategory } from "@/types/blog";
 
 const BLOGS_API_URL = "http://host:8080/api/blogs";
 
-const ensureToken = (token: string | null | undefined) => {
-  if (!token) {
-    throw new Error("Geçerli bir yönetici oturum belirteci bulunamadı.");
-  }
-
-  return token;
-};
-
-const requestBlogApi = async (url: string, token: string) => {
+const requestBlogApi = async (url: string) => {
   try {
     return await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
       cache: "no-store",
     });
   } catch (error) {
@@ -28,11 +16,8 @@ const requestBlogApi = async (url: string, token: string) => {
   }
 };
 
-export const getAllBlogCategories = async (
-  tokenValue?: string | null
-): Promise<BlogCategory[]> => {
-  const token = ensureToken(tokenValue);
-  const response = await requestBlogApi(`${BLOGS_API_URL}/categories`, token);
+export const getAllBlogCategories = async (): Promise<BlogCategory[]> => {
+  const response = await requestBlogApi(`${BLOGS_API_URL}/categories`);
 
   if (!response.ok) {
     throw new Error(
@@ -44,9 +29,8 @@ export const getAllBlogCategories = async (
   return categories;
 }
 
-export const getAllBlogs = async (tokenValue?: string | null): Promise<Blog[]> => {
-  const token = ensureToken(tokenValue);
-  const response = await requestBlogApi(BLOGS_API_URL, token);
+export const getAllBlogs = async (): Promise<Blog[]> => {
+  const response = await requestBlogApi(BLOGS_API_URL);
 
   if (!response.ok) {
     throw new Error(
@@ -61,10 +45,8 @@ export const getAllBlogs = async (tokenValue?: string | null): Promise<Blog[]> =
 
 export const getBlogById = async (
   id: string,
-  tokenValue?: string | null
 ): Promise<Blog | null> => {
-  const token = ensureToken(tokenValue);
-  const response = await requestBlogApi(`${BLOGS_API_URL}/${id}`, token);
+  const response = await requestBlogApi(`${BLOGS_API_URL}/${id}`);
 
   if (response.status === 404) {
     return null;
