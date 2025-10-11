@@ -6,13 +6,13 @@ import Img from "../../../public/tengra_without_text.png";
 import { useEffect, useState } from "react";
 
 export default function Hero() {
-  const texts = ["𐱅𐰭𐰍𐰺𐰀", "TENGRA"];
   const [index, setIndex] = useState(0);
   const [displayed, setDisplayed] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Daha yavaş ve akıcı typing effect
   useEffect(() => {
+    const texts = ["𐱅𐰭𐰍𐰺𐰀", "TENGRA"];
     const fullText = texts[index];
     const speed = isDeleting ? 120 : 180; // yavaşlatıldı
     const pause = 2500; // kelime sonunda bekleme süresi
@@ -42,7 +42,7 @@ export default function Hero() {
       setIsDeleting(false);
       setIndex((prev) => (prev + 1) % texts.length);
     }
-  }, [displayed, isDeleting, index, texts]);
+  }, [displayed, isDeleting, index]);
 
   return (
     <section
