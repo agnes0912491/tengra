@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { mockBlogs } from "@/lib/mockBlogs";
 import Image from "next/image";
+import { useAuth } from "@/components/providers/auth-provider";
 
 export default function BlogsPage() {
   const [activeCategory, setActiveCategory] = useState("All");
+  const { user, isAuthenticated } = useAuth();
+  const isAdmin = useMemo(() => user?.role === "admin", [user]);
 
   const categories = [
     "All",
@@ -23,6 +26,29 @@ export default function BlogsPage() {
       <h1 className="text-4xl text-center mb-12 text-[color:var(--color-turkish-blue-400)] font-display tracking-[0.25em]">
         BLOGS
       </h1>
+
+      {isAuthenticated && isAdmin && (
+        <div className="mx-auto mb-12 max-w-4xl rounded-xl border border-[rgba(0,167,197,0.25)] bg-[rgba(0,167,197,0.06)] p-6 text-left">
+          <h2 className="text-lg font-semibold text-[color:var(--color-turkish-blue-200)]">Blog Yönetimi</h2>
+          <p className="mt-2 text-xs text-gray-300">
+            Yalnızca admin rolüne sahip kullanıcılar bu araçları görebilir. Yeni yazılar eklemek veya mevcut taslakları düzenlemek için admin panelini kullanabilirsiniz.
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
+            <Link
+              href="/admin"
+              className="rounded-full border border-[rgba(0,167,197,0.4)] px-4 py-1 text-[color:var(--color-turkish-blue-200)] transition hover:bg-[rgba(0,167,197,0.12)]"
+            >
+              Admin Paneline Dön
+            </Link>
+            <button
+              type="button"
+              className="rounded-full border border-dashed border-[rgba(0,167,197,0.4)] px-4 py-1 text-[color:var(--color-turkish-blue-200)] opacity-80"
+            >
+              Yeni Yazı Oluştur
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Filtre butonları */}
       <div className="flex flex-wrap justify-center gap-3 mb-10">
