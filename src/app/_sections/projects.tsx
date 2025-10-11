@@ -2,6 +2,9 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
+import { useMemo } from "react";
+import { useAuth } from "@/components/providers/auth-provider";
 
 const projects = [
   {
@@ -22,6 +25,9 @@ const projects = [
 ];
 
 export default function Projects() {
+  const { user, isAuthenticated } = useAuth();
+  const isAdmin = useMemo(() => user?.role === "admin", [user]);
+
   return (
     <section
       id="projects"
@@ -30,6 +36,32 @@ export default function Projects() {
       <h2 className="section-title neon-text">Projects</h2>
 
       <div className="w-16 h-[1px] mx-auto mt-3 mb-10 bg-[rgba(0,167,197,0.4)]" />
+
+      {isAuthenticated && isAdmin && (
+        <div className="mb-12 w-full max-w-5xl rounded-xl border border-[rgba(0,167,197,0.2)] bg-[rgba(0,167,197,0.06)] p-6 text-left">
+          <h3 className="text-lg font-semibold text-[color:var(--color-turkish-blue-200)]">
+            Yönetim Araçları
+          </h3>
+          <p className="mt-2 text-xs text-gray-300">
+            Bu alan yalnızca admin kullanıcıları tarafından görülür. Proje kartlarını düzenlemek için admin panelinden güncelleme oluşturabilirsiniz.
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
+            <Link
+              href="/admin"
+              className="rounded-full border border-[rgba(0,167,197,0.4)] px-4 py-1 text-[color:var(--color-turkish-blue-200)] transition hover:bg-[rgba(0,167,197,0.12)]"
+            >
+              Admin Paneline Dön
+            </Link>
+            <button
+              type="button"
+              className="rounded-full border border-dashed border-[rgba(0,167,197,0.4)] px-4 py-1 text-[color:var(--color-turkish-blue-200)] opacity-80"
+              title="Örnek aksiyon"
+            >
+              Yeni Proje Ekle
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto">
         {projects.map((proj, i) => (
