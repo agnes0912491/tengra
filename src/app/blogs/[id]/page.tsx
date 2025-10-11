@@ -3,8 +3,13 @@
 import { useRouter } from "next/navigation";
 import { use } from "react";
 import { mockBlogs } from "@/lib/mockBlogs";
+import Image from "next/image";
 
-export default function BlogPost({ params }: { params: Promise<{ id: string }> }) {
+export default function BlogPost({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const router = useRouter();
   const resolvedParams = use(params);
   const post = mockBlogs.find((p) => p.id === resolvedParams.id);
@@ -23,7 +28,7 @@ export default function BlogPost({ params }: { params: Promise<{ id: string }> }
         ← Back
       </button>
 
-      <img
+      <Image
         src={post.image}
         alt={post.title}
         className="rounded-xl mb-10 w-full h-72 object-cover opacity-90"

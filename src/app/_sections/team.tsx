@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Agnes from "../../../public/agnes.jpg";
-import { Github, Twitter, TwitterIcon, X } from "lucide-react";
+import { Github, X } from "lucide-react";
 
 const team = [
   {

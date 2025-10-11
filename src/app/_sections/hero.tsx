@@ -42,7 +42,7 @@ export default function Hero() {
       setIsDeleting(false);
       setIndex((prev) => (prev + 1) % texts.length);
     }
-  }, [displayed, isDeleting, index]);
+  }, [displayed, isDeleting, index, texts]);
 
   return (
     <section

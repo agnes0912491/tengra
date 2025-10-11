@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { mockBlogs } from "@/lib/mockBlogs";
+import Image from "next/image";
 
 export default function BlogsPage() {
   const [activeCategory, setActiveCategory] = useState("All");
@@ -48,7 +49,7 @@ export default function BlogsPage() {
             href={`/blogs/${post.id}`}
             className="group bg-[rgba(255,255,255,0.03)] backdrop-blur-xl rounded-xl overflow-hidden border border-[rgba(0,167,197,0.15)] hover:border-[rgba(0,167,197,0.4)] transition"
           >
-            <img
+            <Image
               src={post.image}
               alt={post.title}
               className="w-full h-48 object-cover opacity-80 group-hover:opacity-100 transition"
