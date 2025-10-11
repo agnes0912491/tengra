@@ -1,4 +1,4 @@
-"use client";
+import { cookies } from "next/headers";
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -11,15 +11,9 @@ export default function BlogsPage() {
   const { user, isAuthenticated } = useAuth();
   const isAdmin = useMemo(() => user?.role === "admin", [user]);
 
-  const categories = [
-    "All",
-    ...Array.from(new Set(mockBlogs.flatMap((b) => b.categories))),
-  ];
-
-  const filtered =
-    activeCategory === "All"
-      ? mockBlogs
-      : mockBlogs.filter((b) => b.categories.includes(activeCategory));
+export default async function BlogsPage() {
+  const token = cookies().get(ADMIN_SESSION_COOKIE)?.value;
+  const posts = await getAllBlogs(token);
 
   return (
     <section className="min-h-screen py-24 px-6 md:px-20">
