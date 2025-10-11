@@ -16,9 +16,19 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Admin Access
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Forum rotası hariç tüm sayfalara erişim için yönetici oturumu zorunludur. Uygulamayı çalıştırmadan önce `.env.local` dosyanızda aşağıdaki ortam değişkenlerinin tanımlı olduğundan emin olun:
+
+- `ADMIN_EMAIL`
+- `ADMIN_PASSWORD`
+- `ADMIN_SESSION_SECRET`
+
+Bu değerler yalnızca sizin tarafınızdan bilinen güçlü kimlik bilgileri olmalıdır.
+
+### Blog Verileri
+
+Blog içerikleri `http://host:8080/api/blogs` uç noktasından alınır. İstekler, yönetici oturumunda oluşturulan belirteç ile `Authorization: Bearer <token>` başlığı kullanılarak doğrulanır.
 
 ## Learn More
 
