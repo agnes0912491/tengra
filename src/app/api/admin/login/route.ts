@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
 
 // Backend auth endpoint
-const BACKEND_AUTH_LOGIN = "http://host:8080/api/auth/login";
+const BACKEND_AUTH_LOGIN = `${process.env.BACKEND_API_URL}/auth/login`;
 
 interface LoginRequest {
   email?: string;

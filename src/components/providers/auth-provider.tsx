@@ -60,7 +60,7 @@ export default function AuthProvider({ children }: Props) {
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const authenticated = authenticateUser(email, password);
+    const authenticated = await authenticateUser(email, password);
 
     if (!authenticated) {
       return {

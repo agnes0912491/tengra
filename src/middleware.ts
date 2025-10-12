@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
-import { env } from "process";
 
-const BACKEND_BLOGS = `${env.BACKEND_API_URL}/blogs`;
+const BACKEND_BLOGS = `${process.env.BACKEND_API_URL}/blogs`;
 
 const PUBLIC_PATH_PREFIXES = [
   "/admin/login",

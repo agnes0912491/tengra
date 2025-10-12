@@ -1,16 +1,18 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/auth/protected-route";
-import { useAuth } from "@/components/providers/auth-provider";
-import { getUsers } from "@/lib/auth/users";
+import { useAuth } from "@/components/providers/auth-provider"; 
 import Logo from "../../../public/tengra_without_text.png";
 import { toast } from "react-toastify";
-
-const availableUsers = getUsers();
+import { getAllUsers } from "@/lib/db"; 
+import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
+import { User } from "@/lib/auth/users";
+import Cookies from "js-cookie";
+ 
 
 const navigationLinks = [
   { href: "/", label: "Ana Sayfa" },
@@ -22,12 +24,53 @@ export default function AdminPage() {
   const { user, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const isAdmin = user?.role === "admin";
+
+  const token = useCallback(async() => {
+    const cookie = Cookies.get(ADMIN_SESSION_COOKIE); 
+    return cookie;
+  }, []);
+
+  const [availableUsers, setAvailableUsers] = useState<User[]>([]);
+
+  const fetchUsers = useCallback(async () => {
+    const tokenValue = await token();
+    if (tokenValue) {
+      const users = await getAllUsers(tokenValue);
+      setAvailableUsers(users);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const handleLogout = useCallback(() => {
     logout();
     toast.info("Yönetici oturumu kapatıldı.");
     router.push("/");
   }, [logout, router]);
+
+  if (!isAdmin) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,rgba(0,167,197,0.18),rgba(4,15,20,0.92))] px-6">
+        <div className="max-w-md rounded-xl border border-[rgba(0,167,197,0.25)] bg-[rgba(5,18,24,0.65)] p-8 text-center backdrop-blur-xl shadow-[0_0_45px_rgba(0,0,0,0.25)]">
+          <h1 className="text-2xl font-display tracking-[0.35em] text-[color:var(--color-turkish-blue-300)]">
+            YETKİSİZ ERİŞİM
+          </h1>
+          <p className="mt-4 text-sm text-gray-300">
+            Bu sayfaya erişim yetkiniz bulunmamaktadır. Lütfen yönetici hesabınızla giriş yapın.
+          </p>
+          <Link
+            href="/admin/login"
+            className="mt-6 inline-block rounded-full border border-[rgba(0,167,197,0.4)] px-4 py-2 text-sm text-[color:var(--color-turkish-blue-100)] transition hover:bg-[rgba(0,167,197,0.12)]"
+          >
+            Yönetici Giriş Sayfasına Git
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <ProtectedRoute>

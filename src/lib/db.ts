@@ -1,8 +1,8 @@
-import "server-only";
-
 import type { Blog, BlogCategory } from "@/types/blog";
+import { User } from "./auth/users";
+import { AuthUserPayload } from "@/types/auth";
 
-const BLOGS_API_URL = "http://host:8080/api/blogs";
+const BLOGS_API_URL = `/api/blogs`;
 
 const requestBlogApi = async (url: string) => {
   try {
@@ -16,7 +16,7 @@ const requestBlogApi = async (url: string) => {
   }
 };
 
-export const getAllBlogCategories = async (): Promise<BlogCategory[]> => {
+export const getAllBlogCategories = async (): Promise<BlogCategory[]> => { 
   const response = await requestBlogApi(`${BLOGS_API_URL}/categories`);
 
   if (!response.ok) {
@@ -30,6 +30,7 @@ export const getAllBlogCategories = async (): Promise<BlogCategory[]> => {
 }
 
 export const getAllBlogs = async (): Promise<Blog[]> => {
+  console.log("getAllBlogs fonksiyonu çağrıldı. " + BLOGS_API_URL);
   const response = await requestBlogApi(BLOGS_API_URL);
 
   if (!response.ok) {
@@ -61,3 +62,102 @@ export const getBlogById = async (
   return (await response.json()) as Blog;
 };
 
+export const getAllUsers = async (token: string): Promise<User[]> => {
+  if(!token) {
+    throw new Error("Token sağlanmadı.");
+  } 
+  
+  const response = await fetch(`/api/users`, {
+    headers: { 
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json" 
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Kullanıcıları alırken hata oluştu: ${response.status} durum kodu.`
+    );
+  }
+
+  const users = (await response.json()) as User[];
+  return users;   
+    }
+
+export const authenticateUserWithPassword = async (
+  email: string,
+  password: string
+): Promise<AuthUserPayload | null> => {
+  const response = await fetch(`/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ username: email, password }),
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const payload = (await response.json().catch(() => ({}))) as AuthUserPayload;
+  if (!payload || !payload.token) {
+    return null;
+  }
+
+  return payload;
+}
+
+export const getUserWithId = async (id: string): Promise<User | null> => {
+  if(!id) {
+    throw new Error("Kullanıcı ID'si sağlanmadı.");
+  }
+
+  const response = await fetch(`/api/users/${id}`, {
+    headers: {
+      Accept: "application/json"
+    },
+    method: "GET"
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const user = (await response.json()) as User;
+  return user;   
+}
+
+export const registerUser = async (name: string, email: string, password: string): Promise<User | null> => {
+  const response = await fetch(`/api/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ name, email, password }),
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const user = (await response.json().catch(() => null)) as User | null;
+  return user;
+}
+
+export const getUserWithToken = async (token: string): Promise<User | null> => {
+  if(!token) {
+    throw new Error("Token sağlanmadı.");
+  } 
+  
+  const response = await fetch(`/api/auth/me`, {
+    headers: { 
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json" 
+    },
+    method: "GET"
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const user = (await response.json()) as User;
+  return user;   
+}

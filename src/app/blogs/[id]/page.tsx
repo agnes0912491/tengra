@@ -1,22 +1,36 @@
+"use client";
+
 import Image from "next/image";
-import Link from "next/link";
-import { notFound } from "next/navigation";
-
-import { cookies } from "next/headers";
-
-import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
+import Link from "next/link"; 
 import { getBlogById } from "@/lib/db";
+import { useAuth } from "@/components/providers/auth-provider"; 
+import { useRouter } from "next/router";
+import { useEffect } from "react";
+import { useState } from "react";
+import type { Blog } from "@/types/blog";
 
-export default async function BlogPost({
+export default function BlogPost({
   params,
 }: {
   params: { id: string };
 }) {
-  const token = (await cookies()).get(ADMIN_SESSION_COOKIE)?.value;
-  const post = await getBlogById(params.id);
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
+  const router = useRouter();
+
+  const [post, setPost] = useState<Blog | null>(null);
+  
+  useEffect(() => {
+    const fetchPost = async () => {
+      const data = await getBlogById(params.id);
+      setPost(data);
+    };
+
+    fetchPost();
+  }, [params.id]);
 
   if (!post) {
-    notFound();
+    return router.push('/404');
   }
 
   return (
@@ -29,8 +43,8 @@ export default async function BlogPost({
       </Link>
 
       <Image
-        src={post.image}
-        alt={post.title}
+        src={post?.image}
+        alt={post?.title}
         className="rounded-xl mb-10 w-full h-72 object-cover opacity-90"
         width={1280}
         height={720}

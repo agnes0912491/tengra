@@ -19,7 +19,7 @@ export default function BlogsClient({ posts, categories }: Props) {
 
   const filtered = useMemo(() => {
     if (!activeCategory) return posts;
-  return posts.filter((post) => post.categories.find((cat: BlogCategory) => cat.name === activeCategory.name));
+     return posts.filter((post) => post.categories.find((cat: BlogCategory) => cat.name === activeCategory.name));
   }, [activeCategory, posts]);
 
   return (
