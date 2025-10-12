@@ -38,17 +38,31 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const sessionToken = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+  // Only enforce admin authentication for admin pages and admin API routes.
+  // Do NOT redirect users who visit arbitrary/non-existent frontend pages.
+  const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
+  const isAdminApi = pathname === "/api/admin" || pathname.startsWith("/api/admin/");
 
-  // If no session token set, redirect to login
+  // allowlist for admin-related public endpoints (e.g. login/logout)
+  const isAdminPublic = pathname === "/admin/login" || pathname === "/api/admin/login" || pathname === "/api/admin/logout";
+
+  if (!isAdminRoute && !isAdminApi) {
+    // Not an admin area — let Next.js handle the route (including 404s)
+    return NextResponse.next();
+  }
+
+  if (isAdminPublic) {
+    return NextResponse.next();
+  }
+
+  // Admin area and not a public admin endpoint -> require valid session
+  const sessionToken = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
   if (!sessionToken) {
     const loginUrl = new URL("/admin/login", request.url);
     loginUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // Validate token by calling a protected backend endpoint. Backend will
-  // return 200 for valid tokens and 401/403 for invalid ones.
   try {
     const res = await fetch(BACKEND_BLOGS, {
       method: "GET",
@@ -64,7 +78,6 @@ export async function middleware(request: NextRequest) {
   } catch (_err) {
     const loginUrl = new URL("/admin/login", request.url);
     loginUrl.searchParams.set("next", pathname);
-    
     return NextResponse.redirect(loginUrl);
   }
 

@@ -21,26 +21,67 @@ function AdminLoginForm() {
     setLoading(true);
     setError(null);
 
-    const response = await fetch("/api/admin/login", {
+    // Sanitize inputs on client-side
+    const { sanitizeInput } = await import("@/lib/sanitize");
+    const sEmail = sanitizeInput(email, 191);
+    const sPassword = sanitizeInput(password, 128);
+
+    // Call backend auth endpoint directly
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Accept: "application/json",
       },
-      body: JSON.stringify({ email, password }),
-    });
+      body: JSON.stringify({ username: sEmail, password: sPassword }),
+    }).catch(() => null);
 
-    if (response.ok) {
-      router.replace(nextUrl);
-      router.refresh();
+    if (!response || !response.ok) {
+      setError("E-posta veya şifre hatalı.");
+      setLoading(false);
       return;
     }
 
-    const payload = (await response.json().catch(() => null)) as
-      | { message?: string }
-      | null;
+    const payload = await response.json().catch(() => null);
+    const token = payload?.token;
+    if (!token) {
+      setError("Giriş başarısız oldu.");
+      setLoading(false);
+      return;
+    }
 
-    setError(payload?.message ?? "Giriş başarısız oldu.");
-    setLoading(false);
+    // Verify role by calling backend /users/me or validate endpoint if exists
+    const meRes = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/auth/me`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+    }).catch(() => null);
+
+    if (!meRes || !meRes.ok) {
+      setError("Giriş doğrulanamadı.");
+      setLoading(false);
+      return;
+    }
+
+    const mePayload = await meRes.json().catch(() => null);
+    // backend GET /users returns a list or user object; try to find role
+    const user = mePayload?.user ?? (Array.isArray(mePayload?.users) ? mePayload.users[0] : null);
+    if (!user) {
+      setError("Kullanıcı bilgisi alınamadı.");
+      setLoading(false);
+      return;
+    }
+
+    if (user.role !== "Admin") {
+      setError("Yönetici yetkiniz yok.");
+      setLoading(false);
+      return;
+    }
+
+    // set cookie via document.cookie (frontend) — server-side cookie would be safer
+    document.cookie = `admin_session=${token}; path=/; max-age=${60 * 60 * 24}; samesite=lax`;
+
+    router.replace(nextUrl);
+    router.refresh();
   };
 
   return (

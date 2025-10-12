@@ -15,9 +15,9 @@ export default function BlogsPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const categories = await getAllBlogCategories();
+      // const categories = await getAllBlogCategories();
       const posts = await getAllBlogs();
-      setCategories(categories);
+      setCategories([]);
       setPosts(posts);
     };
 

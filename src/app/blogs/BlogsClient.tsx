@@ -12,6 +12,19 @@ interface Props {
   token?: string | null;
 }
 
+export const generateMetadata = (post: Blog) => ({
+  title: `${post.title} | TENGRA`,
+  description: post.excerpt,
+  openGraph: {
+    images: [post.image],
+  },
+  other: {
+    "article:published_time": post.createdAt,
+    "article:author": post.author,
+  },
+});
+
+
 export default function BlogsClient({ posts, categories }: Props) {
   const [activeCategory, setActiveCategory] = useState<BlogCategory | null>(null);
   const { user, isAuthenticated } = useAuth();
@@ -23,6 +36,26 @@ export default function BlogsClient({ posts, categories }: Props) {
   }, [activeCategory, posts]);
 
   return (
+    <>
+      {filtered.map((post) => (
+        <script
+          key={post.id}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BlogPosting",
+              headline: post.title,
+              image: post.image,
+              author: { "@type": "Person", name: post.author },
+              publisher: { "@type": "Organization", name: "TENGRA Studio" },
+              datePublished: post.createdAt,
+              description: post.excerpt,
+            }),
+          }}
+        />
+      ))}
+     
     <section className="min-h-screen py-24 px-6 md:px-20">
       <h1 className="text-4xl text-center mb-12 text-[color:var(--color-turkish-blue-400)] font-display tracking-[0.25em]">
         BLOGS
@@ -105,5 +138,6 @@ export default function BlogsClient({ posts, categories }: Props) {
         ))}
       </div>
     </section>
+    </>
   );
 }

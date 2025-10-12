@@ -12,5 +12,7 @@ export interface Blog {
   content: string
   image: string
   categories: BlogCategory[]
+  createdAt: string
+  updatedAt: string
 }
 

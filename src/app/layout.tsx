@@ -14,12 +14,47 @@ const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "Tengra Studio",
-  description: "Forging the divine and the technological",
+  title: "TENGRA | Forging the Divine and the Technological",
+  description:
+    "TENGRA — a studio uniting divine inspiration with cutting-edge technology. Games, software, and innovation.",
+  keywords: [
+    "Tengra",
+    "Tengri",
+    "Game Studio",
+    "Software Development",
+    "Futuristic Design",
+    "End-to-End Encryption",
+  ],
+  openGraph: {
+    title: "TENGRA",
+    description: "Forging the Divine and the Technological",
+    url: "https://tengra.studio",
+    siteName: "TENGRA",
+    images: [
+      {
+        url: Icon.src,
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@tengra",
+    title: "TENGRA",
+    description: "Forging the Divine and the Technological",
+    images: [Icon.src],
+  },
+  colorScheme: "dark light",
   icons: {
     icon: Icon.src,
+    shortcut: Icon.src,
+    apple: Icon.src,
   },
 };
+ 
 
 export default function RootLayout({
   children,

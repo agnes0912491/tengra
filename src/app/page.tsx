@@ -3,6 +3,8 @@ import Goals from "./_sections/goals";
 import Projects from "./_sections/projects";
 import Network from "./_sections/network";
 import Team from "./_sections/team";
+ 
+
 
 export default function HomePage() {
   return (

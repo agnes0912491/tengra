@@ -9,6 +9,18 @@ import { useEffect } from "react";
 import { useState } from "react";
 import type { Blog } from "@/types/blog";
 
+export const generateMetadata = (post: Blog) => ({
+  title: `${post.title} | TENGRA`,
+  description: post.excerpt,
+  openGraph: {
+    images: [post.image],
+  },
+  other: {
+    "article:published_time": post.createdAt,
+    "article:author": post.author,
+  },
+});
+
 export default function BlogPost({
   params,
 }: {
@@ -34,6 +46,25 @@ export default function BlogPost({
   }
 
   return (
+    <>
+      {post && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BlogPosting",
+              headline: post.title,
+              image: post.image,
+              author: { "@type": "Person", name: post.author },
+              publisher: { "@type": "Organization", name: "TENGRA Studio" },
+              datePublished: post.createdAt,
+              description: post.excerpt,
+            }),
+          }}
+        />
+      )}
+     
     <article className="min-h-screen py-20 px-6 md:px-40 max-w-5xl mx-auto">
       <Link
         href="/blogs"
@@ -61,5 +92,6 @@ export default function BlogPost({
         dangerouslySetInnerHTML={{ __html: post.content }}
       />
     </article>
+    </>
   );
 }
