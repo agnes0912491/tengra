@@ -1,0 +1,113 @@
+{
+  "Metadata": {
+    "title": "Tengra Studio",
+    "description": "Kutsal olan ile teknolojiyi buluşturan sürükleyici dijital işçilik.",
+    "keywords": "Tengra Studio, yaratıcı teknoloji stüdyosu, dijital inovasyon, sürükleyici deneyimler, tasarım kolektifi",
+    "ogTitle": "Tengra Studio — İlahi olan ile teknolojiyi işliyoruz",
+    "siteName": "Tengra Studio",
+    "ogLocale": "tr_TR"
+  },
+  "Hero": {
+    "taglineLine1": "İlahi Olanı Şekillendirmek",
+    "taglineLine2": "ve Teknolojiyi İşlemek",
+    "scrollCta": "AŞAĞI KAYDIR",
+    "symbolAlt": "Tengra Sembolü",
+    "typingWordOne": "𐱅𐰭𐰍𐰺𐰀",
+    "typingWordTwo": "TENGRA"
+  },
+  "Navigation": {
+    "goals": "Hedefler",
+    "projects": "Projeler",
+    "network": "Ağ",
+    "team": "Ekip",
+    "blogs": "Blog",
+    "forum": "Forum"
+  },
+  "Goals": {
+    "title": "Hedefler",
+    "items": {
+      "inception": {
+        "title": "Başlangıç",
+        "description": "Vizyoner kıvılcımların yeni gerçekliklerin temelini attığı an."
+      },
+      "creation": {
+        "title": "Yaratım",
+        "description": "Mistik anlatıları modern mühendislikle buluşturan titiz zanaatkârlık."
+      },
+      "expansion": {
+        "title": "Genişleme",
+        "description": "Fikirleri toplulukları ve paydaşları güçlendiren ekosistemlere dönüştürmek."
+      },
+      "harmony": {
+        "title": "Uyum",
+        "description": "Her deneyimde estetiği, etiği ve performansı dengelemek."
+      },
+      "beyond": {
+        "title": "Ötesi",
+        "description": "Hayal gücünü ve teknolojiyi olasılık ufkunun ötesine taşımak."
+      }
+    }
+  },
+  "Projects": {
+    "title": "Projeler",
+    "items": {
+      "inception": {
+        "title": "Başlangıç",
+        "description": "Kutsal desenleri veriyle zengin yolculuklara işleyen üretken bir mit yaratma motoru."
+      },
+      "expansion": {
+        "title": "Genişleme",
+        "description": "Yaratıcıları göksel düzeyde altyapıyla buluşturan uyarlanabilir bir platform."
+      },
+      "oposatb": {
+        "title": "Oposatb",
+        "description": "Kozmik frekansları işbirlikçi araçlara çeviren duyusal bir arayüz."
+      }
+    },
+    "admin": {
+      "toolsTitle": "Yönetim Araçları",
+      "toolsDescription": "Yalnızca yöneticilere görünür. Proje kartlarını panelden yönetin.",
+      "backToAdmin": "Yönetim Paneline Dön",
+      "newProject": "Yeni Proje Ekle",
+      "placeholderAction": "Örnek aksiyon"
+    }
+  },
+  "Team": {
+    "title": "Ekip",
+    "members": {
+      "agnes": {
+        "name": "A. Agnes Ö.",
+        "role": "Kurucu / Vizyon Mimarı",
+        "description": "İlahi olan ile teknolojinin dengesini şekillendiriyor."
+      }
+    },
+    "website": "Web Sitesi"
+  },
+  "Network": {
+    "title": "TENGRA AĞI",
+    "description": "Teknolojinin kutsal geleceğini birlikte keşfeden düşünürlerin, yapımcıların ve koruyucuların bir araya geldiği takımyıldıza katılın.",
+    "cta": "Ağa Katıl"
+  },
+  "Footer": {
+    "admin": "Yönetim Konsolu",
+    "checking": "Kontrol ediliyor...",
+    "logout": "Çıkış Yap",
+    "logoutShort": "Çıkış",
+    "login": "Giriş Yap",
+    "copyright": "© {year} Tengra Studio",
+    "logoutSuccess": "Oturum kapatıldı."
+  },
+  "Header": {
+    "home": "Ana Sayfa",
+    "blogs": "Bloglar",
+    "admin": "Yönetim",
+    "greeting": "Merhaba, {name}",
+    "logout": "Çıkış Yap",
+    "login": "Giriş Yap"
+  },
+  "LocaleSwitcher": {
+    "label": "Dil",
+    "en": "English",
+    "tr": "Türkçe"
+  }
+}
