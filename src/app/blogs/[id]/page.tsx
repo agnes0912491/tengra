@@ -8,18 +8,10 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useState } from "react";
 import type { Blog } from "@/types/blog";
+import { generateSEO } from "@/lib/seo";
+import { Metadata } from "next"; 
 
-export const generateMetadata = (post: Blog) => ({
-  title: `${post.title} | TENGRA`,
-  description: post.excerpt,
-  openGraph: {
-    images: [post.image],
-  },
-  other: {
-    "article:published_time": post.createdAt,
-    "article:author": post.author,
-  },
-});
+const BASE_URL = "https://tengra.studio";
 
 export default function BlogPost({
   params,
@@ -45,22 +37,24 @@ export default function BlogPost({
     return router.push('/404');
   }
 
+   const metadata: Metadata = generateSEO({
+    title: post.title,
+    description: post.excerpt,
+    image: post.image,
+    author: post.author,
+    type: "article",
+    url: `${BASE_URL}/blogs/${post.id}`,
+    createdAt: post.createdAt,
+  });
+
   return (
     <>
+
       {post && (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "BlogPosting",
-              headline: post.title,
-              image: post.image,
-              author: { "@type": "Person", name: post.author },
-              publisher: { "@type": "Organization", name: "TENGRA Studio" },
-              datePublished: post.createdAt,
-              description: post.excerpt,
-            }),
+            __html: JSON.stringify(metadata),
           }}
         />
       )}

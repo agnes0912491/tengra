@@ -1,6 +1,6 @@
 import "./globals.css";
 import Icon from "../../public/tengra_without_text.png";
-import { Metadata } from "next";
+import { Metadata, Viewport } from "next";
 import Footer from "@/components/layout/footer";
 import AnimatedWrapper from "@/components/ui/animated-wrapper";
 import AuthProvider from "@/components/providers/auth-provider";
@@ -47,14 +47,16 @@ export const metadata: Metadata = {
     description: "Forging the Divine and the Technological",
     images: [Icon.src],
   },
-  colorScheme: "dark light",
   icons: {
     icon: Icon.src,
     shortcut: Icon.src,
     apple: Icon.src,
   },
 };
- 
+
+export const viewport: Viewport = {
+  colorScheme: "dark light",
+};
 
 export default function RootLayout({
   children,

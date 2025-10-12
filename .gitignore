@@ -40,3 +40,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 pnpm-lock.yaml
+public/sitemap-0.xml
+public/sitemap.xml
+public/robots.txt
+public/robots.txt
