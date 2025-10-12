@@ -1,18 +1,19 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/auth/protected-route";
-import { useAuth } from "@/components/providers/auth-provider"; 
+import { useAuth } from "@/components/providers/auth-provider";
 import Logo from "../../../public/tengra_without_text.png";
 import { toast } from "react-toastify";
-import { getAllUsers } from "@/lib/db"; 
+import { getAllUsers } from "@/lib/db";
 import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
 import { User } from "@/lib/auth/users";
 import Cookies from "js-cookie";
- 
 
 const navigationLinks = [
   { href: "/", label: "Ana Sayfa" },
@@ -26,8 +27,8 @@ export default function AdminPage() {
   const pathname = usePathname();
   const isAdmin = user?.role === "admin";
 
-  const token = useCallback(async() => {
-    const cookie = Cookies.get(ADMIN_SESSION_COOKIE); 
+  const token = useCallback(async () => {
+    const cookie = Cookies.get(ADMIN_SESSION_COOKIE);
     return cookie;
   }, []);
 
@@ -59,7 +60,8 @@ export default function AdminPage() {
             YETKİSİZ ERİŞİM
           </h1>
           <p className="mt-4 text-sm text-gray-300">
-            Bu sayfaya erişim yetkiniz bulunmamaktadır. Lütfen yönetici hesabınızla giriş yapın.
+            Bu sayfaya erişim yetkiniz bulunmamaktadır. Lütfen yönetici
+            hesabınızla giriş yapın.
           </p>
           <Link
             href="/admin/login"
@@ -78,10 +80,18 @@ export default function AdminPage() {
         <aside className="fixed left-0 top-0 flex h-screen w-72 flex-col justify-between border-r border-[rgba(0,167,197,0.25)] bg-[rgba(5,18,24,0.65)] px-6 py-8 backdrop-blur-xl shadow-[12px_0_45px_rgba(0,0,0,0.25)]">
           <header className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[rgba(0,167,197,0.35)] bg-[rgba(0,167,197,0.12)]">
-              <Image src={Logo.src} alt="Tengra Logo" width={32} height={32} className="opacity-80" />
+              <Image
+                src={Logo.src}
+                alt="Tengra Logo"
+                width={32}
+                height={32}
+                className="opacity-80"
+              />
             </div>
             <div className="leading-tight">
-              <p className="text-[10px] uppercase tracking-[0.35em] text-[color:var(--color-turkish-blue-300)]">Tengra</p>
+              <p className="text-[10px] uppercase tracking-[0.35em] text-[color:var(--color-turkish-blue-300)]">
+                Tengra
+              </p>
               <p className="text-sm font-medium text-white">Yönetim Paneli</p>
             </div>
           </header>
@@ -108,9 +118,13 @@ export default function AdminPage() {
           </main>
 
           <footer className="border-t border-[rgba(0,167,197,0.2)] pt-6 text-xs text-[rgba(255,255,255,0.6)]">
-            <p className="text-[10px] uppercase tracking-[0.35em] text-[color:var(--color-turkish-blue-300)]">Kullanıcı</p>
+            <p className="text-[10px] uppercase tracking-[0.35em] text-[color:var(--color-turkish-blue-300)]">
+              Kullanıcı
+            </p>
             <p className="mt-1 text-sm font-medium text-white">{user?.name}</p>
-            <p className="text-[11px] text-[rgba(255,255,255,0.45)]">{user?.email}</p>
+            <p className="text-[11px] text-[rgba(255,255,255,0.45)]">
+              {user?.email}
+            </p>
             <button
               type="button"
               onClick={handleLogout}
@@ -127,19 +141,26 @@ export default function AdminPage() {
               Admin Paneli
             </h1>
             <p className="mt-4 text-sm text-gray-300">
-              Hoş geldin <span className="font-semibold text-[color:var(--color-turkish-blue-200)]">{user?.name}</span>.
-              Buradan stüdyo içeriklerini yönetebilir ve kısıtlı bölümlere erişebilirsin.
+              Hoş geldin{" "}
+              <span className="font-semibold text-[color:var(--color-turkish-blue-200)]">
+                {user?.name}
+              </span>
+              . Buradan stüdyo içeriklerini yönetebilir ve kısıtlı bölümlere
+              erişebilirsin.
             </p>
           </header>
 
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="rounded-xl border border-[rgba(0,167,197,0.2)] bg-[rgba(3,14,18,0.7)] p-6">
-              <h2 className="text-lg font-semibold text-[color:var(--color-turkish-blue-200)]">Hızlı İşlemler</h2>
+              <h2 className="text-lg font-semibold text-[color:var(--color-turkish-blue-200)]">
+                Hızlı İşlemler
+              </h2>
               <ul className="mt-4 space-y-3 text-sm text-gray-300">
                 <li className="rounded-lg border border-[rgba(0,167,197,0.1)] bg-[rgba(0,167,197,0.05)] p-3">
                   <p className="font-medium text-white">Projeleri Güncelle</p>
                   <p className="text-xs text-gray-400">
-                    Ana sayfadaki proje kartlarını sadece adminler düzenleyebilir.
+                    Ana sayfadaki proje kartlarını sadece adminler
+                    düzenleyebilir.
                   </p>
                   <Link
                     href="/#projects"
@@ -151,7 +172,8 @@ export default function AdminPage() {
                 <li className="rounded-lg border border-[rgba(0,167,197,0.1)] bg-[rgba(0,167,197,0.05)] p-3">
                   <p className="font-medium text-white">Blog Yazısı Oluştur</p>
                   <p className="text-xs text-gray-400">
-                    Blog sayfasındaki yönetim araçları yalnızca admin hesabıyla görünür.
+                    Blog sayfasındaki yönetim araçları yalnızca admin hesabıyla
+                    görünür.
                   </p>
                   <Link
                     href="/blogs"
@@ -164,9 +186,12 @@ export default function AdminPage() {
             </div>
 
             <div className="rounded-xl border border-[rgba(0,167,197,0.2)] bg-[rgba(3,14,18,0.7)] p-6">
-              <h2 className="text-lg font-semibold text-[color:var(--color-turkish-blue-200)]">Kullanıcı Rolleri</h2>
+              <h2 className="text-lg font-semibold text-[color:var(--color-turkish-blue-200)]">
+                Kullanıcı Rolleri
+              </h2>
               <p className="mt-2 text-xs text-gray-400">
-                Sistem, rollere göre yetkilendirme uygular. Admin hesabı tüm yönetim yetkilerine sahiptir.
+                Sistem, rollere göre yetkilendirme uygular. Admin hesabı tüm
+                yönetim yetkilerine sahiptir.
               </p>
               <ul className="mt-4 space-y-2 text-sm text-gray-200">
                 {availableUsers.map((availableUser) => (
@@ -175,8 +200,12 @@ export default function AdminPage() {
                     className="flex items-center justify-between rounded-lg border border-[rgba(0,167,197,0.1)] bg-[rgba(0,167,197,0.05)] px-4 py-2"
                   >
                     <div>
-                      <p className="font-medium text-white">{availableUser.name}</p>
-                      <p className="text-xs text-gray-400">{availableUser.email}</p>
+                      <p className="font-medium text-white">
+                        {availableUser.name}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {availableUser.email}
+                      </p>
                     </div>
                     <span className="rounded-full border border-[rgba(0,167,197,0.3)] px-3 py-1 text-[10px] uppercase tracking-wider text-[color:var(--color-turkish-blue-200)]">
                       {availableUser.role}

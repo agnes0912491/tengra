@@ -1,22 +1,27 @@
 import "./globals.css";
 import Icon from "../../public/tengra_without_text.png";
 import { Metadata, Viewport } from "next";
-import Footer from "@/components/layout/footer";
-import AnimatedWrapper from "@/components/ui/animated-wrapper";
 import AuthProvider from "@/components/providers/auth-provider";
-import ParticlesBackground from "@/components/ui/particles-background";
-import { ToastContainer } from "react-toastify";
+import ParticlesClientWrapper from "@/components/ui/particles-client-wrapper";
 import { Inter, Orbitron } from "next/font/google";
 import "@fontsource/noto-sans-old-turkic";
-import { NextIntlClientProvider } from "next-intl";
-import { createTranslator } from "next-intl";
 import { notFound } from "next/navigation";
 
-import { getMessages } from "@/i18n/get-messages";
 import { routing, type Locale } from "@/i18n/routing";
+
+export const dynamic = "force-dynamic";
 
 const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+
+// metadataBase tells Next how to resolve relative image/URL paths for social cards
+// Prefer an explicit public URL in production via NEXT_PUBLIC_SITE_URL or
+// NEXT_PUBLIC_METADATA_BASE. Fallback to localhost for dev.
+const metadataBaseUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  process.env.NEXT_PUBLIC_METADATA_BASE ??
+  "http://localhost:3000";
+export const metadataBase = new URL(metadataBaseUrl);
 
 export const metadata: Metadata = {
   title: "TENGRA | Forging the Divine and the Technological",
@@ -33,11 +38,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: "TENGRA",
     description: "Forging the Divine and the Technological",
-    url: "https://tengra.studio",
+    url: metadataBase.toString(),
     siteName: "TENGRA",
     images: [
       {
-        url: Icon.src,
+        url: new URL(Icon.src, metadataBase).toString(),
         width: 1200,
         height: 630,
       },
@@ -50,12 +55,12 @@ export const metadata: Metadata = {
     site: "@tengra",
     title: "TENGRA",
     description: "Forging the Divine and the Technological",
-    images: [Icon.src],
+    images: [new URL(Icon.src, metadataBase).toString()],
   },
   icons: {
-    icon: Icon.src,
-    shortcut: Icon.src,
-    apple: Icon.src,
+    icon: new URL(Icon.src, metadataBase).toString(),
+    shortcut: new URL(Icon.src, metadataBase).toString(),
+    apple: new URL(Icon.src, metadataBase).toString(),
   },
 };
 
@@ -63,34 +68,45 @@ export const viewport: Viewport = {
   colorScheme: "dark light",
 };
 
+type MaybePromise<T> = T | Promise<T>;
+
 export default async function RootLayout({
   children,
-  params: { locale },
+  params,
 }: {
   children: React.ReactNode;
-  params: { locale: Locale };
+  // Next may provide params as a Promise or a plain object
+  params?: MaybePromise<{ locale?: Locale }>;
 }) {
-  // Ensure that the incoming `locale` is valid
-  if (!routing.locales.includes(locale as any)) {
+  // params can be a Promise or a plain object; resolve safely without using `any`
+  let resolvedParams: { locale?: Locale } | undefined;
+  if (params) {
+    if (typeof (params as Promise<{ locale?: Locale }>).then === "function") {
+      try {
+        resolvedParams = (await params) as { locale?: Locale };
+      } catch {
+        resolvedParams = undefined;
+      }
+    } else {
+      resolvedParams = params as { locale?: Locale };
+    }
+  }
+
+  let locale = resolvedParams?.locale as Locale | undefined;
+
+  // Only call `notFound()` when an explicit but invalid locale was provided.
+  // Do not force-default here; nested layouts/pages will set providers.
+  if (locale !== undefined && !routing.locales.includes(locale)) {
     notFound();
   }
 
-  // Providing all messages to the client
-  // side is the easiest way to get started
-  const messages = await getMessages(locale);
   return (
     <html lang={locale} className={`${orbitron.variable} ${inter.variable}`}>
       <body className="font-sans bg-[color:var(--background)] text-[color:var(--foreground)] w-full min-h-screen">
-        <NextIntlClientProvider locale={locale} messages={messages} timeZone="UTC">
-          <AuthProvider>
-            <ParticlesBackground />
-            <main className="relative flex min-h-screen flex-col pb-32 pt-10">
-              <AnimatedWrapper>{children}</AnimatedWrapper>
-            </main>
-            <Footer />
-            <ToastContainer position="bottom-right" theme="dark" />
-          </AuthProvider>
-        </NextIntlClientProvider>
+        <AuthProvider>
+          <ParticlesClientWrapper />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

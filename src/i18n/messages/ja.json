@@ -1,0 +1,123 @@
+{
+  "Metadata": {
+    "title": "Tengra Studio",
+    "description": "没入型のデジタルクラフトで、神聖とテクノロジーを融合します。",
+    "keywords": "Tengra Studio, クリエイティブテクノロジー, デジタルイノベーション, 没入型体験, デザインコレクティブ",
+    "ogTitle": "Tengra Studio — 神聖とテクノロジーの鍛錬",
+    "siteName": "Tengra Studio",
+    "ogLocale": "ja_JP"
+  },
+  "Hero": {
+    "taglineLine1": "神聖を鍛え",
+    "taglineLine2": "テクノロジーを形作る",
+    "scrollCta": "スクロール",
+    "symbolAlt": "Tengra シンボル",
+    "typingWordOne": "𐱅𐰭𐰍𐰺𐰀",
+    "typingWordTwo": "TENGRA"
+  },
+  "Navigation": {
+    "goals": "目標",
+    "projects": "プロジェクト",
+    "network": "ネットワーク",
+    "team": "チーム",
+    "blogs": "ブログ",
+    "forum": "フォーラム"
+  },
+  "Goals": {
+    "title": "目標",
+    "items": {
+      "inception": {
+        "title": "起源",
+        "description": "ビジョンの火花が新たな現実の礎となる場所。"
+      },
+      "creation": {
+        "title": "創造",
+        "description": "神話的な物語と現代のエンジニアリングを融合する精緻なクラフト。"
+      },
+      "expansion": {
+        "title": "拡張",
+        "description": "コミュニティとパートナーを支えるエコシステムへとアイデアを拡大。"
+      },
+      "harmony": {
+        "title": "調和",
+        "description": "あらゆる体験で美学・倫理・性能の均衡をとる。"
+      },
+      "beyond": {
+        "title": "超越",
+        "description": "想像力とテクノロジーを可能性の地平線の先へ。"
+      }
+    }
+  },
+  "Projects": {
+    "title": "プロジェクト",
+    "items": {
+      "inception": {
+        "title": "起源",
+        "description": "神聖なパターンをデータ豊富な旅路へと織り込む生成的神話エンジン。"
+      },
+      "expansion": {
+        "title": "拡張",
+        "description": "クリエイターを天上級インフラへと結びつけるアダプティブ・プラットフォーム。"
+      },
+      "oposatb": {
+        "title": "Oposatb",
+        "description": "宇宙の周波数を協働ツールへ翻訳する感覚インターフェース。"
+      }
+    },
+    "admin": {
+      "toolsTitle": "管理ツール",
+      "toolsDescription": "管理者のみ表示。ダッシュボードでプロジェクトカードを管理。",
+      "backToAdmin": "管理へ戻る",
+      "newProject": "プロジェクトを追加",
+      "placeholderAction": "サンプル操作"
+    }
+  },
+  "Team": {
+    "title": "チーム",
+    "members": {
+      "agnes": {
+        "name": "A. Agnes Ö.",
+        "role": "創設者 / ビジョン・アーキテクト",
+        "description": "神聖とテクノロジーの均衡を形作る。"
+      }
+    },
+    "website": "Webサイト"
+  },
+  "Network": {
+    "title": "TENGRA ネットワーク",
+    "description": "テクノロジーの神聖な未来をともに探求する思想家・創り手・守護者の星座に参加しよう。",
+    "cta": "ネットワークに参加"
+  },
+  "Footer": {
+    "admin": "管理コンソール",
+    "checking": "確認中...",
+    "logout": "ログアウト",
+    "logoutShort": "ログアウト",
+    "login": "ログイン",
+    "copyright": "© {year} Tengra Studio",
+    "logoutSuccess": "ログアウトしました。"
+  },
+  "Header": {
+    "home": "ホーム",
+    "blogs": "ブログ",
+    "admin": "管理",
+    "greeting": "こんにちは、{name}",
+    "logout": "ログアウト",
+    "login": "ログイン"
+  },
+  "LocaleSwitcher": {
+    "label": "言語",
+    "en": "English",
+    "tr": "Türkçe",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "it": "Italiano",
+    "pt": "Português",
+    "ru": "Русский",
+    "ar": "العربية",
+    "zh": "中文",
+    "ja": "日本語",
+    "ko": "한국어"
+  }
+}

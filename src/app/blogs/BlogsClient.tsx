@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/components/providers/auth-provider";
 import { BlogCategory, Blog } from "@/types/blog";
+import Cookies from "js-cookie";
 import { generateSEO } from "@/lib/seo";
 
 interface Props {
@@ -30,12 +31,18 @@ export async function generateMetadata(posts: Blog[]) {
   });
 }
 
-export default function BlogsClient({ posts, categories }: Props) {
+export default function BlogsClient({
+  posts,
+  categories,
+  token: tokenProp,
+}: Props) {
   const [activeCategory, setActiveCategory] = useState<BlogCategory | null>(
     null
   );
   const { user, isAuthenticated } = useAuth();
   const isAdmin = useMemo(() => user?.role === "admin", [user]);
+
+  const token = tokenProp ?? Cookies.get("admin_session");
 
   const filtered = useMemo(() => {
     if (!activeCategory) return posts;

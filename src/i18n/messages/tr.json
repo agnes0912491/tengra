@@ -107,7 +107,17 @@
   },
   "LocaleSwitcher": {
     "label": "Dil",
-    "en": "English",
-    "tr": "Türkçe"
+    "en": "İngilizce",
+    "tr": "Türkçe",
+    "es": "İspanyolca",
+    "fr": "Fransızca",
+    "de": "Almanca",
+    "it": "İtalyanca",
+    "pt": "Portekizce",
+    "ru": "Rusça",
+    "ar": "Arapça",
+    "zh": "Çince",
+    "ja": "Japonca",
+    "ko": "Korece"
   }
 }

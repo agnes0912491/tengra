@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import Cookies from "js-cookie";
 
 import { isLocale, routing, type Locale } from "@/i18n/routing";
 
@@ -40,6 +41,9 @@ export default function LocaleSwitcher() {
     const query = searchParams?.toString();
     const nextPath = query ? `${basePath}?${query}` : basePath;
 
+    // Persist preferred locale for future visits to '/'
+    Cookies.set("NEXT_LOCALE", newLocale, { path: "/", expires: 365 });
+
     startTransition(() => {
       router.push(nextPath);
       router.refresh();
@@ -56,7 +60,11 @@ export default function LocaleSwitcher() {
         disabled={isPending}
       >
         {localeOptions.map((option) => (
-          <option key={option} value={option} className="bg-[rgba(3,12,18,1)] text-white">
+          <option
+            key={option}
+            value={option}
+            className="bg-[rgba(3,12,18,1)] text-white"
+          >
             {t(option)}
           </option>
         ))}

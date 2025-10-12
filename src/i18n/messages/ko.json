@@ -1,0 +1,123 @@
+{
+  "Metadata": {
+    "title": "Tengra Studio",
+    "description": "몰입형 디지털 장인 정신으로 신성과 기술을 하나로.",
+    "keywords": "Tengra Studio, 크리에이티브 테크놀로지 스튜디오, 디지털 혁신, 몰입형 경험, 디자인 컬렉티브",
+    "ogTitle": "Tengra Studio — 신성과 기술을 단련하다",
+    "siteName": "Tengra Studio",
+    "ogLocale": "ko_KR"
+  },
+  "Hero": {
+    "taglineLine1": "신성을 단련하고",
+    "taglineLine2": "기술을 만들어갑니다",
+    "scrollCta": "아래로 스크롤",
+    "symbolAlt": "Tengra 심볼",
+    "typingWordOne": "𐱅𐰭𐰍𐰺𐰀",
+    "typingWordTwo": "TENGRA"
+  },
+  "Navigation": {
+    "goals": "목표",
+    "projects": "프로젝트",
+    "network": "네트워크",
+    "team": "팀",
+    "blogs": "블로그",
+    "forum": "포럼"
+  },
+  "Goals": {
+    "title": "목표",
+    "items": {
+      "inception": {
+        "title": "기원",
+        "description": "비전의 불꽃이 새로운 현실의 초석이 되는 곳."
+      },
+      "creation": {
+        "title": "창조",
+        "description": "신화적 내러티브와 현대 공학을 결합한 치밀한 장인 정신."
+      },
+      "expansion": {
+        "title": "확장",
+        "description": "아이디어를 커뮤니티와 파트너를 강화하는 생태계로 확장."
+      },
+      "harmony": {
+        "title": "조화",
+        "description": "모든 경험에서 미학, 윤리, 성능의 균형을 맞추다."
+      },
+      "beyond": {
+        "title": "그 너머",
+        "description": "상상력과 기술을 가능성의 지평선 너머로."
+      }
+    }
+  },
+  "Projects": {
+    "title": "프로젝트",
+    "items": {
+      "inception": {
+        "title": "기원",
+        "description": "신성한 패턴을 데이터가 풍부한 여정으로 엮는 생성적 신화 엔진."
+      },
+      "expansion": {
+        "title": "확장",
+        "description": "창작자와 천상의 인프라를 연결하는 적응형 플랫폼."
+      },
+      "oposatb": {
+        "title": "Oposatb",
+        "description": "우주적 주파수를 협업 도구로 변환하는 감각 인터페이스."
+      }
+    },
+    "admin": {
+      "toolsTitle": "관리 도구",
+      "toolsDescription": "관리자에게만 보입니다. 대시보드에서 프로젝트 카드를 관리하세요.",
+      "backToAdmin": "관리로 돌아가기",
+      "newProject": "프로젝트 추가",
+      "placeholderAction": "예시 작업"
+    }
+  },
+  "Team": {
+    "title": "팀",
+    "members": {
+      "agnes": {
+        "name": "A. Agnes Ö.",
+        "role": "설립자 / 비전 아키텍트",
+        "description": "신성과 기술의 균형을 빚어냅니다."
+      }
+    },
+    "website": "웹사이트"
+  },
+  "Network": {
+    "title": "TENGRA 네트워크",
+    "description": "기술의 신성한 미래를 함께 탐구하는 사상가, 창작자, 수호자들의 별자리에 합류하세요.",
+    "cta": "네트워크 참여"
+  },
+  "Footer": {
+    "admin": "관리 콘솔",
+    "checking": "확인 중...",
+    "logout": "로그아웃",
+    "logoutShort": "로그아웃",
+    "login": "로그인",
+    "copyright": "© {year} Tengra Studio",
+    "logoutSuccess": "로그아웃되었습니다."
+  },
+  "Header": {
+    "home": "홈",
+    "blogs": "블로그",
+    "admin": "관리",
+    "greeting": "안녕하세요, {name}",
+    "logout": "로그아웃",
+    "login": "로그인"
+  },
+  "LocaleSwitcher": {
+    "label": "언어",
+    "en": "English",
+    "tr": "Türkçe",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "it": "Italiano",
+    "pt": "Português",
+    "ru": "Русский",
+    "ar": "العربية",
+    "zh": "中文",
+    "ja": "日本語",
+    "ko": "한국어"
+  }
+}

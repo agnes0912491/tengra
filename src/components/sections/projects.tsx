@@ -15,10 +15,13 @@ type ProjectDefinition = {
   image: string;
 };
 
+// The original project images are not present in `public/images/` on the server
+// which caused Next's image optimizer to fail during SSR. Use a safe fallback
+// image that exists in `public/` so the homepage can render.
 const projects: ProjectDefinition[] = [
-  { key: "inception", image: "/images/project1.jpg" },
-  { key: "expansion", image: "/images/project2.jpg" },
-  { key: "oposatb", image: "/images/project3.jpg" },
+  { key: "inception", image: "/tengra_without_text.png" },
+  { key: "expansion", image: "/tengra_without_text.png" },
+  { key: "oposatb", image: "/tengra_without_text.png" },
 ];
 
 export default function Projects() {
@@ -27,15 +30,22 @@ export default function Projects() {
   const isAdmin = useMemo(() => user?.role === "admin", [user]);
 
   return (
-    <section id="projects" className="relative flex flex-col items-center justify-center py-32 px-4 text-center">
+    <section
+      id="projects"
+      className="relative flex flex-col items-center justify-center py-32 px-4 text-center"
+    >
       <h2 className="section-title neon-text">{t("title")}</h2>
 
       <div className="w-16 h-[1px] mx-auto mt-3 mb-10 bg-[rgba(0,167,197,0.4)]" />
 
       {isAuthenticated && isAdmin && (
         <div className="mb-12 w-full max-w-5xl rounded-xl border border-[rgba(0,167,197,0.2)] bg-[rgba(0,167,197,0.06)] p-6 text-left">
-          <h3 className="text-lg font-semibold text-[color:var(--color-turkish-blue-200)]">{t("admin.toolsTitle")}</h3>
-          <p className="mt-2 text-xs text-gray-300">{t("admin.toolsDescription")}</p>
+          <h3 className="text-lg font-semibold text-[color:var(--color-turkish-blue-200)]">
+            {t("admin.toolsTitle")}
+          </h3>
+          <p className="mt-2 text-xs text-gray-300">
+            {t("admin.toolsDescription")}
+          </p>
           <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
             <Link
               href="/admin"
@@ -82,7 +92,9 @@ export default function Projects() {
                 <h3 className="text-xl font-display text-[color:var(--color-turkish-blue-400)] mb-2 group-hover:text-[color:var(--color-turkish-blue-300)] transition-colors">
                   {title}
                 </h3>
-                <p className="text-xs text-[rgba(255,255,255,0.6)]">{description}</p>
+                <p className="text-xs text-[rgba(255,255,255,0.6)]">
+                  {description}
+                </p>
               </div>
 
               <div className="absolute inset-0 rounded-xl pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-700 shadow-[0_0_20px_rgba(0,167,197,0.6)]" />

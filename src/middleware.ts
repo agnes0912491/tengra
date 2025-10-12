@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
 import { isLocale } from "@/i18n/routing";
+import { routing } from "@/i18n/routing";
 
 const BACKEND_BLOGS = `${process.env.BACKEND_API_URL}/blogs`;
 
@@ -31,7 +32,8 @@ const isPublicPath = (pathname: string) => {
   const normalizedPath = stripLocaleFromPath(pathname);
 
   if (normalizedPath === "/") return true; // homepage is public
-  if (normalizedPath === "/blogs" || normalizedPath.startsWith("/blogs/")) return true; // blogs list and posts are public
+  if (normalizedPath === "/blogs" || normalizedPath.startsWith("/blogs/"))
+    return true; // blogs list and posts are public
 
   return PUBLIC_PATH_PREFIXES.some((path) =>
     path.endsWith("/")
@@ -51,6 +53,59 @@ const isAssetPath = (pathname: string) =>
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Auto-redirect root '/' to best locale (/tr, /es, ...), unless it's an asset or public path.
+  if (pathname === "/") {
+    const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value;
+    let best: string | undefined =
+      cookieLocale && isLocale(cookieLocale) ? cookieLocale : undefined;
+
+    if (!best) {
+      const header = request.headers.get("accept-language") ?? "";
+      const preferred = header
+        .split(",")
+        .map((p) => p.trim().split(";")[0].toLowerCase());
+      for (const tag of preferred) {
+        const base = tag.split("-")[0];
+        if (isLocale(base)) {
+          best = base;
+          break;
+        }
+      }
+    }
+
+    const target = best ?? routing.defaultLocale;
+    if (target !== routing.defaultLocale) {
+      const url = new URL(`/${target}`, request.url);
+      return NextResponse.redirect(url);
+    }
+    // Default locale stays at '/'
+  }
+  // Auto-redirect root to the best-matched locale based on Accept-Language
+  if (pathname === "/") {
+    const header = request.headers.get("accept-language") ?? "";
+    const supported = routing.locales as unknown as string[];
+    const preferred = header
+      .split(",")
+      .map((part) => part.trim().split(";")[0])
+      .map((code) => code.toLowerCase().replace("_", "-") as string);
+
+    let match: string | undefined;
+    for (const lang of preferred) {
+      // exact language match (e.g. 'tr', 'es')
+      const base = lang.split("-")[0];
+      const exact = supported.find((l) => l.toLowerCase() === lang);
+      const baseMatch = supported.find((l) => l.toLowerCase() === base);
+      match = exact ?? baseMatch;
+      if (match) break;
+    }
+
+    const target = (match as string | undefined) ?? routing.defaultLocale;
+    if (target !== routing.defaultLocale) {
+      const url = new URL(`/${target}`, request.url);
+      return NextResponse.redirect(url);
+    }
+  }
+
   if (isAssetPath(pathname) || isPublicPath(pathname)) {
     return NextResponse.next();
   }
@@ -58,10 +113,14 @@ export async function middleware(request: NextRequest) {
   // Only enforce admin authentication for admin pages and admin API routes.
   // Do NOT redirect users who visit arbitrary/non-existent frontend pages.
   const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
-  const isAdminApi = pathname === "/api/admin" || pathname.startsWith("/api/admin/");
+  const isAdminApi =
+    pathname === "/api/admin" || pathname.startsWith("/api/admin/");
 
   // allowlist for admin-related public endpoints (e.g. login/logout)
-  const isAdminPublic = pathname === "/admin/login" || pathname === "/api/admin/login" || pathname === "/api/admin/logout";
+  const isAdminPublic =
+    pathname === "/admin/login" ||
+    pathname === "/api/admin/login" ||
+    pathname === "/api/admin/logout";
 
   if (!isAdminRoute && !isAdminApi) {
     // Not an admin area — let Next.js handle the route (including 404s)
@@ -83,7 +142,10 @@ export async function middleware(request: NextRequest) {
   try {
     const res = await fetch(BACKEND_BLOGS, {
       method: "GET",
-      headers: { Authorization: `Bearer ${sessionToken}`, Accept: "application/json" },
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+        Accept: "application/json",
+      },
       cache: "no-store",
     });
 
@@ -104,4 +166,3 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: "/((?!_next/static|_next/image|favicon.ico).*)",
 };
-

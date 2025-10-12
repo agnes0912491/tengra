@@ -1,0 +1,123 @@
+{
+  "Metadata": {
+    "title": "Tengra Studio",
+    "description": "Forjando lo divino y lo tecnológico a través de una artesanía digital inmersiva.",
+    "keywords": "Tengra Studio, estudio de tecnología creativa, innovación digital, experiencias inmersivas, colectivo de diseño",
+    "ogTitle": "Tengra Studio — Forjando lo divino y lo tecnológico",
+    "siteName": "Tengra Studio",
+    "ogLocale": "es_ES"
+  },
+  "Hero": {
+    "taglineLine1": "Forjando lo Divino",
+    "taglineLine2": "y lo Tecnológico",
+    "scrollCta": "DESPLAZA HACIA ABAJO",
+    "symbolAlt": "Símbolo de Tengra",
+    "typingWordOne": "𐱅𐰭𐰍𐰺𐰀",
+    "typingWordTwo": "TENGRA"
+  },
+  "Navigation": {
+    "goals": "Objetivos",
+    "projects": "Proyectos",
+    "network": "Red",
+    "team": "Equipo",
+    "blogs": "Blog",
+    "forum": "Foro"
+  },
+  "Goals": {
+    "title": "Objetivos",
+    "items": {
+      "inception": {
+        "title": "Génesis",
+        "description": "Donde las chispas visionarias se convierten en el cimiento de nuevas realidades."
+      },
+      "creation": {
+        "title": "Creación",
+        "description": "Una artesanía meticulosa que combina narrativas míticas con ingeniería moderna."
+      },
+      "expansion": {
+        "title": "Expansión",
+        "description": "Escalar ideas hacia ecosistemas que empoderan a comunidades y socios."
+      },
+      "harmony": {
+        "title": "Armonía",
+        "description": "Equilibrar estética, ética y rendimiento en cada experiencia."
+      },
+      "beyond": {
+        "title": "Más allá",
+        "description": "Impulsar la imaginación y la tecnología más allá del horizonte de lo posible."
+      }
+    }
+  },
+  "Projects": {
+    "title": "Proyectos",
+    "items": {
+      "inception": {
+        "title": "Génesis",
+        "description": "Un motor generativo de creación de mitos que teje patrones sagrados en viajes ricos en datos."
+      },
+      "expansion": {
+        "title": "Expansión",
+        "description": "Una plataforma adaptable que conecta creadores con infraestructura de grado celestial."
+      },
+      "oposatb": {
+        "title": "Oposatb",
+        "description": "Una interfaz sensorial que traduce frecuencias cósmicas en herramientas colaborativas."
+      }
+    },
+    "admin": {
+      "toolsTitle": "Herramientas de administración",
+      "toolsDescription": "Visible solo para administradores. Gestiona las tarjetas de proyectos desde el panel.",
+      "backToAdmin": "Volver a Admin",
+      "newProject": "Añadir proyecto",
+      "placeholderAction": "Acción de ejemplo"
+    }
+  },
+  "Team": {
+    "title": "Equipo",
+    "members": {
+      "agnes": {
+        "name": "A. Agnes Ö.",
+        "role": "Fundadora / Arquitecta de Visión",
+        "description": "Moldeando el equilibrio entre lo divino y la tecnología."
+      }
+    },
+    "website": "Sitio web"
+  },
+  "Network": {
+    "title": "RED TENGRA",
+    "description": "Únete a una constelación de pensadores, creadores y guardianes que exploran juntos el futuro sagrado de la tecnología.",
+    "cta": "Únete a la Red"
+  },
+  "Footer": {
+    "admin": "Consola de administración",
+    "checking": "Comprobando...",
+    "logout": "Cerrar sesión",
+    "logoutShort": "Salir",
+    "login": "Iniciar sesión",
+    "copyright": "© {year} Tengra Studio",
+    "logoutSuccess": "Has cerrado sesión."
+  },
+  "Header": {
+    "home": "Inicio",
+    "blogs": "Blogs",
+    "admin": "Admin",
+    "greeting": "Hola, {name}",
+    "logout": "Cerrar sesión",
+    "login": "Iniciar sesión"
+  },
+  "LocaleSwitcher": {
+    "label": "Idioma",
+    "en": "English",
+    "tr": "Türkçe",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "it": "Italiano",
+    "pt": "Português",
+    "ru": "Русский",
+    "ar": "العربية",
+    "zh": "中文",
+    "ja": "日本語",
+    "ko": "한국어"
+  }
+}

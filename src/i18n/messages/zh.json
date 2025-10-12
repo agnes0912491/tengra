@@ -1,0 +1,123 @@
+{
+  "Metadata": {
+    "title": "Tengra 工作室",
+    "description": "通过沉浸式数字工艺，将神圣与科技融合。",
+    "keywords": "Tengra Studio, 创意科技工作室, 数字创新, 沉浸式体验, 设计团队",
+    "ogTitle": "Tengra 工作室 — 铸造神性与科技",
+    "siteName": "Tengra Studio",
+    "ogLocale": "zh_CN"
+  },
+  "Hero": {
+    "taglineLine1": "铸造神性",
+    "taglineLine2": "与科技",
+    "scrollCta": "向下滚动",
+    "symbolAlt": "Tengra 标志",
+    "typingWordOne": "𐱅𐰭𐰍𐰺𐰀",
+    "typingWordTwo": "TENGRA"
+  },
+  "Navigation": {
+    "goals": "目标",
+    "projects": "项目",
+    "network": "网络",
+    "team": "团队",
+    "blogs": "博客",
+    "forum": "论坛"
+  },
+  "Goals": {
+    "title": "目标",
+    "items": {
+      "inception": {
+        "title": "起源",
+        "description": "在这里，前瞻性的火花成为新现实的基石。"
+      },
+      "creation": {
+        "title": "创造",
+        "description": "将神话叙事与现代工程精密融合的工艺。"
+      },
+      "expansion": {
+        "title": "扩展",
+        "description": "将理念扩展为赋能社区与伙伴的生态系统。"
+      },
+      "harmony": {
+        "title": "和谐",
+        "description": "在每个体验中平衡美学、伦理与性能。"
+      },
+      "beyond": {
+        "title": "超越",
+        "description": "将想象与科技推向可能性的地平线之外。"
+      }
+    }
+  },
+  "Projects": {
+    "title": "项目",
+    "items": {
+      "inception": {
+        "title": "起源",
+        "description": "一款生成式神话引擎，将神圣纹理编织进数据丰富的旅程。"
+      },
+      "expansion": {
+        "title": "扩展",
+        "description": "一个自适应平台，将创作者与天级基础设施连接起来。"
+      },
+      "oposatb": {
+        "title": "Oposatb",
+        "description": "一个将宇宙频率转译为协作工具的感知界面。"
+      }
+    },
+    "admin": {
+      "toolsTitle": "管理工具",
+      "toolsDescription": "仅管理员可见。在控制台中管理项目卡片。",
+      "backToAdmin": "返回管理",
+      "newProject": "新增项目",
+      "placeholderAction": "示例操作"
+    }
+  },
+  "Team": {
+    "title": "团队",
+    "members": {
+      "agnes": {
+        "name": "A. Agnes Ö.",
+        "role": "创始人 / 愿景架构师",
+        "description": "塑造神性与科技之间的平衡。"
+      }
+    },
+    "website": "网站"
+  },
+  "Network": {
+    "title": "TENGRA 网络",
+    "description": "加入这片由思想者、创造者与守护者组成的星群，共同探索科技的神圣未来。",
+    "cta": "加入网络"
+  },
+  "Footer": {
+    "admin": "管理控制台",
+    "checking": "检查中...",
+    "logout": "退出登录",
+    "logoutShort": "退出",
+    "login": "登录",
+    "copyright": "© {year} Tengra Studio",
+    "logoutSuccess": "你已退出登录。"
+  },
+  "Header": {
+    "home": "首页",
+    "blogs": "博客",
+    "admin": "管理",
+    "greeting": "你好，{name}",
+    "logout": "退出登录",
+    "login": "登录"
+  },
+  "LocaleSwitcher": {
+    "label": "语言",
+    "en": "English",
+    "tr": "Türkçe",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "it": "Italiano",
+    "pt": "Português",
+    "ru": "Русский",
+    "ar": "العربية",
+    "zh": "中文",
+    "ja": "日本語",
+    "ko": "한국어"
+  }
+}
