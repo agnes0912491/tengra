@@ -1,0 +1,113 @@
+{
+  "Metadata": {
+    "title": "Tengra Studio",
+    "description": "Forging the divine and the technological through immersive digital craftsmanship.",
+    "keywords": "Tengra Studio, creative technology studio, digital innovation, immersive experiences, design collective",
+    "ogTitle": "Tengra Studio — Forging the divine and the technological",
+    "siteName": "Tengra Studio",
+    "ogLocale": "en_US"
+  },
+  "Hero": {
+    "taglineLine1": "Forging the Divine",
+    "taglineLine2": "and the Technological",
+    "scrollCta": "SCROLL DOWN",
+    "symbolAlt": "Tengra Symbol",
+    "typingWordOne": "𐱅𐰭𐰍𐰺𐰀",
+    "typingWordTwo": "TENGRA"
+  },
+  "Navigation": {
+    "goals": "Goals",
+    "projects": "Projects",
+    "network": "Network",
+    "team": "Team",
+    "blogs": "Blog",
+    "forum": "Forum"
+  },
+  "Goals": {
+    "title": "Goals",
+    "items": {
+      "inception": {
+        "title": "Inception",
+        "description": "Where visionary sparks become the foundation of new realities."
+      },
+      "creation": {
+        "title": "Creation",
+        "description": "Meticulous craftsmanship that blends mythic narratives with modern engineering."
+      },
+      "expansion": {
+        "title": "Expansion",
+        "description": "Scaling ideas into ecosystems that empower communities and partners."
+      },
+      "harmony": {
+        "title": "Harmony",
+        "description": "Balancing aesthetics, ethics and performance across every experience."
+      },
+      "beyond": {
+        "title": "Beyond",
+        "description": "Pushing imagination and technology beyond the horizon of possibility."
+      }
+    }
+  },
+  "Projects": {
+    "title": "Projects",
+    "items": {
+      "inception": {
+        "title": "Inception",
+        "description": "A generative myth-making engine weaving sacred patterns into data-rich journeys."
+      },
+      "expansion": {
+        "title": "Expansion",
+        "description": "An adaptive platform connecting creators with celestial-grade infrastructure."
+      },
+      "oposatb": {
+        "title": "Oposatb",
+        "description": "A sensory interface translating cosmic frequencies into collaborative tools."
+      }
+    },
+    "admin": {
+      "toolsTitle": "Admin Tools",
+      "toolsDescription": "Visible only to administrators. Manage project cards from the dashboard.",
+      "backToAdmin": "Back to Admin",
+      "newProject": "Add Project",
+      "placeholderAction": "Example action"
+    }
+  },
+  "Team": {
+    "title": "Team",
+    "members": {
+      "agnes": {
+        "name": "A. Agnes Ö.",
+        "role": "Founder / Vision Architect",
+        "description": "Shaping the balance between divinity and technology."
+      }
+    },
+    "website": "Website"
+  },
+  "Network": {
+    "title": "TENGRA NETWORK",
+    "description": "Join a constellation of thinkers, makers and guardians who explore the sacred future of technology together.",
+    "cta": "Join the Network"
+  },
+  "Footer": {
+    "admin": "Admin Console",
+    "checking": "Checking...",
+    "logout": "Log out",
+    "logoutShort": "Logout",
+    "login": "Log in",
+    "copyright": "© {year} Tengra Studio",
+    "logoutSuccess": "You have been signed out."
+  },
+  "Header": {
+    "home": "Home",
+    "blogs": "Blogs",
+    "admin": "Admin",
+    "greeting": "Hello, {name}",
+    "logout": "Log out",
+    "login": "Log in"
+  },
+  "LocaleSwitcher": {
+    "label": "Language",
+    "en": "English",
+    "tr": "Türkçe"
+  }
+}
