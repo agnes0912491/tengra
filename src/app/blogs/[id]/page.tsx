@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link"; 
 import { getBlogById } from "@/lib/db";
-import { useAuth } from "@/components/providers/auth-provider"; 
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useState } from "react";
@@ -18,8 +17,6 @@ export default function BlogPost({
 }: {
   params: { id: string };
 }) {
-  const { user } = useAuth();
-  const isAdmin = user?.role === "admin";
   const router = useRouter();
 
   const [post, setPost] = useState<Blog | null>(null);

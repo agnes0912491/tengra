@@ -4,11 +4,16 @@ import { Metadata, Viewport } from "next";
 import Footer from "@/components/layout/footer";
 import AnimatedWrapper from "@/components/ui/animated-wrapper";
 import AuthProvider from "@/components/providers/auth-provider";
-import { ToastContainer } from "react-toastify";
-
-import { Orbitron, Inter } from "next/font/google";
-import "@fontsource/noto-sans-old-turkic";
 import ParticlesBackground from "@/components/ui/particles-background";
+import { ToastContainer } from "react-toastify";
+import { Inter, Orbitron } from "next/font/google";
+import "@fontsource/noto-sans-old-turkic";
+import { NextIntlClientProvider } from "next-intl";
+import { createTranslator } from "next-intl";
+import { notFound } from "next/navigation";
+
+import { getMessages } from "@/i18n/get-messages";
+import { routing, type Locale } from "@/i18n/routing";
 
 const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -58,24 +63,34 @@ export const viewport: Viewport = {
   colorScheme: "dark light",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
+  params: { locale },
 }: {
   children: React.ReactNode;
+  params: { locale: Locale };
 }) {
+  // Ensure that the incoming `locale` is valid
+  if (!routing.locales.includes(locale as any)) {
+    notFound();
+  }
+
+  // Providing all messages to the client
+  // side is the easiest way to get started
+  const messages = await getMessages(locale);
   return (
-    <html lang="en" className={`${orbitron.variable} ${inter.variable}`}>
-      <body
-        className={`font-sans bg-[color:var(--background)] text-[color:var(--foreground)] w-full min-h-screen`}
-      >
-        <AuthProvider>
-          <ParticlesBackground />
-          <main className="relative flex min-h-screen flex-col pb-32 pt-10">
-            <AnimatedWrapper>{children}</AnimatedWrapper>
-          </main>
-          <Footer />
-          <ToastContainer position="bottom-right" theme="dark" />
-        </AuthProvider>
+    <html lang={locale} className={`${orbitron.variable} ${inter.variable}`}>
+      <body className="font-sans bg-[color:var(--background)] text-[color:var(--foreground)] w-full min-h-screen">
+        <NextIntlClientProvider locale={locale} messages={messages} timeZone="UTC">
+          <AuthProvider>
+            <ParticlesBackground />
+            <main className="relative flex min-h-screen flex-col pb-32 pt-10">
+              <AnimatedWrapper>{children}</AnimatedWrapper>
+            </main>
+            <Footer />
+            <ToastContainer position="bottom-right" theme="dark" />
+          </AuthProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

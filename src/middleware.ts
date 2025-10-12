@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
+import { isLocale } from "@/i18n/routing";
 
 const BACKEND_BLOGS = `${process.env.BACKEND_API_URL}/blogs`;
 
@@ -14,12 +15,28 @@ const PUBLIC_PATH_PREFIXES = [
 // Allow-listed public paths that do not require admin auth.
 // We intentionally treat root ('/') and '/blogs' as public, but avoid adding
 // '/' to PUBLIC_PATH_PREFIXES because that would match every path.
+const stripLocaleFromPath = (pathname: string) => {
+  const segments = pathname.split("/").filter(Boolean);
+  if (segments.length === 0) return "/";
+
+  const [possibleLocale, ...rest] = segments;
+  if (isLocale(possibleLocale)) {
+    return rest.length === 0 ? "/" : `/${rest.join("/")}`;
+  }
+
+  return pathname;
+};
+
 const isPublicPath = (pathname: string) => {
-  if (pathname === "/") return true; // homepage is public
-  if (pathname === "/blogs" || pathname.startsWith("/blogs/")) return true; // blogs list and posts are public
+  const normalizedPath = stripLocaleFromPath(pathname);
+
+  if (normalizedPath === "/") return true; // homepage is public
+  if (normalizedPath === "/blogs" || normalizedPath.startsWith("/blogs/")) return true; // blogs list and posts are public
 
   return PUBLIC_PATH_PREFIXES.some((path) =>
-    path.endsWith("/") ? pathname.startsWith(path) : pathname === path || pathname.startsWith(`${path}/`)
+    path.endsWith("/")
+      ? normalizedPath.startsWith(path)
+      : normalizedPath === path || normalizedPath.startsWith(`${path}/`)
   );
 };
 
@@ -75,7 +92,7 @@ export async function middleware(request: NextRequest) {
       loginUrl.searchParams.set("next", pathname);
       return NextResponse.redirect(loginUrl);
     }
-  } catch (_err) {
+  } catch {
     const loginUrl = new URL("/admin/login", request.url);
     loginUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(loginUrl);
