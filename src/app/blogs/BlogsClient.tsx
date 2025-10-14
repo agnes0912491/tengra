@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/components/providers/auth-provider";
@@ -40,9 +40,16 @@ export default function BlogsClient({
     null
   );
   const { user, isAuthenticated } = useAuth();
-  const isAdmin = useMemo(() => user?.role === "admin", [user]);
+  console.log({ user, isAuthenticated });
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
-  const token = tokenProp ?? Cookies.get("admin_session");
+  useEffect(() => {
+    if (user && user?.id) {
+      setIsAdmin(user?.role === "admin");
+    }
+  }, [user]);
+
+  //const token = tokenProp ?? Cookies.get("admin_session");
 
   const filtered = useMemo(() => {
     if (!activeCategory) return posts;
@@ -54,6 +61,7 @@ export default function BlogsClient({
   }, [activeCategory, posts]);
 
   const metadata = useMemo(() => generateMetadata(filtered), [filtered]);
+
   return (
     <>
       <script
@@ -81,6 +89,7 @@ export default function BlogsClient({
             <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
               <Link
                 href="/admin"
+                prefetch={false}
                 className="rounded-full border border-[rgba(0,167,197,0.4)] px-4 py-1 text-[color:var(--color-turkish-blue-200)] transition hover:bg-[rgba(0,167,197,0.12)]"
               >
                 Admin Paneline Dön
@@ -105,27 +114,30 @@ export default function BlogsClient({
           ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto">
-          <p className="mt-2 text-xs text-gray-300">
-            Yalnızca admin rolüne sahip kullanıcılar bu araçları görebilir. Yeni
-            yazılar eklemek veya mevcut taslakları düzenlemek için admin
-            panelini kullanabilirsiniz.
-          </p>
-          <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
-            <Link
-              href="/admin"
-              className="rounded-full border border-[rgba(0,167,197,0.4)] px-4 py-1 text-[color:var(--color-turkish-blue-200)] transition hover:bg-[rgba(0,167,197,0.12)]"
-            >
-              Admin Paneline Dön
-            </Link>
-            <button
-              type="button"
-              className="rounded-full border border-dashed border-[rgba(0,167,197,0.4)] px-4 py-1 text-[color:var(--color-turkish-blue-200)] opacity-80"
-            >
-              Yeni Yazı Oluştur
-            </button>
+        {isAuthenticated && isAdmin && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto">
+            <p className="mt-2 text-xs text-gray-300">
+              Yalnızca admin rolüne sahip kullanıcılar bu araçları görebilir.
+              Yeni yazılar eklemek veya mevcut taslakları düzenlemek için admin
+              panelini kullanabilirsiniz.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
+              <Link
+                href="/admin"
+                prefetch={false}
+                className="rounded-full border border-[rgba(0,167,197,0.4)] px-4 py-1 text-[color:var(--color-turkish-blue-200)] transition hover:bg-[rgba(0,167,197,0.12)]"
+              >
+                Admin Paneline Dön
+              </Link>
+              <button
+                type="button"
+                className="rounded-full border border-dashed border-[rgba(0,167,197,0.4)] px-4 py-1 text-[color:var(--color-turkish-blue-200)] opacity-80"
+              >
+                Yeni Yazı Oluştur
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="flex flex-wrap justify-center gap-3 mb-10">
           {categories.map((cat) => (

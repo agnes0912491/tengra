@@ -55,6 +55,7 @@ export default function Header() {
           {isAuthenticated && user?.role === "admin" && (
             <Link
               href="/admin"
+              prefetch={false}
               className={`transition hover:text-[color:var(--color-turkish-blue-200)] ${
                 pathname?.startsWith("/admin") ? "text-[color:var(--color-turkish-blue-300)]" : "text-gray-300"
               }`}

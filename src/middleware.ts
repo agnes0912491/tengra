@@ -6,13 +6,7 @@ import { routing } from "@/i18n/routing";
 
 const BACKEND_BLOGS = `${process.env.BACKEND_API_URL}/blogs`;
 
-const PUBLIC_PATH_PREFIXES = [
-  "/admin/login",
-  "/forum",
-  "/api/admin/login",
-  "/api/admin/logout",
-];
-
+const PUBLIC_PATH_PREFIXES = ["/admin/login", "/forum"];
 // Allow-listed public paths that do not require admin auth.
 // We intentionally treat root ('/') and '/blogs' as public, but avoid adding
 // '/' to PUBLIC_PATH_PREFIXES because that would match every path.
@@ -53,35 +47,9 @@ const isAssetPath = (pathname: string) =>
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Auto-redirect root '/' to best locale (/tr, /es, ...), unless it's an asset or public path.
+  // Auto-redirect root '/' to best locale using cookie or Accept-Language
   if (pathname === "/") {
     const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value;
-    let best: string | undefined =
-      cookieLocale && isLocale(cookieLocale) ? cookieLocale : undefined;
-
-    if (!best) {
-      const header = request.headers.get("accept-language") ?? "";
-      const preferred = header
-        .split(",")
-        .map((p) => p.trim().split(";")[0].toLowerCase());
-      for (const tag of preferred) {
-        const base = tag.split("-")[0];
-        if (isLocale(base)) {
-          best = base;
-          break;
-        }
-      }
-    }
-
-    const target = best ?? routing.defaultLocale;
-    if (target !== routing.defaultLocale) {
-      const url = new URL(`/${target}`, request.url);
-      return NextResponse.redirect(url);
-    }
-    // Default locale stays at '/'
-  }
-  // Auto-redirect root to the best-matched locale based on Accept-Language
-  if (pathname === "/") {
     const header = request.headers.get("accept-language") ?? "";
     const supported = routing.locales as unknown as string[];
     const preferred = header
@@ -89,14 +57,17 @@ export async function middleware(request: NextRequest) {
       .map((part) => part.trim().split(";")[0])
       .map((code) => code.toLowerCase().replace("_", "-") as string);
 
-    let match: string | undefined;
-    for (const lang of preferred) {
-      // exact language match (e.g. 'tr', 'es')
-      const base = lang.split("-")[0];
-      const exact = supported.find((l) => l.toLowerCase() === lang);
-      const baseMatch = supported.find((l) => l.toLowerCase() === base);
-      match = exact ?? baseMatch;
-      if (match) break;
+    let match: string | undefined =
+      cookieLocale && isLocale(cookieLocale) ? cookieLocale : undefined;
+
+    if (!match) {
+      for (const lang of preferred) {
+        const base = lang.split("-")[0];
+        const exact = supported.find((l) => l.toLowerCase() === lang);
+        const baseMatch = supported.find((l) => l.toLowerCase() === base);
+        match = exact ?? baseMatch;
+        if (match) break;
+      }
     }
 
     const target = (match as string | undefined) ?? routing.defaultLocale;
@@ -113,16 +84,10 @@ export async function middleware(request: NextRequest) {
   // Only enforce admin authentication for admin pages and admin API routes.
   // Do NOT redirect users who visit arbitrary/non-existent frontend pages.
   const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
-  const isAdminApi =
-    pathname === "/api/admin" || pathname.startsWith("/api/admin/");
-
   // allowlist for admin-related public endpoints (e.g. login/logout)
-  const isAdminPublic =
-    pathname === "/admin/login" ||
-    pathname === "/api/admin/login" ||
-    pathname === "/api/admin/logout";
+  const isAdminPublic = pathname === "/admin/login";
 
-  if (!isAdminRoute && !isAdminApi) {
+  if (!isAdminRoute) {
     // Not an admin area — let Next.js handle the route (including 404s)
     return NextResponse.next();
   }

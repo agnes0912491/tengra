@@ -5,8 +5,7 @@ module.exports = {
   sitemapSize: 7000,
   changefreq: "daily",
   priority: 0.7,
-  // Point next-sitemap to the custom Next.js build directory
-  sourceDir: ".next-local",
+  sourceDir: ".next",
   exclude: ["/admin", "/admin/*", "/api/*"],
   additionalPaths: async (config) => {
     return [];

@@ -65,6 +65,7 @@ export default function AdminPage() {
           </p>
           <Link
             href="/admin/login"
+            prefetch={false}
             className="mt-6 inline-block rounded-full border border-[rgba(0,167,197,0.4)] px-4 py-2 text-sm text-[color:var(--color-turkish-blue-100)] transition hover:bg-[rgba(0,167,197,0.12)]"
           >
             Yönetici Giriş Sayfasına Git
