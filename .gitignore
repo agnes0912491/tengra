@@ -41,3 +41,5 @@ public/sitemap-0.xml
 public/sitemap.xml
 public/robots.txt
 public/robots.txt
+src/app/layout.tsx
+public/ads.txt

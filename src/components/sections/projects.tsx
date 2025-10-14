@@ -15,9 +15,10 @@ type ProjectDefinition = {
   image: string;
 };
 
-// The original project images are not present in `public/images/` on the server
-// which caused Next's image optimizer to fail during SSR. Use a safe fallback
-// image that exists in `public/` so the homepage can render.
+// NOTE:
+// Original project images were missing from `public/images/` on the server,
+// which broke image optimization during SSR. We fallback to a safe public
+// image so the homepage can render consistently.
 const projects: ProjectDefinition[] = [
   { key: "inception", image: "/tengra_without_text.png" },
   { key: "expansion", image: "/tengra_without_text.png" },
@@ -38,6 +39,11 @@ export default function Projects() {
 
       <div className="w-16 h-[1px] mx-auto mt-3 mb-10 bg-[rgba(0,167,197,0.4)]" />
 
+      {/*
+        Admin tools are only visible to authenticated users with role=admin.
+        This is a UI affordance. Server-side authorization is still required
+        when performing privileged operations.
+      */}
       {isAuthenticated && isAdmin && (
         <div className="mb-12 w-full max-w-5xl rounded-xl border border-[rgba(0,167,197,0.2)] bg-[rgba(0,167,197,0.06)] p-6 text-left">
           <h3 className="text-lg font-semibold text-[color:var(--color-turkish-blue-200)]">

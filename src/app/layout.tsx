@@ -8,6 +8,9 @@ import "@fontsource/noto-sans-old-turkic";
 import { notFound } from "next/navigation";
 
 import { routing, type Locale } from "@/i18n/routing";
+import Head from "next/head";
+import Script from "next/script";
+import ConsentBanner from "@/components/consent/ConsentBanner";
 
 export const dynamic = "force-dynamic";
 
@@ -102,9 +105,57 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} className={`${orbitron.variable} ${inter.variable}`}>
+      <Head>
+        <meta name="google-adsense-account" content="ca-pub-1840126959284939" />
+      </Head>
       <body className="font-sans bg-[color:var(--background)] text-[color:var(--foreground)] w-full min-h-screen">
+        {/* Consent Mode default (denied) before any tags load */}
+        <Script id="consent-mode-default" strategy="beforeInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){ dataLayer.push(arguments); }
+            gtag('consent', 'default', {
+              ad_storage: 'denied',
+              ad_personalization: 'denied',
+              ad_user_data: 'denied',
+              analytics_storage: 'denied'
+            });
+          `}
+        </Script>
+
+        {/* If Google Funding Choices CMP is configured, load its script and skip custom banner */}
+        {process.env.NEXT_PUBLIC_GFC_ID ? (
+          <>
+            <Script
+              id="gfc-loader"
+              async
+              src={`https://fundingchoicesmessages.google.com/i/${process.env.NEXT_PUBLIC_GFC_ID}?ers=1`}
+              strategy="afterInteractive"
+            />
+            <Script id="gfc-present" strategy="afterInteractive">
+              {`(function() { 
+                function signalGooglefcPresent() {
+                  if (!window.frames['googlefcPresent']) {
+                    if (document.body) {
+                      const iframe = document.createElement('iframe');
+                      iframe.style.width = '0';
+                      iframe.style.height = '0';
+                      iframe.style.display = 'none';
+                      iframe.name = 'googlefcPresent';
+                      document.body.appendChild(iframe);
+                    } else {
+                      setTimeout(signalGooglefcPresent, 0);
+                    }
+                  }
+                }
+                signalGooglefcPresent();
+              })();`}
+            </Script>
+          </>
+        ) : null}
         <AuthProvider>
           <ParticlesClientWrapper />
+          <ConsentBanner />
           {children}
         </AuthProvider>
       </body>

@@ -10,13 +10,24 @@ import {
 } from "react";
 import { authenticateUser, Role, User } from "@/lib/auth/users";
 
+/**
+ * LocalStorage key where we store the authenticated user snapshot.
+ * This is a lightweight cache used purely for client-side rendering convenience.
+ * In production, prefer server-issued HttpOnly cookies for session state.
+ */
 const STORAGE_KEY = "tengra.auth.user";
 
+/**
+ * Auth context contract exposed to the app.
+ */
 type AuthContextValue = {
   user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
-  login: (email: string, password: string) => Promise<{
+  login: (
+    email: string,
+    password: string
+  ) => Promise<{
     success: boolean;
     message?: string;
   }>;
@@ -25,6 +36,10 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+/**
+ * useAuth: React hook to read the authentication state from context.
+ * Throws if used outside of the AuthProvider tree.
+ */
 export function useAuth() {
   const context = useContext(AuthContext);
 
@@ -39,12 +54,21 @@ type Props = {
   children: React.ReactNode;
 };
 
+/**
+ * AuthProvider: wraps the application with authentication state.
+ * - Hydrates initial state from localStorage (best-effort).
+ * - Exposes login/logout helpers that update both memory state and localStorage.
+ */
 export default function AuthProvider({ children }: Props) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const stored = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
+    // Read any previously saved user snapshot. This is optional and
+    // only improves initial paint; real authorization should be verified
+    // on the server when accessing protected resources.
+    const stored =
+      typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
 
     if (stored) {
       try {
@@ -59,6 +83,10 @@ export default function AuthProvider({ children }: Props) {
     setLoading(false);
   }, []);
 
+  /**
+   * login: calls backend to authenticate using email+password.
+   * On success, stores the returned user and persists it in localStorage.
+   */
   const login = useCallback(async (email: string, password: string) => {
     const authenticated = await authenticateUser(email, password);
 
@@ -75,6 +103,9 @@ export default function AuthProvider({ children }: Props) {
     return { success: true } as const;
   }, []);
 
+  /**
+   * logout: clears user state and removes local cache.
+   */
   const logout = useCallback(() => {
     setUser(null);
     localStorage.removeItem(STORAGE_KEY);
@@ -94,6 +125,9 @@ export default function AuthProvider({ children }: Props) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+/**
+ * useHasRole: convenience helper to check a single role on the current user.
+ */
 export function useHasRole(role: Role) {
   const { user } = useAuth();
   return user?.role === role;

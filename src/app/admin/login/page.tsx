@@ -2,6 +2,7 @@
 
 import { FormEvent, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,8 +10,10 @@ import { Input } from "@/components/ui/input";
 function AdminLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextUrl = searchParams.get("next") ?? "/";
-  const [email, setEmail] = useState("");
+  const nextUrl = searchParams.get("next") ?? "/admin";
+  const { login } = useAuth();
+
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -21,67 +24,20 @@ function AdminLoginForm() {
     setLoading(true);
     setError(null);
 
-    // Sanitize inputs on client-side
-    const { sanitizeInput } = await import("@/lib/sanitize");
-    const sEmail = sanitizeInput(email, 191);
-    const sPassword = sanitizeInput(password, 128);
+    try {
+      const success = await login(username, password);
 
-    // Call backend auth endpoint directly
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({ username: sEmail, password: sPassword }),
-    }).catch(() => null);
-
-    if (!response || !response.ok) {
-      setError("E-posta veya şifre hatalı.");
+      if (success) {
+        router.replace(nextUrl);
+        router.refresh();
+      } else {
+        setError("Kullanıcı adı veya şifre hatalı.");
+      }
+    } catch (err) {
+      setError("Giriş başarısız oldu. Lütfen tekrar deneyin.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const payload = await response.json().catch(() => null);
-    const token = payload?.token;
-    if (!token) {
-      setError("Giriş başarısız oldu.");
-      setLoading(false);
-      return;
-    }
-
-    // Verify role by calling backend /users/me or validate endpoint if exists
-    const meRes = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/auth/me`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
-    }).catch(() => null);
-
-    if (!meRes || !meRes.ok) {
-      setError("Giriş doğrulanamadı.");
-      setLoading(false);
-      return;
-    }
-
-    const mePayload = await meRes.json().catch(() => null);
-    // backend GET /users returns a list or user object; try to find role
-    const user = mePayload?.user ?? (Array.isArray(mePayload?.users) ? mePayload.users[0] : null);
-    if (!user) {
-      setError("Kullanıcı bilgisi alınamadı.");
-      setLoading(false);
-      return;
-    }
-
-    if (user.role !== "Admin") {
-      setError("Yönetici yetkiniz yok.");
-      setLoading(false);
-      return;
-    }
-
-    // set cookie via document.cookie (frontend) — server-side cookie would be safer
-    document.cookie = `admin_session=${token}; path=/; max-age=${60 * 60 * 24}; samesite=lax`;
-
-    router.replace(nextUrl);
-    router.refresh();
   };
 
   return (
@@ -98,17 +54,17 @@ function AdminLoginForm() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2 text-left">
-            <label className="text-sm text-gray-300" htmlFor="email">
-              E-posta
+            <label className="text-sm text-gray-300" htmlFor="username">
+              Kullanıcı Adı / E-posta
             </label>
             <Input
-              id="email"
-              type="email"
-              autoComplete="email"
+              id="username"
+              type="text"
+              autoComplete="username"
               required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="name@example.com"
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
+              placeholder="username veya email@example.com"
             />
           </div>
 
@@ -133,11 +89,7 @@ function AdminLoginForm() {
             </p>
           ) : null}
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={loading}
-          >
+          <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Giriş yapılıyor..." : "Giriş yap"}
           </Button>
         </form>
@@ -157,4 +109,3 @@ export default function AdminLoginPage() {
     </Suspense>
   );
 }
-

@@ -4,7 +4,9 @@ import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
 import { isLocale } from "@/i18n/routing";
 import { routing } from "@/i18n/routing";
 
-const BACKEND_BLOGS = `${process.env.BACKEND_API_URL}/blogs`;
+const API_BASE =
+  process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:5000";
+const BACKEND_AUTH_ME = `${API_BASE}/auth/me`;
 
 const PUBLIC_PATH_PREFIXES = ["/admin/login", "/forum"];
 // Allow-listed public paths that do not require admin auth.
@@ -47,6 +49,9 @@ const isAssetPath = (pathname: string) =>
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Create response object to add security headers
+  let response: NextResponse;
+
   // Auto-redirect root '/' to best locale using cookie or Accept-Language
   if (pathname === "/") {
     const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value;
@@ -73,59 +78,138 @@ export async function middleware(request: NextRequest) {
     const target = (match as string | undefined) ?? routing.defaultLocale;
     if (target !== routing.defaultLocale) {
       const url = new URL(`/${target}`, request.url);
-      return NextResponse.redirect(url);
+      response = NextResponse.redirect(url);
+    } else {
+      response = NextResponse.next();
+    }
+  } else if (isAssetPath(pathname) || isPublicPath(pathname)) {
+    response = NextResponse.next();
+  } else {
+    // Only enforce admin authentication for admin pages and admin API routes.
+    const isAdminRoute =
+      pathname === "/admin" || pathname.startsWith("/admin/");
+    const isAdminPublic = pathname === "/admin/login";
+
+    if (!isAdminRoute) {
+      response = NextResponse.next();
+    } else if (isAdminPublic) {
+      response = NextResponse.next();
+    } else {
+      // Admin area - require valid session and admin role
+      const sessionToken = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+      if (!sessionToken) {
+        const loginUrl = new URL("/admin/login", request.url);
+        loginUrl.searchParams.set("next", pathname);
+        response = NextResponse.redirect(loginUrl);
+      } else {
+        try {
+          const res = await fetch(BACKEND_AUTH_ME, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${sessionToken}`,
+              Accept: "application/json",
+            },
+            cache: "no-store",
+          });
+
+          if (!res.ok) {
+            const loginUrl = new URL("/admin/login", request.url);
+            loginUrl.searchParams.set("next", pathname);
+            response = NextResponse.redirect(loginUrl);
+          } else {
+            const data = await res.json().catch(() => ({} as any));
+            if (
+              !data?.user ||
+              (data.user.role !== "admin" && data.user.role !== "ADMIN")
+            ) {
+              const loginUrl = new URL("/admin/login", request.url);
+              loginUrl.searchParams.set("next", pathname);
+              response = NextResponse.redirect(loginUrl);
+            } else {
+              response = NextResponse.next();
+            }
+          }
+        } catch {
+          const loginUrl = new URL("/admin/login", request.url);
+          loginUrl.searchParams.set("next", pathname);
+          response = NextResponse.redirect(loginUrl);
+        }
+      }
     }
   }
 
-  if (isAssetPath(pathname) || isPublicPath(pathname)) {
-    return NextResponse.next();
+  // Add security headers to all responses
+  const connectSrc = [
+    "'self'",
+    API_BASE,
+    "ws://localhost:6000",
+    "http://localhost:6000",
+    "https://fundingchoicesmessages.google.com",
+    "https://pagead2.googlesyndication.com",
+    "https://googleads.g.doubleclick.net",
+  ].join(" ");
+  const scriptSrc = [
+    "'self'",
+    "'unsafe-inline'",
+    "https://fundingchoicesmessages.google.com",
+    "https://www.gstatic.com",
+    "https://pagead2.googlesyndication.com",
+  ].join(" ");
+  const frameSrc = [
+    "'self'",
+    "https://fundingchoicesmessages.google.com",
+    "https://www.google.com",
+    "https://googleads.g.doubleclick.net",
+  ].join(" ");
+  const imgSrc = [
+    "'self'",
+    "data:",
+    "https:",
+    "https://pagead2.googlesyndication.com",
+    "https://googleads.g.doubleclick.net",
+  ].join(" ");
+  response.headers.set(
+    "Content-Security-Policy",
+    [
+      "default-src 'self'",
+      // Allow inline styles for now; consider removing by using hashed styles only
+      "style-src 'self' 'unsafe-inline'",
+      `img-src ${imgSrc}`,
+      "font-src 'self'",
+      `connect-src ${connectSrc}`,
+      `script-src ${scriptSrc}`,
+      `frame-src ${frameSrc}`,
+      "frame-ancestors 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join("; ")
+  );
+
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("X-XSS-Protection", "1; mode=block");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set(
+    "Permissions-Policy",
+    "geolocation=(), microphone=(), camera=(), payment=(), usb=()"
+  );
+
+  // Set secure cookie attributes
+  if (response.cookies.get(ADMIN_SESSION_COOKIE)) {
+    response.cookies.set(
+      ADMIN_SESSION_COOKIE,
+      response.cookies.get(ADMIN_SESSION_COOKIE)!.value,
+      {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+      }
+    );
   }
 
-  // Only enforce admin authentication for admin pages and admin API routes.
-  // Do NOT redirect users who visit arbitrary/non-existent frontend pages.
-  const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
-  // allowlist for admin-related public endpoints (e.g. login/logout)
-  const isAdminPublic = pathname === "/admin/login";
-
-  if (!isAdminRoute) {
-    // Not an admin area — let Next.js handle the route (including 404s)
-    return NextResponse.next();
-  }
-
-  if (isAdminPublic) {
-    return NextResponse.next();
-  }
-
-  // Admin area and not a public admin endpoint -> require valid session
-  const sessionToken = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
-  if (!sessionToken) {
-    const loginUrl = new URL("/admin/login", request.url);
-    loginUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(loginUrl);
-  }
-
-  try {
-    const res = await fetch(BACKEND_BLOGS, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${sessionToken}`,
-        Accept: "application/json",
-      },
-      cache: "no-store",
-    });
-
-    if (!res.ok) {
-      const loginUrl = new URL("/admin/login", request.url);
-      loginUrl.searchParams.set("next", pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-  } catch {
-    const loginUrl = new URL("/admin/login", request.url);
-    loginUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(loginUrl);
-  }
-
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {

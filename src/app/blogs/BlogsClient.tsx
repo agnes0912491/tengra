@@ -7,6 +7,7 @@ import { useAuth } from "@/components/providers/auth-provider";
 import { BlogCategory, Blog } from "@/types/blog";
 import Cookies from "js-cookie";
 import { generateSEO } from "@/lib/seo";
+import { safeJsonLd } from "@/lib/jsonld";
 
 interface Props {
   posts: Blog[];
@@ -67,7 +68,7 @@ export default function BlogsClient({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(metadata),
+          __html: safeJsonLd(metadata),
         }}
       />
 
