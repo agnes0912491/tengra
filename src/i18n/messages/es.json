@@ -126,12 +126,104 @@
       "success": "Inicio de sesión exitoso.",
       "invalidCredentials": "Las credenciales proporcionadas son incorrectas.",
       "genericError": "El inicio de sesión falló. Por favor, inténtalo de nuevo."
-    }
+    },
+    "title": "Acceso de administrador",
+    "description": "Inicia sesión con tus credenciales de administrador para gestionar Tengra Studio.",
+    "usernameLabel": "Nombre de usuario",
+    "usernamePlaceholder": "Introduce tu nombre de usuario",
+    "passwordLabel": "Contraseña",
+    "button": {
+      "loading": "Iniciando sesión...",
+      "submit": "Iniciar sesión"
+    },
+    "footer": "El acceso está limitado a administradores autorizados de Tengra Studio."
   },
   "AdminDashboard": {
     "toast": {
       "fetchUsersError": "No pudimos cargar la lista de usuarios. Por favor, inténtalo de nuevo.",
       "logout": "Sesión de administrador cerrada."
+    },
+    "navigationLinks": [
+      {
+        "href": "/admin#overview",
+        "label": "Resumen"
+      },
+      {
+        "href": "/admin#projects",
+        "label": "Proyectos"
+      },
+      {
+        "href": "/admin#blogs",
+        "label": "Blogs"
+      },
+      {
+        "href": "/admin#users",
+        "label": "Usuarios"
+      }
+    ],
+    "unauthorizedAccess": "Acceso restringido",
+    "unauthorizedMessage": "Necesitas una cuenta de administrador para ver el panel.",
+    "goToLogin": "Ir al acceso de administrador"
+  },
+  "AuthContext": {
+    "authorization": {
+      "defaultErrorMessage": "La autorización ha fallado. Por favor, inténtalo de nuevo.",
+      "invalidCredentials": "Las credenciales proporcionadas son incorrectas."
+    }
+  },
+  "ProtectedRoute": {
+    "authorization": {
+      "loading": "Verificando autorización..."
+    }
+  },
+  "ConsentBanner": {
+    "description": "Utilizamos cookies para personalizar el contenido y analizar nuestro tráfico. Puedes cambiar tu preferencia en cualquier momento.",
+    "deny": "Rechazar",
+    "allow": "Permitir todo"
+  },
+  "Blogs": {
+    "seoTitle": "Blog de Tengra Studio",
+    "seoDescription": "Ideas, historias e investigaciones del colectivo de Tengra Studio.",
+    "title": "Blog de Tengra Studio",
+    "adminPanelTitle": "Herramientas de administrador",
+    "adminPanelDesc": "Solo los administradores pueden ver estas acciones rápidas en la página del blog.",
+    "goToAdminPanel": "Abrir panel de administración",
+    "createNewPost": "Crear nueva entrada",
+    "by": "Por"
+  },
+  "common": {
+    "backToBlogs": "Volver a todas las publicaciones"
+  },
+  "NotFound": {
+    "title": "Página no encontrada"
+  },
+  "faq": {
+    "title": "Preguntas frecuentes",
+    "subtitle": "Todo lo que necesitas saber sobre Tengra Studio",
+    "stillQuestions": "¿Aún tienes preguntas?",
+    "q1": {
+      "question": "¿Qué es Tengra Studio?",
+      "answer": "Tengra Studio es un colectivo de tecnología creativa que forja la intersección entre la mitología divina y la tecnología moderna. Creamos experiencias digitales inmersivas, herramientas innovadoras y plataformas colaborativas que conectan la sabiduría ancestral con la ingeniería de vanguardia."
+    },
+    "q2": {
+      "question": "¿Qué servicios ofrece Tengra Studio?",
+      "answer": "Nos especializamos en desarrollo full-stack, integración blockchain, soluciones criptográficas, experiencias web inmersivas, desarrollo de CMS a medida, diseño de APIs e infraestructura en la nube. Nuestra experiencia abarca desde sistemas de diseño inspirados en mitos hasta aplicaciones seguras listas para producción."
+    },
+    "q3": {
+      "question": "¿Cómo puedo unirme a la Red Tengra?",
+      "answer": "La Red Tengra da la bienvenida a creadores, pensadores e innovadores que comparten nuestra visión. Puedes unirte contactándonos mediante el formulario o por correo electrónico. Valoramos la colaboración y siempre buscamos socios que amplíen los límites de la tecnología y la creatividad."
+    },
+    "q4": {
+      "question": "¿Tengra Studio está disponible para proyectos a medida?",
+      "answer": "¡Sí! Trabajamos con clientes seleccionados en proyectos personalizados que se alinean con nuestra visión de experiencias digitales significativas y de alta calidad. Ya sea infraestructura backend segura, soluciones blockchain o experiencias frontend inmersivas, aportamos excelencia técnica y visión creativa."
+    },
+    "q5": {
+      "question": "¿Qué tecnologías utiliza Tengra Studio?",
+      "answer": "Trabajamos con C++ moderno, TypeScript, React/Next.js, Node.js, MySQL, Redis, tecnologías blockchain, criptografía avanzada (BLAKE3, Argon2), protocolos WebSocket y plataformas en la nube. Elegimos las tecnologías según las necesidades de seguridad, rendimiento y escalabilidad."
+    },
+    "q6": {
+      "question": "¿Cómo empiezo con Tengra Studio?",
+      "answer": "Solo tienes que escribirnos a info@tengra.org con tu idea de proyecto o propuesta de colaboración. Revisaremos tus requisitos y programaremos una reunión para conversar sobre cómo podemos dar vida a tu visión con nuestra mezcla única de inspiración mítica y experiencia técnica."
     }
   }
 }
