@@ -126,13 +126,44 @@
       "success": "Giriş başarılı.",
       "invalidCredentials": "Girdiğiniz bilgiler hatalı.",
       "genericError": "Giriş başarısız oldu. Lütfen tekrar deneyin."
-    }
+    },
+    "title": "Yönetici girişi",
+    "description": "Tengra Studio’yu yönetmek için yönetici bilgilerinle giriş yap.",
+    "usernameLabel": "Kullanıcı adı",
+    "usernamePlaceholder": "Kullanıcı adını gir",
+    "passwordLabel": "Şifre",
+    "button": {
+      "loading": "Giriş yapılıyor...",
+      "submit": "Giriş yap"
+    },
+    "footer": "Erişim yalnızca yetkili Tengra Studio yöneticileriyle sınırlıdır."
   },
   "AdminDashboard": {
     "toast": {
       "fetchUsersError": "Kullanıcı listesi yüklenemedi. Lütfen tekrar deneyin.",
       "logout": "Yönetici oturumu kapatıldı."
-    }
+    },
+    "navigationLinks": [
+      {
+        "href": "/admin#overview",
+        "label": "Genel Bakış"
+      },
+      {
+        "href": "/admin#projects",
+        "label": "Projeler"
+      },
+      {
+        "href": "/admin#blogs",
+        "label": "Bloglar"
+      },
+      {
+        "href": "/admin#users",
+        "label": "Kullanıcılar"
+      }
+    ],
+    "unauthorizedAccess": "Erişim kısıtlı",
+    "unauthorizedMessage": "Paneli görüntülemek için yönetici hesabına ihtiyaç vardır.",
+    "goToLogin": "Yönetici girişine git"
   },
   "faq": {
     "title": "Sıkça Sorulan Sorular",
@@ -162,5 +193,37 @@
       "question": "Tengra Studio ile nasıl başlayabilirim?",
       "answer": "Proje fikriniz veya işbirliği önerinizle info@tengra.org adresinden e-posta göndererek bize ulaşın. Gereksinimlerinizi inceler ve vizyonunuzu eşsiz mitolojik ilham ve teknik uzmanlık karışımımızla hayata geçirmeyi tartışmak için bir görüşme planlarız."
     }
+  },
+  "AuthContext": {
+    "authorization": {
+      "defaultErrorMessage": "Yetkilendirme başarısız oldu. Lütfen tekrar deneyin.",
+      "invalidCredentials": "Sağlanan kimlik bilgileri hatalı."
+    }
+  },
+  "ProtectedRoute": {
+    "authorization": {
+      "loading": "Yetkilendirme kontrol ediliyor..."
+    }
+  },
+  "ConsentBanner": {
+    "description": "İçeriği kişiselleştirmek ve trafiğimizi analiz etmek için çerezler kullanıyoruz. Tercihini istediğin zaman değiştirebilirsin.",
+    "deny": "Reddet",
+    "allow": "Tümüne izin ver"
+  },
+  "Blogs": {
+    "seoTitle": "Tengra Studio Blogu",
+    "seoDescription": "Tengra Studio kolektifinden içgörüler, hikâyeler ve araştırmalar.",
+    "title": "Tengra Studio Blogu",
+    "adminPanelTitle": "Yönetici araçları",
+    "adminPanelDesc": "Blog sayfasındaki bu hızlı işlemler yalnızca yöneticilere görünür.",
+    "goToAdminPanel": "Yönetim panelini aç",
+    "createNewPost": "Yeni yazı oluştur",
+    "by": "Yazan"
+  },
+  "common": {
+    "backToBlogs": "Tüm yazılara dön"
+  },
+  "NotFound": {
+    "title": "Sayfa bulunamadı"
   }
 }

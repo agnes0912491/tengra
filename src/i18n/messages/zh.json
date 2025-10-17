@@ -126,12 +126,104 @@
       "success": "登录成功。",
       "invalidCredentials": "提供的凭据不正确。",
       "genericError": "登录失败，请重试。"
-    }
+    },
+    "title": "管理员登录",
+    "description": "使用管理员凭证登录以管理 Tengra Studio。",
+    "usernameLabel": "用户名",
+    "usernamePlaceholder": "请输入用户名",
+    "passwordLabel": "密码",
+    "button": {
+      "loading": "正在登录...",
+      "submit": "登录"
+    },
+    "footer": "访问仅限获得授权的 Tengra Studio 管理员。"
   },
   "AdminDashboard": {
     "toast": {
       "fetchUsersError": "无法加载用户列表，请重试。",
       "logout": "管理员会话已结束。"
+    },
+    "navigationLinks": [
+      {
+        "href": "/admin#overview",
+        "label": "概览"
+      },
+      {
+        "href": "/admin#projects",
+        "label": "项目"
+      },
+      {
+        "href": "/admin#blogs",
+        "label": "博客"
+      },
+      {
+        "href": "/admin#users",
+        "label": "用户"
+      }
+    ],
+    "unauthorizedAccess": "访问受限",
+    "unauthorizedMessage": "需要管理员账户才能查看此控制面板。",
+    "goToLogin": "前往管理员登录"
+  },
+  "AuthContext": {
+    "authorization": {
+      "defaultErrorMessage": "授权失败。请重试。",
+      "invalidCredentials": "提供的凭证不正确。"
+    }
+  },
+  "ProtectedRoute": {
+    "authorization": {
+      "loading": "正在检查授权..."
+    }
+  },
+  "ConsentBanner": {
+    "description": "我们使用 Cookie 个性化内容并分析流量。您可以随时更改偏好。",
+    "deny": "拒绝",
+    "allow": "全部允许"
+  },
+  "Blogs": {
+    "seoTitle": "Tengra Studio 博客",
+    "seoDescription": "来自 Tengra Studio 集体的洞察、故事和研究。",
+    "title": "Tengra Studio 博客",
+    "adminPanelTitle": "管理员工具",
+    "adminPanelDesc": "只有管理员才能在博客页面看到这些快速操作。",
+    "goToAdminPanel": "打开管理控制台",
+    "createNewPost": "创建新文章",
+    "by": "作者"
+  },
+  "common": {
+    "backToBlogs": "返回所有文章"
+  },
+  "NotFound": {
+    "title": "页面未找到"
+  },
+  "faq": {
+    "title": "常见问题",
+    "subtitle": "关于 Tengra Studio 的所有常见问题",
+    "stillQuestions": "还有疑问吗？",
+    "q1": {
+      "question": "Tengra Studio 是什么？",
+      "answer": "Tengra Studio 是一个创造性的科技团队，在神话与现代技术之间架起桥梁。我们打造沉浸式数字体验、创新工具和协作平台，将古老智慧与尖端工程相结合。"
+    },
+    "q2": {
+      "question": "Tengra Studio 提供哪些服务？",
+      "answer": "我们专注于全栈开发、区块链集成、密码学解决方案、沉浸式网络体验、定制 CMS 开发、API 设计以及云基础设施。我们的专业领域涵盖从神话灵感的设计系统到可投入生产的安全应用。"
+    },
+    "q3": {
+      "question": "如何加入 Tengra 网络？",
+      "answer": "Tengra 网络欢迎与我们愿景一致的创作者、思想家和创新者。您可以通过联系我们的表单或电子邮件加入。我们重视协作，并始终寻找推动技术与创意边界的伙伴。"
+    },
+    "q4": {
+      "question": "Tengra Studio 是否承接定制项目？",
+      "answer": "是的！我们与精选客户合作开展符合我们愿景的定制项目，打造有意义且高品质的数字体验。无论是安全的后端基础设施、区块链解决方案，还是沉浸式前端体验，我们都能兼具技术实力与创意视野。"
+    },
+    "q5": {
+      "question": "Tengra Studio 使用哪些技术？",
+      "answer": "我们使用现代 C++、TypeScript、React/Next.js、Node.js、MySQL、Redis、区块链技术、高级密码学（BLAKE3、Argon2）、WebSocket 协议以及云平台。我们会根据安全性、性能和可扩展性需求选择技术。"
+    },
+    "q6": {
+      "question": "如何与 Tengra Studio 开始合作？",
+      "answer": "只需发送电子邮件至 info@tengra.org，说明您的项目想法或合作提议。我们会审阅您的需求，并安排会谈，探讨如何利用我们独特的神话灵感与技术专长实现您的愿景。"
     }
   }
 }

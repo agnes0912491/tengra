@@ -126,13 +126,44 @@
       "success": "Signed in successfully.",
       "invalidCredentials": "The provided credentials are incorrect.",
       "genericError": "Sign in failed. Please try again."
-    }
+    },
+    "title": "Admin access",
+    "description": "Sign in with your administrator credentials to manage Tengra Studio.",
+    "usernameLabel": "Username",
+    "usernamePlaceholder": "Enter your username",
+    "passwordLabel": "Password",
+    "button": {
+      "loading": "Signing in...",
+      "submit": "Sign in"
+    },
+    "footer": "Access is limited to authorized Tengra Studio administrators."
   },
   "AdminDashboard": {
     "toast": {
       "fetchUsersError": "We couldn't load the user list. Please try again.",
       "logout": "Admin session closed."
-    }
+    },
+    "navigationLinks": [
+      {
+        "href": "/admin#overview",
+        "label": "Overview"
+      },
+      {
+        "href": "/admin#projects",
+        "label": "Projects"
+      },
+      {
+        "href": "/admin#blogs",
+        "label": "Blogs"
+      },
+      {
+        "href": "/admin#users",
+        "label": "Users"
+      }
+    ],
+    "unauthorizedAccess": "Access restricted",
+    "unauthorizedMessage": "You need an administrator account to view the dashboard.",
+    "goToLogin": "Go to admin login"
   },
   "faq": {
     "title": "Frequently Asked Questions",
@@ -162,5 +193,37 @@
       "question": "How do I get started with Tengra Studio?",
       "answer": "Simply reach out via email at info@tengra.org with your project idea or collaboration proposal. We'll review your requirements and schedule a consultation to discuss how we can bring your vision to life with our unique blend of mythic inspiration and technical expertise."
     }
+  },
+  "AuthContext": {
+    "authorization": {
+      "defaultErrorMessage": "Authorization failed. Please try again.",
+      "invalidCredentials": "The provided credentials are incorrect."
+    }
+  },
+  "ProtectedRoute": {
+    "authorization": {
+      "loading": "Checking authorization..."
+    }
+  },
+  "ConsentBanner": {
+    "description": "We use cookies to personalize content and analyze our traffic. You can change your preference at any time.",
+    "deny": "Deny",
+    "allow": "Allow all"
+  },
+  "Blogs": {
+    "seoTitle": "Tengra Studio Blog",
+    "seoDescription": "Insights, stories and research from the Tengra Studio collective.",
+    "title": "Tengra Studio Blog",
+    "adminPanelTitle": "Admin tools",
+    "adminPanelDesc": "Only administrators can view these quick actions on the blog page.",
+    "goToAdminPanel": "Open admin dashboard",
+    "createNewPost": "Create new post",
+    "by": "By"
+  },
+  "common": {
+    "backToBlogs": "Back to all posts"
+  },
+  "NotFound": {
+    "title": "Page not found"
   }
 }

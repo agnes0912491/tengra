@@ -126,12 +126,104 @@
       "success": "성공적으로 로그인했습니다.",
       "invalidCredentials": "입력한 자격 증명이 올바르지 않습니다.",
       "genericError": "로그인에 실패했습니다. 다시 시도해 주세요."
-    }
+    },
+    "title": "관리자 접속",
+    "description": "관리자 자격 증명으로 로그인하여 Tengra Studio를 관리하세요.",
+    "usernameLabel": "사용자 이름",
+    "usernamePlaceholder": "사용자 이름 입력",
+    "passwordLabel": "비밀번호",
+    "button": {
+      "loading": "로그인 중...",
+      "submit": "로그인"
+    },
+    "footer": "접근 권한은 승인된 Tengra Studio 관리자에게만 부여됩니다."
   },
   "AdminDashboard": {
     "toast": {
       "fetchUsersError": "사용자 목록을 불러오지 못했습니다. 다시 시도해 주세요.",
       "logout": "관리자 세션이 종료되었습니다."
+    },
+    "navigationLinks": [
+      {
+        "href": "/admin#overview",
+        "label": "개요"
+      },
+      {
+        "href": "/admin#projects",
+        "label": "프로젝트"
+      },
+      {
+        "href": "/admin#blogs",
+        "label": "블로그"
+      },
+      {
+        "href": "/admin#users",
+        "label": "사용자"
+      }
+    ],
+    "unauthorizedAccess": "접근 제한",
+    "unauthorizedMessage": "대시보드를 보려면 관리자 계정이 필요합니다.",
+    "goToLogin": "관리자 로그인으로 이동"
+  },
+  "AuthContext": {
+    "authorization": {
+      "defaultErrorMessage": "권한 확인에 실패했습니다. 다시 시도해 주세요.",
+      "invalidCredentials": "제공한 자격 증명이 올바르지 않습니다."
+    }
+  },
+  "ProtectedRoute": {
+    "authorization": {
+      "loading": "권한을 확인하는 중..."
+    }
+  },
+  "ConsentBanner": {
+    "description": "콘텐츠 개인화와 트래픽 분석을 위해 쿠키를 사용합니다. 언제든지 설정을 변경할 수 있습니다.",
+    "deny": "거부",
+    "allow": "모두 허용"
+  },
+  "Blogs": {
+    "seoTitle": "Tengra Studio 블로그",
+    "seoDescription": "Tengra Studio 컬렉티브의 인사이트, 스토리, 연구를 만나보세요.",
+    "title": "Tengra Studio 블로그",
+    "adminPanelTitle": "관리자 도구",
+    "adminPanelDesc": "블로그 페이지의 이 빠른 작업은 관리자만 볼 수 있습니다.",
+    "goToAdminPanel": "관리자 대시보드 열기",
+    "createNewPost": "새 글 만들기",
+    "by": "작성자"
+  },
+  "common": {
+    "backToBlogs": "모든 게시글로 돌아가기"
+  },
+  "NotFound": {
+    "title": "페이지를 찾을 수 없습니다"
+  },
+  "faq": {
+    "title": "자주 묻는 질문",
+    "subtitle": "Tengra Studio에 대해 알아야 할 모든 것",
+    "stillQuestions": "더 궁금한 점이 있나요?",
+    "q1": {
+      "question": "Tengra Studio는 무엇인가요?",
+      "answer": "Tengra Studio는 신화적 서사와 현대 기술의 교차점을 개척하는 크리에이티브 기술 집단입니다. 우리는 몰입형 디지털 경험과 혁신적인 도구, 협업 플랫폼을 제작하여 고대의 지혜와 최첨단 공학을 연결합니다."
+    },
+    "q2": {
+      "question": "Tengra Studio는 어떤 서비스를 제공하나요?",
+      "answer": "풀스택 개발, 블록체인 통합, 암호화 솔루션, 몰입형 웹 경험, 맞춤형 CMS 개발, API 설계, 클라우드 인프라 구축을 전문으로 합니다. 신화에서 영감을 받은 디자인 시스템부터 운영 환경에서 사용할 수 있는 보안 애플리케이션까지 폭넓은 전문성을 갖추고 있습니다."
+    },
+    "q3": {
+      "question": "Tengra 네트워크에는 어떻게 참여하나요?",
+      "answer": "Tengra 네트워크는 우리의 비전을 공유하는 창작자, 사상가, 혁신가를 환영합니다. 연락처 양식이나 이메일로 문의하면 참여할 수 있습니다. 우리는 협업을 중시하며, 기술과 창의성의 경계를 넓히는 파트너를 항상 찾고 있습니다."
+    },
+    "q4": {
+      "question": "Tengra Studio는 맞춤형 프로젝트도 진행하나요?",
+      "answer": "네! 의미 있고 고품질의 디지털 경험이라는 우리의 비전에 부합하는 맞춤형 프로젝트를 선택된 고객과 함께 진행합니다. 안전한 백엔드 인프라, 블록체인 솔루션, 몰입형 프론트엔드 경험 등 기술적 완성도와 창의적 비전을 함께 제공합니다."
+    },
+    "q5": {
+      "question": "Tengra Studio는 어떤 기술을 사용하나요?",
+      "answer": "현대적인 C++, TypeScript, React/Next.js, Node.js, MySQL, Redis, 블록체인 기술, 고급 암호 기술(BLAKE3, Argon2), WebSocket 프로토콜, 클라우드 플랫폼을 활용합니다. 보안성, 성능, 확장성 요구 사항에 따라 적절한 기술을 선택합니다."
+    },
+    "q6": {
+      "question": "Tengra Studio와 어떻게 시작하나요?",
+      "answer": "프로젝트 아이디어나 협업 제안을 info@tengra.org 로 보내 주세요. 요구 사항을 검토한 뒤, 우리의 신화적 영감과 기술 전문성을 바탕으로 비전을 구현하는 방법을 논의할 상담 일정을 잡겠습니다."
     }
   }
 }
