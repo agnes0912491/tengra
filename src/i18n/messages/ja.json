@@ -119,5 +119,19 @@
     "zh": "中文",
     "ja": "日本語",
     "ko": "한국어"
+  },
+  "AdminLogin": {
+    "toast": {
+      "missingCredentials": "ユーザー名とパスワードは必須です。",
+      "success": "ログインに成功しました。",
+      "invalidCredentials": "入力された認証情報が正しくありません。",
+      "genericError": "ログインに失敗しました。もう一度お試しください。"
+    }
+  },
+  "AdminDashboard": {
+    "toast": {
+      "fetchUsersError": "ユーザー一覧を読み込めませんでした。もう一度お試しください。",
+      "logout": "管理者セッションを終了しました。"
+    }
   }
 }

@@ -10,6 +10,7 @@ import ProtectedRoute from "@/components/auth/protected-route";
 import { useAuth } from "@/components/providers/auth-provider";
 import Logo from "../../../public/tengra_without_text.png";
 import { toast } from "react-toastify";
+import { useTranslations } from "next-intl";
 import { getAllUsers } from "@/lib/db";
 import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
 import { User } from "@/lib/auth/users";
@@ -26,6 +27,7 @@ export default function AdminPage() {
   const router = useRouter();
   const pathname = usePathname();
   const isAdmin = user?.role === "admin";
+  const t = useTranslations("AdminDashboard");
 
   const token = useCallback(async () => {
     const cookie = Cookies.get(ADMIN_SESSION_COOKIE);
@@ -35,12 +37,19 @@ export default function AdminPage() {
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
 
   const fetchUsers = useCallback(async () => {
-    const tokenValue = await token();
-    if (tokenValue) {
+    try {
+      const tokenValue = await token();
+      if (!tokenValue) {
+        return;
+      }
+
       const users = await getAllUsers(tokenValue);
       setAvailableUsers(users);
+    } catch (error) {
+      console.error("Failed to fetch admin users:", error);
+      toast.error(t("toast.fetchUsersError"));
     }
-  }, [token]);
+  }, [t, token]);
 
   useEffect(() => {
     fetchUsers();
@@ -48,9 +57,9 @@ export default function AdminPage() {
 
   const handleLogout = useCallback(() => {
     logout();
-    toast.info("Yönetici oturumu kapatıldı.");
+    toast.info(t("toast.logout"));
     router.push("/");
-  }, [logout, router]);
+  }, [logout, router, t]);
 
   if (!isAdmin) {
     return (

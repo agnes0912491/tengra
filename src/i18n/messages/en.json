@@ -120,6 +120,20 @@
     "ja": "日本語",
     "ko": "한국어"
   },
+  "AdminLogin": {
+    "toast": {
+      "missingCredentials": "Username and password are required.",
+      "success": "Signed in successfully.",
+      "invalidCredentials": "The provided credentials are incorrect.",
+      "genericError": "Sign in failed. Please try again."
+    }
+  },
+  "AdminDashboard": {
+    "toast": {
+      "fetchUsersError": "We couldn't load the user list. Please try again.",
+      "logout": "Admin session closed."
+    }
+  },
   "faq": {
     "title": "Frequently Asked Questions",
     "subtitle": "Everything you need to know about Tengra Studio",
