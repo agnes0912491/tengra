@@ -119,5 +119,19 @@
     "zh": "中文",
     "ja": "日本語",
     "ko": "한국어"
+  },
+  "AdminLogin": {
+    "toast": {
+      "missingCredentials": "Se requieren nombre de usuario y contraseña.",
+      "success": "Inicio de sesión exitoso.",
+      "invalidCredentials": "Las credenciales proporcionadas son incorrectas.",
+      "genericError": "El inicio de sesión falló. Por favor, inténtalo de nuevo."
+    }
+  },
+  "AdminDashboard": {
+    "toast": {
+      "fetchUsersError": "No pudimos cargar la lista de usuarios. Por favor, inténtalo de nuevo.",
+      "logout": "Sesión de administrador cerrada."
+    }
   }
 }

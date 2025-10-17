@@ -120,6 +120,20 @@
     "ja": "Japonca",
     "ko": "Korece"
   },
+  "AdminLogin": {
+    "toast": {
+      "missingCredentials": "Kullanıcı adı ve şifre gereklidir.",
+      "success": "Giriş başarılı.",
+      "invalidCredentials": "Girdiğiniz bilgiler hatalı.",
+      "genericError": "Giriş başarısız oldu. Lütfen tekrar deneyin."
+    }
+  },
+  "AdminDashboard": {
+    "toast": {
+      "fetchUsersError": "Kullanıcı listesi yüklenemedi. Lütfen tekrar deneyin.",
+      "logout": "Yönetici oturumu kapatıldı."
+    }
+  },
   "faq": {
     "title": "Sıkça Sorulan Sorular",
     "subtitle": "Tengra Studio hakkında bilmeniz gereken her şey",
