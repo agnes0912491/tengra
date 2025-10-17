@@ -40,8 +40,7 @@ export default function BlogsClient({
   const [activeCategory, setActiveCategory] = useState<BlogCategory | null>(
     null
   );
-  const { user, isAuthenticated } = useAuth();
-  console.log({ user, isAuthenticated });
+  const { user, isAuthenticated } = useAuth(); 
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   useEffect(() => {

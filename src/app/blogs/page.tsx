@@ -16,7 +16,6 @@ export default function BlogsPage() {
       const token = Cookies.get(ADMIN_SESSION_COOKIE) || null;
       const categories = await getAllBlogCategories();
       const posts = await getAllBlogs();
-      console.log({posts})
       if (token) {
         setToken(token);
       }

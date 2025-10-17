@@ -6,7 +6,7 @@ import { AuthUserPayload } from "@/types/auth";
 // generating an invalid URL when the env var is absent.
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:5000";
 // All public content endpoints are served under /api on the backend Router.
-const BLOGS_API_URL = `${API_BASE}/api/blogs`;
+const BLOGS_API_URL = `${API_BASE}/blogs`;
  
 
 /**
@@ -63,7 +63,7 @@ export const getAllUsers = async (token: string): Promise<User[]> => {
     throw new Error("Token sağlanmadı.");
   }
 
-  const response = await fetch(`${API_BASE}/api/users`, {
+  const response = await fetch(`${API_BASE}/users`, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json" 
@@ -84,7 +84,7 @@ export const authenticateUserWithPassword = async (
   email: string,
   password: string
 ): Promise<AuthUserPayload | null> => {
-  const response = await fetch(`${API_BASE}/api/auth/login`, {
+  const response = await fetch(`${API_BASE}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify({ username: email, password }),
@@ -107,7 +107,7 @@ export const getUserWithId = async (id: string): Promise<User | null> => {
     throw new Error("Kullanıcı ID'si sağlanmadı.");
   }
 
-  const response = await fetch(`${API_BASE}/api/users/${id}`, {
+  const response = await fetch(`${API_BASE}/users/${id}`, {
     headers: {
       Accept: "application/json"
     },
@@ -123,7 +123,7 @@ export const getUserWithId = async (id: string): Promise<User | null> => {
 }
 
 export const registerUser = async (name: string, email: string, password: string): Promise<User | null> => {
-  const response = await fetch(`${API_BASE}/api/auth/register`, {
+  const response = await fetch(`${API_BASE}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify({ name, email, password }),
@@ -142,7 +142,7 @@ export const getUserWithToken = async (token: string): Promise<User | null> => {
     throw new Error("Token sağlanmadı.");
   }
 
-  const response = await fetch(`${API_BASE}/api/auth/me`, {
+  const response = await fetch(`${API_BASE}/auth/me`, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json" 

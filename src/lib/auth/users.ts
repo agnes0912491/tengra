@@ -1,4 +1,9 @@
-import { authenticateUserWithPassword, getAllUsers, getUserWithToken } from "../db";
+import { AuthUserPayload } from "@/types/auth";
+import {
+  authenticateUserWithPassword,
+  getAllUsers,
+  getUserWithToken,
+} from "../db";
 
 export type Role = "admin" | "user";
 
@@ -7,11 +12,14 @@ export type User = {
   name: string;
   email: string;
   role: Role;
-}; 
+};
 
-export async function authenticateUser(email: string, password: string): Promise<User | null> {
+export async function authenticateUser(
+  email: string,
+  password: string
+): Promise<{ authToken: AuthUserPayload; user: User } | null> {
   const authToken = await authenticateUserWithPassword(email, password);
-  if (!authToken) {
+  if (!authToken?.token) {
     return null;
   }
 
@@ -21,7 +29,25 @@ export async function authenticateUser(email: string, password: string): Promise
     return null;
   }
 
-  return user;
+  return { authToken, user };
+}
+
+export async function authenticateAdmin(
+  email: string,
+  password: string
+): Promise<{ authToken: AuthUserPayload; user: User } | null> {
+  const authToken = await authenticateUserWithPassword(email, password);
+  if (!authToken?.token) {
+    return null;
+  }
+
+  const user = await getUserWithToken(authToken.token);
+
+  if (!user || user.role !== "admin") {
+    return null;
+  }
+
+  return { authToken, user };
 }
 
 export async function getUsers(token: string): Promise<User[]> {

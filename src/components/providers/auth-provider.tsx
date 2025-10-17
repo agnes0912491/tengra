@@ -8,14 +8,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { authenticateUser, Role, User } from "@/lib/auth/users";
-
-/**
- * LocalStorage key where we store the authenticated user snapshot.
- * This is a lightweight cache used purely for client-side rendering convenience.
- * In production, prefer server-issued HttpOnly cookies for session state.
- */
-const STORAGE_KEY = "tengra.auth.user";
+import { authenticateAdmin, authenticateUser, Role, User } from "@/lib/auth/users";
 
 /**
  * Auth context contract exposed to the app.
@@ -23,8 +16,14 @@ const STORAGE_KEY = "tengra.auth.user";
 type AuthContextValue = {
   user: User | null;
   isAuthenticated: boolean;
-  loading: boolean;
   login: (
+    email: string,
+    password: string
+  ) => Promise<{
+    success: boolean;
+    message?: string;
+  }>;
+  adminLogin: (
     email: string,
     password: string
   ) => Promise<{
@@ -60,28 +59,8 @@ type Props = {
  * - Exposes login/logout helpers that update both memory state and localStorage.
  */
 export default function AuthProvider({ children }: Props) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Read any previously saved user snapshot. This is optional and
-    // only improves initial paint; real authorization should be verified
-    // on the server when accessing protected resources.
-    const stored =
-      typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
-
-    if (stored) {
-      try {
-        const parsed: User = JSON.parse(stored);
-        setUser(parsed);
-      } catch (error) {
-        console.warn("Stored kullanıcı verisi okunamadı:", error);
-        localStorage.removeItem(STORAGE_KEY);
-      }
-    }
-
-    setLoading(false);
-  }, []);
+  const [user, setUser] = useState<User | null>(null); 
+  
 
   /**
    * login: calls backend to authenticate using email+password.
@@ -97,8 +76,28 @@ export default function AuthProvider({ children }: Props) {
       } as const;
     }
 
-    setUser(authenticated);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(authenticated));
+    setUser(authenticated.user);
+    localStorage.setItem("authToken", authenticated.authToken.token);
+    localStorage.setItem("refreshToken", authenticated.authToken.refreshToken);
+    localStorage.setItem("csrfToken", authenticated.authToken.csrfToken);
+
+    return { success: true } as const;
+  }, []);
+  
+  const adminLogin = useCallback(async (email: string, password: string) => {
+    const authenticated = await authenticateAdmin(email, password);
+
+    if (!authenticated) {
+      return {
+        success: false,
+        message: "E-posta veya şifre hatalı.",
+      } as const;
+    }
+
+    setUser(authenticated.user);
+    localStorage.setItem("authToken", authenticated.authToken.token);
+    localStorage.setItem("refreshToken", authenticated.authToken.refreshToken);
+    localStorage.setItem("csrfToken", authenticated.authToken.csrfToken);
 
     return { success: true } as const;
   }, []);
@@ -108,18 +107,20 @@ export default function AuthProvider({ children }: Props) {
    */
   const logout = useCallback(() => {
     setUser(null);
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("csrfToken");
   }, []);
 
   const value = useMemo(
     () => ({
       user,
       isAuthenticated: Boolean(user),
-      loading,
       login,
+      adminLogin,
       logout,
     }),
-    [user, loading, login, logout]
+    [user, login, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

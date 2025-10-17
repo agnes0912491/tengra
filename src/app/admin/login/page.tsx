@@ -2,7 +2,7 @@
 
 import { FormEvent, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/components/providers/auth-provider";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ function AdminLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextUrl = searchParams.get("next") ?? "/admin";
-  const { login } = useAuth();
+  const { adminLogin } = useAuth();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -25,7 +25,7 @@ function AdminLoginForm() {
     setError(null);
 
     try {
-      const success = await login(username, password);
+      const success = await adminLogin(username, password);
 
       if (success) {
         router.replace(nextUrl);

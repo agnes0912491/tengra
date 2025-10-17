@@ -43,7 +43,10 @@ export default function Footer() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const isAdminRoute = useMemo(() => pathname?.startsWith("/admin"), [pathname]);
+  const isAdminRoute = useMemo(
+    () => pathname?.startsWith("/admin"),
+    [pathname]
+  );
 
   const handleLogout = useCallback(() => {
     logout();
@@ -60,7 +63,8 @@ export default function Footer() {
         className="fixed bottom-0 left-0 z-50 w-full border-t border-[rgba(255,255,255,0.1)] bg-[rgba(6,20,26,0.78)] backdrop-blur-xl"
       >
         <div className="mx-auto max-w-7xl px-4 py-3 text-center text-xs text-[rgba(255,255,255,0.55)]">
-          {tFooter("copyright", { year: new Date().getFullYear() })} — {tFooter("admin")}
+          {tFooter("copyright", { year: new Date().getFullYear() })} —{" "}
+          {tFooter("admin")}
         </div>
       </motion.footer>
     );
@@ -76,7 +80,13 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-3 text-sm text-[color:var(--text-muted)]">
         <div className="hidden items-center justify-between gap-6 sm:flex">
           <div className="flex items-center gap-3">
-            <Image src={Img.src} alt="Tengra" width={42} height={42} className="opacity-80" />
+            <Image
+              src={Img.src}
+              alt="Tengra"
+              width={42}
+              height={42}
+              className="opacity-80"
+            />
             <span className="font-display text-lg tracking-[0.4em] text-[color:var(--color-turkish-blue-400)] soft-glow">
               TENGRA
             </span>
@@ -100,10 +110,14 @@ export default function Footer() {
             </span>
             <LocaleSwitcher />
             {loading ? (
-              <span className="text-[rgba(255,255,255,0.6)]">{tFooter("checking")}</span>
+              <span className="text-[rgba(255,255,255,0.6)]">
+                {tFooter("checking")}
+              </span>
             ) : isAuthenticated ? (
               <div className="flex items-center gap-3">
-                <span className="text-[color:var(--color-turkish-blue-200)]">{user?.name}</span>
+                <span className="text-[color:var(--color-turkish-blue-200)]">
+                  {user?.name}
+                </span>
                 <button
                   type="button"
                   onClick={handleLogout}
@@ -119,7 +133,13 @@ export default function Footer() {
         <div className="space-y-3 sm:hidden">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Image src={Img.src} alt="Tengra" width={30} height={30} className="opacity-80" />
+              <Image
+                src={Img.src}
+                alt="Tengra"
+                width={30}
+                height={30}
+                className="opacity-80"
+              />
               <span className="font-display text-sm tracking-[0.35em] text-[color:var(--color-turkish-blue-400)] soft-glow">
                 TENGRA
               </span>
@@ -141,29 +161,9 @@ export default function Footer() {
             ))}
           </nav>
 
-          <div className="flex items-center justify-between text-[10px] text-[rgba(255,255,255,0.6)]">
+          <div className="flex items-center justify-center text-[10px] text-[rgba(255,255,255,0.6)]">
+            {/* Hide auth actions on small screens by design (no login/logout CTAs on mobile) */}
             <LocaleSwitcher />
-            {loading ? (
-              <span>{tFooter("checking")}</span>
-            ) : isAuthenticated ? (
-              <>
-                <span className="text-[color:var(--color-turkish-blue-200)]">{user?.name}</span>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="rounded-full border border-[rgba(0,167,197,0.35)] px-2 py-1 uppercase tracking-widest text-[0.6rem] text-[color:var(--color-turkish-blue-100)]"
-                >
-                  {tFooter("logoutShort")}
-                </button>
-              </>
-            ) : (
-              <Link
-                href="/login"
-                className="rounded-full border border-[rgba(0,167,197,0.35)] px-3 py-1 uppercase tracking-widest text-[0.6rem] text-[color:var(--color-turkish-blue-100)]"
-              >
-                {tFooter("login")}
-              </Link>
-            )}
           </div>
         </div>
       </div>
