@@ -1,21 +1,23 @@
 import { ReactNode } from "react";
-import { cookies, headers } from "next/headers";
+import { headers } from "next/headers";
 
 import IntlProviderClient from "@/components/providers/intl-provider-client";
 import { getMessages } from "@/i18n/get-messages";
 import { isLocale, routing } from "@/i18n/routing";
+import Cookies from "js-cookie";
 
 type Props = {
   children: ReactNode;
 };
 
-function resolvePreferredLocale() {
-  const localeCookie = cookies().get("NEXT_LOCALE")?.value;
+async function resolvePreferredLocale() {
+  const localeCookie = Cookies.get("NEXT_LOCALE");
   if (localeCookie && isLocale(localeCookie)) {
     return localeCookie;
   }
 
-  const acceptLanguage = headers().get("accept-language") ?? "";
+  const headersList = await headers();
+  const acceptLanguage = headersList.get("Accept-Language") || "";
   const supported = routing.locales as readonly string[];
   const candidates = acceptLanguage
     .split(",")
@@ -39,8 +41,8 @@ function resolvePreferredLocale() {
   return routing.defaultLocale;
 }
 
-export default function AdminLayout({ children }: Props) {
-  const preferredLocale = resolvePreferredLocale();
+export default async function AdminLayout({ children }: Props) {
+  const preferredLocale = await resolvePreferredLocale();
   const { locale, messages } = getMessages(preferredLocale);
 
   return (

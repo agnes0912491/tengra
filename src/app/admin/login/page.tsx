@@ -68,17 +68,17 @@ function AdminLoginForm() {
       <div className="w-full max-w-md bg-[rgba(255,255,255,0.04)] border border-[rgba(0,167,197,0.2)] rounded-2xl shadow-xl backdrop-blur-md p-8 space-y-6">
         <div className="space-y-2 text-center">
           <h1 className="text-3xl font-display tracking-[0.25em] text-[color:var(--color-turkish-blue-400)]">
-            ADMIN LOGIN
+            {t("title")}
           </h1>
           <p className="text-sm text-gray-400">
-            Lütfen yönetici kimlik bilgilerinizi kullanarak giriş yapın.
+            {t("description")}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2 text-left">
             <label className="text-sm text-gray-300" htmlFor="username">
-              Kullanıcı Adı / E-posta
+              {t("usernameLabel")}
             </label>
             <Input
               id="username"
@@ -87,13 +87,13 @@ function AdminLoginForm() {
               required
               value={credentials.username}
               onChange={handleChange}
-              placeholder="username veya email@example.com"
+              placeholder={t("usernamePlaceholder")}
             />
           </div>
 
           <div className="space-y-2 text-left">
             <label className="text-sm text-gray-300" htmlFor="password">
-              Şifre
+              {t("passwordLabel")}
             </label>
             <Input
               id="password"
@@ -107,12 +107,12 @@ function AdminLoginForm() {
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Giriş yapılıyor..." : "Giriş yap"}
+            {loading ? t("button.loading") : t("button.submit")}
           </Button>
         </form>
 
         <p className="text-xs text-center text-gray-500">
-          Yönetici erişimi için geçerli kimlik bilgilerini kullanın.
+          {t("footer")}
         </p>
       </div>
     </section>

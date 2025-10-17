@@ -10,6 +10,7 @@ import React, {
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
+import { useTranslations } from "next-intl";
 
 interface User {
   id: number;
@@ -57,9 +58,8 @@ const REFRESH_TOKEN_KEY = "refreshToken";
 const CSRF_TOKEN_KEY = "csrfToken";
 
 const STORAGE_KEYS = [AUTH_TOKEN_KEY, REFRESH_TOKEN_KEY, CSRF_TOKEN_KEY];
-
-const DEFAULT_ERROR_MESSAGE =
-  "Giriş işlemi sırasında beklenmeyen bir hata oluştu.";
+const t = useTranslations("AuthContext");
+const DEFAULT_ERROR_MESSAGE = t("authorization.defaultErrorMessage");
 
 const persistAuthPayload = (data: AuthSuccessPayload) => {
   if (!data) return;
@@ -140,7 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           success: false,
           message:
             response.status === 401
-              ? "Kullanıcı adı veya şifre hatalı."
+              ? t("authorization.invalidCredentials")
               : DEFAULT_ERROR_MESSAGE,
         };
       }

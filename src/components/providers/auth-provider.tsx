@@ -54,27 +54,34 @@ type Props = {
  */
 export default function AuthProvider({ children }: Props) {
   const [user, setUser] = useState<User | null>(null); 
-  
+  const [loading, setLoading] = useState<boolean>(false);
 
   /**
    * login: calls backend to authenticate using email+password.
    * On success, stores the returned user and persists it in localStorage.
    */
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string, type: "user" | "admin" = "user") => {
+    setLoading(true);
     try {
-      const authenticated = await authenticateUser(email, password);
+      const authenticated = type === "admin"
+        ? await authenticateAdmin(email, password)
+        : await authenticateUser(email, password);
 
       if (!authenticated) {
         return { success: false, reason: "invalidCredentials" } as const;
       }
 
-      setUser(authenticated);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(authenticated));
+      setUser(authenticated.user);
+      localStorage.setItem("authToken", authenticated.authToken.token);
+      localStorage.setItem("refreshToken", authenticated.authToken.refreshToken);
+      localStorage.setItem("csrfToken", authenticated.authToken.csrfToken);
 
       return { success: true } as const;
     } catch (error) {
       console.error("Login failed:", error);
       return { success: false, reason: "unexpectedError" } as const;
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -92,11 +99,11 @@ export default function AuthProvider({ children }: Props) {
     () => ({
       user,
       isAuthenticated: Boolean(user),
-      login,
-      adminLogin,
+      loading,
+      login, 
       logout,
     }),
-    [user, login, logout]
+    [user, loading, login, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

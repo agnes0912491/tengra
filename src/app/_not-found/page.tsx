@@ -1,6 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 export default function NotFound() {
+  const t = useTranslations("NotFound");
   return (
     <div
       style={{
@@ -10,7 +13,7 @@ export default function NotFound() {
         justifyContent: "center",
       }}
     >
-      <h1>Page not found</h1>
+      <h1>{t("title")}</h1>
     </div>
   );
 }

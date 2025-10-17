@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Role } from "@/lib/auth/users";
 import { useAuth } from "@/components/providers/auth-provider";
+import { useTranslations } from "next-intl";
 
 type Props = {
   children: React.ReactNode;
@@ -20,6 +21,7 @@ export default function ProtectedRoute({
   // IMPORTANT: This is only a UX convenience. Server-side APIs must still validate
   // the Authorization header and enforce RBAC.
   const { user, isAuthenticated, loading } = useAuth();
+  const t = useTranslations("ProtectedRoute");
   const router = useRouter();
 
   useEffect(() => {
@@ -38,9 +40,9 @@ export default function ProtectedRoute({
   }, [allowedRoles, isAuthenticated, loading, router, user]);
 
   if (loading) {
-    return (
+     return (
       <div className="w-full py-24 text-center text-sm text-[color:var(--color-turkish-blue-200)]">
-        Yetkilendirme yükleniyor...
+        {t("authorization.loading")}
       </div>
     );
   }

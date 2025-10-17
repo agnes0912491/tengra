@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 
 // Minimal Consent Mode v2 implementation for Google services (Adsense/Analytics)
 // - Shows a small banner for EEA/UK/CH users (basic detection with Accept-Language; integrate GeoIP if needed)
@@ -130,27 +131,27 @@ export default function ConsentBanner() {
     }
   };
 
-  if (!shouldShow || consent !== "unknown") return null;
+  if (!shouldShow || consent !== "unknown") return null; 
+
+  const t = useTranslations("ConsentBanner");
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 flex items-center justify-between gap-4 bg-[rgba(0,0,0,0.85)] px-4 py-3 text-sm text-white shadow-lg">
       <p className="max-w-3xl text-[13px] leading-5 opacity-90">
-        Bu sitede kullanıcı deneyimini geliştirmek ve Google hizmetlerini
-        etkinleştirmek için çerezler kullanıyoruz. Avrupa Ekonomik Alanı,
-        Birleşik Krallık ve İsviçre kullanıcıları için rıza gerekiyor.
+        {t("description")}
       </p>
       <div className="flex shrink-0 gap-2">
         <button
           onClick={onDenyAll}
           className="rounded border border-white/30 bg-transparent px-3 py-2 text-[13px] hover:bg-white/10"
         >
-          Reddet
+          {t("deny")}
         </button>
         <button
           onClick={onAllowAll}
           className="rounded bg-[color:var(--color-turkish-blue-400)] px-3 py-2 text-[13px] text-black hover:brightness-110"
         >
-          Kabul Et
+          {t("allow")}
         </button>
       </div>
     </div>
