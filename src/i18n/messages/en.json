@@ -119,5 +119,34 @@
     "zh": "中文",
     "ja": "日本語",
     "ko": "한국어"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Everything you need to know about Tengra Studio",
+    "stillQuestions": "Still have questions?",
+    "q1": {
+      "question": "What is Tengra Studio?",
+      "answer": "Tengra Studio is a creative technology collective forging the intersection of divine mythology and modern technology. We craft immersive digital experiences, innovative tools, and collaborative platforms that bridge ancient wisdom with cutting-edge engineering."
+    },
+    "q2": {
+      "question": "What services does Tengra Studio offer?",
+      "answer": "We specialize in full-stack development, blockchain integration, cryptographic solutions, immersive web experiences, custom CMS development, API design, and cloud infrastructure. Our expertise spans from myth-inspired design systems to production-ready secure applications."
+    },
+    "q3": {
+      "question": "How can I join the Tengra Network?",
+      "answer": "The Tengra Network welcomes creators, thinkers, and innovators who share our vision. You can join by reaching out through our contact form or email. We value collaboration and are always looking for partners who push the boundaries of technology and creativity."
+    },
+    "q4": {
+      "question": "Is Tengra Studio available for custom projects?",
+      "answer": "Yes! We work with select clients on custom projects that align with our vision of meaningful, high-quality digital experiences. Whether you need secure backend infrastructure, blockchain solutions, or immersive frontend experiences, we bring both technical excellence and creative vision."
+    },
+    "q5": {
+      "question": "What technologies does Tengra Studio use?",
+      "answer": "We work with modern C++, TypeScript, React/Next.js, Node.js, MySQL, Redis, blockchain technologies, advanced cryptography (BLAKE3, Argon2), WebSocket protocols, and cloud platforms. We choose technologies based on security, performance, and scalability requirements."
+    },
+    "q6": {
+      "question": "How do I get started with Tengra Studio?",
+      "answer": "Simply reach out via email at info@tengra.org with your project idea or collaboration proposal. We'll review your requirements and schedule a consultation to discuss how we can bring your vision to life with our unique blend of mythic inspiration and technical expertise."
+    }
   }
 }

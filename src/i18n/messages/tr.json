@@ -119,5 +119,34 @@
     "zh": "Çince",
     "ja": "Japonca",
     "ko": "Korece"
+  },
+  "faq": {
+    "title": "Sıkça Sorulan Sorular",
+    "subtitle": "Tengra Studio hakkında bilmeniz gereken her şey",
+    "stillQuestions": "Hala sorunuz mu var?",
+    "q1": {
+      "question": "Tengra Studio nedir?",
+      "answer": "Tengra Studio, ilahi mitoloji ile modern teknolojiyi buluşturan yaratıcı bir teknoloji kolektifidir. Antik bilgeliği son teknoloji mühendislikle harmanlayan sürükleyici dijital deneyimler, yenilikçi araçlar ve işbirlikçi platformlar yaratıyoruz."
+    },
+    "q2": {
+      "question": "Tengra Studio hangi hizmetleri sunuyor?",
+      "answer": "Full-stack geliştirme, blockchain entegrasyonu, kriptografik çözümler, sürükleyici web deneyimleri, özel CMS geliştirme, API tasarımı ve bulut altyapısı konularında uzmanız. Mitolojiden ilham alan tasarım sistemlerinden üretime hazır güvenli uygulamalara kadar geniş bir uzmanlığa sahibiz."
+    },
+    "q3": {
+      "question": "Tengra Ağı'na nasıl katılabilirim?",
+      "answer": "Tengra Ağı, vizyonumuzu paylaşan yaratıcıları, düşünürleri ve yenilikçileri kucaklıyor. İletişim formu veya e-posta yoluyla bize ulaşarak katılabilirsiniz. İşbirliğine değer veriyor ve teknoloji ile yaratıcılığın sınırlarını zorlayan ortaklar arıyoruz."
+    },
+    "q4": {
+      "question": "Tengra Studio özel projeler için müsait mi?",
+      "answer": "Evet! Anlamlı, yüksek kaliteli dijital deneyim vizyonumuzla uyumlu özel projelerde seçkin müşterilerle çalışıyoruz. Güvenli backend altyapısı, blockchain çözümleri veya sürükleyici frontend deneyimlerine ihtiyacınız olsun, hem teknik mükemmellik hem de yaratıcı vizyon getiriyoruz."
+    },
+    "q5": {
+      "question": "Tengra Studio hangi teknolojileri kullanıyor?",
+      "answer": "Modern C++, TypeScript, React/Next.js, Node.js, MySQL, Redis, blockchain teknolojileri, gelişmiş kriptografi (BLAKE3, Argon2), WebSocket protokolleri ve bulut platformlarıyla çalışıyoruz. Teknolojileri güvenlik, performans ve ölçeklenebilirlik gereksinimlerine göre seçiyoruz."
+    },
+    "q6": {
+      "question": "Tengra Studio ile nasıl başlayabilirim?",
+      "answer": "Proje fikriniz veya işbirliği önerinizle info@tengra.org adresinden e-posta göndererek bize ulaşın. Gereksinimlerinizi inceler ve vizyonunuzu eşsiz mitolojik ilham ve teknik uzmanlık karışımımızla hayata geçirmeyi tartışmak için bir görüşme planlarız."
+    }
   }
 }
