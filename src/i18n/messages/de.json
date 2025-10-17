@@ -119,5 +119,19 @@
     "zh": "中文",
     "ja": "日本語",
     "ko": "한국어"
+  },
+  "AdminLogin": {
+    "toast": {
+      "missingCredentials": "Benutzername und Passwort sind erforderlich.",
+      "success": "Anmeldung erfolgreich.",
+      "invalidCredentials": "Die angegebenen Anmeldedaten sind falsch.",
+      "genericError": "Anmeldung fehlgeschlagen. Bitte versuche es erneut."
+    }
+  },
+  "AdminDashboard": {
+    "toast": {
+      "fetchUsersError": "Die Benutzerliste konnte nicht geladen werden. Bitte versuche es erneut.",
+      "logout": "Adminsitzung beendet."
+    }
   }
 }

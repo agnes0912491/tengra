@@ -119,5 +119,19 @@
     "zh": "中文",
     "ja": "日本語",
     "ko": "한국어"
+  },
+  "AdminLogin": {
+    "toast": {
+      "missingCredentials": "Le nom d'utilisateur et le mot de passe sont requis.",
+      "success": "Connexion réussie.",
+      "invalidCredentials": "Les identifiants fournis sont incorrects.",
+      "genericError": "Échec de la connexion. Veuillez réessayer."
+    }
+  },
+  "AdminDashboard": {
+    "toast": {
+      "fetchUsersError": "Impossible de charger la liste des utilisateurs. Veuillez réessayer.",
+      "logout": "Session administrateur fermée."
+    }
   }
 }

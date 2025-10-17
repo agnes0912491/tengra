@@ -119,5 +119,19 @@
     "zh": "中文",
     "ja": "日本語",
     "ko": "한국어"
+  },
+  "AdminLogin": {
+    "toast": {
+      "missingCredentials": "사용자 이름과 비밀번호가 필요합니다.",
+      "success": "성공적으로 로그인했습니다.",
+      "invalidCredentials": "입력한 자격 증명이 올바르지 않습니다.",
+      "genericError": "로그인에 실패했습니다. 다시 시도해 주세요."
+    }
+  },
+  "AdminDashboard": {
+    "toast": {
+      "fetchUsersError": "사용자 목록을 불러오지 못했습니다. 다시 시도해 주세요.",
+      "logout": "관리자 세션이 종료되었습니다."
+    }
   }
 }

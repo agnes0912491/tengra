@@ -3,6 +3,7 @@ import Icon from "../../public/tengra_without_text.png";
 import { Metadata, Viewport } from "next";
 import AuthProvider from "@/components/providers/auth-provider";
 import ParticlesClientWrapper from "@/components/ui/particles-client-wrapper";
+import GlobalToastContainer from "@/components/ui/global-toast-container";
 import { Inter, Orbitron } from "next/font/google";
 import "@fontsource/noto-sans-old-turkic";
 import { notFound } from "next/navigation";
@@ -98,7 +99,7 @@ export default async function RootLayout({
     }
   }
 
-  let locale = resolvedParams?.locale as Locale | undefined;
+  const locale = resolvedParams?.locale as Locale | undefined;
 
   // Only call `notFound()` when an explicit but invalid locale was provided.
   // Do not force-default here; nested layouts/pages will set providers.
@@ -157,6 +158,7 @@ export default async function RootLayout({
           <ParticlesClientWrapper />
           <ConsentBanner />
           {children}
+          <GlobalToastContainer />
         </AuthProvider>
       </body>
     </html>

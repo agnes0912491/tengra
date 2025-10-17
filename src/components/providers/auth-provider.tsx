@@ -20,17 +20,17 @@ const STORAGE_KEY = "tengra.auth.user";
 /**
  * Auth context contract exposed to the app.
  */
+type LoginFailureReason = "invalidCredentials" | "unexpectedError";
+
+type LoginResult =
+  | { success: true }
+  | { success: false; reason: LoginFailureReason };
+
 type AuthContextValue = {
   user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
-  login: (
-    email: string,
-    password: string
-  ) => Promise<{
-    success: boolean;
-    message?: string;
-  }>;
+  login: (email: string, password: string) => Promise<LoginResult>;
   logout: () => void;
 };
 
@@ -88,19 +88,21 @@ export default function AuthProvider({ children }: Props) {
    * On success, stores the returned user and persists it in localStorage.
    */
   const login = useCallback(async (email: string, password: string) => {
-    const authenticated = await authenticateUser(email, password);
+    try {
+      const authenticated = await authenticateUser(email, password);
 
-    if (!authenticated) {
-      return {
-        success: false,
-        message: "E-posta veya şifre hatalı.",
-      } as const;
+      if (!authenticated) {
+        return { success: false, reason: "invalidCredentials" } as const;
+      }
+
+      setUser(authenticated);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(authenticated));
+
+      return { success: true } as const;
+    } catch (error) {
+      console.error("Login failed:", error);
+      return { success: false, reason: "unexpectedError" } as const;
     }
-
-    setUser(authenticated);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(authenticated));
-
-    return { success: true } as const;
   }, []);
 
   /**

@@ -119,5 +119,19 @@
     "zh": "中文",
     "ja": "日本語",
     "ko": "한국어"
+  },
+  "AdminLogin": {
+    "toast": {
+      "missingCredentials": "Nome utente e password sono obbligatori.",
+      "success": "Accesso effettuato con successo.",
+      "invalidCredentials": "Le credenziali fornite non sono corrette.",
+      "genericError": "Accesso non riuscito. Per favore riprova."
+    }
+  },
+  "AdminDashboard": {
+    "toast": {
+      "fetchUsersError": "Impossibile caricare l'elenco degli utenti. Per favore riprova.",
+      "logout": "Sessione amministratore terminata."
+    }
   }
 }

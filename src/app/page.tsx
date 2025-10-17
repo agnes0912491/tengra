@@ -3,7 +3,6 @@ export const dynamic = "force-dynamic";
 import HomePage from "@/components/home/home-page";
 import Footer from "@/components/layout/footer";
 import AnimatedWrapper from "@/components/ui/animated-wrapper";
-import { ToastContainer } from "react-toastify";
 import IntlProviderClient from "@/components/providers/intl-provider-client";
 import { getMessages } from "@/i18n/get-messages";
 import { routing } from "@/i18n/routing";
@@ -22,7 +21,6 @@ export default function IndexPage() {
         </AnimatedWrapper>
       </main>
       <Footer />
-      <ToastContainer position="bottom-right" theme="dark" />
     </IntlProviderClient>
   );
 }

@@ -1,8 +1,10 @@
 "use client";
 
-import { FormEvent, useState, Suspense } from "react";
+import { FormEvent, useState, Suspense, ChangeEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/components/providers/auth-provider";
+import { toast } from "react-toastify";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,29 +14,50 @@ function AdminLoginForm() {
   const searchParams = useSearchParams();
   const nextUrl = searchParams.get("next") ?? "/admin";
   const { login } = useAuth();
+  const t = useTranslations("AdminLogin");
 
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [credentials, setCredentials] = useState({ username: "", password: "" });
   const [loading, setLoading] = useState(false);
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = event.target;
+    setCredentials((prev) => ({
+      ...prev,
+      [id as "username" | "password"]: value,
+    }));
+  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    setLoading(true);
-    setError(null);
-
     try {
-      const success = await login(username, password);
+      const username = credentials.username.trim();
+      const password = credentials.password;
 
-      if (success) {
+      if (!username || !password) {
+        toast.error(t("toast.missingCredentials"));
+        return;
+      }
+
+      setLoading(true);
+
+      const result = await login(username, password);
+
+      if (result.success) {
+        toast.success(t("toast.success"));
         router.replace(nextUrl);
         router.refresh();
       } else {
-        setError("Kullanıcı adı veya şifre hatalı.");
+        const failureMessage =
+          result.reason === "invalidCredentials"
+            ? t("toast.invalidCredentials")
+            : t("toast.genericError");
+
+        toast.error(failureMessage);
       }
     } catch (err) {
-      setError("Giriş başarısız oldu. Lütfen tekrar deneyin.");
+      console.error("Admin login failed:", err);
+      toast.error(t("toast.genericError"));
     } finally {
       setLoading(false);
     }
@@ -62,8 +85,8 @@ function AdminLoginForm() {
               type="text"
               autoComplete="username"
               required
-              value={username}
-              onChange={(event) => setUsername(event.target.value)}
+              value={credentials.username}
+              onChange={handleChange}
               placeholder="username veya email@example.com"
             />
           </div>
@@ -77,17 +100,11 @@ function AdminLoginForm() {
               type="password"
               autoComplete="current-password"
               required
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              value={credentials.password}
+              onChange={handleChange}
               placeholder="••••••••"
             />
           </div>
-
-          {error ? (
-            <p className="text-sm text-red-400 text-center" role="alert">
-              {error}
-            </p>
-          ) : null}
 
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Giriş yapılıyor..." : "Giriş yap"}
