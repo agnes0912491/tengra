@@ -12,17 +12,20 @@ type HeaderLink = {
   labelKey: string;
 };
 
+// Primary navigation links rendered in the site header.
 const headerLinks: HeaderLink[] = [
   { href: "/", labelKey: "home" },
   { href: "/blogs", labelKey: "blogs" },
 ];
 
+// Returns the localized homepage path. Default locale uses '/'.
 function localizeHome(locale: Locale) {
   return locale === routing.defaultLocale ? "/" : `/${locale}`;
 }
 
 export default function Header() {
   const pathname = usePathname();
+  // Read current auth state (client-side only)
   const { user, isAuthenticated, logout } = useAuth();
   const t = useTranslations("Header");
   const locale = useLocale() as Locale;
@@ -52,7 +55,9 @@ export default function Header() {
               </Link>
             );
           })}
-          {isAuthenticated && user?.role === "admin" && (
+      {/* Admin link appears only for authenticated admin users.
+        Server-side authorization must still be enforced on /admin. */}
+      {isAuthenticated && user?.role === "admin" && (
             <Link
               href="/admin"
               prefetch={false}

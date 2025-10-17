@@ -8,7 +8,6 @@ import "@fontsource/noto-sans-old-turkic";
 import { notFound } from "next/navigation";
 
 import { routing, type Locale } from "@/i18n/routing";
-import Head from "next/head";
 import Script from "next/script";
 import ConsentBanner from "@/components/consent/ConsentBanner";
 
@@ -65,6 +64,10 @@ export const metadata: Metadata = {
     shortcut: new URL(Icon.src, metadataBase).toString(),
     apple: new URL(Icon.src, metadataBase).toString(),
   },
+  // Custom meta tags (App Router compliant alternative to next/head)
+  other: {
+    "google-adsense-account": "ca-pub-1840126959284939",
+  },
 };
 
 export const viewport: Viewport = {
@@ -105,9 +108,6 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} className={`${orbitron.variable} ${inter.variable}`}>
-      <Head>
-        <meta name="google-adsense-account" content="ca-pub-1840126959284939" />
-      </Head>
       <body className="font-sans bg-[color:var(--background)] text-[color:var(--foreground)] w-full min-h-screen">
         {/* Consent Mode default (denied) before any tags load */}
         <Script id="consent-mode-default" strategy="beforeInteractive">

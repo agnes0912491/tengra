@@ -16,6 +16,9 @@ export default function ProtectedRoute({
   allowedRoles = ["admin"],
   fallback = null,
 }: Props) {
+  // Client-side guard: redirects away if not authenticated or lacks the required role.
+  // IMPORTANT: This is only a UX convenience. Server-side APIs must still validate
+  // the Authorization header and enforce RBAC.
   const { user, isAuthenticated, loading } = useAuth();
   const router = useRouter();
 
