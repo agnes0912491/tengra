@@ -141,7 +141,7 @@ export default function Footer() {
                       <ChevronDown className="h-3 w-3" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="min-w-[180px] border border-[rgba(0,167,197,0.25)] bg-[rgba(5,18,24,0.92)] text-[color:var(--color-turkish-blue-100)]">
+                  <DropdownMenuContent align="end" className="min-w-[200px] border border-[rgba(0,167,197,0.25)] bg-[rgba(5,18,24,0.92)] text-[color:var(--color-turkish-blue-100)]">
                     <DropdownMenuLabel className="text-[11px] uppercase tracking-[0.3em] text-[rgba(255,255,255,0.6)]">
                       {tFooter("adminMenu.greeting", {
                         name: user?.name ?? tFooter("adminMenu.label"),
@@ -149,7 +149,7 @@ export default function Footer() {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator className="bg-[rgba(0,167,197,0.25)]" />
                     <DropdownMenuItem
-                      className="cursor-pointer text-sm text-[rgba(255,255,255,0.8)] hover:bg-[rgba(0,167,197,0.15)] focus:bg-[rgba(0,167,197,0.15)]"
+                      className="cursor-pointer text-sm text-[rgba(255,255,255,0.85)] hover:bg-[rgba(0,167,197,0.15)] focus:bg-[rgba(0,167,197,0.15)]"
                       onSelect={(event) => {
                         event.preventDefault();
                         handleOpenDashboard();
@@ -158,7 +158,7 @@ export default function Footer() {
                       {tFooter("adminMenu.dashboard")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="cursor-pointer text-sm text-[rgba(255,255,255,0.8)] hover:bg-[rgba(207,63,75,0.2)] focus:bg-[rgba(207,63,75,0.2)]"
+                      className="cursor-pointer text-sm text-[rgba(255,255,255,0.85)] hover:bg-[rgba(207,63,75,0.2)] focus:bg-[rgba(207,63,75,0.2)]"
                       onSelect={(event) => {
                         event.preventDefault();
                         handleLogout();
@@ -169,20 +169,46 @@ export default function Footer() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <div className="flex items-center gap-3">
-                  <span className="text-[color:var(--color-turkish-blue-200)]">
-                    {user?.name}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="rounded-full border border-[rgba(0,167,197,0.4)] px-3 py-1 text-[11px] uppercase tracking-widest text-[color:var(--color-turkish-blue-100)] transition hover:bg-[rgba(0,167,197,0.12)]"
-                  >
-                    {tFooter("logout")}
-                  </button>
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2 rounded-full border border-[rgba(0,167,197,0.4)] bg-transparent px-3 py-1 text-[11px] uppercase tracking-widest text-[color:var(--color-turkish-blue-100)] hover:bg-[rgba(0,167,197,0.12)]"
+                    >
+                      <span className="truncate max-w-[7rem] text-left">
+                        {user?.name ?? "—"}
+                      </span>
+                      <ChevronDown className="h-3 w-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="min-w-[200px] border border-[rgba(0,167,197,0.25)] bg-[rgba(5,18,24,0.92)] text-[color:var(--color-turkish-blue-100)]">
+                    <DropdownMenuLabel className="text-[11px] uppercase tracking-[0.3em] text-[rgba(255,255,255,0.6)]">
+                      {tFooter("adminMenu.greeting", {
+                        name: user?.name ?? "—",
+                      })}
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator className="bg-[rgba(0,167,197,0.25)]" />
+                    <DropdownMenuItem
+                      className="cursor-pointer text-sm text-[rgba(255,255,255,0.85)] hover:bg-[rgba(207,63,75,0.2)] focus:bg-[rgba(207,63,75,0.2)]"
+                      onSelect={(event) => {
+                        event.preventDefault();
+                        handleLogout();
+                      }}
+                    >
+                      {tFooter("logout")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )
-            ) : null}
+            ) : (
+              <Link
+                href="/admin/login"
+                className="rounded-full border border-[rgba(0,167,197,0.4)] px-3 py-1 text-[11px] uppercase tracking-widest text-[color:var(--color-turkish-blue-100)] transition hover:bg-[rgba(0,167,197,0.12)]"
+              >
+                {tFooter("login")}
+              </Link>
+            )}
           </div>
         </div>
 
