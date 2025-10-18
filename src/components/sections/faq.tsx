@@ -119,10 +119,10 @@ export default function FAQ() {
         >
           <p className="text-lg mb-2">{t("stillQuestions")}</p>
           <a
-            href="mailto:info@tengra.org"
+            href="mailto:info@tengra.studio"
             className="text-primary hover:underline font-semibold"
           >
-            info@tengra.org
+            info@tengra.studio
           </a>
         </motion.div>
       </div>

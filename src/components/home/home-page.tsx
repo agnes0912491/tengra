@@ -11,9 +11,9 @@ export default function HomePage() {
       <Hero />
       <Goals />
       <Projects />
-      <Team />
-      <Network />
+      {/* <Team /> */}
       <FAQ />
+      <Network />
     </main>
   );
 }
