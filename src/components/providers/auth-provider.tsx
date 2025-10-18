@@ -4,10 +4,11 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from "react";
+import Cookies from "js-cookie";
+import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
 import { authenticateAdmin, authenticateUser, Role, User } from "@/lib/auth/users";
 
 /**
@@ -23,7 +24,11 @@ type AuthContextValue = {
   user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
-  login: (email: string, password: string) => Promise<LoginResult>;
+  login: (
+    email: string,
+    password: string,
+    type?: "user" | "admin"
+  ) => Promise<LoginResult>;
   logout: () => void;
 };
 
@@ -76,6 +81,17 @@ export default function AuthProvider({ children }: Props) {
       localStorage.setItem("refreshToken", authenticated.authToken.refreshToken);
       localStorage.setItem("csrfToken", authenticated.authToken.csrfToken);
 
+      if (authenticated.user.role === "admin") {
+        Cookies.set(ADMIN_SESSION_COOKIE, authenticated.authToken.token, {
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+          expires: 7,
+          path: "/",
+        });
+      } else {
+        Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/" });
+      }
+
       return { success: true } as const;
     } catch (error) {
       console.error("Login failed:", error);
@@ -93,6 +109,7 @@ export default function AuthProvider({ children }: Props) {
     localStorage.removeItem("authToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("csrfToken");
+    Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/" });
   }, []);
 
   const value = useMemo(

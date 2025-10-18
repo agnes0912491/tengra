@@ -95,7 +95,12 @@
     "logoutShort": "Logout",
     "login": "Log in",
     "copyright": "© {year} Tengra Studio",
-    "logoutSuccess": "You have been signed out."
+    "logoutSuccess": "You have been signed out.",
+    "adminMenu": {
+      "label": "Admin",
+      "dashboard": "Open dashboard",
+      "greeting": "Signed in as {name}"
+    }
   },
   "Header": {
     "home": "Home",
@@ -145,19 +150,19 @@
     },
     "navigationLinks": [
       {
-        "href": "/admin#overview",
+        "href": "/admin/dashboard#overview",
         "label": "Overview"
       },
       {
-        "href": "/admin#projects",
+        "href": "/admin/dashboard#projects",
         "label": "Projects"
       },
       {
-        "href": "/admin#blogs",
+        "href": "/admin/dashboard#blogs",
         "label": "Blogs"
       },
       {
-        "href": "/admin#users",
+        "href": "/admin/dashboard#users",
         "label": "Users"
       }
     ],
@@ -218,7 +223,10 @@
     "adminPanelDesc": "Only administrators can view these quick actions on the blog page.",
     "goToAdminPanel": "Open admin dashboard",
     "createNewPost": "Create new post",
-    "by": "By"
+    "by": "By",
+    "toast": {
+      "fetchError": "We couldn't load the latest posts. Please try again."
+    }
   },
   "common": {
     "backToBlogs": "Back to all posts"

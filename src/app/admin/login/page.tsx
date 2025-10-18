@@ -1,6 +1,12 @@
 "use client";
 
-import { FormEvent, useState, Suspense, ChangeEvent } from "react";
+import {
+  FormEvent,
+  useState,
+  Suspense,
+  ChangeEvent,
+  useEffect,
+} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/providers/auth-provider";
 import { toast } from "react-toastify";
@@ -12,8 +18,12 @@ import { Input } from "@/components/ui/input";
 function AdminLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextUrl = searchParams.get("next") ?? "/admin";
-  const { login } = useAuth();
+  const nextUrlParam = searchParams.get("next");
+  const safeNextUrl =
+    nextUrlParam && !nextUrlParam.startsWith("/admin/login")
+      ? nextUrlParam
+      : "/admin/dashboard";
+  const { login, user, isAuthenticated } = useAuth();
   const t = useTranslations("AdminLogin");
 
   const [credentials, setCredentials] = useState({ username: "", password: "" });
@@ -26,6 +36,12 @@ function AdminLoginForm() {
       [id as "username" | "password"]: value,
     }));
   };
+
+  useEffect(() => {
+    if (isAuthenticated && user?.role === "admin") {
+      router.replace("/admin/dashboard");
+    }
+  }, [isAuthenticated, router, user]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -41,11 +57,11 @@ function AdminLoginForm() {
 
       setLoading(true);
 
-      const result = await login(username, password);
+      const result = await login(username, password, "admin");
 
       if (result.success) {
         toast.success(t("toast.success"));
-        router.replace(nextUrl);
+        router.replace(safeNextUrl);
         router.refresh();
       } else {
         const failureMessage =

@@ -95,7 +95,12 @@
     "logoutShort": "Logout",
     "login": "Anmelden",
     "copyright": "© {year} Tengra Studio",
-    "logoutSuccess": "Du wurdest abgemeldet."
+    "logoutSuccess": "Du wurdest abgemeldet.",
+    "adminMenu": {
+      "label": "Admin",
+      "dashboard": "Dashboard öffnen",
+      "greeting": "Angemeldet als {name}"
+    }
   },
   "Header": {
     "home": "Startseite",
@@ -141,19 +146,19 @@
   "AdminDashboard": {
     "navigationLinks": [
       {
-        "href": "/admin#overview",
+        "href": "/admin/dashboard#overview",
         "label": "Übersicht"
       },
       {
-        "href": "/admin#projects",
+        "href": "/admin/dashboard#projects",
         "label": "Projekte"
       },
       {
-        "href": "/admin#blogs",
+        "href": "/admin/dashboard#blogs",
         "label": "Blogs"
       },
       {
-        "href": "/admin#users",
+        "href": "/admin/dashboard#users",
         "label": "Benutzer"
       }
     ],
@@ -189,7 +194,10 @@
     "adminPanelDesc": "Nur Administratoren können diese Schnellaktionen auf der Blogseite sehen.",
     "goToAdminPanel": "Admin-Dashboard öffnen",
     "createNewPost": "Neuen Beitrag erstellen",
-    "by": "Von"
+    "by": "Von",
+    "toast": {
+      "fetchError": "Beiträge konnten nicht geladen werden. Bitte versuche es erneut."
+    }
   },
   "common": {
     "backToBlogs": "Zurück zu allen Beiträgen"

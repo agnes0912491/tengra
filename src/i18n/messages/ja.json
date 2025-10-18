@@ -95,7 +95,12 @@
     "logoutShort": "ログアウト",
     "login": "ログイン",
     "copyright": "© {year} Tengra Studio",
-    "logoutSuccess": "ログアウトしました。"
+    "logoutSuccess": "ログアウトしました。",
+    "adminMenu": {
+      "label": "管理者",
+      "dashboard": "ダッシュボードを開く",
+      "greeting": "{name} としてサインイン"
+    }
   },
   "Header": {
     "home": "ホーム",
@@ -145,19 +150,19 @@
     },
     "navigationLinks": [
       {
-        "href": "/admin#overview",
+        "href": "/admin/dashboard#overview",
         "label": "概要"
       },
       {
-        "href": "/admin#projects",
+        "href": "/admin/dashboard#projects",
         "label": "プロジェクト"
       },
       {
-        "href": "/admin#blogs",
+        "href": "/admin/dashboard#blogs",
         "label": "ブログ"
       },
       {
-        "href": "/admin#users",
+        "href": "/admin/dashboard#users",
         "label": "ユーザー"
       }
     ],
@@ -189,7 +194,10 @@
     "adminPanelDesc": "ブログページのこのクイックアクションは管理者のみが表示できます。",
     "goToAdminPanel": "管理ダッシュボードを開く",
     "createNewPost": "新しい記事を作成",
-    "by": "著者"
+    "by": "著者",
+    "toast": {
+      "fetchError": "記事を読み込めませんでした。もう一度お試しください。"
+    }
   },
   "common": {
     "backToBlogs": "すべての記事に戻る"

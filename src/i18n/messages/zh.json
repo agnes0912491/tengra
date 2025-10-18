@@ -95,7 +95,12 @@
     "logoutShort": "退出",
     "login": "登录",
     "copyright": "© {year} Tengra Studio",
-    "logoutSuccess": "你已退出登录。"
+    "logoutSuccess": "你已退出登录。",
+    "adminMenu": {
+      "label": "管理员",
+      "dashboard": "打开控制台",
+      "greeting": "已使用 {name} 登录"
+    }
   },
   "Header": {
     "home": "首页",
@@ -145,19 +150,19 @@
     },
     "navigationLinks": [
       {
-        "href": "/admin#overview",
+        "href": "/admin/dashboard#overview",
         "label": "概览"
       },
       {
-        "href": "/admin#projects",
+        "href": "/admin/dashboard#projects",
         "label": "项目"
       },
       {
-        "href": "/admin#blogs",
+        "href": "/admin/dashboard#blogs",
         "label": "博客"
       },
       {
-        "href": "/admin#users",
+        "href": "/admin/dashboard#users",
         "label": "用户"
       }
     ],
@@ -189,7 +194,10 @@
     "adminPanelDesc": "只有管理员才能在博客页面看到这些快速操作。",
     "goToAdminPanel": "打开管理控制台",
     "createNewPost": "创建新文章",
-    "by": "作者"
+    "by": "作者",
+    "toast": {
+      "fetchError": "无法加载文章，请重试。"
+    }
   },
   "common": {
     "backToBlogs": "返回所有文章"

@@ -95,7 +95,12 @@
     "logoutShort": "Выход",
     "login": "Войти",
     "copyright": "© {year} Tengra Studio",
-    "logoutSuccess": "Вы вышли из системы."
+    "logoutSuccess": "Вы вышли из системы.",
+    "adminMenu": {
+      "label": "Админ",
+      "dashboard": "Открыть панель",
+      "greeting": "Вы вошли как {name}"
+    }
   },
   "Header": {
     "home": "Главная",
@@ -145,19 +150,19 @@
     },
     "navigationLinks": [
       {
-        "href": "/admin#overview",
+        "href": "/admin/dashboard#overview",
         "label": "Обзор"
       },
       {
-        "href": "/admin#projects",
+        "href": "/admin/dashboard#projects",
         "label": "Проекты"
       },
       {
-        "href": "/admin#blogs",
+        "href": "/admin/dashboard#blogs",
         "label": "Блоги"
       },
       {
-        "href": "/admin#users",
+        "href": "/admin/dashboard#users",
         "label": "Пользователи"
       }
     ],
@@ -189,7 +194,10 @@
     "adminPanelDesc": "Только администраторы видят эти быстрые действия на странице блога.",
     "goToAdminPanel": "Открыть админ-панель",
     "createNewPost": "Создать новую запись",
-    "by": "Автор"
+    "by": "Автор",
+    "toast": {
+      "fetchError": "Не удалось загрузить записи. Пожалуйста, попробуйте снова."
+    }
   },
   "common": {
     "backToBlogs": "Вернуться ко всем записям"
