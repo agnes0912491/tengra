@@ -95,7 +95,12 @@
     "logoutShort": "Çıkış",
     "login": "Giriş Yap",
     "copyright": "© {year} Tengra Studio",
-    "logoutSuccess": "Oturum kapatıldı."
+    "logoutSuccess": "Oturum kapatıldı.",
+    "adminMenu": {
+      "label": "Yönetim",
+      "dashboard": "Paneli aç",
+      "greeting": "{name} olarak giriş yaptın"
+    }
   },
   "Header": {
     "home": "Ana Sayfa",
@@ -145,19 +150,19 @@
     },
     "navigationLinks": [
       {
-        "href": "/admin#overview",
+        "href": "/admin/dashboard#overview",
         "label": "Genel Bakış"
       },
       {
-        "href": "/admin#projects",
+        "href": "/admin/dashboard#projects",
         "label": "Projeler"
       },
       {
-        "href": "/admin#blogs",
+        "href": "/admin/dashboard#blogs",
         "label": "Bloglar"
       },
       {
-        "href": "/admin#users",
+        "href": "/admin/dashboard#users",
         "label": "Kullanıcılar"
       }
     ],
@@ -218,7 +223,10 @@
     "adminPanelDesc": "Blog sayfasındaki bu hızlı işlemler yalnızca yöneticilere görünür.",
     "goToAdminPanel": "Yönetim panelini aç",
     "createNewPost": "Yeni yazı oluştur",
-    "by": "Yazan"
+    "by": "Yazan",
+    "toast": {
+      "fetchError": "Blog yazıları yüklenemedi. Lütfen tekrar deneyin."
+    }
   },
   "common": {
     "backToBlogs": "Tüm yazılara dön"

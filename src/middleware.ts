@@ -4,6 +4,12 @@ import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
 import { isLocale } from "@/i18n/routing";
 import { routing } from "@/i18n/routing";
 
+type AuthMeResponse = {
+  user?: {
+    role?: string | null;
+  } | null;
+};
+
 const API_BASE =
   process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:5000";
 const BACKEND_AUTH_ME = `${API_BASE}/auth/me`;
@@ -93,7 +99,38 @@ export async function middleware(request: NextRequest) {
     if (!isAdminRoute) {
       response = NextResponse.next();
     } else if (isAdminPublic) {
-      response = NextResponse.next();
+      const sessionToken = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+      if (!sessionToken) {
+        response = NextResponse.next();
+      } else {
+        try {
+          const res = await fetch(BACKEND_AUTH_ME, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${sessionToken}`,
+              Accept: "application/json",
+            },
+            cache: "no-store",
+          });
+
+          if (!res.ok) {
+            response = NextResponse.next();
+          } else {
+            const data = (await res
+              .json()
+              .catch(() => ({}))) as AuthMeResponse;
+            const role = data.user?.role ?? undefined;
+            if (role === "admin" || role === "ADMIN") {
+              const dashboardUrl = new URL("/admin/dashboard", request.url);
+              response = NextResponse.redirect(dashboardUrl);
+            } else {
+              response = NextResponse.next();
+            }
+          }
+        } catch {
+          response = NextResponse.next();
+        }
+      }
     } else {
       // Admin area - require valid session and admin role
       const sessionToken = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
@@ -117,9 +154,9 @@ export async function middleware(request: NextRequest) {
             loginUrl.searchParams.set("next", pathname);
             response = NextResponse.redirect(loginUrl);
           } else {
-            const data = await res.json().catch(() => ({} as any));
+            const data = (await res.json().catch(() => ({}))) as AuthMeResponse;
             if (
-              !data?.user ||
+              !data.user ||
               (data.user.role !== "admin" && data.user.role !== "ADMIN")
             ) {
               const loginUrl = new URL("/admin/login", request.url);

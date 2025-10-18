@@ -7,11 +7,21 @@ import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import { ChevronDown } from "lucide-react";
 
 import Img from "../../../public/tengra_without_text.png";
 import LocaleSwitcher from "@/components/layout/locale-switcher";
 import { useAuth } from "@/components/providers/auth-provider";
 import { routing, type Locale } from "@/i18n/routing";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 type NavLink = {
   href: string;
@@ -42,6 +52,7 @@ export default function Footer() {
   const { user, isAuthenticated, loading, logout } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
+  const isAdmin = user?.role === "admin";
 
   const isAdminRoute = useMemo(
     () => pathname?.startsWith("/admin"),
@@ -53,6 +64,10 @@ export default function Footer() {
     toast.info(tFooter("logoutSuccess"));
     router.push(locale === routing.defaultLocale ? "/" : `/${locale}`);
   }, [locale, logout, router, tFooter]);
+
+  const handleOpenDashboard = useCallback(() => {
+    router.push("/admin/dashboard");
+  }, [router]);
 
   if (isAdminRoute) {
     return (
@@ -114,18 +129,59 @@ export default function Footer() {
                 {tFooter("checking")}
               </span>
             ) : isAuthenticated ? (
-              <div className="flex items-center gap-3">
-                <span className="text-[color:var(--color-turkish-blue-200)]">
-                  {user?.name}
-                </span>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="rounded-full border border-[rgba(0,167,197,0.4)] px-3 py-1 text-[11px] uppercase tracking-widest text-[color:var(--color-turkish-blue-100)] transition hover:bg-[rgba(0,167,197,0.12)]"
-                >
-                  {tFooter("logout")}
-                </button>
-              </div>
+              isAdmin ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2 rounded-full border border-[rgba(0,167,197,0.4)] bg-transparent px-3 py-1 text-[11px] uppercase tracking-widest text-[color:var(--color-turkish-blue-100)] hover:bg-[rgba(0,167,197,0.12)]"
+                    >
+                      {tFooter("adminMenu.label")}
+                      <ChevronDown className="h-3 w-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="min-w-[180px] border border-[rgba(0,167,197,0.25)] bg-[rgba(5,18,24,0.92)] text-[color:var(--color-turkish-blue-100)]">
+                    <DropdownMenuLabel className="text-[11px] uppercase tracking-[0.3em] text-[rgba(255,255,255,0.6)]">
+                      {tFooter("adminMenu.greeting", {
+                        name: user?.name ?? tFooter("adminMenu.label"),
+                      })}
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator className="bg-[rgba(0,167,197,0.25)]" />
+                    <DropdownMenuItem
+                      className="cursor-pointer text-sm text-[rgba(255,255,255,0.8)] hover:bg-[rgba(0,167,197,0.15)] focus:bg-[rgba(0,167,197,0.15)]"
+                      onSelect={(event) => {
+                        event.preventDefault();
+                        handleOpenDashboard();
+                      }}
+                    >
+                      {tFooter("adminMenu.dashboard")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="cursor-pointer text-sm text-[rgba(255,255,255,0.8)] hover:bg-[rgba(207,63,75,0.2)] focus:bg-[rgba(207,63,75,0.2)]"
+                      onSelect={(event) => {
+                        event.preventDefault();
+                        handleLogout();
+                      }}
+                    >
+                      {tFooter("logout")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <span className="text-[color:var(--color-turkish-blue-200)]">
+                    {user?.name}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="rounded-full border border-[rgba(0,167,197,0.4)] px-3 py-1 text-[11px] uppercase tracking-widest text-[color:var(--color-turkish-blue-100)] transition hover:bg-[rgba(0,167,197,0.12)]"
+                  >
+                    {tFooter("logout")}
+                  </button>
+                </div>
+              )
             ) : null}
           </div>
         </div>

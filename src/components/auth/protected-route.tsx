@@ -30,7 +30,7 @@ export default function ProtectedRoute({
     }
 
     if (!isAuthenticated) {
-      router.replace("/login");
+      router.replace("/admin/login");
       return;
     }
 

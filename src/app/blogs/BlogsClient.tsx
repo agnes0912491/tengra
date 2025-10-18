@@ -57,7 +57,7 @@ export default function BlogsClient({ posts, categories }: Props) {
             <p className="mt-2 text-xs text-gray-300">{t("adminPanelDesc")}</p>
             <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
               <Link
-                href="/admin"
+                href="/admin/dashboard"
                 prefetch={false}
                 className="rounded-full border border-[rgba(0,167,197,0.4)] px-4 py-1 text-[color:var(--color-turkish-blue-200)] transition hover:bg-[rgba(0,167,197,0.12)]"
               >

@@ -95,7 +95,12 @@
     "logoutShort": "Salir",
     "login": "Iniciar sesión",
     "copyright": "© {year} Tengra Studio",
-    "logoutSuccess": "Has cerrado sesión."
+    "logoutSuccess": "Has cerrado sesión.",
+    "adminMenu": {
+      "label": "Admin",
+      "dashboard": "Abrir panel",
+      "greeting": "Conectado como {name}"
+    }
   },
   "Header": {
     "home": "Inicio",
@@ -145,19 +150,19 @@
     },
     "navigationLinks": [
       {
-        "href": "/admin#overview",
+        "href": "/admin/dashboard#overview",
         "label": "Resumen"
       },
       {
-        "href": "/admin#projects",
+        "href": "/admin/dashboard#projects",
         "label": "Proyectos"
       },
       {
-        "href": "/admin#blogs",
+        "href": "/admin/dashboard#blogs",
         "label": "Blogs"
       },
       {
-        "href": "/admin#users",
+        "href": "/admin/dashboard#users",
         "label": "Usuarios"
       }
     ],
@@ -189,7 +194,10 @@
     "adminPanelDesc": "Solo los administradores pueden ver estas acciones rápidas en la página del blog.",
     "goToAdminPanel": "Abrir panel de administración",
     "createNewPost": "Crear nueva entrada",
-    "by": "Por"
+    "by": "Por",
+    "toast": {
+      "fetchError": "No se pudieron cargar las entradas. Inténtalo de nuevo."
+    }
   },
   "common": {
     "backToBlogs": "Volver a todas las publicaciones"

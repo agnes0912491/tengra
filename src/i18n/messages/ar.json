@@ -95,7 +95,12 @@
     "logoutShort": "خروج",
     "login": "تسجيل الدخول",
     "copyright": "© {year} Tengra Studio",
-    "logoutSuccess": "تم تسجيل الخروج."
+    "logoutSuccess": "تم تسجيل الخروج.",
+    "adminMenu": {
+      "label": "المشرف",
+      "dashboard": "فتح لوحة التحكم",
+      "greeting": "تم تسجيل الدخول باسم {name}"
+    }
   },
   "Header": {
     "home": "الرئيسية",
@@ -145,19 +150,19 @@
     },
     "navigationLinks": [
       {
-        "href": "/admin#overview",
+        "href": "/admin/dashboard#overview",
         "label": "نظرة عامة"
       },
       {
-        "href": "/admin#projects",
+        "href": "/admin/dashboard#projects",
         "label": "المشاريع"
       },
       {
-        "href": "/admin#blogs",
+        "href": "/admin/dashboard#blogs",
         "label": "المدونات"
       },
       {
-        "href": "/admin#users",
+        "href": "/admin/dashboard#users",
         "label": "المستخدمون"
       }
     ],
@@ -189,7 +194,10 @@
     "adminPanelDesc": "يمكن للمشرفين فقط رؤية هذه الإجراءات السريعة في صفحة المدونة.",
     "goToAdminPanel": "فتح لوحة التحكم",
     "createNewPost": "إنشاء مقالة جديدة",
-    "by": "بقلم"
+    "by": "بقلم",
+    "toast": {
+      "fetchError": "تعذّر تحميل التدوينات. يرجى المحاولة مرة أخرى."
+    }
   },
   "common": {
     "backToBlogs": "العودة إلى جميع المقالات"

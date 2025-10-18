@@ -95,7 +95,12 @@
     "logoutShort": "로그아웃",
     "login": "로그인",
     "copyright": "© {year} Tengra Studio",
-    "logoutSuccess": "로그아웃되었습니다."
+    "logoutSuccess": "로그아웃되었습니다.",
+    "adminMenu": {
+      "label": "관리자",
+      "dashboard": "대시보드 열기",
+      "greeting": "{name} 계정으로 로그인됨"
+    }
   },
   "Header": {
     "home": "홈",
@@ -145,19 +150,19 @@
     },
     "navigationLinks": [
       {
-        "href": "/admin#overview",
+        "href": "/admin/dashboard#overview",
         "label": "개요"
       },
       {
-        "href": "/admin#projects",
+        "href": "/admin/dashboard#projects",
         "label": "프로젝트"
       },
       {
-        "href": "/admin#blogs",
+        "href": "/admin/dashboard#blogs",
         "label": "블로그"
       },
       {
-        "href": "/admin#users",
+        "href": "/admin/dashboard#users",
         "label": "사용자"
       }
     ],
@@ -189,7 +194,10 @@
     "adminPanelDesc": "블로그 페이지의 이 빠른 작업은 관리자만 볼 수 있습니다.",
     "goToAdminPanel": "관리자 대시보드 열기",
     "createNewPost": "새 글 만들기",
-    "by": "작성자"
+    "by": "작성자",
+    "toast": {
+      "fetchError": "블로그 글을 불러오지 못했습니다. 다시 시도해주세요."
+    }
   },
   "common": {
     "backToBlogs": "모든 게시글로 돌아가기"
