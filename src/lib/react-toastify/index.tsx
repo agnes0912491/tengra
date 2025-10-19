@@ -140,10 +140,7 @@ export function ToastContainer({
   icon,
 }: ToastContainerProps) {
   const [toasts, setToasts] = useState<ToastRecord[]>([]);
-  const timers = useMemo(
-    () => new Map<number, ReturnType<typeof setTimeout>>(),
-    []
-  );
+  const timersRef = useRef(new Map<number, ReturnType<typeof setTimeout>>());
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -153,17 +150,17 @@ export function ToastContainer({
   const removeToast = useCallback((id: number) => {
     setToasts((prev) => prev.filter((toastItem) => toastItem.id !== id));
 
-    const existingTimer = timers.get(id);
+    const existingTimer = timersRef.current.get(id);
 
     if (existingTimer) {
       window.clearTimeout(existingTimer);
-      timers.delete(id);
+      timersRef.current.delete(id);
     }
   }, [timers]);
 
   const clearAllToasts = useCallback(() => {
-    timers.forEach((timer) => window.clearTimeout(timer));
-    timers.clear();
+    timersRef.current.forEach((timer) => window.clearTimeout(timer));
+    timersRef.current.clear();
     setToasts([]);
   }, [timers]);
 
@@ -173,7 +170,7 @@ export function ToastContainer({
 
       const delay = toastItem.autoClose ?? autoClose;
       const timer = window.setTimeout(() => removeToast(toastItem.id), delay);
-      timers.set(toastItem.id, timer);
+      timersRef.current.set(toastItem.id, timer);
     };
 
     const handleDismiss: DismissListener = (id) => {

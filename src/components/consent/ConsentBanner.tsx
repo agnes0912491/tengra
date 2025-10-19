@@ -96,11 +96,14 @@ export default function ConsentBanner() {
   const t = useTranslations("ConsentBanner");
   const [consent, setConsentState] = useState<ConsentState>("unknown");
   const [shouldShow, setShouldShow] = useState(false);
+  const skipBanner = Boolean(GFC_ID && GFC_ID.length > 0);
 
   // If Google Funding Choices (Google CMP) is configured, do not show custom banner here.
   if (GFC_ID && GFC_ID.length > 0) return null;
 
   useEffect(() => {
+    if (skipBanner) return;
+
     const current = getConsent();
     setConsentState(current);
 
@@ -116,7 +119,7 @@ export default function ConsentBanner() {
     } else {
       ensureGtag(current);
     }
-  }, []);
+  }, [skipBanner]);
 
   const onAllowAll = () => {
     setConsent("granted");
@@ -148,7 +151,7 @@ export default function ConsentBanner() {
     }
   };
 
-  if (!shouldShow || consent !== "unknown") return null;
+  if (skipBanner || !shouldShow || consent !== "unknown") return null;
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 flex items-center justify-between gap-4 bg-[rgba(0,0,0,0.85)] px-4 py-3 text-sm text-white shadow-lg">
