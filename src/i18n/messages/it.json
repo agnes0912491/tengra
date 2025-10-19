@@ -148,24 +148,12 @@
       "fetchUsersError": "Impossibile caricare l'elenco degli utenti. Per favore riprova.",
       "logout": "Sessione amministratore terminata."
     },
-    "navigationLinks": [
-      {
-        "href": "/admin/dashboard#overview",
-        "label": "Panoramica"
-      },
-      {
-        "href": "/admin/dashboard#projects",
-        "label": "Progetti"
-      },
-      {
-        "href": "/admin/dashboard#blogs",
-        "label": "Blog"
-      },
-      {
-        "href": "/admin/dashboard#users",
-        "label": "Utenti"
-      }
-    ],
+    "navigation": {
+      "overview": "Panoramica",
+      "projects": "Progetti",
+      "blogs": "Blog",
+      "users": "Utenti"
+    },
     "unauthorizedAccess": "Accesso limitato",
     "unauthorizedMessage": "Hai bisogno di un account amministratore per visualizzare la dashboard.",
     "goToLogin": "Vai al login amministratore"

@@ -9,9 +9,9 @@ type Props = {
   children: ReactNode;
 };
 
-export default function AdminLayout({ children }: Props) {
-  const cookieStore = cookies();
-  const headersList = headers();
+export default async function AdminLayout({ children }: Props) {
+  const cookieStore = await cookies();
+  const headersList = await headers();
   const { locale: preferredLocale } = resolvePreferredLocale({
     cookieLocale: cookieStore.get("NEXT_LOCALE")?.value,
     acceptLanguage: headersList.get("accept-language"),

@@ -148,24 +148,12 @@
       "fetchUsersError": "تعذّر تحميل قائمة المستخدمين. يرجى المحاولة مرة أخرى.",
       "logout": "تم إنهاء جلسة المسؤول."
     },
-    "navigationLinks": [
-      {
-        "href": "/admin/dashboard#overview",
-        "label": "نظرة عامة"
-      },
-      {
-        "href": "/admin/dashboard#projects",
-        "label": "المشاريع"
-      },
-      {
-        "href": "/admin/dashboard#blogs",
-        "label": "المدونات"
-      },
-      {
-        "href": "/admin/dashboard#users",
-        "label": "المستخدمون"
-      }
-    ],
+    "navigation": {
+      "overview": "نظرة عامة",
+      "projects": "المشاريع",
+      "blogs": "المدونات",
+      "users": "المستخدمون"
+    },
     "unauthorizedAccess": "وصول مقيد",
     "unauthorizedMessage": "تحتاج إلى حساب مشرف لعرض لوحة التحكم.",
     "goToLogin": "الانتقال إلى تسجيل دخول المشرف"
