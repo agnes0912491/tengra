@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
+import AuthProvider from "@/components/providers/auth-provider";
 import { User } from "@/lib/auth/users";
 import { getUserWithToken } from "@/lib/db";
-import AuthProvider from "@/components/providers/auth-provider";
 
 export default function ClientUserProvider({
   children,
@@ -10,54 +10,69 @@ export default function ClientUserProvider({
   children: React.ReactNode;
 }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [hydrating, setHydrating] = useState(true);
 
-  // Initialize token from localStorage (client-side only)
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    let cancelled = false;
 
-    try {
-      // authToken is a plain string (JWT), not JSON
-      const storedToken = localStorage.getItem("authToken");
-      if (storedToken) {
-        setToken(storedToken);
+    async function hydrateUserFromStorage() {
+      if (typeof window === "undefined") {
+        return;
       }
-    } catch (error) {
-      console.error("Failed to read authToken from localStorage:", error);
-      // Clear corrupted data
-      localStorage.removeItem("authToken");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
 
-  // Fetch user when token changes
-  useEffect(() => {
-    if (isLoading) return;
+      let storedToken: string | null = null;
+      try {
+        storedToken = window.localStorage.getItem("authToken");
+      } catch (error) {
+        console.error("Failed to read authToken from localStorage:", error);
+        window.localStorage.removeItem("authToken");
+      }
 
-    async function fetchUser() {
-      if (!token) {
-        setUser(null);
+      if (!storedToken) {
+        if (!cancelled) {
+          setUser(null);
+          setHydrating(false);
+        }
         return;
       }
 
       try {
-        const fetchedUser = await getUserWithToken(token);
-        setUser(fetchedUser);
+        const fetchedUser = await getUserWithToken(storedToken);
+        if (!cancelled) {
+          setUser(fetchedUser);
+          if (!fetchedUser && typeof window !== "undefined") {
+            window.localStorage.removeItem("authToken");
+            window.localStorage.removeItem("refreshToken");
+            window.localStorage.removeItem("csrfToken");
+          }
+        }
       } catch (error) {
         console.error("Failed to fetch user with token:", error);
-        // Clear invalid tokens
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("csrfToken");
-        setUser(null);
-        setToken("");
+        if (typeof window !== "undefined") {
+          window.localStorage.removeItem("authToken");
+          window.localStorage.removeItem("refreshToken");
+          window.localStorage.removeItem("csrfToken");
+        }
+        if (!cancelled) {
+          setUser(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setHydrating(false);
+        }
       }
     }
 
-    fetchUser();
-  }, [token, isLoading]);
+    hydrateUserFromStorage();
 
-  return <AuthProvider user={user}>{children}</AuthProvider>;
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return (
+    <AuthProvider user={user} hydrating={hydrating}>
+      {children}
+    </AuthProvider>
+  );
 }

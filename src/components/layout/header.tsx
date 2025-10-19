@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 
 import { useAuth } from "@/components/providers/auth-provider";
-import { type Locale } from "@/i18n/routing";
 
 type HeaderLink = {
   href: string;
@@ -18,40 +17,22 @@ const headerLinks: HeaderLink[] = [
   { href: "/blogs", labelKey: "blogs" },
 ];
 
-// Returns the locale-specific homepage path.
-function localizeHome(locale: Locale) {
-  return `/${locale}`;
-}
-
-function localizeHref(locale: Locale, href: string) {
-  if (href === "/") {
-    return localizeHome(locale);
-  }
-
-  if (href === "/blogs") {
-    return `/${locale}/blogs`;
-  }
-
-  return href;
-}
-
 export default function Header() {
   const pathname = usePathname();
   // Read current auth state (client-side only)
   const { user, isAuthenticated, logout } = useAuth();
   const t = useTranslations("Header");
-  const locale = useLocale() as Locale;
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-[rgba(3,12,18,0.6)] border-b border-[rgba(0,167,197,0.15)]">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3 text-sm">
-        <Link href={localizeHome(locale)} className="font-display tracking-[0.4em] text-[color:var(--color-turkish-blue-300)]">
+        <Link href="/" className="font-display tracking-[0.4em] text-[color:var(--color-turkish-blue-300)]">
           TENGRA
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
           {headerLinks.map((link) => {
-            const href = localizeHref(locale, link.href);
+            const href = link.href;
             const isActive = pathname === href;
 
             return (
