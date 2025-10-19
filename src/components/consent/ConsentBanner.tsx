@@ -98,9 +98,6 @@ export default function ConsentBanner() {
   const [shouldShow, setShouldShow] = useState(false);
   const skipBanner = Boolean(GFC_ID && GFC_ID.length > 0);
 
-  // If Google Funding Choices (Google CMP) is configured, do not show custom banner here.
-  if (GFC_ID && GFC_ID.length > 0) return null;
-
   useEffect(() => {
     if (skipBanner) return;
 
@@ -151,6 +148,7 @@ export default function ConsentBanner() {
     }
   };
 
+  // If Google Funding Choices (Google CMP) is configured, do not show custom banner here.
   if (skipBanner || !shouldShow || consent !== "unknown") return null;
 
   return (
