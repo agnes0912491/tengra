@@ -5,9 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/components/providers/auth-provider";
 import { BlogCategory, Blog } from "@/types/blog";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { safeJsonLd } from "@/lib/jsonld";
-import type { Locale } from "@/i18n/routing";
 
 interface Props {
   posts: Blog[];
@@ -20,7 +19,6 @@ export default function BlogsClient({ posts, categories }: Props) {
   );
   const { user, isAuthenticated } = useAuth();
   const t = useTranslations("Blogs");
-  const locale = useLocale() as Locale;
   const siteOrigin =
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://tengra.studio";
 
@@ -37,16 +35,16 @@ export default function BlogsClient({ posts, categories }: Props) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: safeJsonLd({
-            "@context": "https://schema.org",
-            "@type": "Blog",
-            name: t("seoTitle"),
-            description: t("seoDescription"),
-            url: `${siteOrigin}/${locale}/blogs`,
-          }),
-        }}
-      />
+            dangerouslySetInnerHTML={{
+              __html: safeJsonLd({
+                "@context": "https://schema.org",
+                "@type": "Blog",
+                name: t("seoTitle"),
+                description: t("seoDescription"),
+                url: `${siteOrigin}/blogs`,
+              }),
+            }}
+          />
 
       <section className="min-h-screen py-24 px-6 md:px-20">
         <h1 className="text-4xl text-center mb-12 text-[color:var(--color-turkish-blue-400)] font-display tracking-[0.25em]">
@@ -97,7 +95,7 @@ export default function BlogsClient({ posts, categories }: Props) {
           {filtered.map((post) => (
             <Link
               key={post.id}
-              href={`/${locale}/blogs/${post.id}`}
+              href={`/blogs/${post.id}`}
               className="group bg-[rgba(255,255,255,0.03)] backdrop-blur-xl rounded-xl overflow-hidden border border-[rgba(0,167,197,0.15)] hover:border-[rgba(0,167,197,0.4)] transition"
             >
               <Image

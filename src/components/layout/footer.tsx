@@ -4,7 +4,7 @@ import { useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { ChevronDown } from "lucide-react";
@@ -12,7 +12,6 @@ import { ChevronDown } from "lucide-react";
 import Img from "../../../public/tengra_without_text.png";
 import LocaleSwitcher from "@/components/layout/locale-switcher";
 import { useAuth } from "@/components/providers/auth-provider";
-import { type Locale } from "@/i18n/routing";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,29 +36,13 @@ const navLinks: NavLink[] = [
   { href: "/forum", labelKey: "forum" },
 ];
 
-function localizeHref(locale: Locale, href: string) {
-  const prefix = `/${locale}`;
-
-  if (href.startsWith("/#")) {
-    return `${prefix}${href}`;
-  }
-
-  if (href === "/blogs") {
-    return `${prefix}/blogs`;
-  }
-
-  return href;
-}
-
 export default function Footer() {
   const tFooter = useTranslations("Footer");
   const tNavigation = useTranslations("Navigation");
-  const locale = useLocale() as Locale;
   const { user, isAuthenticated, loading, logout } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
   const isAdmin = user?.role === "admin";
-  console.log({user})
 
   const isAdminRoute = useMemo(
     () => pathname?.startsWith("/admin"),
@@ -69,8 +52,8 @@ export default function Footer() {
   const handleLogout = useCallback(() => {
     logout();
     toast.info(tFooter("logoutSuccess"));
-    router.push(`/${locale}`);
-  }, [locale, logout, router, tFooter]);
+    router.push("/");
+  }, [logout, router, tFooter]);
 
   const handleOpenDashboard = useCallback(() => {
     router.push("/admin/dashboard");
@@ -118,7 +101,7 @@ export default function Footer() {
             {navLinks.map((link) => (
               <Link
                 key={link.href}
-                href={localizeHref(locale, link.href)}
+                href={link.href}
                 className="transition-colors hover:text-[color:var(--color-turkish-blue-300)]"
               >
                 {tNavigation(link.labelKey)}
@@ -237,7 +220,7 @@ export default function Footer() {
             {navLinks.map((link) => (
               <Link
                 key={link.href}
-                href={localizeHref(locale, link.href)}
+                href={link.href}
                 className="transition-colors hover:text-[color:var(--color-turkish-blue-300)]"
               >
                 {tNavigation(link.labelKey)}

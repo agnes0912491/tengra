@@ -1,11 +1,14 @@
-import { redirect } from "next/navigation";
+import SiteShell from "@/components/layout/site-shell";
+import BlogPost from "@/components/blog/blog-post";
 
-import { routing } from "@/i18n/routing";
-
-export default function BlogPostRedirect({
-  params,
-}: {
+type BlogPostPageProps = {
   params: { id: string };
-}) {
-  redirect(`/${routing.defaultLocale}/blogs/${params.id}`);
+};
+
+export default function BlogPostPage({ params }: BlogPostPageProps) {
+  return (
+    <SiteShell>
+      <BlogPost postId={params.id} />
+    </SiteShell>
+  );
 }
