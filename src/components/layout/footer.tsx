@@ -38,10 +38,16 @@ const navLinks: NavLink[] = [
 ];
 
 function localizeHref(locale: Locale, href: string) {
-  const prefix = locale === routing.defaultLocale ? "" : `/${locale}`;
+  const prefix = `/${locale}`;
+
   if (href.startsWith("/#")) {
-    return `${prefix}${href}` || href;
+    return `${prefix}${href}`;
   }
+
+  if (href === "/blogs") {
+    return `${prefix}/blogs`;
+  }
+
   return href;
 }
 
@@ -64,7 +70,7 @@ export default function Footer() {
   const handleLogout = useCallback(() => {
     logout();
     toast.info(tFooter("logoutSuccess"));
-    router.push(locale === routing.defaultLocale ? "/" : `/${locale}`);
+    router.push(`/${locale}`);
   }, [locale, logout, router, tFooter]);
 
   const handleOpenDashboard = useCallback(() => {

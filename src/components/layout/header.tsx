@@ -18,9 +18,21 @@ const headerLinks: HeaderLink[] = [
   { href: "/blogs", labelKey: "blogs" },
 ];
 
-// Returns the localized homepage path. Default locale uses '/'.
+// Returns the locale-specific homepage path.
 function localizeHome(locale: Locale) {
-  return locale === routing.defaultLocale ? "/" : `/${locale}`;
+  return `/${locale}`;
+}
+
+function localizeHref(locale: Locale, href: string) {
+  if (href === "/") {
+    return localizeHome(locale);
+  }
+
+  if (href === "/blogs") {
+    return `/${locale}/blogs`;
+  }
+
+  return href;
 }
 
 export default function Header() {
@@ -40,8 +52,8 @@ export default function Header() {
         <nav className="hidden items-center gap-6 md:flex">
           {headerLinks.map((link) => {
             const isHome = link.href === "/";
-            const href = isHome ? localizeHome(locale) : link.href;
-            const isActive = pathname === href || (isHome && pathname === "/");
+            const href = localizeHref(locale, link.href);
+            const isActive = pathname === href;
 
             return (
               <Link

@@ -80,12 +80,8 @@ export async function proxy(request: NextRequest) {
     }
 
     const target = (match as string | undefined) ?? routing.defaultLocale;
-    if (target !== routing.defaultLocale) {
-      const url = new URL(`/${target}`, request.url);
-      response = NextResponse.redirect(url);
-    } else {
-      response = NextResponse.next();
-    }
+    const url = new URL(`/${target}`, request.url);
+    response = NextResponse.redirect(url);
   } else if (isAssetPath(pathname) || isPublicPath(pathname)) {
     response = NextResponse.next();
   } else {

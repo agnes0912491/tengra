@@ -15,6 +15,7 @@ import { getAllUsers } from "@/lib/db";
 import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
 import { User } from "@/lib/auth/users";
 import Cookies from "js-cookie";
+import { routing } from "@/i18n/routing";
  
 
 export default function AdminPage() {
@@ -171,7 +172,7 @@ export default function AdminPage() {
                     düzenleyebilir.
                   </p>
                   <Link
-                    href="/#projects"
+                    href={`/${routing.defaultLocale}/#projects`}
                     className="mt-3 inline-flex items-center text-xs text-[color:var(--color-turkish-blue-200)] underline decoration-dotted underline-offset-2"
                   >
                     Projelere Git
@@ -184,7 +185,7 @@ export default function AdminPage() {
                     görünür.
                   </p>
                   <Link
-                    href="/blogs"
+                    href={`/${routing.defaultLocale}/blogs`}
                     className="mt-3 inline-flex items-center text-xs text-[color:var(--color-turkish-blue-200)] underline decoration-dotted underline-offset-2"
                   >
                     Bloglara Git

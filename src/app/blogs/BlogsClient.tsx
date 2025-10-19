@@ -5,8 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/components/providers/auth-provider";
 import { BlogCategory, Blog } from "@/types/blog";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { safeJsonLd } from "@/lib/jsonld";
+import type { Locale } from "@/i18n/routing";
 
 interface Props {
   posts: Blog[];
@@ -19,6 +20,9 @@ export default function BlogsClient({ posts, categories }: Props) {
   );
   const { user, isAuthenticated } = useAuth();
   const t = useTranslations("Blogs");
+  const locale = useLocale() as Locale;
+  const siteOrigin =
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://tengra.studio";
 
   const isAdmin = user?.role === "admin";
 
@@ -39,7 +43,7 @@ export default function BlogsClient({ posts, categories }: Props) {
             "@type": "Blog",
             name: t("seoTitle"),
             description: t("seoDescription"),
-            url: "https://tengra.studio/blogs",
+            url: `${siteOrigin}/${locale}/blogs`,
           }),
         }}
       />
@@ -93,7 +97,7 @@ export default function BlogsClient({ posts, categories }: Props) {
           {filtered.map((post) => (
             <Link
               key={post.id}
-              href={`/blogs/${post.id}`}
+              href={`/${locale}/blogs/${post.id}`}
               className="group bg-[rgba(255,255,255,0.03)] backdrop-blur-xl rounded-xl overflow-hidden border border-[rgba(0,167,197,0.15)] hover:border-[rgba(0,167,197,0.4)] transition"
             >
               <Image
