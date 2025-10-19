@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Metadata } from "next";
 import { useRouter } from "next/navigation";
 import DOMPurify from "isomorphic-dompurify";
@@ -12,7 +12,6 @@ import { getBlogById } from "@/lib/db";
 import type { Blog } from "@/types/blog";
 import { generateSEO } from "@/lib/seo";
 import { safeJsonLd } from "@/lib/jsonld";
-import { routing } from "@/i18n/routing";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "";
 
@@ -22,7 +21,6 @@ type BlogPostProps = {
 
 export default function BlogPost({ postId }: BlogPostProps) {
   const router = useRouter();
-  const locale = useLocale() as (typeof routing.locales)[number];
   const t = useTranslations("common");
   const [post, setPost] = useState<Blog | null>(null);
 
@@ -42,7 +40,7 @@ export default function BlogPost({ postId }: BlogPostProps) {
 
   if (!post) return null;
 
-  const blogHomeHref = `/${locale}/blogs`;
+  const blogHomeHref = `/blogs`;
 
   const metadata: Metadata = generateSEO({
     title: post.title,
@@ -50,7 +48,7 @@ export default function BlogPost({ postId }: BlogPostProps) {
     image: post.image,
     author: post.author,
     type: "article",
-    url: `${BASE_URL}/${locale}/blogs/${post.id}`,
+    url: `${BASE_URL}/blogs/${post.id}`,
     createdAt: post.createdAt,
   });
 

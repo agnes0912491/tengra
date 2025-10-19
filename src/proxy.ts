@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
-import { resolveLocale, routing } from "@/i18n/routing";
+import { resolveLocale } from "@/i18n/routing";
+import { resolvePreferredLocale } from "@/i18n/resolve-preferred-locale";
 
 type AuthMeResponse = { user?: { role?: string | null } | null };
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:5000";
@@ -32,50 +33,67 @@ const isAssetPath = (p: string) =>
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isProd = process.env.NODE_ENV === "production";
+  const segments = pathname.split("/").filter(Boolean);
+  const localeFromPath = segments.length > 0 ? resolveLocale(segments[0]) : null;
+  const strippedPath =
+    localeFromPath && segments.length > 1
+      ? `/${segments.slice(1).join("/")}`
+      : localeFromPath
+      ? "/"
+      : pathname;
 
-  // Development'ta basitleştirilmiş akış
+  const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value;
+  const acceptLanguageHeader = request.headers.get("accept-language");
+  const resolved = resolvePreferredLocale({
+    cookieLocale,
+    acceptLanguage: acceptLanguageHeader,
+  });
+
+  let preferredLocale = resolved.locale;
+  let shouldUpdateCookie = resolved.source !== "cookie";
+  if (localeFromPath) {
+    preferredLocale = localeFromPath;
+    shouldUpdateCookie = true;
+  }
+
+  const shouldSetLocaleCookie = !isAssetPath(pathname);
+  const applyLocaleCookie = (response: NextResponse) => {
+    if (shouldSetLocaleCookie && shouldUpdateCookie) {
+      response.cookies.set("NEXT_LOCALE", preferredLocale, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 365,
+      });
+    }
+    return response;
+  };
+
+  if (localeFromPath) {
+    const redirectUrl = new URL(strippedPath || "/", request.url);
+    return applyLocaleCookie(NextResponse.redirect(redirectUrl));
+  }
+
   if (!isProd) {
-    // Sadece admin route'larını kontrol et
     if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
       const sessionToken = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
       if (!sessionToken) {
         const loginUrl = new URL("/admin/login", request.url);
         loginUrl.searchParams.set("next", pathname);
-        return NextResponse.redirect(loginUrl);
+        return applyLocaleCookie(NextResponse.redirect(loginUrl));
       }
     }
-    return NextResponse.next();
+    return applyLocaleCookie(NextResponse.next());
   }
 
   // Production için tam güvenlik
   let response: NextResponse;
 
-  // Locale redirect
-  if (pathname === "/") {
-    const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value;
-    const header = request.headers.get("accept-language") ?? "";
-    const supported = routing.locales as unknown as string[];
-    const preferred = header.split(",").map((p) => p.trim().split(";")[0])
-      .map((code) => code.toLowerCase().replace("_", "-") as string);
-    let match: string | undefined = resolveLocale(cookieLocale) ?? undefined;
-    if (!match) {
-      for (const lang of preferred) {
-        const normalized = resolveLocale(lang) ?? undefined;
-        const exact = supported.find((l) => l.toLowerCase() === lang);
-        match = exact ?? normalized;
-        if (match) break;
-      }
-    }
-    const target = (match as string | undefined) ?? routing.defaultLocale;
-    const url = new URL(`/${target}`, request.url);
-    response = NextResponse.redirect(url);
-  } else if (isAssetPath(pathname) || isPublicPath(pathname)) {
+  if (isAssetPath(pathname) || isPublicPath(pathname)) {
     response = NextResponse.next();
   } else {
     // Admin auth
     const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
     const isAdminPublic = pathname === "/admin/login";
-    
+
     if (!isAdminRoute) {
       response = NextResponse.next();
     } else if (isAdminPublic) {
@@ -192,7 +210,7 @@ export async function proxy(request: NextRequest) {
     response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   }
 
-  return response;
+  return applyLocaleCookie(response);
 }
 
 export const config = {

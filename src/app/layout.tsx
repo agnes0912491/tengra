@@ -2,18 +2,18 @@
 import "./globals.css";
 import Icon from "../../public/tengra_without_text.png";
 import { Metadata, Viewport } from "next";
+import { cookies, headers } from "next/headers";
 import ParticlesClientWrapper from "@/components/ui/particles-client-wrapper";
 import GlobalToastContainer from "@/components/ui/global-toast-container";
 import { Inter, Orbitron } from "next/font/google";
 import "@fontsource/noto-sans-old-turkic";
-import { notFound } from "next/navigation";
 
-import { routing, type Locale } from "@/i18n/routing";
 import Script from "next/script";
 import ConsentBanner from "@/components/consent/ConsentBanner";
 import ClientUserProvider from "./ClientUserProvider";
 import IntlProviderClient from "@/components/providers/intl-provider-client";
 import { getMessages } from "@/i18n/get-messages";
+import { resolvePreferredLocale } from "@/i18n/resolve-preferred-locale";
 
 export const dynamic = "force-dynamic";
 
@@ -75,15 +75,17 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({
-  children, 
+  children,
 }: {
-  children: React.ReactNode; 
+  children: React.ReactNode;
 }) {
-  const { locale, messages } = getMessages(routing.defaultLocale);
-
-  if (locale !== undefined && !routing.locales.includes(locale)) {
-    notFound();
-  }
+  const cookieStore = cookies();
+  const headersList = headers();
+  const { locale: preferredLocale } = resolvePreferredLocale({
+    cookieLocale: cookieStore.get("NEXT_LOCALE")?.value,
+    acceptLanguage: headersList.get("accept-language"),
+  });
+  const { locale, messages } = getMessages(preferredLocale);
 
   // Nonce'u runtime'da almaya çalışma, sadece Script'lerde kullan
   const isProd = process.env.NODE_ENV === "production";

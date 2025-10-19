@@ -2,52 +2,26 @@
 
 import { useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 
-import { resolveLocale, routing, type Locale } from "@/i18n/routing";
+import { routing, type Locale } from "@/i18n/routing";
 
 const localeOptions: Locale[] = [...routing.locales];
-
-function getLocalizedPath(pathname: string, targetLocale: Locale) {
-  const segments = pathname.split("/").filter(Boolean);
-
-  const currentLocale = segments.length > 0 ? resolveLocale(segments[0]) : null;
-
-  if (currentLocale) {
-    if (targetLocale === routing.defaultLocale) {
-      segments.shift();
-    } else {
-      segments[0] = targetLocale;
-    }
-  } else if (targetLocale !== routing.defaultLocale) {
-    segments.unshift(targetLocale);
-  }
-
-  const nextPath = segments.length > 0 ? `/${segments.join("/")}` : "/";
-  return nextPath;
-}
 
 export default function LocaleSwitcher() {
   const locale = useLocale() as Locale;
   const t = useTranslations("LocaleSwitcher");
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   const handleChange = (newLocale: Locale) => {
     if (newLocale === locale) return;
 
-    const basePath = getLocalizedPath(pathname ?? "/", newLocale);
-    const query = searchParams?.toString();
-    const nextPath = query ? `${basePath}?${query}` : basePath;
-
     // Persist preferred locale for future visits to '/'
     Cookies.set("NEXT_LOCALE", newLocale, { path: "/", expires: 365 });
 
     startTransition(() => {
-      router.push(nextPath);
       router.refresh();
     });
   };
