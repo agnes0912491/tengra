@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 const toastBaseClass =
   "pointer-events-auto relative flex min-w-[280px] max-w-md items-start gap-3 rounded-2xl border px-4 py-3 shadow-[0_0_25px_rgba(0,167,197,0.18)] backdrop-blur-xl";
 
-const variantClasses: Record<ToastContentProps["type"], string> = {
+const variantClasses: Record<"default" | "success" | "error" | "info", string> = {
   default:
     "border-[rgba(0,167,197,0.25)] bg-[rgba(5,18,24,0.92)] text-[rgba(223,241,246,0.92)]",
   success:

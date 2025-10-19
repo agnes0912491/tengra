@@ -143,7 +143,9 @@ export function ToastContainer({
   newestOnTop,
 }: ToastContainerProps) {
   const [toasts, setToasts] = useState<ToastRecord[]>([]);
-  const [mounted] = useState(() => typeof window !== "undefined");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   const removeToast = useCallback((id: number) => {
     // render'da sadece state değiştir
