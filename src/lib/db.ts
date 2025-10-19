@@ -152,7 +152,7 @@ export const getUserWithId = async (id: string): Promise<User | null> => {
 };
 
 export const registerUser = async (
-  name: string,
+  username: string,
   email: string,
   password: string
 ): Promise<User | null> => {
@@ -162,7 +162,7 @@ export const registerUser = async (
       "Content-Type": "application/json",
       Accept: "application/json",
     },
-    body: JSON.stringify({ name, email, password }),
+    body: JSON.stringify({ username, email, password }),
   });
 
   if (!response.ok) {
@@ -197,13 +197,11 @@ const normalizeUser = (raw: RawUser | null | undefined): User | null => {
   if (id === undefined || id === null || !email) {
     return null;
   }
-
-  const displayName = raw.displayName ?? raw.name ?? raw.username ?? email;
+ 
   const role = (raw.role ?? "user").toString().toLowerCase();
 
   return {
-    id: String(id),
-    name: displayName,
+    id: String(id), 
     email,
     role: role === "admin" ? "admin" : "user",
     username: raw.username ?? undefined,

@@ -42,7 +42,7 @@ export default function Footer() {
   const { user, isAuthenticated, loading, logout } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
-  const isAdmin = user?.role === "admin";
+  const isAdmin = user?.role === "admin"; 
 
   const isAdminRoute = useMemo(
     () => pathname?.startsWith("/admin"),
@@ -134,7 +134,7 @@ export default function Footer() {
                   <DropdownMenuContent align="end" className="min-w-[200px] border border-[rgba(0,167,197,0.25)] bg-[rgba(5,18,24,0.92)] text-[color:var(--color-turkish-blue-100)]">
                     <DropdownMenuLabel className="text-[11px] uppercase tracking-[0.3em] text-[rgba(255,255,255,0.6)]">
                       {tFooter("adminMenu.greeting", {
-                        name: user?.name ?? tFooter("adminMenu.label"),
+                        name: user?.displayName ?? tFooter("adminMenu.label"),
                       })}
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator className="bg-[rgba(0,167,197,0.25)]" />
@@ -167,7 +167,7 @@ export default function Footer() {
                       className="flex items-center gap-2 rounded-full border border-[rgba(0,167,197,0.4)] bg-transparent px-3 py-1 text-[11px] uppercase tracking-widest text-[color:var(--color-turkish-blue-100)] hover:bg-[rgba(0,167,197,0.12)]"
                     >
                       <span className="truncate max-w-[7rem] text-left">
-                        {user?.name ?? "—"}
+                            {user?.displayName ?? "—"}
                       </span>
                       <ChevronDown className="h-3 w-3" />
                     </Button>
@@ -175,7 +175,7 @@ export default function Footer() {
                   <DropdownMenuContent align="end" className="min-w-[200px] border border-[rgba(0,167,197,0.25)] bg-[rgba(5,18,24,0.92)] text-[color:var(--color-turkish-blue-100)]">
                     <DropdownMenuLabel className="text-[11px] uppercase tracking-[0.3em] text-[rgba(255,255,255,0.6)]">
                       {tFooter("adminMenu.greeting", {
-                        name: user?.name ?? "—",
+                        name: user?.displayName ?? "—",
                       })}
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator className="bg-[rgba(0,167,197,0.25)]" />

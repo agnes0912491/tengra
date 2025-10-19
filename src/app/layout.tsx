@@ -74,13 +74,13 @@ export const viewport: Viewport = {
   colorScheme: "dark light",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = cookies();
-  const headersList = headers();
+  const cookieStore = await cookies();
+  const headersList = await headers();
   const { locale: preferredLocale } = resolvePreferredLocale({
     cookieLocale: cookieStore.get("NEXT_LOCALE")?.value,
     acceptLanguage: headersList.get("accept-language"),

@@ -66,7 +66,7 @@ export default function Header() {
           {isAuthenticated && user ? (
             <>
               <span className="hidden text-xs text-gray-300 sm:block">
-                {t("greeting", { name: user.name })}
+                {t("greeting", { name: user.displayName })}
               </span>
               <button
                 onClick={logout}

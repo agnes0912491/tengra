@@ -8,8 +8,7 @@ import {
 export type Role = "admin" | "user";
 
 export type User = {
-  id: string;
-  name: string;
+  id: string; 
   email: string;
   role: Role;
   username?: string;
