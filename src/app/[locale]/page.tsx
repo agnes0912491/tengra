@@ -1,5 +1,5 @@
 import HomePage from "@/components/home/home-page";
-import { isLocale } from "@/i18n/routing";
+import { resolveLocale, routing } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 
 export default function LocaleHomePage({
@@ -7,9 +7,13 @@ export default function LocaleHomePage({
 }: {
   params: { locale: string };
 }) {
-  const localeParam = params?.locale;
-  if (!localeParam || !isLocale(localeParam)) {
+  const locale = resolveLocale(params?.locale);
+  if (!locale) {
     notFound();
   }
   return <HomePage />;
+}
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
 }
