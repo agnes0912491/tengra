@@ -1,8 +1,10 @@
-import HomePage from "@/components/home/home-page";
+import BlogsPageClient from "@/app/blogs/blogs-page-client";
 import { resolveLocale, routing } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 
-export default function LocaleHomePage({
+export const dynamic = "force-dynamic";
+
+export default function LocaleBlogsPage({
   params,
 }: {
   params: { locale: string };
@@ -11,7 +13,8 @@ export default function LocaleHomePage({
   if (!locale) {
     notFound();
   }
-  return <HomePage />;
+
+  return <BlogsPageClient />;
 }
 
 export function generateStaticParams() {

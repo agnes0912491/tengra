@@ -1,26 +1,41 @@
 export const dynamic = "force-dynamic";
 
-import HomePage from "@/components/home/home-page";
-import Footer from "@/components/layout/footer";
-import AnimatedWrapper from "@/components/ui/animated-wrapper";
-import IntlProviderClient from "@/components/providers/intl-provider-client";
-import { getMessages } from "@/i18n/get-messages";
-import { routing } from "@/i18n/routing";
-import Head from "next/head";
+import { cookies, headers } from "next/headers";
+import { redirect } from "next/navigation";
+
+import { resolveLocale, routing } from "@/i18n/routing";
+
+function selectPreferredLocale() {
+  const cookieLocale = cookies().get("NEXT_LOCALE")?.value;
+  const headerLocale = headers().get("accept-language") ?? "";
+
+  let match = resolveLocale(cookieLocale);
+
+  if (!match) {
+    const candidates = headerLocale
+      .split(",")
+      .map((part) => part.trim().split(";")[0])
+      .map((code) => code.toLowerCase().replace("_", "-"));
+
+    for (const code of candidates) {
+      const exact = (routing.locales as readonly string[]).find(
+        (locale) => locale.toLowerCase() === code
+      );
+
+      match =
+        (exact as (typeof routing.locales)[number] | undefined) ??
+        resolveLocale(code);
+
+      if (match) {
+        break;
+      }
+    }
+  }
+
+  return match ?? routing.defaultLocale;
+}
 
 export default function IndexPage() {
-  const { locale, messages } = getMessages(routing.defaultLocale);
-  return (
-    <IntlProviderClient locale={locale} messages={messages}>
-      <Head>
-        <meta name="google-adsense-account" content="ca-pub-1840126959284939" />
-      </Head>
-      <main className="relative flex min-h-screen flex-col pb-32 pt-10">
-        <AnimatedWrapper>
-          <HomePage />
-        </AnimatedWrapper>
-      </main>
-      <Footer />
-    </IntlProviderClient>
-  );
+  const locale = selectPreferredLocale();
+  redirect(`/${locale}`);
 }
