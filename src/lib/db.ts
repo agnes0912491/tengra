@@ -172,6 +172,46 @@ export const registerUser = async (
   return (await response.json().catch(() => null)) as User | null;
 };
 
+type RawUser = Partial<User> & {
+  id?: string | number;
+  userId?: string | number;
+  name?: string | null;
+  displayName?: string | null;
+  username?: string | null;
+  email?: string | null;
+  role?: string | null;
+  avatar?: string | null;
+};
+
+type AuthMePayload = {
+  user?: RawUser | null;
+};
+
+const normalizeUser = (raw: RawUser | null | undefined): User | null => {
+  if (!raw) {
+    return null;
+  }
+
+  const id = raw.id ?? raw.userId;
+  const email = raw.email ?? raw.username ?? "";
+  if (id === undefined || id === null || !email) {
+    return null;
+  }
+
+  const displayName = raw.displayName ?? raw.name ?? raw.username ?? email;
+  const role = (raw.role ?? "user").toString().toLowerCase();
+
+  return {
+    id: String(id),
+    name: displayName,
+    email,
+    role: role === "admin" ? "admin" : "user",
+    username: raw.username ?? undefined,
+    displayName: raw.displayName ?? raw.name ?? undefined,
+    avatar: raw.avatar ?? undefined,
+  };
+};
+
 export const getUserWithToken = async (token: string): Promise<User | null> => {
   if (!token) {
     throw new Error("Token sağlanmadı.");
@@ -189,5 +229,15 @@ export const getUserWithToken = async (token: string): Promise<User | null> => {
     return null;
   }
 
-  return (await response.json()) as User;
+  const payload = (await response.json().catch(() => null)) as
+    | AuthMePayload
+    | RawUser
+    | null;
+
+  if (!payload) {
+    return null;
+  }
+
+  const rawUser = ("user" in payload ? payload.user : payload) as RawUser | null;
+  return normalizeUser(rawUser);
 };

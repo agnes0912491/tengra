@@ -12,6 +12,9 @@ export type User = {
   name: string;
   email: string;
   role: Role;
+  username?: string;
+  displayName?: string | null;
+  avatar?: string | null;
 };
 
 export async function authenticateUser(
