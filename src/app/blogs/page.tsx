@@ -1,7 +1,10 @@
-import { redirect } from "next/navigation";
+import BlogsPageClient from "@/app/blogs/blogs-page-client";
+import SiteShell from "@/components/layout/site-shell";
 
-import { routing } from "@/i18n/routing";
-
-export default function BlogsRedirect() {
-  redirect(`/${routing.defaultLocale}/blogs`);
+export default function BlogsPage() {
+  return (
+    <SiteShell>
+      <BlogsPageClient />
+    </SiteShell>
+  );
 }
