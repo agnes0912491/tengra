@@ -4,6 +4,7 @@ import { cookies, headers } from "next/headers";
 import IntlProviderClient from "@/components/providers/intl-provider-client";
 import { getMessages } from "@/i18n/get-messages";
 import { resolvePreferredLocale } from "@/i18n/resolve-preferred-locale";
+import AdminShell from "@/components/admin/admin-shell";
 
 type Props = {
   children: ReactNode;
@@ -20,7 +21,7 @@ export default async function AdminLayout({ children }: Props) {
 
   return (
     <IntlProviderClient locale={locale} messages={messages}>
-      {children}
+      <AdminShell>{children}</AdminShell>
     </IntlProviderClient>
   );
 }
