@@ -77,15 +77,7 @@ const getServerTone = (health: ServerHealth) =>
 
 export default async function AdminOverviewPage() {
   const cookieStore = await cookies();
-  const token = cookieStore.get(ADMIN_SESSION_COOKIE)?.value;
-  const { user, isAuthenticated, logout } = useAuth();
-  if (!isAuthenticated || !user || user.role !== "admin") {
-    return (
-      <div className="p-8 text-center text-sm text-red-400">
-        Yönetici erişimi gerekli. Lütfen yönetici hesabınızla giriş yapın.
-      </div>
-    );
-  }
+  const token = cookieStore.get(ADMIN_SESSION_COOKIE)?.value; 
   const [projects, blogs, users, health] = await Promise.all([
     getAllProjects(token),
     getAllBlogs().catch(() => [] as Blog[]),
