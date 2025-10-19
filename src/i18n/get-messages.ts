@@ -10,7 +10,7 @@ import pt from "./messages/pt.json";
 import ru from "./messages/ru.json";
 import ar from "./messages/ar.json";
 import ko from "./messages/ko.json";
-import { isLocale, type Locale, routing } from "./routing";
+import { resolveLocale, type Locale, routing } from "./routing";
 
 type Messages = typeof en;
 
@@ -31,13 +31,7 @@ const allMessages = {
 } as const satisfies Record<string, Messages>;
 
 export function getMessages(locale: string | undefined) {
-  // Normalize to base language (e.g., 'pt-BR' -> 'pt') and to our declared locales
-  const raw = (locale ?? "").toLowerCase();
-  const base = raw.split("-")[0];
-
-  const chosen: Locale = isLocale(base)
-    ? (base as Locale)
-    : routing.defaultLocale;
+  const chosen: Locale = resolveLocale(locale) ?? routing.defaultLocale;
   const fallback = allMessages[routing.defaultLocale];
   const messages =
     (allMessages as Record<string, Messages>)[chosen] ?? fallback;

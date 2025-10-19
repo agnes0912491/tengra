@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
-import { isLocale } from "@/i18n/routing";
-import { routing } from "@/i18n/routing";
+import { resolveLocale, routing } from "@/i18n/routing";
 
 type AuthMeResponse = {
   user?: {
@@ -23,7 +22,7 @@ const stripLocaleFromPath = (pathname: string) => {
   if (segments.length === 0) return "/";
 
   const [possibleLocale, ...rest] = segments;
-  if (isLocale(possibleLocale)) {
+  if (resolveLocale(possibleLocale)) {
     return rest.length === 0 ? "/" : `/${rest.join("/")}`;
   }
 
@@ -69,14 +68,13 @@ export async function proxy(request: NextRequest) {
       .map((code) => code.toLowerCase().replace("_", "-") as string);
 
     let match: string | undefined =
-      cookieLocale && isLocale(cookieLocale) ? cookieLocale : undefined;
+      resolveLocale(cookieLocale) ?? undefined;
 
     if (!match) {
       for (const lang of preferred) {
-        const base = lang.split("-")[0];
+        const normalized = resolveLocale(lang) ?? undefined;
         const exact = supported.find((l) => l.toLowerCase() === lang);
-        const baseMatch = supported.find((l) => l.toLowerCase() === base);
-        match = exact ?? baseMatch;
+        match = exact ?? normalized;
         if (match) break;
       }
     }
@@ -184,13 +182,16 @@ export async function proxy(request: NextRequest) {
     "https://fundingchoicesmessages.google.com",
     "https://pagead2.googlesyndication.com",
     "https://googleads.g.doubleclick.net",
+    "https://cloudflareinsights.com",
   ].join(" ");
   const scriptSrc = [
     "'self'",
     "'unsafe-inline'",
+    "'unsafe-eval'",
     "https://fundingchoicesmessages.google.com",
     "https://www.gstatic.com",
     "https://pagead2.googlesyndication.com",
+    "https://static.cloudflareinsights.com",
   ].join(" ");
   const frameSrc = [
     "'self'",
