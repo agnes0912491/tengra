@@ -59,6 +59,7 @@ export default function Footer() {
   const pathname = usePathname();
   const router = useRouter();
   const isAdmin = user?.role === "admin";
+  console.log({user})
 
   const isAdminRoute = useMemo(
     () => pathname?.startsWith("/admin"),
