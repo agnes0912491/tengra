@@ -1,5 +1,6 @@
 import type { Blog, BlogCategory } from "@/types/blog";
-import { User } from "./auth/users";
+import type { Project, ProjectStatus } from "@/types/project";
+import { Role, User } from "./auth/users";
 import { AuthUserPayload } from "@/types/auth";
 
 // Base API URL for the backend. Fallback to localhost in development to avoid
@@ -8,6 +9,14 @@ const API_BASE =
   process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:5000";
 // All public content endpoints are served under /api on the backend Router.
 const BLOGS_API_URL = `${API_BASE}/blogs`;
+const PROJECTS_API_URL = `${API_BASE}/projects`;
+
+type ServerHealthResponse = {
+  status?: string;
+  uptime?: number | string;
+  version?: string;
+  lastDeploymentAt?: string;
+};
 
 type BlogCategoriesResponse = {
   categories?: BlogCategory[];
@@ -238,4 +247,197 @@ export const getUserWithToken = async (token: string): Promise<User | null> => {
 
   const rawUser = ("user" in payload ? payload.user : payload) as RawUser | null;
   return normalizeUser(rawUser);
+};
+
+const normalizeProject = (project: unknown): Project | null => {
+  if (!project || typeof project !== "object") {
+    return null;
+  }
+
+  const candidate = project as Record<string, unknown>;
+  const id = candidate.id ?? candidate.projectId ?? candidate.slug;
+  const name = candidate.name ?? candidate.title;
+
+  if (!id || !name) {
+    return null;
+  }
+
+  let status: ProjectStatus | undefined;
+  if (typeof candidate.status === "string") {
+    const normalized = candidate.status.toLowerCase();
+    const allowed: ProjectStatus[] = [
+      "draft",
+      "in_progress",
+      "on_hold",
+      "completed",
+      "archived",
+    ];
+
+    if ((allowed as string[]).includes(normalized)) {
+      status = normalized as ProjectStatus;
+    }
+  }
+
+  return {
+    id: String(id),
+    name: String(name),
+    slug: candidate.slug ? String(candidate.slug) : undefined,
+    description:
+      typeof candidate.description === "string"
+        ? candidate.description
+        : candidate.summary && typeof candidate.summary === "string"
+        ? candidate.summary
+        : undefined,
+    status,
+    lastUpdatedAt:
+      typeof candidate.updatedAt === "string"
+        ? candidate.updatedAt
+        : typeof candidate.lastUpdatedAt === "string"
+        ? candidate.lastUpdatedAt
+        : undefined,
+    createdAt:
+      typeof candidate.createdAt === "string"
+        ? candidate.createdAt
+        : undefined,
+  };
+};
+
+export const getAllProjects = async (
+  token?: string
+): Promise<Project[]> => {
+  try {
+    const headers: Record<string, string> = {
+      Accept: "application/json",
+    };
+
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    const response = await fetch(PROJECTS_API_URL, {
+      cache: "no-store",
+      headers,
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const json = await response.json().catch(() => []);
+    if (!Array.isArray(json)) {
+      return [];
+    }
+
+    return json
+      .map((item) => normalizeProject(item))
+      .filter((item): item is Project => Boolean(item));
+  } catch (error) {
+    console.error("Failed to fetch projects", error);
+    return [];
+  }
+};
+
+export type ServerHealth = {
+  status: "online" | "offline";
+  uptimeSeconds?: number;
+  version?: string;
+  lastDeploymentAt?: string;
+};
+
+const parseUptime = (uptime: number | string | undefined): number | undefined => {
+  if (typeof uptime === "number") {
+    return uptime;
+  }
+
+  if (typeof uptime === "string") {
+    const normalized = Number.parseFloat(uptime);
+    return Number.isFinite(normalized) ? normalized : undefined;
+  }
+
+  return undefined;
+};
+
+export const getServerHealth = async (
+  token?: string
+): Promise<ServerHealth> => {
+  try {
+    const headers: Record<string, string> = {
+      Accept: "application/json",
+    };
+
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_BASE}/health`, {
+      cache: "no-store",
+      headers,
+    });
+
+    if (!response.ok) {
+      return { status: "offline" };
+    }
+
+    const json = (await response
+      .json()
+      .catch(() => ({} as ServerHealthResponse))) as ServerHealthResponse;
+
+    const uptimeSeconds = parseUptime(json.uptime);
+    const normalizedStatus = json.status?.toString().toLowerCase();
+
+    return {
+      status:
+        normalizedStatus === "ok" || normalizedStatus === "online"
+          ? "online"
+          : "offline",
+      uptimeSeconds,
+      version: json.version ?? undefined,
+      lastDeploymentAt: json.lastDeploymentAt ?? undefined,
+    };
+  } catch (error) {
+    console.error("Failed to read server health", error);
+    return { status: "offline" };
+  }
+};
+
+export const updateUserRole = async (
+  userId: string,
+  role: Role,
+  token: string
+): Promise<User> => {
+  if (!userId) {
+    throw new Error("Kullanıcı ID'si sağlanmadı.");
+  }
+
+  if (!token) {
+    throw new Error("Yetkilendirme anahtarı eksik.");
+  }
+
+  const response = await fetch(`${API_BASE}/users/${userId}/role`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ role }),
+  });
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => "");
+    throw new Error(
+      `Kullanıcı rolü güncellenemedi: HTTP ${response.status}${
+        text ? ` - ${text}` : ""
+      }`
+    );
+  }
+
+  const json = (await response.json().catch(() => null)) as RawUser | null;
+  const user = normalizeUser(json);
+
+  if (!user) {
+    throw new Error("Kullanıcı bilgisi alınamadı.");
+  }
+
+  return user;
 };
