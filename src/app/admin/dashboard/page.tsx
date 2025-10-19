@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -23,11 +23,28 @@ export default function AdminPage() {
   const router = useRouter();
   const pathname = usePathname();
   const isAdmin = user?.role === "admin";
-  const t = useTranslations("AdminDashboard"); 
-  const navigationLinks = t(
-    "navigationLinks",
-    { returnObjects: true }
-  ) as { href: string; label: string }[];
+  const t = useTranslations("AdminDashboard");
+  const navigationLinks = useMemo(
+    () => [
+      {
+        href: "/admin/dashboard#overview",
+        label: t("navigation.overview"),
+      },
+      {
+        href: "/admin/dashboard#projects",
+        label: t("navigation.projects"),
+      },
+      {
+        href: "/admin/dashboard#blogs",
+        label: t("navigation.blogs"),
+      },
+      {
+        href: "/admin/dashboard#users",
+        label: t("navigation.users"),
+      },
+    ],
+    [t]
+  );
 
   const token = useCallback(async () => {
     const cookie = Cookies.get(ADMIN_SESSION_COOKIE);

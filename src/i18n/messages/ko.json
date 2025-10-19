@@ -148,24 +148,12 @@
       "fetchUsersError": "사용자 목록을 불러오지 못했습니다. 다시 시도해 주세요.",
       "logout": "관리자 세션이 종료되었습니다."
     },
-    "navigationLinks": [
-      {
-        "href": "/admin/dashboard#overview",
-        "label": "개요"
-      },
-      {
-        "href": "/admin/dashboard#projects",
-        "label": "프로젝트"
-      },
-      {
-        "href": "/admin/dashboard#blogs",
-        "label": "블로그"
-      },
-      {
-        "href": "/admin/dashboard#users",
-        "label": "사용자"
-      }
-    ],
+    "navigation": {
+      "overview": "개요",
+      "projects": "프로젝트",
+      "blogs": "블로그",
+      "users": "사용자"
+    },
     "unauthorizedAccess": "접근 제한",
     "unauthorizedMessage": "대시보드를 보려면 관리자 계정이 필요합니다.",
     "goToLogin": "관리자 로그인으로 이동"

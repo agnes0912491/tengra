@@ -148,24 +148,12 @@
       "fetchUsersError": "We couldn't load the user list. Please try again.",
       "logout": "Admin session closed."
     },
-    "navigationLinks": [
-      {
-        "href": "/admin/dashboard#overview",
-        "label": "Overview"
-      },
-      {
-        "href": "/admin/dashboard#projects",
-        "label": "Projects"
-      },
-      {
-        "href": "/admin/dashboard#blogs",
-        "label": "Blogs"
-      },
-      {
-        "href": "/admin/dashboard#users",
-        "label": "Users"
-      }
-    ],
+    "navigation": {
+      "overview": "Overview",
+      "projects": "Projects",
+      "blogs": "Blogs",
+      "users": "Users"
+    },
     "unauthorizedAccess": "Access restricted",
     "unauthorizedMessage": "You need an administrator account to view the dashboard.",
     "goToLogin": "Go to admin login"
