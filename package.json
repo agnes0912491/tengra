@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack && next-sitemap --watch",
-    "build": "next build --experimental-turbo",
+    "build": "next build --turbo",
     "postbuild": "next-sitemap",
     "start": "next start",
     "lint": "eslint"
