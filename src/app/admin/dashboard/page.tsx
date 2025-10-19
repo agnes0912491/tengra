@@ -157,7 +157,7 @@ export default function AdminPage() {
             <p className="text-[10px] uppercase tracking-[0.35em] text-[color:var(--color-turkish-blue-300)]">
               Kullanıcı
             </p>
-            <p className="mt-1 text-sm font-medium text-white">{user?.name}</p>
+            <p className="mt-1 text-sm font-medium text-white">{user?.displayName || user.username || "—"}</p>
             <p className="text-[11px] text-[rgba(255,255,255,0.45)]">
               {user?.email}
             </p>
@@ -179,7 +179,7 @@ export default function AdminPage() {
             <p className="mt-4 text-sm text-gray-300">
               Hoş geldin{" "}
               <span className="font-semibold text-[color:var(--color-turkish-blue-200)]">
-                {user?.name}
+                {user?.displayName || user.username || "—"}
               </span>
               . Buradan stüdyo içeriklerini yönetebilir ve kısıtlı bölümlere
               erişebilirsin.
@@ -199,7 +199,7 @@ export default function AdminPage() {
                     düzenleyebilir.
                   </p>
                   <Link
-                    href={`/${routing.defaultLocale}/#projects`}
+                    href={`/#projects`}
                     className="mt-3 inline-flex items-center text-xs text-[color:var(--color-turkish-blue-200)] underline decoration-dotted underline-offset-2"
                   >
                     Projelere Git
@@ -212,7 +212,7 @@ export default function AdminPage() {
                     görünür.
                   </p>
                   <Link
-                    href={`/${routing.defaultLocale}/blogs`}
+                    href={`/#blogs`}
                     className="mt-3 inline-flex items-center text-xs text-[color:var(--color-turkish-blue-200)] underline decoration-dotted underline-offset-2"
                   >
                     Bloglara Git
@@ -237,7 +237,7 @@ export default function AdminPage() {
                   >
                     <div>
                       <p className="font-medium text-white">
-                        {availableUser.name}
+                        {availableUser.displayName || availableUser.username || "—"}
                       </p>
                       <p className="text-xs text-gray-400">
                         {availableUser.email}
