@@ -140,7 +140,10 @@ export function ToastContainer({
   icon,
 }: ToastContainerProps) {
   const [toasts, setToasts] = useState<ToastRecord[]>([]);
-  const timers = useRef(new Map<number, number>());
+  const timers = useMemo(
+    () => new Map<number, ReturnType<typeof setTimeout>>(),
+    []
+  );
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -150,19 +153,19 @@ export function ToastContainer({
   const removeToast = useCallback((id: number) => {
     setToasts((prev) => prev.filter((toastItem) => toastItem.id !== id));
 
-    const existingTimer = timers.current.get(id);
+    const existingTimer = timers.get(id);
 
     if (existingTimer) {
       window.clearTimeout(existingTimer);
-      timers.current.delete(id);
+      timers.delete(id);
     }
-  }, []);
+  }, [timers]);
 
   const clearAllToasts = useCallback(() => {
-    timers.current.forEach((timer) => window.clearTimeout(timer));
-    timers.current.clear();
+    timers.forEach((timer) => window.clearTimeout(timer));
+    timers.clear();
     setToasts([]);
-  }, []);
+  }, [timers]);
 
   useEffect(() => {
     const handleAdd: ToastListener = (toastItem) => {
@@ -170,7 +173,7 @@ export function ToastContainer({
 
       const delay = toastItem.autoClose ?? autoClose;
       const timer = window.setTimeout(() => removeToast(toastItem.id), delay);
-      timers.current.set(toastItem.id, timer);
+      timers.set(toastItem.id, timer);
     };
 
     const handleDismiss: DismissListener = (id) => {
@@ -191,7 +194,7 @@ export function ToastContainer({
 
       clearAllToasts();
     };
-  }, [autoClose, clearAllToasts, removeToast]);
+  }, [autoClose, clearAllToasts, removeToast, timers]);
 
   const containerClass = useMemo(
     () =>

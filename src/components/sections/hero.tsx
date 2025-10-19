@@ -7,45 +7,65 @@ import { useTranslations } from "next-intl";
 
 import Img from "../../../public/tengra_without_text.png";
 
-export default function Hero() {
-  const t = useTranslations("Hero");
+type TypingTextProps = {
+  texts: string[];
+};
+
+function TypingText({ texts }: TypingTextProps) {
   const [index, setIndex] = useState(0);
   const [displayed, setDisplayed] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const texts = useMemo(() => [t("typingWordOne"), t("typingWordTwo")], [t]);
-
   useEffect(() => {
-    setDisplayed("");
-    setIndex(0);
-    setIsDeleting(false);
-  }, [texts]);
+    if (texts.length === 0) {
+      return;
+    }
 
-  useEffect(() => {
     const fullText = texts[index];
     const speed = isDeleting ? 120 : 180;
     const pause = 2500;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
 
     if (!isDeleting && displayed.length < fullText.length) {
-      const timeout = setTimeout(() => setDisplayed(fullText.slice(0, displayed.length + 1)), speed);
-      return () => clearTimeout(timeout);
+      timeout = window.setTimeout(() => {
+        setDisplayed(fullText.slice(0, displayed.length + 1));
+      }, speed);
+    } else if (isDeleting && displayed.length > 0) {
+      timeout = window.setTimeout(() => {
+        setDisplayed(fullText.slice(0, displayed.length - 1));
+      }, speed / 1.4);
+    } else if (!isDeleting && displayed.length === fullText.length) {
+      timeout = window.setTimeout(() => {
+        setIsDeleting(true);
+      }, pause);
+    } else if (isDeleting && displayed.length === 0) {
+      timeout = window.setTimeout(() => {
+        setIsDeleting(false);
+        setIndex((prev) => (prev + 1) % texts.length);
+      }, 240);
     }
 
-    if (isDeleting && displayed.length > 0) {
-      const timeout = setTimeout(() => setDisplayed(fullText.slice(0, displayed.length - 1)), speed / 1.4);
-      return () => clearTimeout(timeout);
-    }
-
-    if (!isDeleting && displayed.length === fullText.length) {
-      const pauseTimer = setTimeout(() => setIsDeleting(true), pause);
-      return () => clearTimeout(pauseTimer);
-    }
-
-    if (isDeleting && displayed.length === 0) {
-      setIsDeleting(false);
-      setIndex((prev) => (prev + 1) % texts.length);
-    }
+    return () => {
+      if (timeout) {
+        window.clearTimeout(timeout);
+      }
+    };
   }, [displayed, index, isDeleting, texts]);
+
+  return (
+    <motion.h1
+      key={`${index}-${texts[index] ?? ""}`}
+      className="mt-10 text-4xl md:text-5xl tracking-[0.35em] font-display neon-text select-none tengra-text"
+    >
+      {displayed}
+      <span className="border-r-2 border-[rgba(0,167,197,0.7)] ml-1 animate-cursor" />
+    </motion.h1>
+  );
+}
+
+export default function Hero() {
+  const t = useTranslations("Hero");
+  const texts = useMemo(() => [t("typingWordOne"), t("typingWordTwo")], [t]);
 
   return (
     <section
@@ -89,13 +109,7 @@ export default function Hero() {
           {t("taglineLine2")}
         </h2>
 
-        <motion.h1
-          key={`${index}-${texts[index]}`}
-          className="mt-10 text-4xl md:text-5xl tracking-[0.35em] font-display neon-text select-none tengra-text"
-        >
-          {displayed}
-          <span className="border-r-2 border-[rgba(0,167,197,0.7)] ml-1 animate-cursor" />
-        </motion.h1>
+        <TypingText key={texts.join("|")} texts={texts} />
 
         <div className="w-24 h-[1px] mt-10 bg-[rgba(0,167,197,0.5)] shadow-[0_0_10px_rgba(0,167,197,0.6)]" />
 

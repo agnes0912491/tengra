@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 
 import { useAuth } from "@/components/providers/auth-provider";
-import { routing, type Locale } from "@/i18n/routing";
+import { type Locale } from "@/i18n/routing";
 
 type HeaderLink = {
   href: string;
@@ -51,7 +51,6 @@ export default function Header() {
 
         <nav className="hidden items-center gap-6 md:flex">
           {headerLinks.map((link) => {
-            const isHome = link.href === "/";
             const href = localizeHref(locale, link.href);
             const isActive = pathname === href;
 
