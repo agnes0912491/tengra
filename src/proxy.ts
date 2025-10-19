@@ -32,6 +32,14 @@ export async function proxy(request: NextRequest) {
   // Nonce: her istekte benzersiz
   // Not: Base64 zorunlu değil; benzersiz ve tahmin edilemez olması yeterli. :contentReference[oaicite:4]{index=4}
   const nonce = `${crypto.randomUUID()}${Math.random().toString(36).slice(2)}`;
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-nonce", nonce);
+  const next = () =>
+    NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
   let response: NextResponse;
 
   // ---- locale redirect (değişmedi) ----
@@ -54,17 +62,17 @@ export async function proxy(request: NextRequest) {
     const url = new URL(`/${target}`, request.url);
     response = NextResponse.redirect(url);
   } else if (isAssetPath(pathname) || isPublicPath(pathname)) {
-    response = NextResponse.next();
+    response = next();
   } else {
     // ---- admin auth (değişmedi) ----
     const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
     const isAdminPublic = pathname === "/admin/login";
     if (!isAdminRoute) {
-      response = NextResponse.next();
+      response = next();
     } else if (isAdminPublic) {
       const sessionToken = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
       if (!sessionToken) {
-        response = NextResponse.next();
+        response = next();
       } else {
         try {
           const res = await fetch(BACKEND_AUTH_ME, {
@@ -73,7 +81,7 @@ export async function proxy(request: NextRequest) {
             cache: "no-store",
           });
           if (!res.ok) {
-            response = NextResponse.next();
+            response = next();
           } else {
             const data = (await res.json().catch(() => ({}))) as AuthMeResponse;
             const role = data.user?.role ?? undefined;
@@ -81,11 +89,11 @@ export async function proxy(request: NextRequest) {
               const dashboardUrl = new URL("/admin/dashboard", request.url);
               response = NextResponse.redirect(dashboardUrl);
             } else {
-              response = NextResponse.next();
+              response = next();
             }
           }
         } catch {
-          response = NextResponse.next();
+          response = next();
         }
       }
     } else {
@@ -112,7 +120,7 @@ export async function proxy(request: NextRequest) {
               loginUrl.searchParams.set("next", pathname);
               response = NextResponse.redirect(loginUrl);
             } else {
-              response = NextResponse.next();
+              response = next();
             }
           }
         } catch {
@@ -141,8 +149,8 @@ export async function proxy(request: NextRequest) {
 
   const scriptSrc = [
     "'self'",
-    `'nonce-${nonce}'`,                                            // nonce + strict-dynamic modeli :contentReference[oaicite:7]{index=7}
-    "'strict-dynamic'",                                            // üçüncü tarafın zincir yüklemelerine izin verir :contentReference[oaicite:8]{index=8}
+    `'nonce-${nonce}'`,                                            // nonce + inline scriptler için
+    "'unsafe-inline'",                                            // Cloudflare Rocket Loader tarafından enjekte edilen inline scriptlere izin ver
     "https://static.cloudflareinsights.com",                       // Cloudflare beacon :contentReference[oaicite:9]{index=9}
     "https://fundingchoicesmessages.google.com",                   // GFC script :contentReference[oaicite:10]{index=10}
     "https://www.googletagmanager.com",

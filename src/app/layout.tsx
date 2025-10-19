@@ -86,7 +86,8 @@ export default async function RootLayout({
 }) {
   // Resolve locale from params
   const locale = params?.locale as Locale | undefined;
-  const nonce = (await headers()).get("x-nonce") ?? undefined;
+  const headersList = headers();
+  const nonce = headersList.get("x-nonce") ?? undefined;
 
   // Only call `notFound()` when an explicit but invalid locale was provided.
   if (locale !== undefined && !routing.locales.includes(locale)) {
