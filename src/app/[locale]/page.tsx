@@ -2,12 +2,13 @@ import HomePage from "@/components/home/home-page";
 import { resolveLocale, routing } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 
-export default function LocaleHomePage({
+export default async function LocaleHomePage({
   params,
 }: {
   params: { locale: string };
 }) {
-  const locale = resolveLocale(params?.locale);
+  const awaitedParams = await params; 
+  const locale = resolveLocale(awaitedParams?.locale);
   if (!locale) {
     notFound();
   }

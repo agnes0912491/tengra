@@ -5,14 +5,15 @@ import { getMessages } from "@/i18n/get-messages";
 import { resolveLocale } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 
-export default function LocaleLayout({
+export default async function LocaleLayout({
   children,
   params,
 }: {
   children: React.ReactNode;
   params: { locale: string };
 }) {
-  const locale = resolveLocale(params?.locale);
+  const awaitedParams = await params;
+  const locale = resolveLocale(awaitedParams?.locale);
   if (!locale) {
     notFound();
   }

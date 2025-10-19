@@ -12,16 +12,14 @@ import { routing, type Locale } from "@/i18n/routing";
 import Script from "next/script";
 import ConsentBanner from "@/components/consent/ConsentBanner";
 import ClientUserProvider from "./ClientUserProvider";
-import { headers } from "next/headers"; 
+import IntlProviderClient from "@/components/providers/intl-provider-client";
+import { getMessages } from "@/i18n/get-messages";
 
 export const dynamic = "force-dynamic";
 
 const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
-// metadataBase tells Next how to resolve relative image/URL paths for social cards
-// Prefer an explicit public URL in production via NEXT_PUBLIC_SITE_URL or
-// NEXT_PUBLIC_METADATA_BASE. Fallback to localhost for dev.
 const metadataBaseUrl =
   process.env.NEXT_PUBLIC_SITE_URL ??
   process.env.NEXT_PUBLIC_METADATA_BASE ??
@@ -67,7 +65,6 @@ export const metadata: Metadata = {
     shortcut: new URL(Icon.src, metadataBase).toString(),
     apple: new URL(Icon.src, metadataBase).toString(),
   },
-  // Custom meta tags (App Router compliant alternative to next/head)
   other: {
     "google-adsense-account": "ca-pub-1840126959284939",
   },
@@ -77,28 +74,25 @@ export const viewport: Viewport = {
   colorScheme: "dark light",
 };
 
-export default async function RootLayout({
-  children,
-  params,
+export default function RootLayout({
+  children, 
 }: {
-  children: React.ReactNode;
-  params?: { locale?: Locale };
+  children: React.ReactNode; 
 }) {
-  // Resolve locale from params
-  const locale = params?.locale as Locale | undefined;
-  const headersList = await headers();
-  const nonce = headersList.get("x-nonce") ?? undefined;
+  const { locale, messages } = getMessages(routing.defaultLocale);
 
-  // Only call `notFound()` when an explicit but invalid locale was provided.
   if (locale !== undefined && !routing.locales.includes(locale)) {
     notFound();
   }
 
+  // Nonce'u runtime'da almaya çalışma, sadece Script'lerde kullan
+  const isProd = process.env.NODE_ENV === "production";
+
   return (
     <html lang={locale} className={`${orbitron.variable} ${inter.variable}`}>
       <body className="font-sans bg-[color:var(--background)] text-[color:var(--foreground)] w-full min-h-screen">
-        {/* Consent Mode default (denied) before any tags load */}
-        <Script id="consent-mode-default" strategy="beforeInteractive" nonce={nonce}>
+        {/* Consent Mode default */}
+        <Script id="consent-mode-default" strategy="beforeInteractive">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){ dataLayer.push(arguments); }
@@ -111,17 +105,16 @@ export default async function RootLayout({
           `}
         </Script>
 
-        {/* If Google Funding Choices CMP is configured, load its script and skip custom banner */}
-        {process.env.NEXT_PUBLIC_GFC_ID ? (
+        {/* Google Funding Choices (opsiyonel) */}
+        {process.env.NEXT_PUBLIC_GFC_ID && isProd ? (
           <>
             <Script
               id="gfc-loader"
               async
               src={`https://fundingchoicesmessages.google.com/i/${process.env.NEXT_PUBLIC_GFC_ID}?ers=1`}
               strategy="afterInteractive"
-              nonce={nonce}
             />
-            <Script id="gfc-present" strategy="afterInteractive" nonce={nonce}>
+            <Script id="gfc-present" strategy="afterInteractive">
               {`(function() { 
                 function signalGooglefcPresent() {
                   if (!window.frames['googlefcPresent']) {
@@ -140,17 +133,24 @@ export default async function RootLayout({
                 signalGooglefcPresent();
               })();`}
             </Script>
-            <Script
-              src="https://static.cloudflareinsights.com/beacon.min.js"
-              strategy="afterInteractive"
-              nonce={nonce}
-            />
           </>
         ) : null}
+
+        {/* Cloudflare Insights (opsiyonel) */}
+        {/* {isProd && (
+          <Script
+            src="https://static.cloudflareinsights.com/beacon.min.js"
+            strategy="afterInteractive"
+            data-cf-beacon='{"token": "YOUR_TOKEN_HERE"}'
+          />
+        )} */}
+
         <ClientUserProvider>
-          <ParticlesClientWrapper />
-          <ConsentBanner />
-          {children}
+          <ParticlesClientWrapper /> 
+          <IntlProviderClient locale={locale} messages={messages}>
+            <ConsentBanner />
+            {children}
+          </IntlProviderClient>
           <GlobalToastContainer />
         </ClientUserProvider>
       </body>

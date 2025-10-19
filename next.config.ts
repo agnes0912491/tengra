@@ -1,5 +1,4 @@
-import type { NextConfig } from "next";
-import path from "node:path";
+import type { NextConfig } from "next"; 
 
 const nextConfig: NextConfig = {
   experimental: {
@@ -8,13 +7,10 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  webpack: (config) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "react-toastify": path.join(__dirname, "src/lib/react-toastify"),
-    };
-
-    return config;
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
   },
 };
 
