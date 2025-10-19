@@ -12,7 +12,7 @@ import { ChevronDown } from "lucide-react";
 import Img from "../../../public/tengra_without_text.png";
 import LocaleSwitcher from "@/components/layout/locale-switcher";
 import { useAuth } from "@/components/providers/auth-provider";
-import { routing, type Locale } from "@/i18n/routing";
+import { type Locale } from "@/i18n/routing";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,8 +64,6 @@ export default function Footer() {
     () => pathname?.startsWith("/admin"),
     [pathname]
   );
-
-  console.log(user, isAuthenticated, loading, isAdmin);
 
   const handleLogout = useCallback(() => {
     logout();
