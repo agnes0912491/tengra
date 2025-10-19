@@ -156,13 +156,13 @@ export function ToastContainer({
       window.clearTimeout(existingTimer);
       timersRef.current.delete(id);
     }
-  }, []);
+  }, [timers]);
 
   const clearAllToasts = useCallback(() => {
     timersRef.current.forEach((timer) => window.clearTimeout(timer));
     timersRef.current.clear();
     setToasts([]);
-  }, []);
+  }, [timers]);
 
   useEffect(() => {
     const handleAdd: ToastListener = (toastItem) => {
@@ -191,7 +191,7 @@ export function ToastContainer({
 
       clearAllToasts();
     };
-  }, [autoClose, clearAllToasts, removeToast]);
+  }, [autoClose, clearAllToasts, removeToast, timers]);
 
   const containerClass = useMemo(
     () =>
