@@ -149,8 +149,8 @@ export async function proxy(request: NextRequest) {
 
   const scriptSrc = [
     "'self'",
-    `'nonce-${nonce}'`,                                            // nonce + strict-dynamic modeli :contentReference[oaicite:7]{index=7}
-    "'strict-dynamic'",                                            // üçüncü tarafın zincir yüklemelerine izin verir :contentReference[oaicite:8]{index=8}
+    `'nonce-${nonce}'`,                                            // nonce + inline scriptler için
+    "'unsafe-inline'",                                            // Cloudflare Rocket Loader tarafından enjekte edilen inline scriptlere izin ver
     "https://static.cloudflareinsights.com",                       // Cloudflare beacon :contentReference[oaicite:9]{index=9}
     "https://fundingchoicesmessages.google.com",                   // GFC script :contentReference[oaicite:10]{index=10}
     "https://www.googletagmanager.com",
