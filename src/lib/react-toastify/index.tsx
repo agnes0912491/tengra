@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 
@@ -40,10 +47,30 @@ type ToastPosition =
   | "bottom-right"
   | "bottom-center";
 
+type ToastContentProps = {
+  type?: ToastType;
+};
+
+type CloseButtonProps = {
+  closeToast?: () => void;
+};
+
 type ToastContainerProps = {
   position?: ToastPosition;
   autoClose?: number;
   theme?: ToastTheme;
+  className?: string;
+  toastClassName?:
+    | string
+    | ((opts: { type?: ToastType | undefined }) => string);
+  bodyClassName?: string;
+  progressClassName?: string;
+  newestOnTop?: boolean;
+  closeButton?:
+    | ReactNode
+    | false
+    | ((props: CloseButtonProps) => ReactNode);
+  icon?: ReactNode | false;
 };
 
 const addListeners = new Set<ToastListener>();
@@ -105,6 +132,12 @@ export function ToastContainer({
   position = "bottom-right",
   autoClose = 3500,
   theme = "dark",
+  className,
+  toastClassName,
+  bodyClassName,
+  progressClassName,
+  closeButton,
+  icon,
 }: ToastContainerProps) {
   const [toasts, setToasts] = useState<ToastRecord[]>([]);
   const timers = useRef(new Map<number, number>());
@@ -173,35 +206,65 @@ export function ToastContainer({
     return null;
   }
 
+  const orderedToasts = newestOnTop ? [...toasts].reverse() : toasts;
+
   return createPortal(
-    <div className={containerClass}>
-      {toasts.map((toastItem) => (
-        <div
-          key={toastItem.id}
-          className={cn(
-            "pointer-events-auto flex items-start gap-3 rounded-xl border px-4 py-3 shadow-lg transition-all",
-            themeClasses[theme],
-            toastItem.type === "success" &&
-              "border-[rgba(45,212,191,0.6)] text-emerald-200",
-            toastItem.type === "error" &&
-              "border-[rgba(248,113,113,0.5)] text-rose-200",
-            toastItem.type === "info" &&
-              "border-[rgba(96,165,250,0.5)] text-blue-200"
-          )}
-        >
-          <span className="text-sm leading-5">{toastItem.message}</span>
-          <button
-            type="button"
-            onClick={() => removeToast(toastItem.id)}
-            className="ml-auto text-xs uppercase tracking-wide text-[rgba(255,255,255,0.6)] transition hover:text-white"
+    <div className={cn(containerClass, className)}>
+      {orderedToasts.map((toastItem) => {
+        const resolvedToastClass =
+          typeof toastClassName === "function"
+            ? toastClassName({ type: toastItem.type })
+            : toastClassName;
+
+        const resolvedClose =
+          typeof closeButton === "function"
+            ? closeButton({ closeToast: () => removeToast(toastItem.id) })
+            : closeButton;
+
+        return (
+          <div
+            key={toastItem.id}
+            className={cn(
+              "pointer-events-auto flex items-start gap-3 rounded-xl border px-4 py-3 shadow-lg transition-all",
+              themeClasses[theme],
+              toastItem.type === "success" &&
+                "border-[rgba(45,212,191,0.6)] text-emerald-200",
+              toastItem.type === "error" &&
+                "border-[rgba(248,113,113,0.5)] text-rose-200",
+              toastItem.type === "info" &&
+                "border-[rgba(96,165,250,0.5)] text-blue-200",
+              resolvedToastClass
+            )}
           >
-            Kapat
-          </button>
-        </div>
-      ))}
+            {icon !== false && icon}
+            <span className={cn("text-sm leading-5", bodyClassName)}>
+              {toastItem.message}
+            </span>
+            {resolvedClose === false ? null : resolvedClose ?? (
+              <button
+                type="button"
+                onClick={() => removeToast(toastItem.id)}
+                className="ml-auto text-xs uppercase tracking-wide text-[rgba(255,255,255,0.6)] transition hover:text-white"
+              >
+                Kapat
+              </button>
+            )}
+          </div>
+        );
+      })}
+      {progressClassName ? (
+        <div className={progressClassName} aria-hidden />
+      ) : null}
     </div>,
     document.body
   );
 }
 
-export type { ToastOptions, ToastPosition, ToastTheme, ToastContainerProps };
+export type {
+  CloseButtonProps,
+  ToastContentProps,
+  ToastContainerProps,
+  ToastOptions,
+  ToastPosition,
+  ToastTheme,
+};
