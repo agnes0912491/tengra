@@ -145,7 +145,15 @@ export function ToastContainer({
   const [toasts, setToasts] = useState<ToastRecord[]>([]);
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      setMounted(true);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, []);
 
   const removeToast = useCallback((id: number) => {
     // render'da sadece state değiştir
