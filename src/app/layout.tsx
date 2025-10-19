@@ -2,7 +2,6 @@
 import "./globals.css";
 import Icon from "../../public/tengra_without_text.png";
 import { Metadata, Viewport } from "next";
-import AuthProvider from "@/components/providers/auth-provider";
 import ParticlesClientWrapper from "@/components/ui/particles-client-wrapper";
 import GlobalToastContainer from "@/components/ui/global-toast-container";
 import { Inter, Orbitron } from "next/font/google";
