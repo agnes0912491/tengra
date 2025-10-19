@@ -5,14 +5,16 @@ import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Cookies from "js-cookie";
 
-import { isLocale, routing, type Locale } from "@/i18n/routing";
+import { resolveLocale, routing, type Locale } from "@/i18n/routing";
 
 const localeOptions: Locale[] = [...routing.locales];
 
 function getLocalizedPath(pathname: string, targetLocale: Locale) {
   const segments = pathname.split("/").filter(Boolean);
 
-  if (segments.length > 0 && isLocale(segments[0])) {
+  const currentLocale = segments.length > 0 ? resolveLocale(segments[0]) : null;
+
+  if (currentLocale) {
     if (targetLocale === routing.defaultLocale) {
       segments.shift();
     } else {

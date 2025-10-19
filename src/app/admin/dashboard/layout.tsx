@@ -3,7 +3,7 @@ import { cookies, headers } from "next/headers";
 
 import IntlProviderClient from "@/components/providers/intl-provider-client";
 import { getMessages } from "@/i18n/get-messages";
-import { isLocale, routing } from "@/i18n/routing";
+import { resolveLocale, routing } from "@/i18n/routing";
 
 type Props = {
   children: ReactNode;
@@ -11,8 +11,9 @@ type Props = {
 
 function resolvePreferredLocale() {
   const localeCookie = cookies().get("NEXT_LOCALE")?.value;
-  if (localeCookie && isLocale(localeCookie)) {
-    return localeCookie;
+  const cookieLocale = resolveLocale(localeCookie);
+  if (cookieLocale) {
+    return cookieLocale;
   }
 
   const headersList = headers();
@@ -25,15 +26,10 @@ function resolvePreferredLocale() {
 
   for (const code of candidates) {
     if (!code) continue;
-    const exactMatch = supported.find((locale) => locale.toLowerCase() === code);
-    if (exactMatch) {
-      return exactMatch;
-    }
 
-    const base = code.split("-")[0];
-    const baseMatch = supported.find((locale) => locale.toLowerCase() === base);
-    if (baseMatch) {
-      return baseMatch;
+    const normalized = resolveLocale(code);
+    if (normalized) {
+      return normalized;
     }
   }
 
