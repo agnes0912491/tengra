@@ -374,3 +374,32 @@
   font-family: "Noto Sans Old Turkic", "Noto Sans", "Segoe UI Symbol", "Arial Unicode MS", sans-serif !important;
   font-feature-settings: "kern";
 }
+
+.admin-starfield {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(1.2px 1.2px at 20% 10%, rgba(110, 211, 225, 0.8), transparent 60%),
+    radial-gradient(1px 1px at 80% 30%, rgba(53, 184, 207, 0.7), transparent 55%),
+    radial-gradient(1.4px 1.4px at 40% 80%, rgba(0, 167, 197, 0.65), transparent 60%),
+    radial-gradient(1px 1px at 70% 60%, rgba(255, 255, 255, 0.45), transparent 65%);
+  background-size: 1400px 1400px, 1100px 1100px, 900px 900px, 700px 700px;
+  opacity: 0.42;
+  animation: admin-twinkle 18s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(0, 167, 197, 0.4));
+}
+
+@keyframes admin-twinkle {
+  0% {
+    opacity: 0.35;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: translate3d(-12px, -8px, 0) scale(1.015);
+  }
+  100% {
+    opacity: 0.35;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
