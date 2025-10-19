@@ -140,27 +140,22 @@ export function ToastContainer({
   icon,
 }: ToastContainerProps) {
   const [toasts, setToasts] = useState<ToastRecord[]>([]);
-  const timersRef = useRef(new Map<number, ReturnType<typeof setTimeout>>());
-  const [mounted, setMounted] = useState(false);
+  const [mounted] = useState(() => typeof window !== "undefined");
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const removeToast = useCallback((id: number) => {
-    setToasts((prev) => prev.filter((toastItem) => toastItem.id !== id));
-
-    const existingTimer = timersRef.current.get(id);
-
-    if (existingTimer) {
-      window.clearTimeout(existingTimer);
-      timersRef.current.delete(id);
+const removeToast = useCallback((id: number) => {
+  // render'da sadece state değiştir
+  setToasts((prev) => prev.filter((t) => t.id !== id));
+  
+	const timer = toastTimers.get(id);
+    if (timer) {
+      clearTimeout(timer);
+      toastTimers.delete(id);
     }
-  }, []);
+}, []);
 
   const clearAllToasts = useCallback(() => {
-    timersRef.current.forEach((timer) => window.clearTimeout(timer));
-    timersRef.current.clear();
+    toastTimers.forEach((t) => clearTimeout(t));
+    toastTimers.clear();
     setToasts([]);
   }, []);
 

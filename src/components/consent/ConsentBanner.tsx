@@ -94,29 +94,29 @@ const GFC_ID = process.env.NEXT_PUBLIC_GFC_ID;
 
 export default function ConsentBanner() {
   const t = useTranslations("ConsentBanner");
-  const [consent, setConsentState] = useState<ConsentState>("unknown");
+  const [consent, setConsentState] = useState<ConsentState>(() => getConsent());
   const [shouldShow, setShouldShow] = useState(false);
   const skipBanner = Boolean(GFC_ID && GFC_ID.length > 0);
 
   useEffect(() => {
     if (skipBanner) return;
 
-    const current = getConsent();
-    setConsentState(current);
-
-    if (current === "unknown") {
+    if (consent === "unknown") {
       const languages =
         typeof navigator === "undefined"
           ? null
           : [navigator.language, ...(navigator.languages ?? [])]
               .filter(Boolean)
               .join(",");
-      setShouldShow(inEEA(languages));
+      setTimeout(() => {      
+	setShouldShow(inEEA(languages));
+      }, 0);
+
       ensureGtag("denied");
     } else {
-      ensureGtag(current);
+      ensureGtag(consent);
     }
-  }, [skipBanner]);
+  }, [skipBanner, consent]);
 
   const onAllowAll = () => {
     setConsent("granted");

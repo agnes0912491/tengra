@@ -12,6 +12,7 @@ import { routing, type Locale } from "@/i18n/routing";
 import Script from "next/script";
 import ConsentBanner from "@/components/consent/ConsentBanner";
 import ClientUserProvider from "./ClientUserProvider";
+import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
@@ -85,6 +86,7 @@ export default async function RootLayout({
 }) {
   // Resolve locale from params
   const locale = params?.locale as Locale | undefined;
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
 
   // Only call `notFound()` when an explicit but invalid locale was provided.
   if (locale !== undefined && !routing.locales.includes(locale)) {
@@ -95,7 +97,7 @@ export default async function RootLayout({
     <html lang={locale} className={`${orbitron.variable} ${inter.variable}`}>
       <body className="font-sans bg-[color:var(--background)] text-[color:var(--foreground)] w-full min-h-screen">
         {/* Consent Mode default (denied) before any tags load */}
-        <Script id="consent-mode-default" strategy="beforeInteractive">
+        <Script id="consent-mode-default" strategy="beforeInteractive" nonce={nonce}>
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){ dataLayer.push(arguments); }
@@ -116,8 +118,9 @@ export default async function RootLayout({
               async
               src={`https://fundingchoicesmessages.google.com/i/${process.env.NEXT_PUBLIC_GFC_ID}?ers=1`}
               strategy="afterInteractive"
+              nonce={nonce}
             />
-            <Script id="gfc-present" strategy="afterInteractive">
+            <Script id="gfc-present" strategy="afterInteractive" nonce={nonce}>
               {`(function() { 
                 function signalGooglefcPresent() {
                   if (!window.frames['googlefcPresent']) {
@@ -136,6 +139,11 @@ export default async function RootLayout({
                 signalGooglefcPresent();
               })();`}
             </Script>
+            <Script
+              src="https://static.cloudflareinsights.com/beacon.min.js"
+              strategy="afterInteractive"
+              nonce={nonce}
+            />
           </>
         ) : null}
         <ClientUserProvider>

@@ -1,75 +1,47 @@
 import { NextRequest, NextResponse } from "next/server";
-
 import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
 import { resolveLocale, routing } from "@/i18n/routing";
 
-type AuthMeResponse = {
-  user?: {
-    role?: string | null;
-  } | null;
-};
-
-const API_BASE =
-  process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:5000";
+type AuthMeResponse = { user?: { role?: string | null } | null };
+const API_BASE = process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:5000";
 const BACKEND_AUTH_ME = `${API_BASE}/auth/me`;
 
+// ---- helpers (değişmedi) ----
 const PUBLIC_PATH_PREFIXES = ["/admin/login", "/forum"];
-// Allow-listed public paths that do not require admin auth.
-// We intentionally treat root ('/') and '/blogs' as public, but avoid adding
-// '/' to PUBLIC_PATH_PREFIXES because that would match every path.
 const stripLocaleFromPath = (pathname: string) => {
   const segments = pathname.split("/").filter(Boolean);
   if (segments.length === 0) return "/";
-
   const [possibleLocale, ...rest] = segments;
-  if (resolveLocale(possibleLocale)) {
-    return rest.length === 0 ? "/" : `/${rest.join("/")}`;
-  }
-
+  if (resolveLocale(possibleLocale)) return rest.length === 0 ? "/" : `/${rest.join("/")}`;
   return pathname;
 };
-
 const isPublicPath = (pathname: string) => {
-  const normalizedPath = stripLocaleFromPath(pathname);
-
-  if (normalizedPath === "/") return true; // homepage is public
-  if (normalizedPath === "/blogs" || normalizedPath.startsWith("/blogs/"))
-    return true; // blogs list and posts are public
-
-  return PUBLIC_PATH_PREFIXES.some((path) =>
-    path.endsWith("/")
-      ? normalizedPath.startsWith(path)
-      : normalizedPath === path || normalizedPath.startsWith(`${path}/`)
+  const normalized = stripLocaleFromPath(pathname);
+  if (normalized === "/") return true;
+  if (normalized === "/blogs" || normalized.startsWith("/blogs/")) return true;
+  return PUBLIC_PATH_PREFIXES.some((p) =>
+    p.endsWith("/") ? normalized.startsWith(p) : normalized === p || normalized.startsWith(`${p}/`)
   );
 };
-
-const isAssetPath = (pathname: string) =>
-  pathname.startsWith("/_next") ||
-  pathname.startsWith("/favicon") ||
-  pathname.startsWith("/images") ||
-  pathname.startsWith("/public") ||
-  pathname === "/robots.txt" ||
-  pathname === "/sitemap.xml";
+const isAssetPath = (p: string) =>
+  p.startsWith("/_next") || p.startsWith("/favicon") || p.startsWith("/images") ||
+  p.startsWith("/public") || p === "/robots.txt" || p === "/sitemap.xml";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
-  // Create response object to add security headers
+  // Nonce: her istekte benzersiz
+  // Not: Base64 zorunlu değil; benzersiz ve tahmin edilemez olması yeterli. :contentReference[oaicite:4]{index=4}
+  const nonce = `${crypto.randomUUID()}${Math.random().toString(36).slice(2)}`;
   let response: NextResponse;
 
-  // Auto-redirect root '/' to best locale using cookie or Accept-Language
+  // ---- locale redirect (değişmedi) ----
   if (pathname === "/") {
     const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value;
     const header = request.headers.get("accept-language") ?? "";
     const supported = routing.locales as unknown as string[];
-    const preferred = header
-      .split(",")
-      .map((part) => part.trim().split(";")[0])
+    const preferred = header.split(",").map((p) => p.trim().split(";")[0])
       .map((code) => code.toLowerCase().replace("_", "-") as string);
-
-    let match: string | undefined =
-      resolveLocale(cookieLocale) ?? undefined;
-
+    let match: string | undefined = resolveLocale(cookieLocale) ?? undefined;
     if (!match) {
       for (const lang of preferred) {
         const normalized = resolveLocale(lang) ?? undefined;
@@ -78,18 +50,15 @@ export async function proxy(request: NextRequest) {
         if (match) break;
       }
     }
-
     const target = (match as string | undefined) ?? routing.defaultLocale;
     const url = new URL(`/${target}`, request.url);
     response = NextResponse.redirect(url);
   } else if (isAssetPath(pathname) || isPublicPath(pathname)) {
     response = NextResponse.next();
   } else {
-    // Only enforce admin authentication for admin pages and admin API routes.
-    const isAdminRoute =
-      pathname === "/admin" || pathname.startsWith("/admin/");
+    // ---- admin auth (değişmedi) ----
+    const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
     const isAdminPublic = pathname === "/admin/login";
-
     if (!isAdminRoute) {
       response = NextResponse.next();
     } else if (isAdminPublic) {
@@ -100,19 +69,13 @@ export async function proxy(request: NextRequest) {
         try {
           const res = await fetch(BACKEND_AUTH_ME, {
             method: "GET",
-            headers: {
-              Authorization: `Bearer ${sessionToken}`,
-              Accept: "application/json",
-            },
+            headers: { Authorization: `Bearer ${sessionToken}`, Accept: "application/json" },
             cache: "no-store",
           });
-
           if (!res.ok) {
             response = NextResponse.next();
           } else {
-            const data = (await res
-              .json()
-              .catch(() => ({}))) as AuthMeResponse;
+            const data = (await res.json().catch(() => ({}))) as AuthMeResponse;
             const role = data.user?.role ?? undefined;
             if (role === "admin" || role === "ADMIN") {
               const dashboardUrl = new URL("/admin/dashboard", request.url);
@@ -126,7 +89,6 @@ export async function proxy(request: NextRequest) {
         }
       }
     } else {
-      // Admin area - require valid session and admin role
       const sessionToken = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
       if (!sessionToken) {
         const loginUrl = new URL("/admin/login", request.url);
@@ -136,23 +98,16 @@ export async function proxy(request: NextRequest) {
         try {
           const res = await fetch(BACKEND_AUTH_ME, {
             method: "GET",
-            headers: {
-              Authorization: `Bearer ${sessionToken}`,
-              Accept: "application/json",
-            },
+            headers: { Authorization: `Bearer ${sessionToken}`, Accept: "application/json" },
             cache: "no-store",
           });
-
           if (!res.ok) {
             const loginUrl = new URL("/admin/login", request.url);
             loginUrl.searchParams.set("next", pathname);
             response = NextResponse.redirect(loginUrl);
           } else {
             const data = (await res.json().catch(() => ({}))) as AuthMeResponse;
-            if (
-              !data.user ||
-              (data.user.role !== "admin" && data.user.role !== "ADMIN")
-            ) {
+            if (!data.user || (data.user.role !== "admin" && data.user.role !== "ADMIN")) {
               const loginUrl = new URL("/admin/login", request.url);
               loginUrl.searchParams.set("next", pathname);
               response = NextResponse.redirect(loginUrl);
@@ -169,32 +124,39 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // Add security headers to all responses
+  // ---- CSP (nonce + strict-dynamic) ----
+  const isProd = process.env.NODE_ENV === "production";
+
   const connectSrc = [
     "'self'",
     API_BASE,
-    "ws://localhost:6000",
-    "http://localhost:6000",
-    "https://fundingchoicesmessages.google.com",
-    "https://pagead2.googlesyndication.com",
+    "https://cloudflareinsights.com",                               // Cloudflare Web Analytics beacon hedefi :contentReference[oaicite:5]{index=5}
+    "https://fundingchoicesmessages.google.com",                    // GFC API :contentReference[oaicite:6]{index=6}
+    "https://www.google-analytics.com",
     "https://googleads.g.doubleclick.net",
-    "https://cloudflareinsights.com",
-  ].join(" ");
+    "https://pagead2.googlesyndication.com",
+    !isProd && "ws://localhost:6000",
+    !isProd && "http://localhost:6000",
+  ].filter(Boolean).join(" ");
+
   const scriptSrc = [
     "'self'",
-    "'unsafe-inline'",
-    "'unsafe-eval'",
-    "https://fundingchoicesmessages.google.com",
+    `'nonce-${nonce}'`,                                            // nonce + strict-dynamic modeli :contentReference[oaicite:7]{index=7}
+    "'strict-dynamic'",                                            // üçüncü tarafın zincir yüklemelerine izin verir :contentReference[oaicite:8]{index=8}
+    "https://static.cloudflareinsights.com",                       // Cloudflare beacon :contentReference[oaicite:9]{index=9}
+    "https://fundingchoicesmessages.google.com",                   // GFC script :contentReference[oaicite:10]{index=10}
+    "https://www.googletagmanager.com",
     "https://www.gstatic.com",
     "https://pagead2.googlesyndication.com",
-    "https://static.cloudflareinsights.com",
-  ].join(" ");
+    !isProd && "'unsafe-eval'",                                    // yalnız dev için (React Fast Refresh)
+  ].filter(Boolean).join(" ");
+
   const frameSrc = [
     "'self'",
-    "https://fundingchoicesmessages.google.com",
-    "https://www.google.com",
+    "https://fundingchoicesmessages.google.com",                   // GFC iframe :contentReference[oaicite:11]{index=11}
     "https://googleads.g.doubleclick.net",
   ].join(" ");
+
   const imgSrc = [
     "'self'",
     "data:",
@@ -202,43 +164,53 @@ export async function proxy(request: NextRequest) {
     "https://pagead2.googlesyndication.com",
     "https://googleads.g.doubleclick.net",
   ].join(" ");
+
+  const styleSrc = [
+    "'self'",
+    "'unsafe-inline'",                                             // gerekiyorsa; nonce’a geçebilirsiniz :contentReference[oaicite:12]{index=12}
+    "https://fonts.googleapis.com",
+  ].join(" ");
+
+  const fontSrc = ["'self'", "https://fonts.gstatic.com", "data:"].join(" ");
+
   response.headers.set(
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      // Allow inline styles for now; consider removing by using hashed styles only
-      "style-src 'self' 'unsafe-inline'",
-      `img-src ${imgSrc}`,
-      "font-src 'self'",
-      `connect-src ${connectSrc}`,
       `script-src ${scriptSrc}`,
+      `connect-src ${connectSrc}`,
+      `img-src ${imgSrc}`,
+      `style-src ${styleSrc}`,
+      `font-src ${fontSrc}`,
       `frame-src ${frameSrc}`,
-      "frame-ancestors 'none'",
+      "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
+      "frame-ancestors 'none'",
+      "upgrade-insecure-requests",
     ].join("; ")
   );
 
+  // nonce’ı layout’a geçirmek için
+  response.headers.set("x-nonce", nonce);                          // Next, nonce’ı otomatik uygular + <Script nonce> ile kullanılır :contentReference[oaicite:13]{index=13}
+
+  // Diğer güvenlik başlıkları (mevcutlar korunarak)
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("X-Frame-Options", "DENY");
-  response.headers.set("X-XSS-Protection", "1; mode=block");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  response.headers.set(
-    "Permissions-Policy",
-    "geolocation=(), microphone=(), camera=(), payment=(), usb=()"
-  );
+  response.headers.set("Permissions-Policy", "geolocation=(), microphone=(), camera=(), payment=(), usb=()");
 
-  // Set secure cookie attributes
+  // Cookie güvenliği (mevcut)
   if (response.cookies.get(ADMIN_SESSION_COOKIE)) {
     response.cookies.set(
       ADMIN_SESSION_COOKIE,
       response.cookies.get(ADMIN_SESSION_COOKIE)!.value,
       {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: isProd,
         sameSite: "strict",
         path: "/",
-        maxAge: 60 * 60 * 24 * 7, // 7 days
+        maxAge: 60 * 60 * 24 * 7,
       }
     );
   }
@@ -247,5 +219,14 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: "/((?!_next/static|_next/image|favicon.ico).*)",
+  // Next resmi öneri: prefetch isteklerini hariç tutma :contentReference[oaicite:14]{index=14}
+  matcher: [
+    {
+      source: "/((?!_next/static|_next/image|favicon.ico).*)",
+      missing: [
+        { type: "header", key: "next-router-prefetch" },
+        { type: "header", key: "purpose", value: "prefetch" },
+      ],
+    },
+  ],
 };
