@@ -12,7 +12,7 @@ import { routing, type Locale } from "@/i18n/routing";
 import Script from "next/script";
 import ConsentBanner from "@/components/consent/ConsentBanner";
 import ClientUserProvider from "./ClientUserProvider";
-import { headers } from "next/headers";
+import { headers } from "next/headers"; 
 
 export const dynamic = "force-dynamic";
 
@@ -86,7 +86,7 @@ export default async function RootLayout({
 }) {
   // Resolve locale from params
   const locale = params?.locale as Locale | undefined;
-  const headersList = headers();
+  const headersList = await headers();
   const nonce = headersList.get("x-nonce") ?? undefined;
 
   // Only call `notFound()` when an explicit but invalid locale was provided.

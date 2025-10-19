@@ -3,7 +3,7 @@
 import {
   useCallback,
   useEffect,
-  useMemo, 
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
@@ -60,15 +60,15 @@ type ToastContainerProps = {
   theme?: ToastTheme;
   className?: string;
   toastClassName?:
-    | string
-    | ((opts: { type?: ToastType | undefined }) => string);
+  | string
+  | ((opts: { type?: ToastType | undefined }) => string);
   bodyClassName?: string;
   progressClassName?: string;
   newestOnTop?: boolean;
   closeButton?:
-    | ReactNode
-    | false
-    | ((props: CloseButtonProps) => ReactNode);
+  | ReactNode
+  | false
+  | ((props: CloseButtonProps) => ReactNode);
   icon?: ReactNode | false;
 };
 
@@ -76,6 +76,9 @@ const addListeners = new Set<ToastListener>();
 const dismissListeners = new Set<DismissListener>();
 
 let toastIdCounter = 0;
+
+// Map to keep track of toast timers
+const toastTimers = new Map<number, number>();
 
 function emitToast(toast: ToastRecord) {
   addListeners.forEach((listener) => listener(toast));
@@ -137,20 +140,21 @@ export function ToastContainer({
   progressClassName,
   closeButton,
   icon,
+  newestOnTop,
 }: ToastContainerProps) {
   const [toasts, setToasts] = useState<ToastRecord[]>([]);
   const [mounted] = useState(() => typeof window !== "undefined");
 
-const removeToast = useCallback((id: number) => {
-  // render'da sadece state değiştir
-  setToasts((prev) => prev.filter((t) => t.id !== id));
-  
-	const timer = toastTimers.get(id);
+  const removeToast = useCallback((id: number) => {
+    // render'da sadece state değiştir
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+
+    const timer = toastTimers.get(id);
     if (timer) {
       clearTimeout(timer);
       toastTimers.delete(id);
     }
-}, []);
+  }, []);
 
   const clearAllToasts = useCallback(() => {
     toastTimers.forEach((t) => clearTimeout(t));
@@ -164,7 +168,7 @@ const removeToast = useCallback((id: number) => {
 
       const delay = toastItem.autoClose ?? autoClose;
       const timer = window.setTimeout(() => removeToast(toastItem.id), delay);
-      timersRef.current.set(toastItem.id, timer);
+      toastTimers.set(toastItem.id, timer);
     };
 
     const handleDismiss: DismissListener = (id) => {
@@ -222,11 +226,11 @@ const removeToast = useCallback((id: number) => {
               "pointer-events-auto flex items-start gap-3 rounded-xl border px-4 py-3 shadow-lg transition-all",
               themeClasses[theme],
               toastItem.type === "success" &&
-                "border-[rgba(45,212,191,0.6)] text-emerald-200",
+              "border-[rgba(45,212,191,0.6)] text-emerald-200",
               toastItem.type === "error" &&
-                "border-[rgba(248,113,113,0.5)] text-rose-200",
+              "border-[rgba(248,113,113,0.5)] text-rose-200",
               toastItem.type === "info" &&
-                "border-[rgba(96,165,250,0.5)] text-blue-200",
+              "border-[rgba(96,165,250,0.5)] text-blue-200",
               resolvedToastClass
             )}
           >

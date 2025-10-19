@@ -1,27 +1,20 @@
 "use client";
 
-import { useCallback } from "react";
-import Particles from "react-tsparticles";
-import { loadSlim } from "tsparticles-slim";
-import type { Engine } from "tsparticles-engine";
+import { Particles } from "@tsparticles/react";
 
 export default function ParticlesBackground() {
-  const init = useCallback(async (engine: Engine) => {
-    await loadSlim(engine);
-  }, []);
-
   return (
     <Particles
       id="tengra-particles"
-      init={init}
       options={{
+
         fullScreen: { enable: true, zIndex: 0 },
         background: { color: "transparent" },
         fpsLimit: 60,
         particles: {
-          number: { value: 30, density: { enable: true, area: 800 } },
+          number: { value: 30, density: { enable: true, width: 800, height: 800 } },
           color: { value: "#00A7C5" },
-          opacity: { value: 0.3, random: true },
+          opacity: { value: 0.3 },
           size: { value: { min: 0.5, max: 2.5 } },
           move: {
             enable: true,
