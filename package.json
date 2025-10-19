@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack && npx next-sitemap --watch",
-    "build": "next build && npx next-sitemap",
+    "dev": "next dev --turbopack && next-sitemap --watch",
+    "build": "next build --turbo",
+    "postbuild": "next-sitemap",
     "start": "next start",
     "lint": "eslint"
   },
