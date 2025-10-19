@@ -148,24 +148,12 @@
       "fetchUsersError": "无法加载用户列表，请重试。",
       "logout": "管理员会话已结束。"
     },
-    "navigationLinks": [
-      {
-        "href": "/admin/dashboard#overview",
-        "label": "概览"
-      },
-      {
-        "href": "/admin/dashboard#projects",
-        "label": "项目"
-      },
-      {
-        "href": "/admin/dashboard#blogs",
-        "label": "博客"
-      },
-      {
-        "href": "/admin/dashboard#users",
-        "label": "用户"
-      }
-    ],
+    "navigation": {
+      "overview": "概览",
+      "projects": "项目",
+      "blogs": "博客",
+      "users": "用户"
+    },
     "unauthorizedAccess": "访问受限",
     "unauthorizedMessage": "需要管理员账户才能查看此控制面板。",
     "goToLogin": "前往管理员登录"

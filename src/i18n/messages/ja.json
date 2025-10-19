@@ -148,24 +148,12 @@
       "fetchUsersError": "ユーザー一覧を読み込めませんでした。もう一度お試しください。",
       "logout": "管理者セッションを終了しました。"
     },
-    "navigationLinks": [
-      {
-        "href": "/admin/dashboard#overview",
-        "label": "概要"
-      },
-      {
-        "href": "/admin/dashboard#projects",
-        "label": "プロジェクト"
-      },
-      {
-        "href": "/admin/dashboard#blogs",
-        "label": "ブログ"
-      },
-      {
-        "href": "/admin/dashboard#users",
-        "label": "ユーザー"
-      }
-    ],
+    "navigation": {
+      "overview": "概要",
+      "projects": "プロジェクト",
+      "blogs": "ブログ",
+      "users": "ユーザー"
+    },
     "unauthorizedAccess": "アクセス制限",
     "unauthorizedMessage": "ダッシュボードを表示するには管理者アカウントが必要です。",
     "goToLogin": "管理者ログインへ"
