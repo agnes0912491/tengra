@@ -50,6 +50,7 @@ export function useAuth() {
 
 type Props = {
   children: React.ReactNode;
+  user?: User | null;
 };
 
 /**
@@ -57,8 +58,8 @@ type Props = {
  * - Hydrates initial state from localStorage (best-effort).
  * - Exposes login/logout helpers that update both memory state and localStorage.
  */
-export default function AuthProvider({ children }: Props) {
-  const [user, setUser] = useState<User | null>(null); 
+export default function AuthProvider({ children, user: initialUser }: Props) {
+  const [user, setUser] = useState<User | null>(initialUser || null);
   const [loading, setLoading] = useState<boolean>(false);
 
   /**

@@ -59,6 +59,8 @@ export default function Footer() {
     [pathname]
   );
 
+  console.log(user, isAuthenticated, loading, isAdmin);
+
   const handleLogout = useCallback(() => {
     logout();
     toast.info(tFooter("logoutSuccess"));
@@ -202,12 +204,7 @@ export default function Footer() {
                 </DropdownMenu>
               )
             ) : (
-              <Link
-                href="/admin/login"
-                className="rounded-full border border-[rgba(0,167,197,0.4)] px-3 py-1 text-[11px] uppercase tracking-widest text-[color:var(--color-turkish-blue-100)] transition hover:bg-[rgba(0,167,197,0.12)]"
-              >
-                {tFooter("login")}
-              </Link>
+              <></>
             )}
           </div>
         </div>

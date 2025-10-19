@@ -1,3 +1,4 @@
+// Sunucu bileşeni, "use client" yok!
 import "./globals.css";
 import Icon from "../../public/tengra_without_text.png";
 import { Metadata, Viewport } from "next";
@@ -11,6 +12,7 @@ import { notFound } from "next/navigation";
 import { routing, type Locale } from "@/i18n/routing";
 import Script from "next/script";
 import ConsentBanner from "@/components/consent/ConsentBanner";
+import ClientUserProvider from "./ClientUserProvider";
 
 export const dynamic = "force-dynamic";
 
@@ -75,34 +77,17 @@ export const viewport: Viewport = {
   colorScheme: "dark light",
 };
 
-type MaybePromise<T> = T | Promise<T>;
-
 export default async function RootLayout({
   children,
   params,
 }: {
   children: React.ReactNode;
-  // Next may provide params as a Promise or a plain object
-  params?: MaybePromise<{ locale?: Locale }>;
+  params?: { locale?: Locale };
 }) {
-  // params can be a Promise or a plain object; resolve safely without using `any`
-  let resolvedParams: { locale?: Locale } | undefined;
-  if (params) {
-    if (typeof (params as Promise<{ locale?: Locale }>).then === "function") {
-      try {
-        resolvedParams = (await params) as { locale?: Locale };
-      } catch {
-        resolvedParams = undefined;
-      }
-    } else {
-      resolvedParams = params as { locale?: Locale };
-    }
-  }
-
-  const locale = resolvedParams?.locale as Locale | undefined;
+  // Resolve locale from params
+  const locale = params?.locale as Locale | undefined;
 
   // Only call `notFound()` when an explicit but invalid locale was provided.
-  // Do not force-default here; nested layouts/pages will set providers.
   if (locale !== undefined && !routing.locales.includes(locale)) {
     notFound();
   }
@@ -154,12 +139,12 @@ export default async function RootLayout({
             </Script>
           </>
         ) : null}
-        <AuthProvider>
+        <ClientUserProvider>
           <ParticlesClientWrapper />
           <ConsentBanner />
           {children}
           <GlobalToastContainer />
-        </AuthProvider>
+        </ClientUserProvider>
       </body>
     </html>
   );

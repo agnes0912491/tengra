@@ -52,7 +52,7 @@ const isAssetPath = (pathname: string) =>
   pathname === "/robots.txt" ||
   pathname === "/sitemap.xml";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Create response object to add security headers
