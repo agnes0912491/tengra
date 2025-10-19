@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -61,6 +62,20 @@ type Props = {
 export default function AuthProvider({ children, user: initialUser }: Props) {
   const [user, setUser] = useState<User | null>(initialUser || null);
   const [loading, setLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (initialUser === undefined) {
+      return;
+    }
+
+    setUser((prev) => {
+      if (prev?.id === initialUser?.id) {
+        return prev;
+      }
+
+      return initialUser ?? null;
+    });
+  }, [initialUser]);
 
   /**
    * login: calls backend to authenticate using email+password.
