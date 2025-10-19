@@ -58,8 +58,6 @@ const REFRESH_TOKEN_KEY = "refreshToken";
 const CSRF_TOKEN_KEY = "csrfToken";
 
 const STORAGE_KEYS = [AUTH_TOKEN_KEY, REFRESH_TOKEN_KEY, CSRF_TOKEN_KEY];
-const t = useTranslations("AuthContext");
-const DEFAULT_ERROR_MESSAGE = t("authorization.defaultErrorMessage");
 
 const persistAuthPayload = (data: AuthSuccessPayload) => {
   if (!data) return;
@@ -85,6 +83,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const t = useTranslations("AuthContext");
+  const defaultErrorMessage = t("authorization.defaultErrorMessage");
 
   useEffect(() => {
     // Check if user is logged in on mount
@@ -141,7 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           message:
             response.status === 401
               ? t("authorization.invalidCredentials")
-              : DEFAULT_ERROR_MESSAGE,
+              : defaultErrorMessage,
         };
       }
 
@@ -150,7 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!data.success) {
         return {
           success: false,
-          message: data.message ?? DEFAULT_ERROR_MESSAGE,
+          message: data.message ?? defaultErrorMessage,
         };
       }
 
@@ -160,7 +160,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { success: true };
     } catch (error) {
       console.error("Login error:", error);
-      return { success: false, message: DEFAULT_ERROR_MESSAGE };
+      return { success: false, message: defaultErrorMessage };
     }
   };
 

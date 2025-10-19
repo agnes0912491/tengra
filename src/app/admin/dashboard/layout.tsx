@@ -18,7 +18,6 @@ function resolvePreferredLocale() {
 
   const headersList = headers();
   const acceptLanguage = headersList.get("Accept-Language") || "";
-  const supported = routing.locales as readonly string[];
   const candidates = acceptLanguage
     .split(",")
     .map((item) => item.trim().split(";")[0])

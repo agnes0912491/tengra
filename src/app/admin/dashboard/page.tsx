@@ -36,24 +36,34 @@ export default function AdminPage() {
 
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
 
-  const fetchUsers = useCallback(async () => {
-    try {
-      const tokenValue = await token();
-      if (!tokenValue) {
-        return;
-      }
-
-      const users = await getAllUsers(tokenValue);
-      setAvailableUsers(users);
-    } catch (error) {
-      console.error("Failed to fetch admin users:", error);
-      toast.error(t("toast.fetchUsersError"));
-    }
-  }, [t, token]);
-
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    let cancelled = false;
+
+    const fetchUsers = async () => {
+      try {
+        const tokenValue = await token();
+        if (!tokenValue || cancelled) {
+          return;
+        }
+
+        const users = await getAllUsers(tokenValue);
+        if (!cancelled) {
+          setAvailableUsers(users);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Failed to fetch admin users:", error);
+          toast.error(t("toast.fetchUsersError"));
+        }
+      }
+    };
+
+    void fetchUsers();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [t, token]);
 
   const handleLogout = useCallback(() => {
     logout();

@@ -58,45 +58,60 @@ function inEEA(header: string | null): boolean {
 
 declare global {
   interface Window {
-    dataLayer?: any[];
-    gtag?: (...args: any[]) => void;
+    dataLayer?: unknown[];
+    gtag?: (...args: unknown[]) => void;
   }
 }
+
+type ConsentUpdate = {
+  ad_storage: "granted" | "denied";
+  ad_personalization: "granted" | "denied";
+  ad_user_data: "granted" | "denied";
+  analytics_storage: "granted" | "denied";
+  wait_for_update?: number;
+};
 
 function ensureGtag(consent: ConsentState) {
   if (typeof window === "undefined") return;
   window.dataLayer = window.dataLayer || [];
-  function gtag(...args: any[]) {
+  function gtag(...args: unknown[]) {
     window.dataLayer!.push(args);
   }
   window.gtag = window.gtag || gtag;
 
   // Consent defaults before tag load
-  window.gtag("consent", "default", {
+  const defaults: ConsentUpdate = {
     ad_storage: consent === "granted" ? "granted" : "denied",
     ad_personalization: consent === "granted" ? "granted" : "denied",
     ad_user_data: consent === "granted" ? "granted" : "denied",
     analytics_storage: consent === "granted" ? "granted" : "denied",
     wait_for_update: 500,
-  });
+  };
+  window.gtag("consent", "default", defaults);
 }
 
 const GFC_ID = process.env.NEXT_PUBLIC_GFC_ID;
 
 export default function ConsentBanner() {
-  // If Google Funding Choices (Google CMP) is configured, do not show custom banner here.
-  if (GFC_ID && GFC_ID.length > 0) return null;
+  const t = useTranslations("ConsentBanner");
   const [consent, setConsentState] = useState<ConsentState>("unknown");
   const [shouldShow, setShouldShow] = useState(false);
+
+  // If Google Funding Choices (Google CMP) is configured, do not show custom banner here.
+  if (GFC_ID && GFC_ID.length > 0) return null;
 
   useEffect(() => {
     const current = getConsent();
     setConsentState(current);
 
     if (current === "unknown") {
-      const acceptLanguage =
-        navigator.language + "," + (navigator.languages || []).join(",");
-      setShouldShow(inEEA(acceptLanguage));
+      const languages =
+        typeof navigator === "undefined"
+          ? null
+          : [navigator.language, ...(navigator.languages ?? [])]
+              .filter(Boolean)
+              .join(",");
+      setShouldShow(inEEA(languages));
       ensureGtag("denied");
     } else {
       ensureGtag(current);
@@ -107,13 +122,14 @@ export default function ConsentBanner() {
     setConsent("granted");
     setConsentState("granted");
     setShouldShow(false);
-    if (window.gtag) {
-      window.gtag("consent", "update", {
+    if (typeof window !== "undefined" && window.gtag) {
+      const update: ConsentUpdate = {
         ad_storage: "granted",
         ad_personalization: "granted",
         ad_user_data: "granted",
         analytics_storage: "granted",
-      });
+      };
+      window.gtag("consent", "update", update);
     }
   };
 
@@ -121,19 +137,18 @@ export default function ConsentBanner() {
     setConsent("denied");
     setConsentState("denied");
     setShouldShow(false);
-    if (window.gtag) {
-      window.gtag("consent", "update", {
+    if (typeof window !== "undefined" && window.gtag) {
+      const update: ConsentUpdate = {
         ad_storage: "denied",
         ad_personalization: "denied",
         ad_user_data: "denied",
         analytics_storage: "denied",
-      });
+      };
+      window.gtag("consent", "update", update);
     }
   };
 
-  if (!shouldShow || consent !== "unknown") return null; 
-
-  const t = useTranslations("ConsentBanner");
+  if (!shouldShow || consent !== "unknown") return null;
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 flex items-center justify-between gap-4 bg-[rgba(0,0,0,0.85)] px-4 py-3 text-sm text-white shadow-lg">
