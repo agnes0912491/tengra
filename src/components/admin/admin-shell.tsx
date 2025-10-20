@@ -96,7 +96,7 @@ export default function AdminShell({ children }: Props) {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(0,151,178,0.18),transparent_60%)]" />
         </div>
 
-        <aside className="relative flex h-screen w-72 flex-col justify-between border-r border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.55)]/90 px-6 py-8 shadow-[12px_0_55px_rgba(0,0,0,0.35)] backdrop-blur-2xl">
+        <aside className="static flex min-h-screen w-72 flex-col justify-between border-r border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.55)]/90 px-6 py-8 shadow-[12px_0_55px_rgba(0,0,0,0.35)] backdrop-blur-2xl">
           <div className="absolute inset-0 -z-10 rounded-r-3xl bg-[linear-gradient(145deg,rgba(255,255,255,0.12)_0%,rgba(255,255,255,0.02)_45%,rgba(0,167,197,0.08)_100%)] opacity-70" />
           <header className="relative flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[rgba(110,211,225,0.35)] bg-[rgba(0,167,197,0.12)] shadow-[0_0_22px_rgba(0,167,197,0.4)]">
@@ -142,7 +142,7 @@ export default function AdminShell({ children }: Props) {
 
           <footer className="relative border-t border-[rgba(110,211,225,0.2)] pt-6 text-xs text-[rgba(255,255,255,0.7)]">
             <p className="text-[10px] uppercase tracking-[0.35em] text-[color:var(--color-turkish-blue-300)]">Kullanıcı</p>
-            <p className="mt-1 text-sm font-medium text-white">{user?.name ?? user?.displayName ?? "Admin"}</p>
+            <p className="mt-1 text-sm font-medium text-white">{user?.displayName ?? user?.username ?? "Admin"}</p>
             <p className="text-[11px] text-[rgba(255,255,255,0.55)]">{user?.email}</p>
             <button
               type="button"
