@@ -5,7 +5,7 @@ import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 
 import type { Role, User } from "@/lib/auth/users";
-import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
+import { ADMIN_SESSION_COOKIE_CANDIDATES } from "@/lib/auth";
 import { updateUserRole } from "@/lib/db";
 
 const ROLE_OPTIONS: { value: Role; label: string }[] = [
@@ -28,7 +28,9 @@ export default function UsersTable({ initialUsers }: Props) {
   const [isPending, startTransition] = useTransition();
 
   const handleRoleChange = (userId: string, role: Role) => {
-    const token = Cookies.get(ADMIN_SESSION_COOKIE);
+    const token = ADMIN_SESSION_COOKIE_CANDIDATES.map((name) => Cookies.get(name)).find(
+      (value): value is string => Boolean(value)
+    );
     if (!token) {
       toast.error("Yetkilendirme bilgisi bulunamadı.");
       return;

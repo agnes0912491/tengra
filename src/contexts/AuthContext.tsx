@@ -9,7 +9,10 @@ import React, {
 } from "react";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
-import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
+import {
+  ADMIN_SESSION_COOKIE,
+  LEGACY_ADMIN_SESSION_COOKIES,
+} from "@/lib/auth";
 import { useTranslations } from "next-intl";
 
 interface User {
@@ -66,17 +69,24 @@ const persistAuthPayload = (data: AuthSuccessPayload) => {
   localStorage.setItem(REFRESH_TOKEN_KEY, data.refreshToken);
   localStorage.setItem(CSRF_TOKEN_KEY, data.csrfToken);
 
-  Cookies.set(ADMIN_SESSION_COOKIE, data.token, {
+  const cookieOptions = {
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: "strict" as const,
     expires: 7,
     path: "/",
-  });
+  };
+  Cookies.set(ADMIN_SESSION_COOKIE, data.token, cookieOptions);
+  for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
+    Cookies.set(legacyName, data.token, cookieOptions);
+  }
 };
 
 const clearStoredAuth = () => {
   STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
   Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/" });
+  for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
+    Cookies.remove(legacyName, { path: "/" });
+  }
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
