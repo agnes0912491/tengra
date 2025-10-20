@@ -89,9 +89,10 @@ export default function AuthProvider({
   const login = useCallback(async (email: string, password: string, type: "user" | "admin" = "user") => {
     setAuthActionLoading(true);
     try {
-      const authenticated = type === "admin"
-        ? await authenticateAdmin(email, password)
-        : await authenticateUser(email, password);
+      const authenticated =
+        type === "admin"
+          ? await authenticateAdmin(email, password)
+          : await authenticateUser(email, password);
 
       if (!authenticated) {
         return { success: false, reason: "invalidCredentials" } as const;
@@ -102,7 +103,9 @@ export default function AuthProvider({
       localStorage.setItem("refreshToken", authenticated.authToken.refreshToken);
       localStorage.setItem("csrfToken", authenticated.authToken.csrfToken);
 
-      if (authenticated.user.role === "admin") {
+      const normalizedRole = authenticated.user.role?.toString().toLowerCase();
+
+      if (normalizedRole === "admin") {
         Cookies.set(ADMIN_SESSION_COOKIE, authenticated.authToken.token, {
           secure: process.env.NODE_ENV === "production",
           sameSite: "strict",

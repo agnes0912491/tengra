@@ -1,7 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
 import AuthProvider from "@/components/providers/auth-provider";
 import { User } from "@/lib/auth/users";
+import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
 import { getUserWithToken } from "@/lib/db";
 
 export default function ClientUserProvider({
@@ -33,6 +35,7 @@ export default function ClientUserProvider({
           setUser(null);
           setHydrating(false);
         }
+        Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/" });
         return;
       }
 
@@ -40,6 +43,18 @@ export default function ClientUserProvider({
         const fetchedUser = await getUserWithToken(storedToken);
         if (!cancelled) {
           setUser(fetchedUser);
+          const normalizedRole = fetchedUser?.role?.toString().toLowerCase();
+
+          if (normalizedRole === "admin") {
+            Cookies.set(ADMIN_SESSION_COOKIE, storedToken, {
+              secure: process.env.NODE_ENV === "production",
+              sameSite: "strict",
+              expires: 7,
+              path: "/",
+            });
+          } else {
+            Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/" });
+          }
           if (!fetchedUser && typeof window !== "undefined") {
             window.localStorage.removeItem("authToken");
             window.localStorage.removeItem("refreshToken");
@@ -53,6 +68,7 @@ export default function ClientUserProvider({
           window.localStorage.removeItem("refreshToken");
           window.localStorage.removeItem("csrfToken");
         }
+        Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/" });
         if (!cancelled) {
           setUser(null);
         }
