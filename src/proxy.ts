@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
+import { resolveAdminSessionToken } from "@/lib/auth";
 import { resolveLocale } from "@/i18n/routing";
 import { resolvePreferredLocale } from "@/i18n/resolve-preferred-locale";
 
@@ -74,7 +74,9 @@ export async function proxy(request: NextRequest) {
 
   if (!isProd) {
     if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-      const sessionToken = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+      const sessionToken = resolveAdminSessionToken(
+        (name) => request.cookies.get(name)?.value
+      );
       if (!sessionToken) {
         const loginUrl = new URL("/admin/login", request.url);
         loginUrl.searchParams.set("next", pathname);
@@ -97,7 +99,9 @@ export async function proxy(request: NextRequest) {
     if (!isAdminRoute) {
       response = NextResponse.next();
     } else if (isAdminPublic) {
-      const sessionToken = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+      const sessionToken = resolveAdminSessionToken(
+        (name) => request.cookies.get(name)?.value
+      );
       if (!sessionToken) {
         response = NextResponse.next();
       } else {
@@ -125,7 +129,9 @@ export async function proxy(request: NextRequest) {
         }
       }
     } else {
-      const sessionToken = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+      const sessionToken = resolveAdminSessionToken(
+        (name) => request.cookies.get(name)?.value
+      );
       if (!sessionToken) {
         const loginUrl = new URL("/admin/login", request.url);
         loginUrl.searchParams.set("next", pathname);

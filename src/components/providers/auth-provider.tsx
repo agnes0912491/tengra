@@ -9,7 +9,10 @@ import {
   useState,
 } from "react";
 import Cookies from "js-cookie";
-import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
+import {
+  ADMIN_SESSION_COOKIE,
+  LEGACY_ADMIN_SESSION_COOKIES,
+} from "@/lib/auth";
 import { authenticateAdmin, authenticateUser, Role, User } from "@/lib/auth/users";
 
 /**
@@ -106,14 +109,21 @@ export default function AuthProvider({
       const normalizedRole = authenticated.user.role?.toString().toLowerCase();
 
       if (normalizedRole === "admin") {
-        Cookies.set(ADMIN_SESSION_COOKIE, authenticated.authToken.token, {
+        const cookieOptions = {
           secure: process.env.NODE_ENV === "production",
-          sameSite: "strict",
+          sameSite: "strict" as const,
           expires: 7,
           path: "/",
-        });
+        };
+        Cookies.set(ADMIN_SESSION_COOKIE, authenticated.authToken.token, cookieOptions);
+        for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
+          Cookies.set(legacyName, authenticated.authToken.token, cookieOptions);
+        }
       } else {
         Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/" });
+        for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
+          Cookies.remove(legacyName, { path: "/" });
+        }
       }
 
       return { success: true } as const;
@@ -134,6 +144,9 @@ export default function AuthProvider({
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("csrfToken");
     Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/" });
+    for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
+      Cookies.remove(legacyName, { path: "/" });
+    }
   }, []);
 
   const value = useMemo(

@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 
 import AdminPageHeader from "@/components/admin/admin-page-header";
 import AdminStatCard from "@/components/admin/admin-stat-card";
-import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
+import { resolveAdminSessionToken } from "@/lib/auth";
 import {
   getAllBlogs,
   getAllProjects,
@@ -80,7 +80,7 @@ const getServerTone = (health: ServerHealth) =>
 
 export default async function AdminOverviewPage() {
   const cookieStore = await cookies();
-  const token = cookieStore.get(ADMIN_SESSION_COOKIE)?.value;
+  const token = resolveAdminSessionToken((name) => cookieStore.get(name)?.value);
   const [projects, blogs, users, health] = await Promise.all([
     getAllProjects(token),
     getAllBlogs().catch(() => [] as Blog[]),

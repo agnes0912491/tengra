@@ -2,12 +2,12 @@ import { cookies } from "next/headers";
 
 import AdminPageHeader from "@/components/admin/admin-page-header";
 import ProjectsTable from "@/components/admin/projects/projects-table";
-import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
+import { resolveAdminSessionToken } from "@/lib/auth";
 import { getAllProjects } from "@/lib/db";
 
 export default async function AdminProjectsPage() {
   const cookieStore = await cookies();
-  const token = cookieStore.get(ADMIN_SESSION_COOKIE)?.value;
+  const token = resolveAdminSessionToken((name) => cookieStore.get(name)?.value);
   const projects = await getAllProjects(token);
 
   return (
