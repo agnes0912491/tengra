@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack && next-sitemap --watch",
     "build": "next build --turbo",
     "postbuild": "next-sitemap",
-    "start": "next start",
+    "start": "npm run build && next start",
     "lint": "eslint"
   },
   "dependencies": {
