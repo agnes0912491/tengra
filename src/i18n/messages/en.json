@@ -130,7 +130,10 @@
       "missingCredentials": "Username and password are required.",
       "success": "Signed in successfully.",
       "invalidCredentials": "The provided credentials are incorrect.",
-      "genericError": "Sign in failed. Please try again."
+      "genericError": "Sign in failed. Please try again.",
+      "otpSent": "We sent a 6-digit verification code to your email.",
+      "otpInvalid": "The verification code is invalid.",
+      "otpExpired": "The verification code has expired. Please request a new one."
     },
     "title": "Admin access",
     "description": "Sign in with your administrator credentials to manage Tengra Studio.",
@@ -140,6 +143,19 @@
     "button": {
       "loading": "Signing in...",
       "submit": "Sign in"
+    },
+    "otp": {
+      "title": "Enter verification code",
+      "description": "Check your email for the 6-digit code. Enter it within 5 minutes to continue.",
+      "codeLabel": "Verification code",
+      "codePlaceholder": "123456",
+      "expiresIn": "Code expires in {minutes}:{seconds}.",
+      "expired": "This code is no longer valid. Start over to receive a new one.",
+      "button": {
+        "submit": "Verify code",
+        "loading": "Verifying..."
+      },
+      "back": "Back to login"
     },
     "footer": "Access is limited to authorized Tengra Studio administrators."
   },

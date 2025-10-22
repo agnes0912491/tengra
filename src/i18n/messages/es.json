@@ -130,7 +130,10 @@
       "missingCredentials": "Se requieren nombre de usuario y contraseña.",
       "success": "Inicio de sesión exitoso.",
       "invalidCredentials": "Las credenciales proporcionadas son incorrectas.",
-      "genericError": "El inicio de sesión falló. Por favor, inténtalo de nuevo."
+      "genericError": "El inicio de sesión falló. Por favor, inténtalo de nuevo.",
+      "otpSent": "We sent a 6-digit verification code to your email.",
+      "otpInvalid": "The verification code is invalid.",
+      "otpExpired": "The verification code has expired. Please request a new one."
     },
     "title": "Acceso de administrador",
     "description": "Inicia sesión con tus credenciales de administrador para gestionar Tengra Studio.",
@@ -141,7 +144,20 @@
       "loading": "Iniciando sesión...",
       "submit": "Iniciar sesión"
     },
-    "footer": "El acceso está limitado a administradores autorizados de Tengra Studio."
+    "footer": "El acceso está limitado a administradores autorizados de Tengra Studio.",
+    "otp": {
+      "title": "Enter verification code",
+      "description": "Check your email for the 6-digit code. Enter it within 5 minutes to continue.",
+      "codeLabel": "Verification code",
+      "codePlaceholder": "123456",
+      "expiresIn": "Code expires in {minutes}:{seconds}.",
+      "expired": "This code is no longer valid. Start over to receive a new one.",
+      "button": {
+        "submit": "Verify code",
+        "loading": "Verifying..."
+      },
+      "back": "Back to login"
+    }
   },
   "AdminDashboard": {
     "toast": {

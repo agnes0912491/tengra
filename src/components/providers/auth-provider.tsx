@@ -13,16 +13,31 @@ import {
   ADMIN_SESSION_COOKIE,
   LEGACY_ADMIN_SESSION_COOKIES,
 } from "@/lib/auth";
-import { authenticateAdmin, authenticateUser, Role, User } from "@/lib/auth/users";
+import {
+  authenticateAdmin,
+  authenticateUser,
+  completeAdminLoginWithOtp,
+  Role,
+  User,
+} from "@/lib/auth/users";
+import { AuthOtpChallengePayload, AuthUserPayload } from "@/types/auth";
 
 /**
  * Auth context contract exposed to the app.
  */
 type LoginFailureReason = "invalidCredentials" | "unexpectedError";
 
+type OtpChallengeResult = {
+  success: false;
+  reason: "otpRequired";
+  challenge: AuthOtpChallengePayload;
+  username: string;
+};
+
 type LoginResult =
   | { success: true }
-  | { success: false; reason: LoginFailureReason };
+  | { success: false; reason: LoginFailureReason }
+  | OtpChallengeResult;
 
 type AuthContextValue = {
   user: User | null;
@@ -32,6 +47,12 @@ type AuthContextValue = {
     email: string,
     password: string,
     type?: "user" | "admin"
+  ) => Promise<LoginResult>;
+  verifyAdminOtp: (
+    email: string,
+    otpCode: string,
+    otpToken: string,
+    temporaryToken?: string
   ) => Promise<LoginResult>;
   logout: () => void;
 };
@@ -71,6 +92,36 @@ export default function AuthProvider({
   const [user, setUser] = useState<User | null>(initialUser ?? null);
   const [authActionLoading, setAuthActionLoading] = useState<boolean>(false);
 
+  const persistAuthenticatedSession = useCallback(
+    ({ authToken, user }: { authToken: AuthUserPayload; user: User }) => {
+      setUser(user);
+      localStorage.setItem("authToken", authToken.token);
+      localStorage.setItem("refreshToken", authToken.refreshToken);
+      localStorage.setItem("csrfToken", authToken.csrfToken);
+
+      const normalizedRole = user.role?.toString().toLowerCase();
+
+      if (normalizedRole === "admin") {
+        const cookieOptions = {
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict" as const,
+          expires: 7,
+          path: "/",
+        };
+        Cookies.set(ADMIN_SESSION_COOKIE, authToken.token, cookieOptions);
+        for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
+          Cookies.set(legacyName, authToken.token, cookieOptions);
+        }
+      } else {
+        Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/" });
+        for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
+          Cookies.remove(legacyName, { path: "/" });
+        }
+      }
+    },
+    []
+  );
+
   useEffect(() => {
     if (initialUser === undefined) {
       return;
@@ -92,39 +143,33 @@ export default function AuthProvider({
   const login = useCallback(async (email: string, password: string, type: "user" | "admin" = "user") => {
     setAuthActionLoading(true);
     try {
-      const authenticated =
-        type === "admin"
-          ? await authenticateAdmin(email, password)
-          : await authenticateUser(email, password);
+      if (type === "admin") {
+        const authenticated = await authenticateAdmin(email, password);
+
+        if (!authenticated) {
+          return { success: false, reason: "invalidCredentials" } as const;
+        }
+
+        if (authenticated.status === "otpRequired") {
+          return {
+            success: false,
+            reason: "otpRequired",
+            challenge: authenticated.challenge,
+            username: email,
+          } as const;
+        }
+
+        persistAuthenticatedSession(authenticated.auth);
+        return { success: true } as const;
+      }
+
+      const authenticated = await authenticateUser(email, password);
 
       if (!authenticated) {
         return { success: false, reason: "invalidCredentials" } as const;
       }
 
-      setUser(authenticated.user);
-      localStorage.setItem("authToken", authenticated.authToken.token);
-      localStorage.setItem("refreshToken", authenticated.authToken.refreshToken);
-      localStorage.setItem("csrfToken", authenticated.authToken.csrfToken);
-
-      const normalizedRole = authenticated.user.role?.toString().toLowerCase();
-
-      if (normalizedRole === "admin") {
-        const cookieOptions = {
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "strict" as const,
-          expires: 7,
-          path: "/",
-        };
-        Cookies.set(ADMIN_SESSION_COOKIE, authenticated.authToken.token, cookieOptions);
-        for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
-          Cookies.set(legacyName, authenticated.authToken.token, cookieOptions);
-        }
-      } else {
-        Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/" });
-        for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
-          Cookies.remove(legacyName, { path: "/" });
-        }
-      }
+      persistAuthenticatedSession(authenticated);
 
       return { success: true } as const;
     } catch (error) {
@@ -133,7 +178,39 @@ export default function AuthProvider({
     } finally {
       setAuthActionLoading(false);
     }
-  }, []);
+  }, [persistAuthenticatedSession]);
+
+  const verifyAdminOtp = useCallback(
+    async (
+      email: string,
+      otpCode: string,
+      otpToken: string,
+      temporaryToken?: string
+    ) => {
+      setAuthActionLoading(true);
+      try {
+        const authenticated = await completeAdminLoginWithOtp(
+          email,
+          otpCode,
+          otpToken,
+          temporaryToken
+        );
+
+        if (!authenticated) {
+          return { success: false, reason: "invalidCredentials" } as const;
+        }
+
+        persistAuthenticatedSession(authenticated);
+        return { success: true } as const;
+      } catch (error) {
+        console.error("Admin OTP verification failed:", error);
+        return { success: false, reason: "unexpectedError" } as const;
+      } finally {
+        setAuthActionLoading(false);
+      }
+    },
+    [persistAuthenticatedSession]
+  );
 
   /**
    * logout: clears user state and removes local cache.
@@ -155,9 +232,10 @@ export default function AuthProvider({
       isAuthenticated: Boolean(user),
       loading: hydrating || authActionLoading,
       login,
+      verifyAdminOtp,
       logout,
     }),
-    [user, hydrating, authActionLoading, login, logout]
+    [user, hydrating, authActionLoading, login, verifyAdminOtp, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
