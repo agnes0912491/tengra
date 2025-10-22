@@ -130,7 +130,10 @@
       "missingCredentials": "需要用户名和密码。",
       "success": "登录成功。",
       "invalidCredentials": "提供的凭据不正确。",
-      "genericError": "登录失败，请重试。"
+      "genericError": "登录失败，请重试。",
+      "otpSent": "We sent a 6-digit verification code to your email.",
+      "otpInvalid": "The verification code is invalid.",
+      "otpExpired": "The verification code has expired. Please request a new one."
     },
     "title": "管理员登录",
     "description": "使用管理员凭证登录以管理 Tengra Studio。",
@@ -141,7 +144,20 @@
       "loading": "正在登录...",
       "submit": "登录"
     },
-    "footer": "访问仅限获得授权的 Tengra Studio 管理员。"
+    "footer": "访问仅限获得授权的 Tengra Studio 管理员。",
+    "otp": {
+      "title": "Enter verification code",
+      "description": "Check your email for the 6-digit code. Enter it within 5 minutes to continue.",
+      "codeLabel": "Verification code",
+      "codePlaceholder": "123456",
+      "expiresIn": "Code expires in {minutes}:{seconds}.",
+      "expired": "This code is no longer valid. Start over to receive a new one.",
+      "button": {
+        "submit": "Verify code",
+        "loading": "Verifying..."
+      },
+      "back": "Back to login"
+    }
   },
   "AdminDashboard": {
     "toast": {

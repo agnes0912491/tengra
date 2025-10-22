@@ -130,7 +130,10 @@
       "missingCredentials": "ユーザー名とパスワードは必須です。",
       "success": "ログインに成功しました。",
       "invalidCredentials": "入力された認証情報が正しくありません。",
-      "genericError": "ログインに失敗しました。もう一度お試しください。"
+      "genericError": "ログインに失敗しました。もう一度お試しください。",
+      "otpSent": "We sent a 6-digit verification code to your email.",
+      "otpInvalid": "The verification code is invalid.",
+      "otpExpired": "The verification code has expired. Please request a new one."
     },
     "title": "管理者アクセス",
     "description": "管理者の認証情報でログインし、Tengra Studio を管理してください。",
@@ -141,7 +144,20 @@
       "loading": "サインイン中...",
       "submit": "サインイン"
     },
-    "footer": "アクセスできるのは承認された Tengra Studio の管理者のみです。"
+    "footer": "アクセスできるのは承認された Tengra Studio の管理者のみです。",
+    "otp": {
+      "title": "Enter verification code",
+      "description": "Check your email for the 6-digit code. Enter it within 5 minutes to continue.",
+      "codeLabel": "Verification code",
+      "codePlaceholder": "123456",
+      "expiresIn": "Code expires in {minutes}:{seconds}.",
+      "expired": "This code is no longer valid. Start over to receive a new one.",
+      "button": {
+        "submit": "Verify code",
+        "loading": "Verifying..."
+      },
+      "back": "Back to login"
+    }
   },
   "AdminDashboard": {
     "toast": {
