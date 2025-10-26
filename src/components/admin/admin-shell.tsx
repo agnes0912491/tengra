@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import { cn } from "@/lib/utils";
 import ProtectedRoute from "@/components/auth/protected-route";
+import PublishListener from "@/components/admin/publish-listener";
 import { useAuth } from "@/components/providers/auth-provider";
 import Logo from "../../../public/tengra_without_text.png";
 
@@ -160,6 +161,7 @@ export default function AdminShell({ children }: Props) {
           </div>
           <div className="mx-auto flex w-full max-w-6xl flex-col gap-10">
             {children}
+            <PublishListener />
           </div>
         </main>
       </div>

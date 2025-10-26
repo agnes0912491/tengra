@@ -1,6 +1,6 @@
 "use client";
 
-import type { ToastContentProps, CloseButtonProps } from "react-toastify";
+import type { CloseButtonProps } from "react-toastify";
 import { ToastContainer } from "react-toastify";
 
 import { cn } from "@/lib/utils";

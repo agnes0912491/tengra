@@ -4,7 +4,6 @@ import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
-
 import { useAuth } from "@/components/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,14 +56,30 @@ export default function AdminLoginForm() {
         toast.success(t("toast.success"));
         router.replace(safeNextUrl);
         router.refresh();
-      } else {
-        const failureMessage =
-          result.reason === "invalidCredentials"
-            ? t("toast.invalidCredentials")
-            : t("toast.genericError");
-
-        toast.error(failureMessage);
+        return;
       }
+
+      // If the login flow requires two-factor authentication we expect the
+      // global AuthProvider to show the TwoFactorModal (it sets a pending
+      // temp token and renders the modal). Do not show a generic error toast
+      // in that case; the modal will guide the user.
+      if (result.reason === "requires2FA") {
+        // Show a neutral/info toast so the user knows to check their email.
+        // Use a stable hard-coded string to avoid throwing if a translation
+        // key is missing in some locales.
+        // Deulbug log the rest so we can confirm the payload in the browser console.
+        // eslint-disable-next-line no-console
+        console.log("login result (requires2FA):", result);
+        toast.info("İki adımlı doğrulama gerekli — lütfen e-postanızı kontrol edin.");
+        return;
+      }
+
+      const failureMessage =
+        result.reason === "invalidCredentials"
+          ? t("toast.invalidCredentials")
+          : t("toast.genericError");
+
+      toast.error(failureMessage);
     } catch (err) {
       console.error("Admin login failed:", err);
       toast.error(t("toast.genericError"));

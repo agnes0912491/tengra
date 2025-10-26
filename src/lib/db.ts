@@ -111,7 +111,22 @@ export const getAllUsers = async (token: string): Promise<User[]> => {
     );
   }
 
-  return (await response.json()) as User[];
+  // The backend returns an object { users: [...] } while some callers
+  // historically expected a raw array. Accept both shapes for robustness.
+  const json = await response.json().catch(() => null);
+  if (!json) return [];
+
+  if (Array.isArray(json)) {
+    return json as User[];
+  }
+
+  const asObj = json as { users?: unknown };
+  if (Array.isArray(asObj.users)) {
+    return asObj.users as User[];
+  }
+
+  // Unexpected shape
+  throw new Error("Kullanıcı verisi beklenmeyen formatta döndü.");
 };
 
 export const authenticateUserWithPassword = async (
@@ -131,14 +146,53 @@ export const authenticateUserWithPassword = async (
     return null;
   }
 
+  // Return the raw payload even when the server indicates 2FA is required
   const payload = (await response
     .json()
     .catch(() => ({} as AuthUserPayload))) as AuthUserPayload;
-  if (!payload || !payload.token) {
-    return null;
-  }
 
   return payload;
+};
+
+export const verifyTempToken = async (
+  tempToken: string,
+  twoFactorCode: string
+): Promise<AuthUserPayload | null> => {
+    // Always parse the JSON payload so the UI can display specific error messages
+    const response = await fetch(`${API_BASE}/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ tempToken, twoFactorCode }),
+    });
+
+    try {
+      const payload: AuthUserPayload = await response.json();
+      return payload;
+    } catch {
+      // If the response isn't JSON for some reason, return a generic failure
+      return { success: false, error: "unexpected_response" } as AuthUserPayload;
+    }
+};
+
+export const resendTempToken = async (tempToken: string): Promise<AuthUserPayload | null> => {
+  const response = await fetch(`${API_BASE}/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ tempToken, resend: "true" }),
+  });
+
+  try {
+    const payload: AuthUserPayload = await response.json();
+    return payload;
+  } catch {
+    return { success: false, error: "unexpected_response" } as AuthUserPayload;
+  }
 };
 
 export const getUserWithId = async (id: string): Promise<User | null> => {

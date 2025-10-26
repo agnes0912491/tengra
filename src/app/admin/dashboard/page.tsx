@@ -99,59 +99,64 @@ export default async function AdminOverviewPage() {
   const statCards: ReadonlyArray<
     Pick<ComponentProps<typeof AdminStatCard>, "label" | "value" | "sublabel" | "tone">
   > = [
-    {
-      label: "Projeler",
-      value: projects.length,
-      sublabel: latestProject
-        ? `${latestProject.name} • ${formatDateTime(
+      {
+        label: "Projeler",
+        value: projects.length,
+        sublabel: latestProject
+          ? `${latestProject.name} • ${formatDateTime(
             latestProject.lastUpdatedAt ?? latestProject.createdAt ?? undefined
           )}`
-        : "Henüz proje verisi bulunamadı",
-    },
-    {
-      label: "Blog Yazıları",
-      value: blogs.length,
-      sublabel: latestBlog
-        ? `${latestBlog.title} • ${formatDateTime(
+          : "Henüz proje verisi bulunamadı",
+      },
+      {
+        label: "Blog Yazıları",
+        value: blogs.length,
+        sublabel: latestBlog
+          ? `${latestBlog.title} • ${formatDateTime(
             latestBlog.updatedAt ?? latestBlog.date
           )}`
-        : "Henüz blog yayını bulunamadı",
-    },
-    {
-      label: "Toplam Kullanıcı",
-      value: users.length,
-      sublabel: `${adminCount} yönetici • ${users.length - adminCount} standart kullanıcı`,
-    },
-    {
-      label: "Sunucu Durumu",
-      value: health.status === "online" ? "Çevrimiçi" : "Çevrimdışı",
-      sublabel: `Çalışma süresi: ${formattedUptime}`,
-      tone: getServerTone(health),
-    },
-  ];
+          : "Henüz blog yayını bulunamadı",
+      },
+      {
+        label: "Toplam Kullanıcı",
+        value: users.length,
+        sublabel: `${adminCount} yönetici • ${users.length - adminCount} standart kullanıcı`,
+      },
+      {
+        label: "Sunucu Durumu",
+        value: health.status === "online" ? "Çevrimiçi" : "Çevrimdışı",
+        sublabel: `Çalışma süresi: ${formattedUptime}`,
+        tone: getServerTone(health),
+      },
+    ];
 
   const quickNavigation: ReadonlyArray<{
     title: string;
     description: string;
     href: string;
   }> = [
-    {
-      title: "Projeleri Yönet",
-      description:
-        "Portföyde yer alan projeleri güncelleyin veya yeni proje ekleyin.",
-      href: "/admin/dashboard/projects",
-    },
-    {
-      title: "Yeni Blog Yazısı",
-      description: "Tengra topluluğu için yeni içerikler hazırlayın.",
-      href: "/admin/dashboard/blogs",
-    },
-    {
-      title: "Kullanıcı Rollerini Düzenle",
-      description: "Ekip üyelerine yönetici yetkisi verin veya erişimleri sınırlandırın.",
-      href: "/admin/dashboard/users",
-    },
-  ];
+      {
+        title: "Projeleri Yönet",
+        description:
+          "Portföyde yer alan projeleri güncelleyin veya yeni proje ekleyin.",
+        href: "/admin/dashboard/projects",
+      },
+      {
+        title: "Yeni Blog Yazısı",
+        description: "Tengra topluluğu için yeni içerikler hazırlayın.",
+        href: "/admin/dashboard/blogs",
+      },
+      {
+        title: "Ana Sayfa İçeriği",
+        description: "Ana sayfadaki hedefler ve S.S.S. bölümlerini düzenleyin.",
+        href: "/admin/dashboard/homepage",
+      },
+      {
+        title: "Kullanıcı Rollerini Düzenle",
+        description: "Ekip üyelerine yönetici yetkisi verin veya erişimleri sınırlandırın.",
+        href: "/admin/dashboard/users",
+      },
+    ];
 
   const followUpActions: ReadonlyArray<{
     title: string;
@@ -159,19 +164,19 @@ export default async function AdminOverviewPage() {
     href: string;
     linkLabel: string;
   }> = [
-    {
-      title: "Projeleri Güncelle",
-      description: "Ana sayfadaki proje kartlarını sadece adminler düzenleyebilir.",
-      href: "#projects",
-      linkLabel: "Projelere Git",
-    },
-    {
-      title: "Blog Yazısı Oluştur",
-      description: "Blog sayfasındaki yönetim araçları yalnızca admin hesabıyla görünür.",
-      href: "#blogs",
-      linkLabel: "Bloglara Git",
-    },
-  ];
+      {
+        title: "Projeleri Güncelle",
+        description: "Ana sayfadaki proje kartlarını sadece adminler düzenleyebilir.",
+        href: "#projects",
+        linkLabel: "Projelere Git",
+      },
+      {
+        title: "Blog Yazısı Oluştur",
+        description: "Blog sayfasındaki yönetim araçları yalnızca admin hesabıyla görünür.",
+        href: "#blogs",
+        linkLabel: "Bloglara Git",
+      },
+    ];
 
   const serverMetadata: ReadonlyArray<{ label: string; value: string }> = [
     { label: "Uptime", value: formattedUptime },

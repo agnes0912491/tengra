@@ -148,7 +148,7 @@ export default async function RootLayout({
         )} */}
 
         <ClientUserProvider>
-          <ParticlesClientWrapper /> 
+          <ParticlesClientWrapper />
           <IntlProviderClient locale={locale} messages={messages}>
             <ConsentBanner />
             {children}
