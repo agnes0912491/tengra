@@ -12,4 +12,14 @@ export interface AuthUserPayload {
     expiresIn?: number;
     // Absolute expiry timestamp (seconds since epoch). Preferred over expiresIn.
     expiresAt?: number;
+} 
+
+export interface AuthOtpChallengePayload {
+    success: boolean;
+    otpRequired: boolean;
+    otpToken: string;
+    temporaryToken?: string;
+    expiresAt?: string;
+    expiresInSeconds?: number;
+    message?: string;
 }

@@ -130,7 +130,10 @@
       "missingCredentials": "Kullanıcı adı ve şifre gereklidir.",
       "success": "Giriş başarılı.",
       "invalidCredentials": "Girdiğiniz bilgiler hatalı.",
-      "genericError": "Giriş başarısız oldu. Lütfen tekrar deneyin."
+      "genericError": "Giriş başarısız oldu. Lütfen tekrar deneyin.",
+      "otpSent": "6 haneli doğrulama kodunu e-posta adresine gönderdik.",
+      "otpInvalid": "Doğrulama kodu geçersiz.",
+      "otpExpired": "Doğrulama kodunun süresi doldu. Lütfen yeniden deneyin."
     },
     "title": "Yönetici girişi",
     "description": "Tengra Studio’yu yönetmek için yönetici bilgilerinle giriş yap.",
@@ -140,6 +143,19 @@
     "button": {
       "loading": "Giriş yapılıyor...",
       "submit": "Giriş yap"
+    },
+    "otp": {
+      "title": "Doğrulama kodunu gir",
+      "description": "E-postana gönderilen 6 haneli kodu kontrol et. Devam etmek için 5 dakika içinde gir.",
+      "codeLabel": "Doğrulama kodu",
+      "codePlaceholder": "123456",
+      "expiresIn": "Kod {minutes}:{seconds} içinde sona eriyor.",
+      "expired": "Kodun süresi doldu. Yeni bir kod almak için yeniden giriş yap.",
+      "button": {
+        "submit": "Kodu doğrula",
+        "loading": "Doğrulanıyor..."
+      },
+      "back": "Giriş ekranına dön"
     },
     "footer": "Erişim yalnızca yetkili Tengra Studio yöneticileriyle sınırlıdır."
   },
