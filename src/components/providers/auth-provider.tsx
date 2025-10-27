@@ -14,28 +14,20 @@ import {
   ADMIN_SESSION_COOKIE,
   LEGACY_ADMIN_SESSION_COOKIES,
 } from "@/lib/auth";
-import { authenticateAdmin, authenticateUser, completeAdminLoginWithOtp, Role, User } from "@/lib/auth/users";
+import { authenticateAdmin, authenticateUser, Role, User } from "@/lib/auth/users";
 import { authenticateUserWithPassword, getUserWithToken } from "@/lib/db";
 import { toast } from "react-toastify";
 import TwoFactorModal from "@/components/auth/TwoFactorModal";
-import { AuthOtpChallengePayload, AuthUserPayload } from "@/types/auth";
+import { AuthUserPayload } from "@/types/auth";
 
 /**
  * Auth context contract exposed to the app.
  */
 type LoginFailureReason = "invalidCredentials" | "unexpectedError" | "requires2FA";
 
-type OtpChallengeResult = {
-  success: false;
-  reason: "otpRequired";
-  challenge: AuthOtpChallengePayload;
-  username: string;
-};
-
 type LoginResult =
   | { success: true }
-  | { success: false; reason: LoginFailureReason }
-  | OtpChallengeResult;
+  | { success: false; reason: LoginFailureReason } | { success: true; }
 
 type AuthContextValue = {
   user: User | null;
@@ -45,12 +37,6 @@ type AuthContextValue = {
     email: string,
     password: string,
     type?: "user" | "admin"
-  ) => Promise<LoginResult>;
-  verifyAdminOtp: (
-    email: string,
-    otpCode: string,
-    otpToken: string,
-    temporaryToken?: string
   ) => Promise<LoginResult>;
   logout: () => void;
 };
@@ -94,36 +80,6 @@ export default function AuthProvider({
   const pendingResolveRef = useRef<((payload: AuthUserPayload) => void) | null>(null);
   const pendingRejectRef = useRef<((reason?: unknown) => void) | null>(null);
 
-  const persistAuthenticatedSession = useCallback(
-    ({ authToken, user }: { authToken: AuthUserPayload; user: User }) => {
-      setUser(user);
-      localStorage.setItem("authToken", authToken.token as string);
-      localStorage.setItem("refreshToken", authToken.refreshToken as string);
-      localStorage.setItem("csrfToken", authToken.csrfToken as string);
-
-      const normalizedRole = user.role?.toString().toLowerCase();
-
-      if (normalizedRole === "admin") {
-        const cookieOptions = {
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "strict" as const,
-          expires: 7,
-          path: "/",
-        };
-        Cookies.set(ADMIN_SESSION_COOKIE, authToken.token as string, cookieOptions);
-        for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
-          Cookies.set(legacyName, authToken.token as string, cookieOptions);
-        }
-      } else {
-        Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/" });
-        for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
-          Cookies.remove(legacyName, { path: "/" });
-        }
-      }
-    },
-    []
-  );
-
   useEffect(() => {
     if (initialUser === undefined) {
       return;
@@ -145,74 +101,171 @@ export default function AuthProvider({
   const login = useCallback(async (email: string, password: string, type: "user" | "admin" = "user") => {
     setAuthActionLoading(true);
     try {
-      if (type === "admin") {
-        const authenticated = await authenticateAdmin(email, password);
-
-        if (!authenticated) {
-          return { success: false, reason: "invalidCredentials" } as const;
-        }
-
-        if (authenticated.status === "otpRequired") {
-          return {
-            success: false,
-            reason: "otpRequired",
-            challenge: authenticated.challenge,
-            username: email,
-          } as const;
-        }
-
-        persistAuthenticatedSession(authenticated.auth);
-        return { success: true } as const;
-      }
-
-      const authenticated = await authenticateUser(email, password);
-
-      if (!authenticated) {
+      // Use low-level password authentication to detect 2FA requirement
+      const payload = await authenticateUserWithPassword(email, password);
+      if (!payload) {
         return { success: false, reason: "invalidCredentials" } as const;
       }
 
-      persistAuthenticatedSession(authenticated);
+      if (payload.requires2FA && payload.tempToken) {
+        // Register a finalizer that the modal will call when verification succeeds.
+        pendingResolveRef.current = async (verifiedPayload: AuthUserPayload) => {
+          // Persist tokens and load user
+          if (!verifiedPayload.token) {
+            // nothing to do
+            return;
+          }
 
-      return { success: true } as const;
+          try {
+            console.log("[AuthProvider] finalizing 2FA, payload:", verifiedPayload);
+
+            // Persist the tokens first (some codepaths may read from storage/cookies)
+            localStorage.setItem("authToken", verifiedPayload.token);
+            if (verifiedPayload.refreshToken) localStorage.setItem("refreshToken", verifiedPayload.refreshToken);
+            if (verifiedPayload.csrfToken) localStorage.setItem("csrfToken", verifiedPayload.csrfToken);
+
+            // Tokens persisted to localStorage above. We'll derive the user's role
+            // after fetching the user and set cookies accordingly below.
+
+            // Now attempt to load the user with the token. Logging results helps
+            // diagnose why the dashboard navigation may not trigger.
+            const userObj = await getUserWithToken(verifiedPayload.token);
+            console.log("[AuthProvider] getUserWithToken result:", userObj);
+
+            if (!userObj) {
+              // If we couldn't fetch the user, surface a helpful toast and keep the tokens
+              // persisted so the user can retry or refresh the page.
+              toast.error("Doğrulama başarılı, fakat kullanıcı bilgisi alınamadı. Lütfen sayfayı yenileyin veya tekrar giriş yapın.");
+              return;
+            }
+
+            setUser(userObj);
+
+            // If the role wasn't set via payload earlier, ensure cookies are consistent
+            const normalizedRole = userObj.role?.toString().toLowerCase();
+            if (normalizedRole === "admin") {
+              const cookieOptions = {
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "strict" as const,
+                expires: 7,
+                path: "/",
+              };
+              Cookies.set(ADMIN_SESSION_COOKIE, verifiedPayload.token, cookieOptions);
+              for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
+                Cookies.set(legacyName, verifiedPayload.token, cookieOptions);
+              }
+            } else {
+              Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/" });
+              for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
+                Cookies.remove(legacyName, { path: "/" });
+              }
+            }
+          } catch (err) {
+            console.error("[AuthProvider] error finalizing 2FA:", err);
+            toast.error("Doğrulama sırasında bir hata oluştu. Lütfen tekrar deneyin.");
+          } finally {
+            // clear refs
+            pendingResolveRef.current = null;
+            pendingRejectRef.current = null;
+            setPendingTempToken(null);
+          }
+        };
+
+        // Show modal to the user and return a special result so callers don't treat this as invalid credentials
+        setPendingTempToken(payload.tempToken);
+        // Calculate seconds remaining from server-provided expiresAt when available
+        if (payload.expiresAt) {
+          const nowSec = Math.floor(Date.now() / 1000);
+          const secs = Math.max(1, Math.floor(payload.expiresAt - nowSec));
+          setPendingExpirySeconds(secs);
+        } else {
+          setPendingExpirySeconds(payload.expiresIn ?? 300);
+        }
+        return { success: false, reason: "requires2FA" } as const;
+      }
+
+      // Fallback to earlier higher-level flow
+      if (type === "admin") {
+        const adminResult = await authenticateAdmin(email, password);
+        if (!adminResult) return { success: false, reason: "invalidCredentials" } as const;
+
+        if ("status" in adminResult) {
+          if (adminResult.status === "otpRequired") {
+            return { success: false, reason: "requires2FA" } as const;
+          }
+          if (adminResult.status === "authenticated") {
+            const auth = adminResult.auth;
+            setUser(auth.user);
+            const token = auth.authToken?.token;
+            if (!token) return { success: false, reason: "unexpectedError" } as const;
+            localStorage.setItem("authToken", token);
+            if (auth.authToken.refreshToken) localStorage.setItem("refreshToken", auth.authToken.refreshToken);
+            if (auth.authToken.csrfToken) localStorage.setItem("csrfToken", auth.authToken.csrfToken);
+
+            const normalizedRole = auth.user.role?.toString().toLowerCase();
+            if (normalizedRole === "admin") {
+              const cookieOptions = {
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "strict" as const,
+                expires: 7,
+                path: "/",
+              };
+              Cookies.set(ADMIN_SESSION_COOKIE, token, cookieOptions);
+              for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
+                Cookies.set(legacyName, token, cookieOptions);
+              }
+            } else {
+              Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/" });
+              for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
+                Cookies.remove(legacyName, { path: "/" });
+              }
+            }
+
+            return { success: true } as const;
+          }
+        }
+
+        return { success: false, reason: "unexpectedError" } as const;
+      } else {
+        const userResult = await authenticateUser(email, password);
+        if (!userResult) return { success: false, reason: "invalidCredentials" } as const;
+
+        setUser(userResult.user);
+        const token = userResult.authToken.token;
+        if (!token) return { success: false, reason: "unexpectedError" } as const;
+        localStorage.setItem("authToken", token);
+        if (userResult.authToken.refreshToken) localStorage.setItem("refreshToken", userResult.authToken.refreshToken);
+        if (userResult.authToken.csrfToken) localStorage.setItem("csrfToken", userResult.authToken.csrfToken);
+
+        const normalizedRole = userResult.user.role?.toString().toLowerCase();
+        if (normalizedRole === "admin") {
+          const cookieOptions = {
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict" as const,
+            expires: 7,
+            path: "/",
+          };
+          Cookies.set(ADMIN_SESSION_COOKIE, token, cookieOptions);
+          for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
+            Cookies.set(legacyName, token, cookieOptions);
+          }
+        } else {
+          Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/" });
+          for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
+            Cookies.remove(legacyName, { path: "/" });
+          }
+        }
+
+        return { success: true } as const;
+      }
+
     } catch (error) {
       console.error("Login failed:", error);
       return { success: false, reason: "unexpectedError" } as const;
     } finally {
       setAuthActionLoading(false);
     }
-  }, [persistAuthenticatedSession]);
-
-  const verifyAdminOtp = useCallback(
-    async (
-      email: string,
-      otpCode: string,
-      otpToken: string,
-      temporaryToken?: string
-    ) => {
-      setAuthActionLoading(true);
-      try {
-        const authenticated = await completeAdminLoginWithOtp(
-          email,
-          otpCode,
-          otpToken,
-          temporaryToken
-        );
-
-        if (!authenticated) {
-          return { success: false, reason: "invalidCredentials" } as const;
-        }
-
-        persistAuthenticatedSession(authenticated);
-        return { success: true } as const;
-      } catch (error) {
-        console.error("Admin OTP verification failed:", error);
-        return { success: false, reason: "unexpectedError" } as const;
-      } finally {
-        setAuthActionLoading(false);
-      }
-    },
-    [persistAuthenticatedSession]
-  );
+  }, []);
 
   /**
    * logout: clears user state and removes local cache.
@@ -234,10 +287,9 @@ export default function AuthProvider({
       isAuthenticated: Boolean(user),
       loading: hydrating || authActionLoading,
       login,
-      verifyAdminOtp,
       logout,
     }),
-    [user, hydrating, authActionLoading, login, verifyAdminOtp, logout]
+    [user, hydrating, authActionLoading, login, logout]
   );
 
   const handleTwoFactorSuccess = (payload: AuthUserPayload) => {

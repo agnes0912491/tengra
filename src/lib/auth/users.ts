@@ -1,4 +1,4 @@
-import { AuthOtpChallengePayload, AuthUserPayload } from "@/types/auth";
+import { AuthUserPayload, AuthOtpChallengePayload } from "@/types/auth";
 import {
   authenticateUserWithPassword,
   getAllUsers,

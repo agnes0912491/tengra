@@ -1,7 +1,7 @@
 import type { Blog, BlogCategory } from "@/types/blog";
 import type { Project, ProjectStatus } from "@/types/project";
 import { Role, User } from "./auth/users";
-import { AuthOtpChallengePayload, AuthUserPayload } from "@/types/auth";
+import { AuthUserPayload } from "@/types/auth";
 
 // Base API URL for the backend. Fallback to localhost in development to avoid
 // generating an invalid URL when the env var is absent.
@@ -129,29 +129,10 @@ export const getAllUsers = async (token: string): Promise<User[]> => {
   throw new Error("Kullanıcı verisi beklenmeyen formatta döndü.");
 };
 
-type RawAuthOtpResponse = AuthOtpChallengePayload & { token?: string };
-
-type AuthLoginResponse = AuthUserPayload | RawAuthOtpResponse | null;
-
-const adaptOtpChallenge = (
-  payload: RawAuthOtpResponse | null
-): AuthOtpChallengePayload | null => {
-  if (!payload) {
-    return null;
-  }
-
-  const { token, ...rest } = payload;
-
-  return {
-    ...rest,
-    temporaryToken: typeof token === "string" ? token : undefined,
-  };
-};
-
 export const authenticateUserWithPassword = async (
   email: string,
   password: string
-): Promise<AuthLoginResponse> => {
+): Promise<AuthUserPayload | null> => {
   const response = await fetch(`${API_BASE}/auth/login`, {
     method: "POST",
     headers: {
@@ -159,70 +140,6 @@ export const authenticateUserWithPassword = async (
       Accept: "application/json",
     },
     body: JSON.stringify({ username: email, password }),
-  });
-
-  const parsePayload = async () =>
-    ((await response
-      .json()
-      .catch(() => null)) ?? null) as AuthLoginResponse;
-
-  if (response.status === 202) {
-    const challenge = await parsePayload();
-
-    if (challenge && typeof challenge === "object" && "otpRequired" in challenge) {
-      const otpChallenge = adaptOtpChallenge(
-        challenge as RawAuthOtpResponse
-      );
-      if (otpChallenge?.otpRequired && otpChallenge.otpToken) {
-        return otpChallenge;
-      }
-    }
-
-    return null;
-  }
-
-  if (!response.ok) {
-    return null;
-  }
-
-  const payload = await parsePayload();
-
-  if (payload && typeof payload === "object" && "otpRequired" in payload) {
-    const otpChallenge = adaptOtpChallenge(payload as RawAuthOtpResponse);
-    if (otpChallenge?.otpRequired && otpChallenge.otpToken) {
-      return otpChallenge;
-    }
-  }
-
-  if (payload && typeof payload === "object" && "token" in payload) {
-    const authPayload = payload as AuthUserPayload;
-    if (authPayload.token) {
-      return authPayload;
-    }
-  }
-
-  return null;
-};
-
-export const verifyAdminOtp = async (
-  username: string,
-  otpCode: string,
-  otpToken: string,
-  temporaryToken?: string
-): Promise<AuthUserPayload | null> => {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  };
-
-  if (temporaryToken) {
-    headers.Authorization = `Bearer ${temporaryToken}`;
-  }
-
-  const response = await fetch(`${API_BASE}/auth/login/otp/verify`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({ username, otp: otpCode, otpToken }),
   });
 
   if (!response.ok) {
@@ -233,10 +150,6 @@ export const verifyAdminOtp = async (
   const payload = (await response
     .json()
     .catch(() => ({} as AuthUserPayload))) as AuthUserPayload;
-
-  if (!payload || !payload.token) {
-    return null;
-  }
 
   return payload;
 };
@@ -272,6 +185,42 @@ export const resendTempToken = async (tempToken: string): Promise<AuthUserPayloa
       Accept: "application/json",
     },
     body: JSON.stringify({ tempToken, resend: "true" }),
+  });
+
+  try {
+    const payload: AuthUserPayload = await response.json();
+    return payload;
+  } catch {
+    return { success: false, error: "unexpected_response" } as AuthUserPayload;
+  }
+};
+
+/**
+ * Verify an admin OTP challenge. This wraps the same backend login endpoint
+ * used for completing 2FA: the server accepts an otpToken/temporary token
+ * and the OTP code and responds with the final AuthUserPayload on success.
+ */
+export const verifyAdminOtp = async (
+  email: string,
+  otpCode: string,
+  otpToken?: string,
+  temporaryToken?: string
+): Promise<AuthUserPayload | null> => {
+  // Build a flexible payload to match the backend's expected fields. Some
+  // deployments return otpToken, others use tempToken; include both where
+  // available so the request is accepted.
+  const body: Record<string, unknown> = { twoFactorCode: otpCode };
+  if (otpToken) body.otpToken = otpToken;
+  if (temporaryToken) body.tempToken = temporaryToken;
+  if (email) body.username = email;
+
+  const response = await fetch(`${API_BASE}/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(body),
   });
 
   try {
