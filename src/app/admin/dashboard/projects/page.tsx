@@ -16,7 +16,6 @@ export default async function AdminProjectsPage() {
         title="Projeler"
         description="Stüdyonun vitrinindeki projeleri güncelleyin veya yenilerini ekleyin."
         ctaLabel="Yeni Proje"
-        ctaMessage="Yeni proje oluşturma iş akışı yakında aktif olacak."
       />
       <ProjectsTable projects={projects} />
     </div>

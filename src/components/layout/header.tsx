@@ -39,23 +39,22 @@ export default function Header() {
               <Link
                 key={link.href}
                 href={href}
-                className={`transition hover:text-[color:var(--color-turkish-blue-200)] ${
-                  isActive ? "text-[color:var(--color-turkish-blue-300)]" : "text-gray-300"
-                }`}
+                className={`group relative transition hover:text-[color:var(--color-turkish-blue-200)] ${isActive ? "text-[color:var(--color-turkish-blue-300)]" : "text-gray-300"
+                  }`}
               >
                 {t(link.labelKey)}
+                <span className="absolute -bottom-1 left-0 h-px w-0 bg-gradient-to-r from-[rgba(0,167,197,0.0)] via-[rgba(0,167,197,0.6)] to-[rgba(0,167,197,0.0)] transition-all duration-300 group-hover:w-full" />
               </Link>
             );
           })}
-      {/* Admin link appears only for authenticated admin users.
+          {/* Admin link appears only for authenticated admin users.
         Server-side authorization must still be enforced on /admin. */}
-      {isAuthenticated && user?.role === "admin" && (
+          {isAuthenticated && user?.role === "admin" && (
             <Link
               href="/admin"
               prefetch={false}
-              className={`transition hover:text-[color:var(--color-turkish-blue-200)] ${
-                pathname?.startsWith("/admin") ? "text-[color:var(--color-turkish-blue-300)]" : "text-gray-300"
-              }`}
+              className={`transition hover:text-[color:var(--color-turkish-blue-200)] ${pathname?.startsWith("/admin") ? "text-[color:var(--color-turkish-blue-300)]" : "text-gray-300"
+                }`}
             >
               {t("admin")}
             </Link>

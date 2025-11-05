@@ -27,19 +27,19 @@ function TypingText({ texts }: TypingTextProps) {
     let timeout: ReturnType<typeof setTimeout> | undefined;
 
     if (!isDeleting && displayed.length < fullText.length) {
-      timeout = window.setTimeout(() => {
+      timeout = setTimeout(() => {
         setDisplayed(fullText.slice(0, displayed.length + 1));
       }, speed);
     } else if (isDeleting && displayed.length > 0) {
-      timeout = window.setTimeout(() => {
+      timeout = setTimeout(() => {
         setDisplayed(fullText.slice(0, displayed.length - 1));
       }, speed / 1.4);
     } else if (!isDeleting && displayed.length === fullText.length) {
-      timeout = window.setTimeout(() => {
+      timeout = setTimeout(() => {
         setIsDeleting(true);
       }, pause);
     } else if (isDeleting && displayed.length === 0) {
-      timeout = window.setTimeout(() => {
+      timeout = setTimeout(() => {
         setIsDeleting(false);
         setIndex((prev) => (prev + 1) % texts.length);
       }, 240);
@@ -47,7 +47,7 @@ function TypingText({ texts }: TypingTextProps) {
 
     return () => {
       if (timeout) {
-        window.clearTimeout(timeout);
+        clearTimeout(timeout);
       }
     };
   }, [displayed, index, isDeleting, texts]);

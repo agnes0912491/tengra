@@ -32,7 +32,13 @@ export default function TranslationsTable({ files }: Props) {
         return;
       }
       const json = await res.json();
-      setPreview(json.content ?? "");
+      const raw = json.content ?? "";
+      try {
+        const parsed = JSON.parse(raw);
+        setPreview(JSON.stringify(parsed, null, 2));
+      } catch {
+        setPreview(raw);
+      }
       setPreviewLocale(locale);
     } catch {
       setPreview("Unknown error");
@@ -107,7 +113,9 @@ export default function TranslationsTable({ files }: Props) {
                 Kapat
               </button>
             </div>
-            <pre className="mt-4 whitespace-pre-wrap break-words text-xs">{preview}</pre>
+            <pre className="mt-4 whitespace-pre overflow-auto rounded-md bg-[rgba(3,12,18,0.8)] p-4 text-xs leading-relaxed text-[rgba(223,241,246,0.95)] border border-[rgba(0,167,197,0.2)]">
+              {preview}
+            </pre>
           </div>
         </div>
       )}

@@ -29,8 +29,7 @@ export default function ClientUserProvider({
       try {
         storedToken = window.localStorage.getItem("authToken");
       } catch (error) {
-        console.error("Failed to read authToken from localStorage:", error);
-        window.localStorage.removeItem("authToken");
+        console.error("Failed to read authToken from localStorage:", error); 
       }
 
       if (!storedToken) {
@@ -69,17 +68,12 @@ export default function ClientUserProvider({
             }
           }
           if (!fetchedUser && typeof window !== "undefined") {
-            window.localStorage.removeItem("authToken");
-            window.localStorage.removeItem("refreshToken");
-            window.localStorage.removeItem("csrfToken");
+            console.warn("No user found with stored token.");
           }
         }
       } catch (error) {
         console.error("Failed to fetch user with token:", error);
-        if (typeof window !== "undefined") {
-          window.localStorage.removeItem("authToken");
-          window.localStorage.removeItem("refreshToken");
-          window.localStorage.removeItem("csrfToken");
+        if (typeof window !== "undefined") { 
         }
         Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/" });
         for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {

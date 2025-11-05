@@ -6,7 +6,7 @@ import {
   verifyAdminOtp,
 } from "../db";
 
-export type Role = "admin" | "user";
+export type Role = "admin" | "moderator" | "user";
 
 export type User = {
   id: string; 

@@ -17,9 +17,9 @@ import type { Project } from "@/types/project";
 import type { Blog } from "@/types/blog";
 import type { User } from "@/lib/auth/users";
 import AdminCurrentUserCard from "@/components/admin/admin-current-user-card";
-import AdminCurrentUserName from "@/components/admin/admin-current-user-name";
+import AdminMetrics from "@/components/admin/dashboard/metrics";
 
-const formatDuration = (seconds?: number) => {
+const formatDuration = (seconds?: number) => { 
   if (!seconds || Number.isNaN(seconds)) {
     return "Bilinmiyor";
   }
@@ -73,7 +73,6 @@ const getLatestProject = (projects: Project[]): Project | undefined => {
     )[0];
 };
 
-const getHighlightedUsers = (users: User[]) => users.slice(0, 5);
 
 const getServerTone = (health: ServerHealth) =>
   health.status === "online" ? "success" : "danger";
@@ -91,10 +90,7 @@ export default async function AdminOverviewPage() {
   const adminCount = users.filter((user) => user.role === "admin").length;
   const latestProject = getLatestProject(projects);
   const latestBlog = blogs[0];
-  const highlightedUsers = getHighlightedUsers(users);
   const formattedUptime = formatDuration(health.uptimeSeconds);
-
-  const availableUsers = users.slice(0, 10);
 
   const statCards: ReadonlyArray<
     Pick<ComponentProps<typeof AdminStatCard>, "label" | "value" | "sublabel" | "tone">
@@ -158,31 +154,6 @@ export default async function AdminOverviewPage() {
       },
     ];
 
-  const followUpActions: ReadonlyArray<{
-    title: string;
-    description: string;
-    href: string;
-    linkLabel: string;
-  }> = [
-      {
-        title: "Projeleri Güncelle",
-        description: "Ana sayfadaki proje kartlarını sadece adminler düzenleyebilir.",
-        href: "#projects",
-        linkLabel: "Projelere Git",
-      },
-      {
-        title: "Blog Yazısı Oluştur",
-        description: "Blog sayfasındaki yönetim araçları yalnızca admin hesabıyla görünür.",
-        href: "#blogs",
-        linkLabel: "Bloglara Git",
-      },
-    ];
-
-  const serverMetadata: ReadonlyArray<{ label: string; value: string }> = [
-    { label: "Uptime", value: formattedUptime },
-    { label: "Sürüm", value: health.version ?? "Belirtilmemiş" },
-    { label: "Son Dağıtım", value: formatDateTime(health.lastDeploymentAt) },
-  ];
 
   return (
     <div className="flex flex-col gap-12">
@@ -243,121 +214,9 @@ export default async function AdminOverviewPage() {
         <AdminCurrentUserCard />
       </section>
 
-      <section className="grid gap-8 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <div className="space-y-8">
-          <header className="rounded-3xl border border-[rgba(110,211,225,0.16)] bg-[rgba(6,20,27,0.6)]/80 p-6 shadow-[0_25px_70px_rgba(0,0,0,0.45)] backdrop-blur-xl">
-            <h2 className="text-3xl font-display tracking-[0.35em] text-[color:var(--color-turkish-blue-300)]">
-              Admin Paneli
-            </h2>
-            <p className="mt-4 text-sm text-gray-300">
-              Hoş geldin{" "}
-              <span className="font-semibold text-[color:var(--color-turkish-blue-200)]">
-                <AdminCurrentUserName />
-              </span>
-            </p>
-            <div className="mt-6 space-y-3 text-sm text-[rgba(255,255,255,0.7)]">
-              <p>
-                <span className="text-[rgba(255,255,255,0.45)]">Durum:</span>{" "}
-                <span className={health.status === "online" ? "text-green-300" : "text-red-300"}>
-                  {health.status === "online" ? "Çevrimiçi" : "Çevrimdışı"}
-                </span>
-              </p>
-              {serverMetadata.map((item) => (
-                <p key={item.label}>
-                  <span className="text-[rgba(255,255,255,0.45)]">{item.label}:</span> {item.value}
-                </p>
-              ))}
-            </div>
-          </header>
-
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-xl border border-[rgba(0,167,197,0.2)] bg-[rgba(3,14,18,0.7)] p-6">
-              <h3 className="text-lg font-semibold text-[color:var(--color-turkish-blue-200)]">
-                İzlenecek Adımlar
-              </h3>
-              <ul className="mt-4 space-y-3 text-sm text-gray-300">
-                {followUpActions.map((action) => {
-                  const linkTarget = action.href.startsWith("#")
-                    ? `/${action.href}`
-                    : action.href;
-
-                  return (
-                    <li
-                      key={action.href}
-                      className="rounded-lg border border-[rgba(0,167,197,0.1)] bg-[rgba(0,167,197,0.05)] p-3"
-                    >
-                      <p className="font-medium text-white">{action.title}</p>
-                      <p className="text-xs text-gray-400">{action.description}</p>
-                      <Link
-                        href={linkTarget}
-                        className="mt-3 inline-flex items-center text-xs text-[color:var(--color-turkish-blue-200)] underline decoration-dotted underline-offset-2"
-                      >
-                        {action.linkLabel}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-
-            <div className="rounded-xl border border-[rgba(0,167,197,0.2)] bg-[rgba(3,14,18,0.7)] p-6">
-              <h3 className="text-lg font-semibold text-[color:var(--color-turkish-blue-200)]">
-                Kullanıcı Rolleri
-              </h3>
-              <p className="mt-2 text-xs text-gray-400">
-                Sistem, rollere göre yetkilendirme uygular. Admin hesabı tüm
-                yönetim yetkilerine sahiptir.
-              </p>
-              <ul className="mt-4 space-y-2 text-sm text-gray-200">
-                {availableUsers.map((availableUser) => (
-                  <li
-                    key={availableUser.id}
-                    className="flex items-center justify-between rounded-lg border border-[rgba(0,167,197,0.1)] bg-[rgba(0,167,197,0.05)] px-4 py-2"
-                  >
-                    <div>
-                      <p className="font-medium text-white">
-                        {availableUser.displayName || availableUser.username || "—"}
-                      </p>
-                      <p className="text-xs text-gray-400">{availableUser.email}</p>
-                    </div>
-                    <span className="rounded-full border border-[rgba(0,167,197,0.3)] px-3 py-1 text-[10px] uppercase tracking-wider text-[color:var(--color-turkish-blue-200)]">
-                      {availableUser.role}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <aside className="rounded-3xl border border-[rgba(110,211,225,0.16)] bg-[rgba(6,20,27,0.6)]/80 p-6 shadow-[0_25px_70px_rgba(0,0,0,0.45)] backdrop-blur-xl">
-          <h2 className="text-lg font-semibold text-[color:var(--color-turkish-blue-200)]">Ekip Özeti</h2>
-          <p className="mt-2 text-sm text-[rgba(255,255,255,0.6)]">
-            Aktif kullanıcılar ve rollerine hızlı bir bakış.
-          </p>
-          <ul className="mt-5 space-y-3 text-sm text-[rgba(255,255,255,0.75)]">
-            {highlightedUsers.length > 0 ? (
-              highlightedUsers.map((user) => (
-                <li
-                  key={user.id}
-                  className="flex items-center justify-between rounded-2xl border border-[rgba(110,211,225,0.16)] bg-[rgba(8,28,38,0.55)] px-4 py-3"
-                >
-                  <div>
-                    <p className="font-medium text-white">{user.displayName ?? user.email}</p>
-                    <p className="text-[11px] text-[rgba(255,255,255,0.5)]">{user.email}</p>
-                  </div>
-                  <span className="rounded-full border border-[rgba(110,211,225,0.35)] px-3 py-1 text-[10px] uppercase tracking-[0.3em] text-[color:var(--color-turkish-blue-200)]">
-                    {user.role}
-                  </span>
-                </li>
-              ))
-            ) : (
-              <li className="rounded-2xl border border-dashed border-[rgba(110,211,225,0.2)] bg-[rgba(8,28,38,0.45)] px-4 py-6 text-center text-xs text-[rgba(255,255,255,0.5)]">
-                Kullanıcı bilgisi alınamadı.
-              </li>
-            )}
-          </ul>
-        </aside>
+      <section aria-labelledby="admin-dashboard-metrics">
+        <h2 id="admin-dashboard-metrics" className="sr-only">Sistem ve Trafik</h2>
+        <AdminMetrics />
       </section>
     </div>
   );

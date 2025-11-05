@@ -1,5 +1,5 @@
 import type { Blog, BlogCategory } from "@/types/blog";
-import type { Project, ProjectStatus } from "@/types/project";
+import type { Project, ProjectStatus, ProjectType } from "@/types/project";
 import { Role, User } from "./auth/users";
 import { AuthUserPayload } from "@/types/auth";
 
@@ -10,20 +10,29 @@ const API_BASE =
 // All public content endpoints are served under /api on the backend Router.
 const BLOGS_API_URL = `${API_BASE}/blogs`;
 const PROJECTS_API_URL = `${API_BASE}/projects`;
-
-type ServerHealthResponse = {
-  status?: string;
-  uptime?: number | string;
-  version?: string;
-  lastDeploymentAt?: string;
-};
+const ANALYTICS_API_URL = `${API_BASE}/analytics`;
+const UPLOAD_API_URL = `${API_BASE}/upload`;
 
 type BlogCategoriesResponse = {
   categories?: BlogCategory[];
 };
 
-type BlogsResponse = {
-  blogs?: Blog[];
+// Backend blog API response shapes
+type RawBlogPost = {
+  id?: number | string;
+  author_id?: number | string;
+  title?: string;
+  content?: string;
+  createdAt?: string;
+  image?: string;
+};
+
+type BlogsListResponse = {
+  posts?: RawBlogPost[];
+};
+
+type BlogSingleResponse = {
+  post?: RawBlogPost;
 };
 
 /**
@@ -51,9 +60,52 @@ export const getAllBlogCategories = async (): Promise<BlogCategory[]> => {
   return Array.isArray(json.categories) ? json.categories : [];
 };
 
+export const createBlogCategory = async (name: string): Promise<BlogCategory | null> => {
+  const response = await fetch(`${BLOGS_API_URL}/categories`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ name }),
+  });
+  if (!response.ok) return null;
+  const json = (await response.json().catch(() => null)) as { category?: BlogCategory } | null;
+  return json?.category ?? null;
+};
+
 /**
  * Fetches all public blogs.
  */
+const normalizeBlog = (raw: RawBlogPost | null | undefined): Blog | null => {
+  if (!raw) return null;
+
+  const id = raw.id ?? undefined;
+  const title = raw.title ?? undefined;
+  const content = raw.content ?? "";
+  const createdAt = raw.createdAt ?? "";
+  const authorId = raw.author_id ?? undefined;
+
+  if (id === undefined || title === undefined) return null;
+
+  // Derive minimal fields required by Blog type; fill gaps with sensible defaults
+  const date = createdAt || new Date().toISOString();
+  const excerpt = content ? content.slice(0, 160) : "";
+
+  return {
+    id: String(id),
+    title,
+    date,
+    author: authorId !== undefined ? String(authorId) : "",
+    excerpt,
+    content,
+    image: raw.image ?? "",
+    categories: [],
+    createdAt: date,
+    updatedAt: date,
+  };
+};
+
 export const getAllBlogs = async (): Promise<Blog[]> => {
   const response = await fetch(BLOGS_API_URL, { cache: "no-store" });
 
@@ -68,10 +120,13 @@ export const getAllBlogs = async (): Promise<Blog[]> => {
 
   const json = (await response
     .json()
-    .catch(() => ({} as BlogsResponse))) as BlogsResponse;
-  const list = Array.isArray(json.blogs) ? json.blogs : [];
+    .catch(() => ({} as BlogsListResponse))) as BlogsListResponse;
+  const list = Array.isArray(json.posts) ? json.posts : [];
 
-  return [...list].sort((a, b) => b.date.localeCompare(a.date));
+  return list
+    .map((post) => normalizeBlog(post))
+    .filter((p): p is Blog => Boolean(p))
+    .sort((a, b) => b.date.localeCompare(a.date));
 };
 
 /**
@@ -90,7 +145,11 @@ export const getBlogById = async (id: string): Promise<Blog | null> => {
     );
   }
 
-  return (await response.json()) as Blog;
+  const json = (await response
+    .json()
+    .catch(() => ({} as BlogSingleResponse))) as BlogSingleResponse;
+  const normalized = normalizeBlog(json.post);
+  return normalized ?? null;
 };
 
 export const getAllUsers = async (token: string): Promise<User[]> => {
@@ -302,7 +361,7 @@ const normalizeUser = (raw: RawUser | null | undefined): User | null => {
   return {
     id: String(id), 
     email,
-    role: role === "admin" ? "admin" : "user",
+  role: role === "admin" ? "admin" : role === "moderator" ? "moderator" : "user",
     username: raw.username ?? undefined,
     displayName: raw.displayName ?? raw.name ?? undefined,
     avatar: raw.avatar ?? undefined,
@@ -368,6 +427,21 @@ const normalizeProject = (project: unknown): Project | null => {
     }
   }
 
+  let type: ProjectType | undefined;
+  if (typeof candidate.type === "string") {
+    const tNorm = candidate.type.toLowerCase();
+    const allowedTypes: ProjectType[] = ["game", "website", "tool", "other"];
+    if ((allowedTypes as string[]).includes(tNorm)) {
+      type = tNorm as ProjectType;
+    }
+  }
+
+  const getStr = (obj: unknown, key: string): string | undefined => {
+    if (!obj || typeof obj !== "object") return undefined;
+    const value = (obj as Record<string, unknown>)[key];
+    return typeof value === "string" ? value : undefined;
+  };
+
   return {
     id: String(id),
     name: String(name),
@@ -378,7 +452,9 @@ const normalizeProject = (project: unknown): Project | null => {
         : candidate.summary && typeof candidate.summary === "string"
         ? candidate.summary
         : undefined,
+    logoUrl: getStr(candidate, "logoUrl") ?? getStr(candidate, "logo") ?? getStr(candidate, "image") ?? undefined,
     status,
+  type,
     lastUpdatedAt:
       typeof candidate.updatedAt === "string"
         ? candidate.updatedAt
@@ -407,13 +483,13 @@ export const getAllProjects = async (
     const response = await fetch(PROJECTS_API_URL, {
       cache: "no-store",
       headers,
-    });
-
+    }); 
+ 
     if (!response.ok) {
       return [];
     }
 
-    const json = await response.json().catch(() => []);
+    const json = await response.json().catch(() => []);  
     if (!Array.isArray(json)) {
       return [];
     }
@@ -427,11 +503,235 @@ export const getAllProjects = async (
   }
 };
 
+export const createProject = async (
+  { name, description, status, type }: Project,
+  token: string
+): Promise<Project | null> => {
+  if (!token) {
+    throw new Error("Yetkilendirme anahtarı eksik.");
+  }
+
+  const response = await fetch(PROJECTS_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  body: JSON.stringify({ name, description, status, type }),
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const json = (await response.json().catch(() => null)) as
+    | { project?: unknown }
+    | unknown;
+  const project = (json && typeof json === "object" && "project" in json
+    ? (json as { project?: unknown }).project
+    : json) as unknown;
+  return normalizeProject(project);
+}
+
+export const editProject = async({name,description,status, type}: Partial<Project>, projectId: string, token: string): Promise<Project | null> => {
+  if (!token) {
+    throw new Error("Yetkilendirme anahtarı eksik.");
+  }
+
+  if (!projectId) {
+    throw new Error("Proje ID'si sağlanmadı.");
+  }
+
+  const response = await fetch(`${PROJECTS_API_URL}/${projectId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  body: JSON.stringify({ name, description, status, type }),
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const json = (await response.json().catch(() => null)) as
+    | { project?: unknown }
+    | unknown;
+  const project = (json && typeof json === "object" && "project" in json
+    ? (json as { project?: unknown }).project
+    : json) as unknown;
+  return normalizeProject(project);
+}
+
+export const deleteProject = async(projectId: string, token: string): Promise<boolean> => {
+  if (!token) {
+    throw new Error("Yetkilendirme anahtarı eksik.");
+  }
+
+  if (!projectId) {
+    throw new Error("Proje ID'si sağlanmadı.");
+  }
+
+  const response = await fetch(`${PROJECTS_API_URL}/${projectId}`, {
+    method: "DELETE",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.ok;
+};
+
+// --- Project Stats ---
+export type ProjectStat = { metric: string; day: string; value: number };
+
+export const getProjectStats = async (
+  projectId: string,
+  token?: string
+): Promise<ProjectStat[]> => {
+  try {
+    const headers: Record<string, string> = { Accept: "application/json" };
+    if (token) headers.Authorization = `Bearer ${token}`;
+    const res = await fetch(`${PROJECTS_API_URL}/${encodeURIComponent(projectId)}/stats`, {
+      headers,
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    const json = (await res.json().catch(() => null)) as { stats?: Array<{ metric?: string; day?: string; value?: number | string }> } | null;
+    const list = Array.isArray(json?.stats) ? json!.stats! : [];
+    return list
+      .map((s) => ({ metric: String(s.metric ?? "generic"), day: String(s.day ?? ""), value: typeof s.value === "number" ? s.value : Number(s.value) || 0 }))
+      .filter((s) => s.day.length > 0);
+  } catch {
+    return [];
+  }
+};
+
+export const recordProjectStat = async (
+  projectId: string,
+  payload: { metric: string; value: number; day?: string },
+  token: string
+): Promise<boolean> => {
+  const res = await fetch(`${PROJECTS_API_URL}/${encodeURIComponent(projectId)}/stats`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  return res.ok;
+};
+
+// --- Blogs: create a new blog post (admin) ---
+export const createBlog = async (
+  payload: {
+    title: string;
+    content: string; // markdown or html
+    excerpt?: string;
+    image?: string; // thumbnail url
+    categories?: string[]; // names or ids depending on backend
+    author?: string;
+  },
+  token: string
+): Promise<Blog | null> => {
+  if (!token) throw new Error("Yetkilendirme anahtarı eksik.");
+
+  // Backend expects token in the JSON body (not Authorization header)
+  const response = await fetch(BLOGS_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      title: payload.title,
+      content: payload.content,
+      image: payload.image ?? undefined,
+      token, // required by backend to resolve author
+    }),
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const json = (await response
+    .json()
+    .catch(() => ({} as BlogSingleResponse))) as BlogSingleResponse;
+  const normalized = normalizeBlog(json.post);
+  return normalized ?? null;
+};
+
+export const uploadImage = async (
+  dataUrl: string,
+  token: string
+): Promise<{ url?: string; dataUrl?: string; filename?: string } | null> => {
+  if (!token) throw new Error("Yetkilendirme anahtarı eksik.");
+  const res = await fetch(`${UPLOAD_API_URL}/image`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ dataUrl }),
+  });
+  if (!res.ok) return null;
+  const json = (await res.json().catch(() => null)) as
+    | { success?: boolean; url?: unknown; dataUrl?: unknown; filename?: unknown }
+    | null;
+  if (!json || json.success !== true) return null;
+  const out: { url?: string; dataUrl?: string; filename?: string } = {};
+  if (typeof json.url === "string") out.url = json.url;
+  if (typeof json.dataUrl === "string") out.dataUrl = json.dataUrl;
+  if (typeof json.filename === "string") out.filename = json.filename;
+  return out;
+};
+
+// Presigned upload (S3/MinIO)
+export const presignUpload = async (
+  params: { contentType: string; extension?: string; contentLength?: number; keyPrefix?: string },
+  token: string
+): Promise<{ url: string; method: string; key: string; publicUrl: string } | null> => {
+  if (!token) throw new Error("Yetkilendirme anahtarı eksik.");
+  const res = await fetch(`${UPLOAD_API_URL}/presign`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      contentType: params.contentType,
+      extension: params.extension,
+      contentLength: params.contentLength,
+      keyPrefix: params.keyPrefix ?? "blog/",
+    }),
+  });
+  if (!res.ok) return null;
+  const json = (await res.json().catch(() => null)) as
+    | { success?: boolean; url?: unknown; method?: unknown; key?: unknown; publicUrl?: unknown }
+    | null;
+  if (!json || json.success !== true || typeof json.url !== "string" || typeof json.key !== "string") return null;
+  return {
+    url: String(json.url),
+    method: typeof json.method === "string" ? json.method : "PUT",
+    key: String(json.key),
+    publicUrl: typeof json.publicUrl === "string" ? json.publicUrl : "",
+  };
+};
+
 export type ServerHealth = {
   status: "online" | "offline";
   uptimeSeconds?: number;
-  version?: string;
-  lastDeploymentAt?: string;
+  memory?: { totalBytes: number; usedBytes: number };
+  cpu?: { loadAvg1: number; loadAvg5: number; loadAvg15: number };
 };
 
 const parseUptime = (uptime: number | string | undefined): number | undefined => {
@@ -462,18 +762,27 @@ export const getServerHealth = async (
     const response = await fetch(`${API_BASE}/health`, {
       cache: "no-store",
       headers,
-    });
-
+    }); 
     if (!response.ok) {
       return { status: "offline" };
     }
 
-    const json = (await response
+    type HealthJson = {
+      status?: unknown;
+      uptimeSeconds?: unknown;
+      memory?: { totalBytes?: unknown; usedBytes?: unknown } | null;
+      cpu?: { loadAvg1?: unknown; loadAvg5?: unknown; loadAvg15?: unknown } | null;
+    };
+    const json: HealthJson = (await response
       .json()
-      .catch(() => ({} as ServerHealthResponse))) as ServerHealthResponse;
-
-    const uptimeSeconds = parseUptime(json.uptime);
-    const normalizedStatus = json.status?.toString().toLowerCase();
+      .catch(() => ({} as HealthJson))) as HealthJson;
+    const uptimeSeconds = parseUptime(
+      typeof json.uptimeSeconds === "string" || typeof json.uptimeSeconds === "number"
+        ? (json.uptimeSeconds as number | string)
+        : undefined
+    );
+    const normalizedStatus =
+      typeof json.status === "string" ? json.status.toLowerCase() : undefined;
 
     return {
       status:
@@ -481,13 +790,99 @@ export const getServerHealth = async (
           ? "online"
           : "offline",
       uptimeSeconds,
-      version: json.version ?? undefined,
-      lastDeploymentAt: json.lastDeploymentAt ?? undefined,
+      memory:
+        json.memory &&
+        typeof json.memory.totalBytes === "number" &&
+        typeof json.memory.usedBytes === "number"
+          ? { totalBytes: json.memory.totalBytes, usedBytes: json.memory.usedBytes }
+          : undefined,
+      cpu:
+        json.cpu &&
+        typeof json.cpu.loadAvg1 === "number" &&
+        typeof json.cpu.loadAvg5 === "number" &&
+        typeof json.cpu.loadAvg15 === "number"
+          ? {
+              loadAvg1: json.cpu.loadAvg1,
+              loadAvg5: json.cpu.loadAvg5,
+              loadAvg15: json.cpu.loadAvg15,
+            }
+          : undefined,
     };
   } catch (error) {
     console.error("Failed to read server health", error);
     return { status: "offline" };
   }
+};
+
+// --- Analytics ---
+export const incrementSiteVisit = async (): Promise<void> => {
+  try {
+    await fetch(`${ANALYTICS_API_URL}/visits/increment`, { method: "POST" });
+  } catch {}
+};
+
+export const getVisits = async (token: string): Promise<{ date: string; count: number }[]> => {
+  const res = await fetch(`${ANALYTICS_API_URL}/visits`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  if (!res.ok) return [];
+  const json = (await res.json().catch(() => null)) as { visits?: { date: string; count: number }[] } | null;
+  return Array.isArray(json?.visits) ? json!.visits! : [];
+};
+
+export const incrementBlogView = async (id: string | number): Promise<void> => {
+  try {
+    await fetch(`${ANALYTICS_API_URL}/blogs/${id}/increment`, { method: "POST" });
+  } catch {}
+};
+
+export const getTopBlogViews = async (token: string): Promise<{ id: string; count: number }[]> => {
+  const res = await fetch(`${ANALYTICS_API_URL}/blogs/top`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  if (!res.ok) return [];
+  const json = (await res.json().catch(() => null)) as { top?: { id: string | number; count: string | number }[] } | null;
+  const top = Array.isArray(json?.top) ? json!.top! : [];
+  return top.map((t) => ({ id: String(t.id), count: Number(t.count) || 0 }));
+};
+
+// Per-page analytics
+export const incrementPageView = async (path: string, ua?: string): Promise<void> => {
+  try {
+    await fetch(`${ANALYTICS_API_URL}/page/increment`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ path, ua: ua ?? "" }),
+    });
+  } catch {}
+};
+
+export const getTopPages = async (
+  token: string
+): Promise<{ path: string; count: number }[]> => {
+  const res = await fetch(`${ANALYTICS_API_URL}/pages/top`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  if (!res.ok) return [];
+  const json = (await res.json().catch(() => null)) as { top?: { path?: string; count?: string | number }[] } | null;
+  const list = Array.isArray(json?.top) ? json!.top! : [];
+  return list.map((i) => ({ path: String(i.path ?? "/"), count: Number(i.count ?? 0) || 0 }));
+};
+
+export const getTopAgents = async (
+  token: string
+): Promise<{ agent: string; count: number }[]> => {
+  const res = await fetch(`${ANALYTICS_API_URL}/agents/top`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  if (!res.ok) return [];
+  const json = (await res.json().catch(() => null)) as { top?: { agent?: string; count?: string | number }[] } | null;
+  const list = Array.isArray(json?.top) ? json!.top! : [];
+  return list.map((i) => ({ agent: String(i.agent ?? "Other"), count: Number(i.count ?? 0) || 0 }));
 };
 
 export const updateUserRole = async (
@@ -530,4 +925,118 @@ export const updateUserRole = async (
   }
 
   return user;
+};
+
+// --- FAQ (S.S.S.) ---
+export type FaqItem = {
+  id: string;
+  locale: string;
+  question: string;
+  answer: string;
+  order: number;
+  isActive: boolean;
+  updatedAt?: string;
+};
+
+export const getFaqs = async (locale: string): Promise<FaqItem[]> => {
+  const res = await fetch(`${API_BASE}/faq/${encodeURIComponent(locale)}`, {
+    cache: "no-store",
+  });
+  if (!res.ok) return [];
+  const json = (await res.json().catch(() => null)) as {
+    items?: Array<{
+      id?: string | number;
+      locale?: string;
+      question?: string;
+      answer?: string;
+      order?: number | string;
+      isActive?: boolean;
+      updatedAt?: string;
+    }>;
+  } | null;
+  const list = Array.isArray(json?.items) ? json!.items! : [];
+  return list
+    .map((i) => ({
+      id: String(i.id ?? ""),
+      locale: i.locale ?? locale,
+      question: i.question ?? "",
+      answer: i.answer ?? "",
+      order: typeof i.order === "string" ? Number(i.order) || 0 : (i.order ?? 0),
+      isActive: Boolean(i.isActive ?? true),
+      updatedAt: i.updatedAt,
+    }))
+    .filter((i) => i.id && i.question && i.answer);
+};
+
+export const createFaq = async (
+  payload: { locale: string; question: string; answer: string; order?: number; isActive?: boolean },
+  token: string
+): Promise<FaqItem | null> => {
+  const res = await fetch(`${API_BASE}/faq`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) return null;
+  const json = (await res.json().catch(() => null)) as { item?: unknown } | null;
+  const it = json && typeof json === "object" && "item" in json ? (json as Record<string, unknown>).item : undefined;
+  if (!it || typeof it !== "object") return null;
+  const rec = it as Record<string, unknown>;
+  const s = (v: unknown, fb = "") => (typeof v === "string" ? v : fb);
+  const n = (v: unknown, fb = 0) => (typeof v === "number" ? v : typeof v === "string" ? Number(v) || fb : fb);
+  const b = (v: unknown, fb = true) => (typeof v === "boolean" ? v : typeof v === "string" ? v === "true" || v === "1" : fb);
+  return {
+    id: s(rec.id, ""),
+    locale: s(rec.locale, payload.locale),
+    question: s(rec.question, payload.question),
+    answer: s(rec.answer, payload.answer),
+    order: n(rec.order, payload.order ?? 0),
+    isActive: b(rec.isActive, payload.isActive ?? true),
+    updatedAt: s(rec.updatedAt, undefined as unknown as string | undefined),
+  };
+};
+
+export const updateFaq = async (
+  id: string,
+  patch: Partial<Pick<FaqItem, "locale" | "question" | "answer" | "order" | "isActive">>,
+  token: string
+): Promise<FaqItem | null> => {
+  const res = await fetch(`${API_BASE}/faq/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(patch),
+  });
+  if (!res.ok) return null;
+  const json = (await res.json().catch(() => null)) as { item?: unknown } | null;
+  const it = json && typeof json === "object" && "item" in json ? (json as Record<string, unknown>).item : undefined;
+  if (!it || typeof it !== "object") return null;
+  const rec = it as Record<string, unknown>;
+  const s = (v: unknown, fb = "") => (typeof v === "string" ? v : fb);
+  const n = (v: unknown, fb = 0) => (typeof v === "number" ? v : typeof v === "string" ? Number(v) || fb : fb);
+  const b = (v: unknown, fb = true) => (typeof v === "boolean" ? v : typeof v === "string" ? v === "true" || v === "1" : fb);
+  return {
+    id: s(rec.id, id),
+    locale: s(rec.locale, patch.locale ?? "tr-TR"),
+    question: s(rec.question, patch.question ?? ""),
+    answer: s(rec.answer, patch.answer ?? ""),
+    order: n(rec.order, patch.order ?? 0),
+    isActive: b(rec.isActive, patch.isActive ?? true),
+    updatedAt: s(rec.updatedAt, undefined as unknown as string | undefined),
+  };
+};
+
+export const deleteFaq = async (id: string, token: string): Promise<boolean> => {
+  const res = await fetch(`${API_BASE}/faq/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.ok;
 };

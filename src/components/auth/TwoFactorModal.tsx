@@ -15,14 +15,14 @@ type Props = {
 export default function TwoFactorModal({ tempToken, onSuccess, expirySeconds = 300, }: Props) {
 
 
-    const [code, setCode] = useState("");
+    const [digits, setDigits] = useState<string[]>(["", "", "", "", "", ""]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [remaining, setRemaining] = useState<number>(expirySeconds);
     const [expired, setExpired] = useState(false);
     const [currentTempToken, setCurrentTempToken] = useState<string>(tempToken);
     const [resendCooldown, setResendCooldown] = useState<number>(0);
-    const inputRef = useRef<HTMLInputElement | null>(null);
+    const inputsRef = useRef<Array<HTMLInputElement | null>>([null, null, null, null, null, null]);
     const timerRef = useRef<number | null>(null);
 
     useEffect(() => {
@@ -47,7 +47,7 @@ export default function TwoFactorModal({ tempToken, onSuccess, expirySeconds = 3
     }, [resendCooldown]);
 
     useEffect(() => {
-        inputRef.current?.focus();
+        inputsRef.current[0]?.focus();
 
         // start countdown
         setRemaining(expirySeconds);
@@ -84,14 +84,67 @@ export default function TwoFactorModal({ tempToken, onSuccess, expirySeconds = 3
         return `${mm}:${ss}`;
     }
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value.replace(/[^0-9]/g, "");
-        setCode(value.slice(0, 6));
+    const pasteIntoInputs = (text: string) => {
+        const clean = text.replace(/[^0-9]/g, "").slice(0, 6);
+        if (!clean) return;
+        const arr = clean.split("");
+        const next = ["", "", "", "", "", ""];
+        for (let i = 0; i < arr.length; i++) next[i] = arr[i];
+        setDigits(next);
+        const focusIndex = Math.min(arr.length, 5);
+        inputsRef.current[focusIndex]?.focus();
         setError(null);
+    };
+
+    const handleInputChange = (index: number) => (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value.replace(/[^0-9]/g, "");
+        if (!value) {
+            setDigits((prev) => {
+                const next = [...prev];
+                next[index] = "";
+                return next;
+            });
+            return;
+        }
+        setDigits((prev) => {
+            const next = [...prev];
+            // take the last typed digit
+            next[index] = value[value.length - 1] ?? "";
+            return next;
+        });
+        // move focus right
+        if (index < 5) inputsRef.current[index + 1]?.focus();
+        setError(null);
+    };
+
+    const handleKeyDown = (index: number) => (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Backspace") {
+            if (digits[index]) {
+                // clear current box
+                setDigits((prev) => {
+                    const next = [...prev];
+                    next[index] = "";
+                    return next;
+                });
+            } else if (index > 0) {
+                // go left
+                inputsRef.current[index - 1]?.focus();
+                setDigits((prev) => {
+                    const next = [...prev];
+                    next[index - 1] = "";
+                    return next;
+                });
+            }
+        } else if (e.key === "ArrowLeft" && index > 0) {
+            inputsRef.current[index - 1]?.focus();
+        } else if (e.key === "ArrowRight" && index < 5) {
+            inputsRef.current[index + 1]?.focus();
+        }
     };
 
     const handleSubmit = async (e?: React.FormEvent) => {
         e?.preventDefault();
+        const code = digits.join("");
         if (code.length !== 6) {
             setError("Please enter a 6-digit code");
             return;
@@ -130,13 +183,13 @@ export default function TwoFactorModal({ tempToken, onSuccess, expirySeconds = 3
             }
 
             // reset input on invalid code
-            setCode("");
+            setDigits(["", "", "", "", "", ""]);
             setError(friendly);
-            inputRef.current?.focus();
+            inputsRef.current[0]?.focus();
         } catch (err) {
             console.error("2FA verification failed:", err);
             setError("Verification failed. Please try again.");
-            setCode("");
+            setDigits(["", "", "", "", "", ""]);
         } finally {
             setLoading(false);
         }
@@ -156,9 +209,9 @@ export default function TwoFactorModal({ tempToken, onSuccess, expirySeconds = 3
                 const secs = payload.expiresAt ? Math.max(1, Math.floor(payload.expiresAt - nowSec)) : (payload.expiresIn ?? expirySeconds);
                 setRemaining(secs);
                 setExpired(false);
-                setCode("");
+                setDigits(["", "", "", "", "", ""]);
                 setError(null);
-                inputRef.current?.focus();
+                inputsRef.current[0]?.focus();
                 // show success toast and start cooldown (30s)
                 toast.success("Verification code resent", { autoClose: 3000 });
                 setResendCooldown(30);
@@ -178,50 +231,57 @@ export default function TwoFactorModal({ tempToken, onSuccess, expirySeconds = 3
 
     return (
         <>
-            <div aria-hidden={false} role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.85)] dark:bg-[rgba(0,0,0,0.85)]">
-                <div className="w-full max-w-md bg-white dark:bg-zinc-900 text-black dark:text-white rounded-lg p-6 shadow-lg">
-                    <h2 className="text-lg font-medium mb-2">Enter verification code</h2>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">A 6-digit verification code was sent to your email.</p>
+            <div aria-hidden={false} role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.8)]">
+                <div className="w-full max-w-md rounded-3xl border border-[rgba(110,211,225,0.18)] bg-[rgba(6,20,27,0.9)]/90 p-6 shadow-[0_25px_70px_rgba(0,0,0,0.45)] backdrop-blur-xl text-white">
+                    <h2 className="font-display text-lg uppercase tracking-[0.3em] text-[color:var(--color-turkish-blue-300)] mb-2">Doğrulama Kodu</h2>
+                    <p className="text-sm text-[rgba(255,255,255,0.75)] mb-2">E-postanıza gönderilen 6 haneli kodu giriniz.</p>
 
-                    <div className="mb-4 text-sm text-gray-500 dark:text-gray-300">Code expires in: <span className="font-mono">{formatTime(remaining)}</span></div>
+                    <div className="mb-4 text-sm text-[rgba(255,255,255,0.6)]">Kodun süresi: <span className="font-mono">{formatTime(remaining)}</span></div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        <input
-                            aria-label="2fa-code"
-                            ref={inputRef}
-                            value={code}
-                            onChange={handleChange}
-                            className="w-full text-center text-2xl tracking-widest p-2 border rounded bg-white dark:bg-zinc-800 text-black dark:text-white border-gray-300 dark:border-zinc-700"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                            autoFocus
-                            disabled={expired}
-                        />
+                        <div className="flex items-center justify-center gap-2" onPaste={(e) => {
+                            e.preventDefault();
+                            const text = e.clipboardData.getData("text");
+                            pasteIntoInputs(text);
+                        }}>
+                            {digits.map((val, i) => (
+                                <input
+                                    key={i}
+                                    ref={(el) => { inputsRef.current[i] = el; }}
+                                    value={val}
+                                    onChange={handleInputChange(i)}
+                                    onKeyDown={handleKeyDown(i)}
+                                    className="h-12 w-10 rounded-md border border-[rgba(110,211,225,0.3)] bg-[rgba(3,12,18,0.85)] text-center text-xl tracking-[0.3em] text-white focus:border-[rgba(110,211,225,0.6)] focus:outline-none"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    maxLength={1}
+                                    disabled={expired}
+                                />
+                            ))}
+                        </div>
 
-                        {error && <div className="text-sm text-red-600 dark:text-red-400">{error}</div>}
+                        {error && <div className="text-sm text-red-400">{error}</div>}
 
-                        <div className="flex justify-end">
-                            <div className="flex gap-2">
-                                <button
-                                    type="button"
-                                    onClick={handleResend}
-                                    disabled={loading}
-                                    className="px-3 py-2 bg-gray-200 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 rounded disabled:opacity-60"
-                                >
-                                    Resend
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={loading || expired}
-                                    className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-60"
-                                >
-                                    {loading ? "Verifying..." : "Verify"}
-                                </button>
-                            </div>
+                        <div className="flex justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={handleResend}
+                                disabled={loading || resendCooldown > 0}
+                                className="rounded-full border border-[rgba(110,211,225,0.35)] bg-[rgba(8,28,38,0.65)] px-4 py-2 text-xs uppercase tracking-[0.35em] text-[rgba(255,255,255,0.85)] disabled:opacity-60"
+                            >
+                                {resendCooldown > 0 ? `Tekrar Gönder (${resendCooldown})` : "Tekrar Gönder"}
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={loading || expired}
+                                className="rounded-full bg-[color:var(--color-turkish-blue-500)] px-5 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-black disabled:opacity-60"
+                            >
+                                {loading ? "Doğrulanıyor…" : "Doğrula"}
+                            </button>
                         </div>
                     </form>
 
-                    <p className="text-xs text-gray-400 mt-4">This dialog cannot be closed while verification is pending.</p>
+                    <p className="text-xs text-[rgba(255,255,255,0.5)] mt-4">Doğrulama beklenirken bu pencere kapatılamaz.</p>
                 </div>
             </div>
         </>

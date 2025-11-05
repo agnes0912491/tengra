@@ -10,24 +10,38 @@ import { updateUserRole } from "@/lib/db";
 
 const ROLE_OPTIONS: { value: Role; label: string }[] = [
   { value: "admin", label: "Yönetici" },
+  { value: "moderator", label: "Moderatör" },
   { value: "user", label: "Standart" },
 ];
 
 type Props = {
   initialUsers: User[];
+  currentUserId?: string;
+  currentUserRole?: Role;
 };
 
 type LocalUser = User & {
   isUpdating?: boolean;
 };
 
-export default function UsersTable({ initialUsers }: Props) {
+const roleRank: Record<Role, number> = { user: 0, moderator: 1, admin: 2 };
+
+const isHigherRole = (a: Role, b: Role | undefined) => {
+  if (!b) return false;
+  return roleRank[a] > roleRank[b];
+};
+
+export default function UsersTable({ initialUsers, currentUserId, currentUserRole }: Props) {
   const [users, setUsers] = useState<LocalUser[]>(() =>
     initialUsers.map((user) => ({ ...user, isUpdating: false }))
   );
   const [isPending, startTransition] = useTransition();
 
   const handleRoleChange = (userId: string, role: Role) => {
+    if (currentUserId && currentUserId === userId) {
+      toast.error("Kendi rolünüzü değiştiremezsiniz.");
+      return;
+    }
     const token = ADMIN_SESSION_COOKIE_CANDIDATES.map((name) => Cookies.get(name)).find(
       (value): value is string => Boolean(value)
     );
@@ -107,24 +121,26 @@ export default function UsersTable({ initialUsers }: Props) {
                 </div>
               </td>
               <td className="px-6 py-4 text-right">
-                <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(110,211,225,0.25)] bg-[rgba(8,28,38,0.55)] px-3 py-2">
-                  <label htmlFor={`role-${user.id}`} className="text-[10px] uppercase tracking-[0.35em] text-[rgba(255,255,255,0.45)]">
-                    Rolü değiştir
-                  </label>
-                  <select
-                    id={`role-${user.id}`}
-                    value={user.role}
-                    disabled={isBusy}
-                    onChange={(event) => handleRoleChange(user.id, event.target.value as Role)}
-                    className="rounded-full border border-[rgba(110,211,225,0.25)] bg-[rgba(4,18,24,0.85)] px-3 py-1 text-xs text-[rgba(255,255,255,0.85)] focus:border-[rgba(110,211,225,0.55)] focus:outline-none"
-                  >
-                    {ROLE_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {currentUserId !== user.id && !isHigherRole(user.role as Role, currentUserRole) ? (
+                  <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(110,211,225,0.25)] bg-[rgba(8,28,38,0.55)] px-3 py-2">
+                    <label htmlFor={`role-${user.id}`} className="text-[10px] uppercase tracking-[0.35em] text-[rgba(255,255,255,0.45)]">
+                      Rolü değiştir
+                    </label>
+                    <select
+                      id={`role-${user.id}`}
+                      value={user.role}
+                      disabled={isBusy}
+                      onChange={(event) => handleRoleChange(user.id, event.target.value as Role)}
+                      className="rounded-full border border-[rgba(110,211,225,0.25)] bg-[rgba(4,18,24,0.85)] px-3 py-1 text-xs text-[rgba(255,255,255,0.85)] focus:border-[rgba(110,211,225,0.55)] focus:outline-none"
+                    >
+                      {ROLE_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : null}
               </td>
             </tr>
           ))}

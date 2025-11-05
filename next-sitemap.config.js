@@ -7,7 +7,7 @@ module.exports = {
   priority: 0.7,
   sourceDir: ".next",
   exclude: ["/admin", "/admin/*", "/api/*"],
-  additionalPaths: async (config) => {
+  additionalPaths: async () => {
     return [];
   },
 };

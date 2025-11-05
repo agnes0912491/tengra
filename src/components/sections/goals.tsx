@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Code, Globe, Infinity, Sparkles, Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 
 type GoalKey = "inception" | "creation" | "expansion" | "harmony" | "beyond";
 
@@ -21,6 +22,25 @@ const goals: GoalDefinition[] = [
 
 export default function Goals() {
   const t = useTranslations("Goals");
+  const [adminGoals, setAdminGoals] = useState<Array<{ title: string; body: string }>>([]);
+
+  useEffect(() => {
+    let cancel = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/homepage", { cache: "no-store" });
+        if (!res.ok) return;
+        const json = await res.json().catch(() => ({}));
+        const targets = Array.isArray(json?.targets) ? json.targets : [];
+        if (!cancel) setAdminGoals(targets);
+      } catch {
+        // ignore
+      }
+    })();
+    return () => {
+      cancel = true;
+    };
+  }, []);
 
   return (
     <section id="goals" className="relative flex flex-col items-center justify-center py-32 px-4 text-center">
@@ -32,14 +52,15 @@ export default function Goals() {
         <div className="absolute left-1/2 top-0 -translate-x-1/2 h-full w-[2px] bg-[rgba(0,167,197,0.2)]" />
 
         <ol className="space-y-16 relative z-10">
-          {goals.map(({ icon: Icon, key }, index) => {
+          {(adminGoals.length > 0
+            ? adminGoals.map((g, idx) => ({ icon: goals[idx % goals.length].icon, title: g.title, description: g.body }))
+            : goals.map(({ icon, key }) => ({ icon, title: t(`items.${key}.title` as const), description: t(`items.${key}.description` as const) }))
+          ).map(({ icon: Icon, title, description }, index) => {
             const isLeft = index % 2 === 0;
-            const title = t(`items.${key}.title` as const);
-            const description = t(`items.${key}.description` as const);
 
             return (
               <motion.li
-                key={key}
+                key={`${title}-${index}`}
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1, duration: 0.6 }}

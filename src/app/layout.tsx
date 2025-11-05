@@ -14,6 +14,7 @@ import ClientUserProvider from "./ClientUserProvider";
 import IntlProviderClient from "@/components/providers/intl-provider-client";
 import { getMessages } from "@/i18n/get-messages";
 import { resolvePreferredLocale } from "@/i18n/resolve-preferred-locale";
+import AnalyticsTracker from "@/components/analytics/AnalyticsTracker";
 
 export const dynamic = "force-dynamic";
 
@@ -151,6 +152,8 @@ export default async function RootLayout({
           <ParticlesClientWrapper />
           <IntlProviderClient locale={locale} messages={messages}>
             <ConsentBanner />
+            {/* Per-page analytics tracker */}
+            <AnalyticsTracker />
             {children}
           </IntlProviderClient>
           <GlobalToastContainer />

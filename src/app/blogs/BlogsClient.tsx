@@ -7,6 +7,9 @@ import { useAuth } from "@/components/providers/auth-provider";
 import { BlogCategory, Blog } from "@/types/blog";
 import { useTranslations } from "next-intl";
 import { safeJsonLd } from "@/lib/jsonld";
+import dynamic from "next/dynamic";
+
+const BlogCreateCta = dynamic(() => import("@/components/admin/blogs/blog-create-cta"), { ssr: false });
 
 interface Props {
   posts: Blog[];
@@ -35,16 +38,16 @@ export default function BlogsClient({ posts, categories }: Props) {
     <>
       <script
         type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: safeJsonLd({
-                "@context": "https://schema.org",
-                "@type": "Blog",
-                name: t("seoTitle"),
-                description: t("seoDescription"),
-                url: `${siteOrigin}/blogs`,
-              }),
-            }}
-          />
+        dangerouslySetInnerHTML={{
+          __html: safeJsonLd({
+            "@context": "https://schema.org",
+            "@type": "Blog",
+            name: t("seoTitle"),
+            description: t("seoDescription"),
+            url: `${siteOrigin}/blogs`,
+          }),
+        }}
+      />
 
       <section className="min-h-screen py-24 px-6 md:px-20">
         <h1 className="text-4xl text-center mb-12 text-[color:var(--color-turkish-blue-400)] font-display tracking-[0.25em]">
@@ -65,12 +68,7 @@ export default function BlogsClient({ posts, categories }: Props) {
               >
                 {t("goToAdminPanel")}
               </Link>
-              <button
-                type="button"
-                className="rounded-full border border-dashed border-[rgba(0,167,197,0.4)] px-4 py-1 text-[color:var(--color-turkish-blue-200)] opacity-80"
-              >
-                {t("createNewPost")}
-              </button>
+              <BlogCreateCta />
             </div>
           </div>
         )}
@@ -80,11 +78,10 @@ export default function BlogsClient({ posts, categories }: Props) {
             <button
               key={cat.name}
               onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-1 rounded-full text-sm border transition ${
-                activeCategory?.name === cat.name
-                  ? "bg-[rgba(0,167,197,0.2)] text-[color:var(--color-turkish-blue-300)] border-[rgba(0,167,197,0.4)]"
-                  : "border-gray-700 text-gray-400 hover:border-[rgba(0,167,197,0.3)] hover:text-[color:var(--color-turkish-blue-300)]"
-              }`}
+              className={`px-4 py-1 rounded-full text-sm border transition ${activeCategory?.name === cat.name
+                ? "bg-[rgba(0,167,197,0.2)] text-[color:var(--color-turkish-blue-300)] border-[rgba(0,167,197,0.4)]"
+                : "border-gray-700 text-gray-400 hover:border-[rgba(0,167,197,0.3)] hover:text-[color:var(--color-turkish-blue-300)]"
+                }`}
             >
               {cat.name}
             </button>
@@ -96,14 +93,15 @@ export default function BlogsClient({ posts, categories }: Props) {
             <Link
               key={post.id}
               href={`/blogs/${post.id}`}
-              className="group bg-[rgba(255,255,255,0.03)] backdrop-blur-xl rounded-xl overflow-hidden border border-[rgba(0,167,197,0.15)] hover:border-[rgba(0,167,197,0.4)] transition"
+              className="group relative overflow-hidden rounded-2xl border border-[rgba(0,167,197,0.18)] bg-[rgba(5,18,24,0.78)]/90 backdrop-blur-xl transition-all hover:border-[rgba(0,167,197,0.45)] hover:shadow-[0_0_35px_rgba(0,167,197,0.15)]"
             >
               <Image
-                src={post.image}
+                src={post.image && post.image.length ? post.image : "/tengra_without_text.png"}
                 alt={post.title}
-                className="w-full h-48 object-cover opacity-80 group-hover:opacity-100 transition"
+                className="w-full h-48 object-cover opacity-85 group-hover:opacity-100 transition"
                 width={800}
                 height={480}
+                priority={false}
               />
               <div className="p-5">
                 <div className="flex justify-between items-center text-xs text-gray-400 mb-2">

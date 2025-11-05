@@ -3,32 +3,41 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { useAuth } from "@/components/providers/auth-provider";
+import { getAllProjects } from "@/lib/db";
+import type { Project } from "@/types/project";
 
-type ProjectKey = "inception" | "expansion" | "oposatb";
-
-type ProjectDefinition = {
-  key: ProjectKey;
-  image: string;
-};
-
-// NOTE:
-// Original project images were missing from `public/images/` on the server,
-// which broke image optimization during SSR. We fallback to a safe public
-// image so the homepage can render consistently.
-const projects: ProjectDefinition[] = [
-  { key: "inception", image: "/tengra_without_text.png" },
-  { key: "expansion", image: "/tengra_without_text.png" },
-  { key: "oposatb", image: "/tengra_without_text.png" },
-];
+const FALLBACK_IMAGE = "/tengra_without_text.png";
 
 export default function Projects() {
   const t = useTranslations("Projects");
   const { user, isAuthenticated } = useAuth();
   const isAdmin = useMemo(() => user?.role === "admin", [user]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancel = false;
+    (async () => {
+      try {
+        const list = await getAllProjects();
+        if (!cancel) setProjects(list);
+      } catch (e) {
+        if (!cancel) setError(String(e));
+      } finally {
+        if (!cancel) setLoading(false);
+      }
+    })();
+    return () => {
+      cancel = true;
+    };
+  }, []);
+
+  const isSlider = projects.length > 5;
 
   return (
     <section
@@ -71,43 +80,98 @@ export default function Projects() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto">
-        {projects.map(({ key, image }, index) => {
-          const title = t(`items.${key}.title` as const);
-          const description = t(`items.${key}.description` as const);
-
-          return (
-            <motion.div
-              key={key}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1, duration: 0.6 }}
-              viewport={{ once: true }}
-              className="relative rounded-xl overflow-hidden group glass border border-[rgba(0,167,197,0.15)] hover:border-[rgba(0,167,197,0.5)] transition-all duration-500"
+      {loading && (
+        <div className="mt-8 text-sm text-[rgba(255,255,255,0.7)]">Projeler yükleniyor…</div>
+      )}
+      {error && (
+        <div className="mt-8 text-sm text-red-400">Projeler alınamadı.</div>
+      )}
+      <div
+        className={
+          isSlider
+            ? "relative w-full max-w-6xl overflow-hidden"
+            : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto"
+        }
+      >
+        {/* Slider container */}
+        {isSlider ? (
+          <div className="group/slider relative">
+            <div
+              className="flex snap-x snap-mandatory gap-6 overflow-x-auto px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
-              <div className="relative w-full h-56 overflow-hidden">
-                <Image
-                  src={image}
-                  alt={title}
-                  fill
-                  className="object-cover opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60 group-hover:to-black/30 transition-all" />
-              </div>
+              {projects.map((proj, index) => {
+                const title = proj.name;
+                const description = proj.description ?? "";
+                const image = proj.logoUrl || FALLBACK_IMAGE;
 
-              <div className="p-6 text-left">
-                <h3 className="text-xl font-display text-[color:var(--color-turkish-blue-400)] mb-2 group-hover:text-[color:var(--color-turkish-blue-300)] transition-colors">
-                  {title}
-                </h3>
-                <p className="text-xs text-[rgba(255,255,255,0.6)]">
-                  {description}
-                </p>
-              </div>
+                return (
+                  <motion.div
+                    key={proj.id ?? `${title}-${index}`}
+                    initial={{ opacity: 0, y: 40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05, duration: 0.45 }}
+                    viewport={{ once: true }}
+                    className="glass relative h-[260px] w-[320px] shrink-0 snap-center overflow-hidden rounded-xl border border-[rgba(0,167,197,0.15)] transition-all duration-500 hover:border-[rgba(0,167,197,0.5)]"
+                  >
+                    <div className="relative h-[150px] w-full overflow-hidden">
+                      <Image
+                        src={image}
+                        alt={title}
+                        fill
+                        className="object-cover opacity-80 transition-all duration-700 group-hover/slider:opacity-100"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60" />
+                    </div>
+                    <div className="p-4 text-left">
+                      <h3 className="mb-1 line-clamp-1 text-lg font-display text-[color:var(--color-turkish-blue-400)]">
+                        {title}
+                      </h3>
+                      <p className="line-clamp-3 text-[12px] text-[rgba(255,255,255,0.7)]">{description}</p>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          projects.map((proj, index) => {
+            const title = proj.name;
+            const description = proj.description ?? "";
+            const image = proj.logoUrl || FALLBACK_IMAGE;
 
-              <div className="absolute inset-0 rounded-xl pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-700 shadow-[0_0_20px_rgba(0,167,197,0.6)]" />
-            </motion.div>
-          );
-        })}
+            return (
+              <motion.div
+                key={proj.id ?? `${title}-${index}`}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1, duration: 0.6 }}
+                viewport={{ once: true }}
+                className="group relative overflow-hidden rounded-xl glass border border-[rgba(0,167,197,0.15)] transition-all duration-500 hover:border-[rgba(0,167,197,0.5)]"
+              >
+                <div className="relative w-full h-56 overflow-hidden">
+                  <Image
+                    src={image}
+                    alt={title}
+                    fill
+                    className="object-cover opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60 group-hover:to-black/30 transition-all" />
+                </div>
+
+                <div className="p-6 text-left">
+                  <h3 className="text-xl font-display text-[color:var(--color-turkish-blue-400)] mb-2 group-hover:text-[color:var(--color-turkish-blue-300)] transition-colors">
+                    {title}
+                  </h3>
+                  <p className="text-xs text-[rgba(255,255,255,0.6)]">
+                    {description}
+                  </p>
+                </div>
+
+                <div className="absolute inset-0 rounded-xl pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-700 shadow-[0_0_20px_rgba(0,167,197,0.6)]" />
+              </motion.div>
+            );
+          })
+        )}
       </div>
     </section>
   );

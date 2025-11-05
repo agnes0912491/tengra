@@ -83,6 +83,21 @@ export async function proxy(request: NextRequest) {
         return applyLocaleCookie(NextResponse.redirect(loginUrl));
       }
     }
+    // Increment analytics counters asynchronously (non-blocking)
+    try {
+      if (!isAssetPath(pathname) && request.method === "GET") {
+        // site-wide visit (dev only to avoid extra writes in prod)
+        fetch(`${API_BASE}/analytics/visits/increment`, { method: "POST", cache: "no-store" }).catch(() => {});
+        // per-page with user-agent for bot/human breakdown
+        const ua = request.headers.get("user-agent") || "";
+        fetch(`${API_BASE}/analytics/page/increment`, {
+          method: "POST",
+          cache: "no-store",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ path: pathname, ua }),
+        }).catch(() => {});
+      }
+    } catch {}
     return applyLocaleCookie(NextResponse.next());
   }
 
@@ -215,6 +230,19 @@ export async function proxy(request: NextRequest) {
     response.headers.set("X-Frame-Options", "DENY");
     response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   }
+
+  // In production, record per-page view (bots included) server-side
+  try {
+    if (!isAssetPath(pathname) && request.method === "GET") {
+      const ua = request.headers.get("user-agent") || "";
+      fetch(`${API_BASE}/analytics/page/increment`, {
+        method: "POST",
+        cache: "no-store",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: pathname, ua }),
+      }).catch(() => {});
+    }
+  } catch {}
 
   return applyLocaleCookie(response);
 }
