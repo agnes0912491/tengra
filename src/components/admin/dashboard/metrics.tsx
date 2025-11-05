@@ -51,6 +51,7 @@ export default function AdminMetrics() {
         const load = async () => {
             const [h, v, t, p, a] = await Promise.all([
                 getServerHealth(token).catch(() => ({ status: "offline" as const })),
+                // prefer short-lived caching on server
                 token ? getVisits(token).catch(() => []) : Promise.resolve([]),
                 token ? getTopBlogViews(token).catch(() => []) : Promise.resolve([]),
                 token ? getTopPages(token).catch(() => []) : Promise.resolve([]),
@@ -64,7 +65,7 @@ export default function AdminMetrics() {
             setTopAgents(a);
         };
         load();
-        const id = setInterval(load, 15000);
+        const id = setInterval(load, 30000);
         return () => {
             mounted = false;
             clearInterval(id);
@@ -72,7 +73,7 @@ export default function AdminMetrics() {
     }, [token]);
 
     return (
-        <div className="grid gap-6 xl:grid-cols-2 2xl:grid-cols-3">
+        <div className="flex flex-col gap-6">
             {/* Sistem Sağlığı */}
             <StatCard title="Sistem Sağlığı">
                     <div className="mt-4 grid grid-cols-2 gap-4 text-sm">

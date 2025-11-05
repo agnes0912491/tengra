@@ -1,20 +1,42 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
+import * as Dialog from "@radix-ui/react-dialog";
 import { Input } from "@/components/ui/input";
 // import { cn } from "@/lib/utils";
 import Cookies from "js-cookie";
 import { ADMIN_SESSION_COOKIE_CANDIDATES } from "@/lib/auth";
 import { createFaq, deleteFaq, getFaqs, updateFaq, type FaqItem } from "@/lib/db";
 import { routing } from "@/i18n/routing";
-import { ArrowDown, ArrowUp } from "lucide-react";
+import { GripVertical, Trash2 } from "lucide-react";
+const MDEditor = dynamic<{
+  value?: string;
+  onChange?: (v?: string) => void;
+  height?: number;
+  preview?: "edit" | "preview" | "live";
+  style?: React.CSSProperties;
+}>(() => import("@uiw/react-md-editor").then(m => m.default as unknown as React.ComponentType<{
+  value?: string;
+  onChange?: (v?: string) => void;
+  height?: number;
+  preview?: "edit" | "preview" | "live";
+  style?: React.CSSProperties;
+}>), { ssr: false, loading: () => (
+  <div className="space-y-2"><div className="h-6 w-40 rounded-md bg-[rgba(255,255,255,0.06)] animate-pulse" /><div className="h-32 w-full rounded-lg bg-[rgba(255,255,255,0.04)] animate-pulse" /></div>
+) });
 
 const SUPPORTED_LOCALES = routing.locales;
 
 export default function FaqAdmin() {
     const [locale, setLocale] = useState<(typeof SUPPORTED_LOCALES)[number]>("tr");
     const [items, setItems] = useState<FaqItem[]>([]);
+    const [drafts, setDrafts] = useState<FaqItem[]>([]);
+    const [dirty, setDirty] = useState<Set<string>>(new Set());
+    const [orderDirty, setOrderDirty] = useState(false);
+    const [savingAll, setSavingAll] = useState(false);
+    const [openConfirmAll, setOpenConfirmAll] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -28,7 +50,11 @@ export default function FaqAdmin() {
         setError(null);
         try {
             const list = await getFaqs(loc);
-            setItems(list);
+            const cloned = list.map(i => ({ ...i }));
+            setItems(cloned);
+            setDrafts(cloned.map(i => ({ ...i })));
+            setDirty(new Set());
+            setOrderDirty(false);
         } catch (e) {
             setError(String(e));
         } finally {
@@ -52,22 +78,74 @@ export default function FaqAdmin() {
             },
             token
         );
-        if (created) setItems((prev) => [...prev, created]);
+        if (created) {
+            setItems((prev) => [...prev, { ...created }]);
+            setDrafts((prev) => [...prev, { ...created }]);
+        }
     };
 
-    const saveItem = async (id: string, patch: Partial<FaqItem>) => {
+    const saveItem = useCallback(async (id: string, patch: Partial<FaqItem>) => {
         if (!token) return;
         const updated = await updateFaq(id, patch, token);
-        if (updated) setItems((prev) => prev.map((i) => (i.id === id ? updated : i)));
-    };
+        if (updated) {
+            setItems((prev) => prev.map((i) => (i.id === id ? { ...updated } : i)));
+            setDrafts((prev) => prev.map((i) => (i.id === id ? { ...updated } : i)));
+            setDirty((prev) => { const s = new Set(prev); s.delete(id); return s; });
+        }
+    }, [token]);
 
     const removeItem = async (id: string) => {
         if (!token) return;
         const ok = await deleteFaq(id, token);
-        if (ok) setItems((prev) => prev.filter((i) => i.id !== id));
+        if (ok) {
+            setItems((prev) => prev.filter((i) => i.id !== id));
+            setDrafts((prev) => prev.filter((i) => i.id !== id));
+            setDirty((prev) => { const s = new Set(prev); s.delete(id); return s; });
+        }
+    };
+
+    // Drag & drop ordering (vertical list)
+    const [dragId, setDragId] = useState<string | null>(null);
+    const onDragStart = useCallback((id: string) => setDragId(id), []);
+    const onDropOver = useCallback((overId: string) => {
+        if (!dragId || dragId === overId) return;
+        setDrafts((prev) => {
+            const srcIdx = prev.findIndex((i) => i.id === dragId);
+            const dstIdx = prev.findIndex((i) => i.id === overId);
+            if (srcIdx < 0 || dstIdx < 0) return prev;
+            const next = prev.map(i => ({ ...i }));
+            const [moved] = next.splice(srcIdx, 1);
+            next.splice(dstIdx, 0, moved);
+            next.forEach((it, index) => { it.order = index; });
+            return next;
+        });
+        setOrderDirty(true);
+        setDragId(null);
+    }, [dragId, saveItem]);
+
+    const saveOrder = async () => {
+        if (!token) return;
+        const updates: Array<Promise<unknown>> = [];
+        drafts.forEach((it, idx) => {
+            if (items[idx]?.id !== it.id || items[idx]?.order !== it.order) {
+                updates.push(updateFaq(it.id, { order: it.order }, token));
+            }
+        });
+        await Promise.all(updates);
+        setItems(drafts.map(i => ({ ...i })));
+        setOrderDirty(false);
+    };
+
+    const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+    const setDraftField = (id: string, field: keyof FaqItem, value: string) => {
+        setDrafts(prev => prev.map(i => i.id === id ? { ...i, [field]: value } : i));
+        setDirty(prev => { const s = new Set(prev); s.add(id); return s; });
+        if (timers.current[id]) clearTimeout(timers.current[id]);
+        timers.current[id] = setTimeout(() => {}, 250);
     };
 
     return (
+      <>
         <div className="rounded-3xl border border-[rgba(110,211,225,0.16)] bg-[rgba(6,20,27,0.6)]/80 p-6">
             <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -89,89 +167,78 @@ export default function FaqAdmin() {
                         </select>
                     </div>
                 </div>
-                <Button onClick={addNew} className="bg-[color:var(--color-turkish-blue-500)] text-black">Yeni SSS</Button>
+                <div className="flex flex-wrap items-center gap-2">
+                  {orderDirty && (
+                    <DebouncedSave onSave={saveOrder} label="Sıralamayı Kaydet" />
+                  )}
+                  {dirty.size > 0 && (
+                    <>
+                      <Button onClick={async () => {
+                        setSavingAll(true);
+                        try {
+                          const payloads = Array.from(dirty.values()).map(() => null);
+                          // Persist only dirty items' question/answer
+                          const ops: Array<Promise<unknown>> = [];
+                          drafts.forEach((d) => {
+                            if (dirty.has(d.id)) {
+                              ops.push(updateFaq(d.id, { question: d.question, answer: d.answer }, token));
+                            }
+                          });
+                          await Promise.all(ops);
+                          // refresh items from drafts
+                          setItems(drafts.map((i) => ({ ...i })));
+                          setDirty(new Set());
+                        } finally {
+                          setSavingAll(false);
+                        }
+                      }} disabled={savingAll} className="bg-[color:var(--color-turkish-blue-500)] text-black">
+                        {savingAll ? "Kaydediliyor…" : "Tüm Değişiklikleri Kaydet"}
+                      </Button>
+                      <Button variant="outline" onClick={() => setOpenConfirmAll(true)}>Tümünü İptal Et</Button>
+                    </>
+                  )}
+                  <Button onClick={addNew} className="bg-[color:var(--color-turkish-blue-500)] text-black">Yeni SSS</Button>
+                </div>
             </div>
 
             {loading && <p className="mt-4 text-sm text-[rgba(255,255,255,0.7)]">Yükleniyor…</p>}
             {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
 
             <div className="mt-4 space-y-3">
-                {items.length === 0 && !loading && (
+                {drafts.length === 0 && !loading && (
                     <div className="rounded-xl border border-dashed border-[rgba(110,211,225,0.25)] bg-[rgba(8,28,38,0.5)] p-8 text-center text-sm text-[rgba(255,255,255,0.7)]">
                         Kayıt bulunamadı.
                     </div>
                 )}
 
-                {items.map((item) => (
-                    <div key={item.id} className="rounded-xl border border-[rgba(110,211,225,0.25)] bg-[rgba(8,28,38,0.5)] p-4">
-                        <div className="flex items-center justify-between gap-3">
-                            <div className="flex items-center gap-2">
-                                <span className="text-xs text-[rgba(255,255,255,0.6)]">Sıra</span>
-                                <input
-                                    type="number"
-                                    value={item.order}
-                                    onChange={(e) => {
-                                        const v = Number(e.currentTarget.value) || 0;
-                                        setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, order: v } : i)));
-                                    }}
-                                    onBlur={() => saveItem(item.id, { order: item.order })}
-                                    className="w-20 rounded-md border border-[rgba(110,211,225,0.25)] bg-[rgba(4,18,24,0.85)] px-2 py-1 text-xs text-white"
-                                />
-                                <button
-                                    type="button"
-                                    className="rounded-md border border-[rgba(110,211,225,0.3)] p-1 text-[rgba(255,255,255,0.75)] hover:text-[color:var(--color-turkish-blue-300)]"
-                                    aria-label="Yukarı taşı"
-                                    onClick={() => {
-                                        setItems((prev) => {
-                                            const idx = prev.findIndex((i) => i.id === item.id);
-                                            if (idx <= 0) return prev;
-                                            const copy = [...prev];
-                                            const [moved] = copy.splice(idx, 1);
-                                            copy.splice(idx - 1, 0, moved);
-                                            return copy.map((it, i) => ({ ...it, order: i }));
-                                        });
-                                        void saveItem(item.id, { order: Math.max(0, item.order - 1) });
-                                    }}
-                                >
-                                    <ArrowUp size={14} />
-                                </button>
-                                <button
-                                    type="button"
-                                    className="rounded-md border border-[rgba(110,211,225,0.3)] p-1 text-[rgba(255,255,255,0.75)] hover:text-[color:var(--color-turkish-blue-300)]"
-                                    aria-label="Aşağı taşı"
-                                    onClick={() => {
-                                        setItems((prev) => {
-                                            const idx = prev.findIndex((i) => i.id === item.id);
-                                            if (idx < 0 || idx >= prev.length - 1) return prev;
-                                            const copy = [...prev];
-                                            const [moved] = copy.splice(idx, 1);
-                                            copy.splice(idx + 1, 0, moved);
-                                            return copy.map((it, i) => ({ ...it, order: i }));
-                                        });
-                                        void saveItem(item.id, { order: item.order + 1 });
-                                    }}
-                                >
-                                    <ArrowDown size={14} />
-                                </button>
+                {drafts.map((item, index) => (
+                    <div
+                        key={item.id}
+                        className="relative rounded-xl border border-[rgba(110,211,225,0.25)] bg-[rgba(8,28,38,0.5)] p-4"
+                        draggable
+                        onDragStart={() => onDragStart(item.id)}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={() => onDropOver(item.id)}
+                    >
+                        {/* Order badge */}
+                        <div className="absolute left-3 top-3 grid h-6 w-6 place-items-center rounded-full bg-[rgba(0,167,197,0.15)] text-[10px] font-semibold text-[color:var(--color-turkish-blue-200)] border border-[rgba(0,167,197,0.35)]">
+                            #{index + 1}
+                        </div>
+                        <div className="flex items-start justify-between gap-3 pl-8">
+                            <div className="flex items-center gap-2 text-[rgba(255,255,255,0.7)]">
+                                <GripVertical className="h-4 w-4 opacity-70" />
+                                <span className="text-xs">Sürükleyerek sırala</span>
                             </div>
-
-                            <div className="flex items-center gap-3">
-                                <label className="flex items-center gap-2 text-xs text-[rgba(255,255,255,0.75)]">
-                                    <input
-                                        type="checkbox"
-                                        checked={item.isActive}
-                                        onChange={(e) => {
-                                            const v = e.target.checked;
-                                            setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, isActive: v } : i)));
-                                            void saveItem(item.id, { isActive: v });
-                                        }}
-                                    />
-                                    Aktif
-                                </label>
-                                <Button variant="outline" onClick={() => removeItem(item.id)} className="border-[rgba(110,211,225,0.35)]">
-                                    Sil
-                                </Button>
-                            </div>
+                            <Button
+                                type="button"
+                                variant="destructive"
+                                onClick={() => removeItem(item.id)}
+                                className="h-8 w-8 rounded-full p-0"
+                                aria-label="Sil"
+                                title="Sil"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
                         </div>
 
                         <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -179,30 +246,80 @@ export default function FaqAdmin() {
                                 <label className="text-xs text-[rgba(255,255,255,0.7)]">Soru</label>
                                 <Input
                                     value={item.question}
-                                    onChange={(e) => {
-                                        const v = (e.target as HTMLInputElement | null)?.value ?? "";
-                                        setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, question: v } : i)));
-                                    }}
-                                    onBlur={() => saveItem(item.id, { question: item.question })}
+                                    onChange={(e) => setDraftField(item.id, "question", e.currentTarget.value)}
                                     className="mt-1 border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.75)] text-white"
                                 />
                             </div>
                             <div>
                                 <label className="text-xs text-[rgba(255,255,255,0.7)]">Cevap</label>
-                                <Input
-                                    value={item.answer}
-                                    onChange={(e) => {
-                                        const v = (e.target as HTMLInputElement | null)?.value ?? "";
-                                        setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, answer: v } : i)));
-                                    }}
-                                    onBlur={() => saveItem(item.id, { answer: item.answer })}
-                                    className="mt-1 border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.75)] text-white"
-                                />
+                                <div data-color-mode="dark" className="rounded-lg border border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.6)] p-2">
+                                  <MDEditor value={item.answer} onChange={(v: string = "") => setDraftField(item.id, "answer", v)} height={180} style={{ background: "transparent" }} preview="edit" />
+                                </div>
                             </div>
                         </div>
+                        {dirty.has(item.id) && (
+                          <div className="mt-3 flex items-center gap-2">
+                            <Button onClick={() => saveItem(item.id, { question: item.question, answer: item.answer })} className="bg-[color:var(--color-turkish-blue-500)] text-black">Kaydet</Button>
+                            <Button variant="outline" onClick={() => {
+                              const original = items.find(i => i.id === item.id);
+                              if (original) setDrafts(prev => prev.map(d => d.id === item.id ? { ...original } : d));
+                              setDirty(prev => { const s = new Set(prev); s.delete(item.id); return s; });
+                            }}>İptal</Button>
+                          </div>
+                        )}
                     </div>
                 ))}
             </div>
         </div>
+        {/* Confirm all dialog */}
+        <Dialog.Root open={openConfirmAll} onOpenChange={(v) => setOpenConfirmAll(v)}>
+          <Dialog.Portal>
+            <Dialog.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-sm" />
+            <Dialog.Content className="fixed left-1/2 top-1/2 w-[90vw] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.9)] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.55)]">
+              <Dialog.Title className="text-lg font-semibold text-white">Tüm değişiklikleri geri al?</Dialog.Title>
+              <Dialog.Description className="mt-2 text-sm text-[rgba(255,255,255,0.7)]">
+                Kaydedilmemiş tüm değişiklikler silinecek. Bu işlem geri alınamaz.
+              </Dialog.Description>
+              <div className="mt-5 flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setOpenConfirmAll(false)}>Vazgeç</Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    setDrafts(items.map(i => ({ ...i })));
+                    setDirty(new Set());
+                    setOpenConfirmAll(false);
+                  }}
+                >
+                  Evet, geri al
+                </Button>
+              </div>
+              <Dialog.Close asChild>
+                <button aria-label="Kapat" className="absolute right-3 top-3 h-6 w-6 rounded-full text-[rgba(255,255,255,0.6)] hover:text-white">×</button>
+              </Dialog.Close>
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
+      </>
     );
+}
+
+function DebouncedSave({ onSave, label }: { onSave: () => Promise<void> | void; label: string }) {
+  const [busy, setBusy] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const click = () => {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(async () => {
+      setBusy(true);
+      try {
+        await onSave();
+      } finally {
+        setBusy(false);
+      }
+    }, 300);
+  };
+  return (
+    <Button onClick={click} disabled={busy} className="bg-[color:var(--color-turkish-blue-500)] text-black">
+      {busy ? "Kaydediliyor…" : label}
+    </Button>
+  );
 }

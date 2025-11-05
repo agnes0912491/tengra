@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
@@ -98,17 +99,21 @@ export default function Footer() {
           </div>
 
           <nav className="flex items-center gap-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="transition-colors hover:text-[color:var(--color-turkish-blue-300)]"
-              >
-                {tNavigation(link.labelKey)}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isHomeAnchor = link.href.startsWith("/#");
+              const isActive = (!isHomeAnchor && pathname?.startsWith(link.href)) || (isHomeAnchor && pathname === "/");
+              const base = isActive
+                ? "text-[color:var(--color-turkish-blue-300)] hover:text-[color:var(--color-turkish-blue-200)]"
+                : "text-[rgba(255,255,255,0.55)] hover:text-[rgba(255,255,255,0.8)]";
+              return (
+                <Link key={link.href} href={link.href} className={"transition-colors " + base}>
+                  {tNavigation(link.labelKey)}
+                </Link>
+              );
+            })}
           </nav>
 
+          <AgentBadge />
           <div className="flex items-center gap-4 text-xs text-[rgba(255,255,255,0.6)]">
             <span className="hidden text-[rgba(255,255,255,0.45)] md:inline">
               {tFooter("copyright", { year: new Date().getFullYear() })}
@@ -217,15 +222,18 @@ export default function Footer() {
           </div>
 
           <nav className="flex flex-wrap items-center justify-center gap-3 text-xs">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="transition-colors hover:text-[color:var(--color-turkish-blue-300)]"
-              >
-                {tNavigation(link.labelKey)}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isHomeAnchor = link.href.startsWith("/#");
+              const isActive = (!isHomeAnchor && pathname?.startsWith(link.href)) || (isHomeAnchor && pathname === "/");
+              const base = isActive
+                ? "text-[color:var(--color-turkish-blue-300)] hover:text-[color:var(--color-turkish-blue-200)]"
+                : "text-[rgba(255,255,255,0.55)] hover:text-[rgba(255,255,255,0.8)]";
+              return (
+                <Link key={link.href} href={link.href} className={"transition-colors " + base}>
+                  {tNavigation(link.labelKey)}
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="flex items-center justify-center text-[10px] text-[rgba(255,255,255,0.6)]">
@@ -235,5 +243,34 @@ export default function Footer() {
         </div>
       </div>
     </motion.footer>
+  );
+}
+
+function AgentBadge() {
+  const [online, setOnline] = React.useState(false);
+  const [name, setName] = React.useState<string>("AI Agent");
+  React.useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/agent/status", { cache: "no-store" });
+        if (!res.ok) return;
+        const json = await res.json();
+        if (!cancelled) {
+          setOnline(Boolean(json?.online));
+          if (typeof json?.name === "string") setName(json.name);
+        }
+      } catch {}
+    })();
+    return () => { cancelled = true; };
+  }, []);
+  if (!online) return null;
+  return (
+    <div className="hidden items-center gap-2 sm:flex">
+      <span className="chip">
+        <span className="mr-1.5 inline-block size-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.6)]" />
+        {name} Online
+      </span>
+    </div>
   );
 }

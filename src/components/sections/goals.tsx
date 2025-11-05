@@ -54,16 +54,15 @@ export default function Goals() {
     <section id="goals" className="relative flex flex-col items-center justify-center py-32 px-4 text-center">
       <h2 className="section-title neon-text">{t("title")}</h2>
       <div className="w-16 h-[1px] mx-auto mt-3 mb-10 bg-[rgba(0,167,197,0.4)]" />
-      <div className="absolute left-1/2 top-0 -translate-x-1/2 h-full w-[2px] timeline-line opacity-30" />
+      <div className="absolute left-1/2 top-0 -translate-x-1/2 h-full w-[2px] opacity-30"
+           style={{ background: "linear-gradient(180deg, transparent, rgba(0,167,197,0.5), transparent)" }} />
 
       <div className="relative w-full max-w-3xl mx-auto">
         <div className="absolute left-1/2 top-0 -translate-x-1/2 h-full w-[2px] bg-[rgba(0,167,197,0.2)]" />
 
         <ol className="space-y-16 relative z-10">
-          {(adminGoals.length > 0
-            ? adminGoals.map((g, idx) => ({ icon: goals[idx % goals.length].icon, title: g.title, description: g.body }))
-            : goals.map(({ icon, key }) => ({ icon, title: t(`items.${key}.title` as const), description: t(`items.${key}.description` as const) }))
-          ).map(({ icon: Icon, title, description }, index) => {
+          {(adminGoals.length > 0 ? adminGoals.map((g, idx) => ({ icon: goals[idx % goals.length].icon, title: g.title, description: g.body })) : [])
+          .map(({ icon: Icon, title, description }, index) => {
             const isLeft = index % 2 === 0;
 
             return (
@@ -81,7 +80,7 @@ export default function Goals() {
 
                 <div className={`relative mt-12 w-full md:w-[46%] ${isLeft ? "md:ml-auto" : "md:mr-auto"}`}>
                   <div className="p-[1px] rounded-2xl bg-gradient-to-br from-[rgba(110,211,225,0.25)]/40 via-transparent to-transparent">
-                    <div className="rounded-[calc(1rem-1px)] border border-[rgba(110,211,225,0.18)] bg-[rgba(6,20,27,0.6)]/80 backdrop-blur-xl p-6 shadow-[0_25px_70px_rgba(0,0,0,0.45)]">
+                    <div className="rounded-[calc(1rem-1px)] border border-[rgba(110,211,225,0.18)] bg-[rgba(6,20,27,0.5)]/80 backdrop-blur-xl p-6 shadow-[0_25px_70px_rgba(0,0,0,0.45)] transition hover:shadow-[0_25px_90px_rgba(0,0,0,0.55)] hover:border-[rgba(110,211,225,0.35)]">
                       <h3 className="text-xl font-display text-[color:var(--color-turkish-blue-300)] mb-2">{title}</h3>
                       <p className="text-sm text-[color:var(--text-muted)]">{description}</p>
                     </div>
@@ -91,6 +90,11 @@ export default function Goals() {
             );
           })}
         </ol>
+        {adminGoals.length === 0 && (
+          <p className="mt-8 text-center text-sm text-[color:var(--text-muted)]">
+            Soon this section will be updated.
+          </p>
+        )}
       </div>
     </section>
   );

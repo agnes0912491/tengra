@@ -21,6 +21,7 @@
     "network": "Ağ",
     "team": "Ekip",
     "blogs": "Blog",
+    "faq": "S.S.S.",
     "forum": "Forum"
   }, 
   "Projects": {
@@ -75,6 +76,9 @@
     "label": "Dil",
     "en": "İngilizce",
     "tr": "Türkçe" 
+  },
+  "Goals": {
+    "title": "Hedefler"
   },
   "AdminLogin": {
     "toast": {

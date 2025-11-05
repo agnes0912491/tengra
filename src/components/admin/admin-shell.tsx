@@ -75,6 +75,7 @@ export default function AdminShell({ children }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const t = useTranslations("AdminDashboard");
+  const tNav = useTranslations("Navigation");
 
   const isAdmin = user?.role === "admin";
 
@@ -118,8 +119,8 @@ export default function AdminShell({ children }: Props) {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(0,151,178,0.18),transparent_60%)]" />
         </div>
 
-        <aside className="relative flex min-h-screen w-72 xl:w-80 flex-col justify-between border-r border-[rgba(110,211,225,0.14)] bg-[rgba(5,16,22,0.6)] px-6 py-7 shadow-[12px_0_55px_rgba(0,0,0,0.35)] backdrop-blur-2xl" role="complementary" aria-label="Yönetim Paneli Yan Menü">
-          <div className="absolute inset-0 -z-10 rounded-r-[2rem] bg-[radial-gradient(120%_80%_at_0%_0%,rgba(110,211,225,0.16),transparent),linear-gradient(145deg,rgba(255,255,255,0.06),transparent_45%)]" />
+        <aside className="relative flex min-h-screen w-72 xl:w-80 flex-col justify-between bg-[rgba(5,16,22,0.6)] px-6 py-7 backdrop-blur-2xl" role="complementary" aria-label="Yönetim Paneli Yan Menü">
+          <div className="absolute inset-0 -z-10 bg-[radial-gradient(120%_80%_at_0%_0%,rgba(110,211,225,0.16),transparent),linear-gradient(145deg,rgba(255,255,255,0.06),transparent_45%)]" />
           <header className="relative flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[rgba(110,211,225,0.35)] bg-[rgba(0,167,197,0.12)] shadow-[0_0_22px_rgba(0,167,197,0.4)]">
               <Image src={Logo.src} alt="Tengra Logo" width={32} height={32} className="opacity-90" />
@@ -132,12 +133,13 @@ export default function AdminShell({ children }: Props) {
 
           <nav className="relative mt-8 flex flex-1 flex-col gap-3 overflow-y-auto pr-1 text-sm" role="navigation" aria-label="Ana gezinme">
             {navigation.map((item) => {
-              const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
-              return <SidebarItem key={item.href} item={item} isActive={!!isActive} />;
+              const localized = item.href === "/admin/dashboard/faq" ? { ...item, label: tNav("faq") } : item;
+              const isActive = pathname === item.href;
+              return <SidebarItem key={item.href} item={localized} isActive={!!isActive} />;
             })}
           </nav>
 
-          <footer className="relative border-t border-[rgba(110,211,225,0.16)] pt-6 text-xs text-[rgba(255,255,255,0.7)]">
+          <footer className="sticky bottom-0 left-0 w-full border-t border-[rgba(110,211,225,0.16)] pt-6 text-xs text-[rgba(255,255,255,0.7)]">
             <Link
               href="/"
               className="mb-4 flex items-center gap-2 rounded-xl px-4 py-2 text-sm text-[color:var(--text-invert)] bg-[color:var(--color-turkish-blue-500)] shadow-[var(--glow-soft)] hover:bg-[color:var(--color-turkish-blue-400)] hover:shadow-[var(--glow-strong)] transition"
@@ -154,7 +156,7 @@ export default function AdminShell({ children }: Props) {
             <button
               type="button"
               onClick={handleLogout}
-              className="mt-4 flex w-full items-center justify-center rounded-full px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.3em] text-[color:var(--text-invert)] bg-[color:var(--color-turkish-blue-500)] hover:bg-[color:var(--color-turkish-blue-400)] shadow-[var(--glow-soft)] hover:shadow-[var(--glow-strong)] transition"
+              className="mt-4 flex w-full items-center justify-center rounded-full px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.3em] text-white bg-[color:var(--color-danger)] hover:bg-[color:var(--color-danger)]/90 shadow-[0_0_16px_rgba(207,63,75,0.45)] transition"
             >
               Çıkış Yap
             </button>

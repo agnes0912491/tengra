@@ -7,7 +7,7 @@ import dynamic from "next/dynamic";
 // import { Input } from "@/components/ui/input";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { createBlog, createBlogCategory, getAllBlogCategories, uploadImage, presignUpload } from "@/lib/db";
+import { createBlog, getAllBlogCategories, uploadImage, presignUpload } from "@/lib/db";
 import type { BlogCategory } from "@/types/blog";
 import { cn } from "@/lib/utils";
 import { Eye } from "lucide-react";
@@ -99,25 +99,31 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
         if (!name) return;
         setCreatingCategory(true);
         try {
-            const created = await createBlogCategory(name);
+            const res = await fetch('/api/admin/blogs/categories', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name }),
+            });
+            if (!res.ok) throw new Error(await res.text());
+            const json = (await res.json().catch(() => null)) as { category?: BlogCategory; name?: string } | null;
+            const created: BlogCategory | null = json && (json.category as BlogCategory) ? (json.category as BlogCategory) : (json?.name ? ({ name: json.name } as BlogCategory) : null);
             if (created) {
                 setCategories((prev) => [created, ...prev.filter((c) => c.name !== created.name)]);
-                setSelectedCategories((prev) =>
-                    prev.includes(created.name) ? prev : [...prev, created.name]
-                );
+                setSelectedCategories((prev) => (prev.includes(created.name) ? prev : [...prev, created.name]));
                 setNewCategory("");
+            } else {
+                getAllBlogCategories().then(setCategories).catch(() => void 0);
             }
+        } catch (e) {
+            console.error('Failed to create category', e);
         } finally {
             setCreatingCategory(false);
         }
     };
 
     const canNext = () => {
-        if (step === 0) return title.trim().length > 2;
-        if (step === 1) return selectedCategories.length >= 0; // always ok
-        if (step === 2) return content.trim().length > 10;
-        if (step === 3) return true;
-        return false;
+        if (step === 0) return title.trim().length > 0;
+        return true;
     };
 
     const fileToDataUrl = (file: File): Promise<string> =>
@@ -165,6 +171,10 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
                         imageToSend = "";
                     }
                 }
+            }
+            if (!title.trim() || !content.trim()) {
+                setSubmitting(false);
+                return;
             }
             await createBlog(
                 {
@@ -269,7 +279,7 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div>
                                 <label className="text-xs text-[rgba(255,255,255,0.7)]">Başlık</label>
-                                <Input value={title} onChange={(e) => setTitle(e.currentTarget.value)} required className="mt-1 border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.75)] text-white" />
+                                <Input value={title} onChange={(e) => setTitle(e.currentTarget.value)} required className="mt-1 border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.75)] text-white w-full" />
                             </div>
                         </div>
                     )}
@@ -326,7 +336,9 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
                             </div>
                             <div className="rounded-lg border border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.6)] p-2">
                                 {richEditor ? (
-                                    <MDEditor value={content} onChange={(v = "") => setContent(v)} preview={showPreview ? "preview" : "edit"} height={320} style={{ background: "transparent" }} />
+                                    <React.Suspense fallback={<div className="space-y-2"><div className="h-6 w-40 rounded-md bg-[rgba(255,255,255,0.06)] animate-pulse" /><div className="h-48 w-full rounded-lg bg-[rgba(255,255,255,0.04)] animate-pulse" /></div>}>
+                                        <MDEditor value={content} onChange={(v = "") => setContent(v)} preview={showPreview ? "preview" : "edit"} height={320} style={{ background: "transparent" }} />
+                                    </React.Suspense>
                                 ) : (
                                     <textarea
                                         value={content}

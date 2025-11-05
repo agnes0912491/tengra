@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { getFaqs, type FaqItem } from "@/lib/db";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 export default function FaqSection() {
   const locale = useLocale();
+  const tNav = useTranslations("Navigation");
   const [items, setItems] = useState<FaqItem[]>([]);
   const [openId, setOpenId] = useState<string | null>(null);
 
@@ -25,7 +26,7 @@ export default function FaqSection() {
 
   return (
     <section className="relative py-24 px-6 md:px-20">
-      <h2 className="section-title neon-text text-center">S.S.S.</h2>
+      <h2 className="section-title neon-text text-center">{tNav("faq")}</h2>
       <div className="w-16 h-[1px] mx-auto mt-3 mb-10 bg-[rgba(0,167,197,0.4)]" />
       <div className="mx-auto max-w-4xl space-y-3">
         {items.map((it) => (
@@ -50,4 +51,3 @@ export default function FaqSection() {
     </section>
   );
 }
-

@@ -21,6 +21,7 @@
     "network": "Network",
     "team": "Team",
     "blogs": "Blog",
+    "faq": "F.A.Q.",
     "forum": "Forum"
   },
   "Projects": {
@@ -64,6 +65,9 @@
     "label": "Language",
     "en": "English",
     "tr": "Türkçe"
+  },
+  "Goals": {
+    "title": "Goals"
   },
   "AdminLogin": {
     "toast": {

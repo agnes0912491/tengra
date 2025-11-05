@@ -1,6 +1,4 @@
-import type { ComponentProps } from "react";
-
-import Link from "next/link";
+import type { ComponentProps } from "react"; 
 import { cookies } from "next/headers";
 
 import AdminPageHeader from "@/components/admin/admin-page-header";
@@ -16,7 +14,6 @@ import {
 import type { Project } from "@/types/project";
 import type { Blog } from "@/types/blog";
 import type { User } from "@/lib/auth/users";
-import AdminCurrentUserCard from "@/components/admin/admin-current-user-card";
 import AdminMetrics from "@/components/admin/dashboard/metrics";
 
 const formatDuration = (seconds?: number) => { 
@@ -126,33 +123,7 @@ export default async function AdminOverviewPage() {
       },
     ];
 
-  const quickNavigation: ReadonlyArray<{
-    title: string;
-    description: string;
-    href: string;
-  }> = [
-      {
-        title: "Projeleri Yönet",
-        description:
-          "Portföyde yer alan projeleri güncelleyin veya yeni proje ekleyin.",
-        href: "/admin/dashboard/projects",
-      },
-      {
-        title: "Yeni Blog Yazısı",
-        description: "Tengra topluluğu için yeni içerikler hazırlayın.",
-        href: "/admin/dashboard/blogs",
-      },
-      {
-        title: "Ana Sayfa İçeriği",
-        description: "Ana sayfadaki hedefler ve S.S.S. bölümlerini düzenleyin.",
-        href: "/admin/dashboard/homepage",
-      },
-      {
-        title: "Kullanıcı Rollerini Düzenle",
-        description: "Ekip üyelerine yönetici yetkisi verin veya erişimleri sınırlandırın.",
-        href: "/admin/dashboard/users",
-      },
-    ];
+  // Hızlı kısayollar ve aktif yönetici bölümleri kaldırıldı.
 
 
   return (
@@ -179,40 +150,7 @@ export default async function AdminOverviewPage() {
         </div>
       </section>
 
-      <section
-        aria-labelledby="admin-dashboard-shortcuts"
-        className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]"
-      >
-        <div className="rounded-3xl border border-[rgba(110,211,225,0.16)] bg-[rgba(6,20,27,0.6)]/80 p-6 shadow-[0_25px_70px_rgba(0,0,0,0.45)] backdrop-blur-xl">
-          <h2
-            id="admin-dashboard-shortcuts"
-            className="text-lg font-semibold text-[color:var(--color-turkish-blue-200)]"
-          >
-            Hızlı Kısayollar
-          </h2>
-          <p className="mt-2 text-sm text-[rgba(255,255,255,0.6)]">
-            En sık kullandığınız yönetim araçlarına tek tıkla ulaşın.
-          </p>
-          <ul className="mt-5 space-y-4 text-sm">
-            {quickNavigation.map((action) => (
-              <li
-                key={action.href}
-                className="group rounded-2xl border border-[rgba(110,211,225,0.16)] bg-[rgba(8,28,38,0.65)] p-4 transition hover:border-[rgba(110,211,225,0.45)] hover:bg-[rgba(10,40,52,0.75)]"
-              >
-                <Link
-                  href={action.href}
-                  className="text-base font-semibold text-white transition group-hover:text-[color:var(--color-turkish-blue-200)]"
-                >
-                  {action.title}
-                </Link>
-                <p className="mt-1 text-xs text-[rgba(255,255,255,0.55)]">{action.description}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <AdminCurrentUserCard />
-      </section>
+      {/** Kısayollar ve Aktif Yönetici kaldırıldı */}
 
       <section aria-labelledby="admin-dashboard-metrics">
         <h2 id="admin-dashboard-metrics" className="sr-only">Sistem ve Trafik</h2>

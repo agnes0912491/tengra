@@ -26,10 +26,7 @@ type RawBlogPost = {
   createdAt?: string;
   image?: string;
 };
-
-type BlogsListResponse = {
-  posts?: RawBlogPost[];
-};
+ 
 
 type BlogSingleResponse = {
   post?: RawBlogPost;
@@ -118,13 +115,23 @@ export const getAllBlogs = async (): Promise<Blog[]> => {
     );
   }
 
-  const json = (await response
-    .json()
-    .catch(() => ({} as BlogsListResponse))) as BlogsListResponse;
-  const list = Array.isArray(json.posts) ? json.posts : [];
+  const raw = await response.text();
+  type RawPost = { id?: number | string; title?: string; content?: string; createdAt?: string; image?: string };
+  let list: RawPost[] = [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      list = parsed as RawPost[];
+    } else if (parsed && typeof parsed === "object" && Array.isArray((parsed as { posts?: unknown }).posts)) {
+      list = (parsed as { posts: RawPost[] }).posts;
+    }
+  } catch {
+    list = [];
+  }
+  const posts: RawPost[] = Array.isArray(list) ? list : [];
 
-  return list
-    .map((post) => normalizeBlog(post))
+  return posts
+    .map((post) => normalizeBlog(post as RawPost))
     .filter((p): p is Blog => Boolean(p))
     .sort((a, b) => b.date.localeCompare(a.date));
 };

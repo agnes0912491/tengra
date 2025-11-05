@@ -44,3 +44,49 @@ Ek: Lokasyon Analitiği
 - [x] Backend: `/analytics/countries/top` uç noktası eklendi.
 - [x] Backend: `page/increment` çağrısında ülke sayımı (body.country veya CF/Vercel başlığından enjekte).
 - [x] Frontend: AnalyticsTracker ülke tahmini (navigator.language) + isteğe eklenmesi.
+Next.js build speed tips (CI-ready)
+
+- Use ISR for server fetches
+  - Prefer `fetch(url, { next: { revalidate: 60 } })` over `cache: 'no-store'` in app routes that can be cached.
+  - Already applied: `app/sitemap.ts` now uses ISR instead of dynamic no-store.
+
+- Turn off heavy build artifacts
+  - `productionBrowserSourceMaps: false` (set in `next.config.ts`).
+
+- Dynamic import large UI bundles
+  - Keep heavy libs (e.g., markdown editor, globe, charts) loaded via `dynamic(() => import('...'), { ssr: false })` only where needed.
+
+- CI caching (GitHub Actions sketch)
+  - Cache `~/.npm`, `node_modules`, and `.next/cache`.
+
+  ```yaml
+  - name: Use Node 20
+    uses: actions/setup-node@v4
+    with:
+      node-version: 20
+      cache: 'npm'
+
+  - name: Cache Next.js build cache
+    uses: actions/cache@v4
+    with:
+      path: |
+        frontend/.next/cache
+      key: next-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
+
+  - name: Install deps
+    working-directory: frontend
+    run: npm ci
+
+  - name: Lint & typecheck
+    working-directory: frontend
+    run: |
+      npm run lint
+      # tsc --noEmit (if you keep separate TS step)
+
+  - name: Build
+    working-directory: frontend
+    run: npm run build
+  ```
+
+- Trim global work
+  - Avoid heavy async in root layouts or generateMetadata. Defer to page-level with ISR.
