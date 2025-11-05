@@ -6,6 +6,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import type { Project, ProjectType } from "@/types/project";
+import Dropzone from "@/components/ui/dropzone";
+import { uploadImage } from "@/lib/db";
+import Image from "next/image";
 
 type Props = {
     open: boolean;
@@ -45,7 +48,7 @@ export default function ProjectEditModal({ open, onClose, onSave }: Props) {
                         <label className="text-sm text-[rgba(255,255,255,0.8)]">Proje Adı</label>
                         <Input
                             value={formData.name || ""}
-                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            onChange={(e) => setFormData({ ...formData, name: e.currentTarget.value })}
                             className="border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] text-white"
                             required
                         />
@@ -55,13 +58,51 @@ export default function ProjectEditModal({ open, onClose, onSave }: Props) {
                         <label className="text-sm text-[rgba(255,255,255,0.8)]">Açıklama</label>
                         <textarea
                             value={formData.description || ""}
-                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            onChange={(e) => setFormData({ ...formData, description: e.currentTarget.value })}
                             className="min-h-[120px] w-full rounded-lg border border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] p-3 text-white focus:border-[rgba(0,167,197,0.6)] focus:outline-none"
                             rows={5}
                         />
                     </div>
 
-                    {/** Logo URL kaldırıldı */}
+                    <div className="space-y-2">
+                        <label className="text-sm text-[rgba(255,255,255,0.8)]">Logo/Görsel (sürükle-bırak)</label>
+                        <Dropzone
+                            accept={{ "image/*": [".png", ".jpg", ".jpeg", ".webp", ".gif"] }}
+                            onDrop={async (files) => {
+                                const file = files[0];
+                                if (!file) return;
+                                const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+                                const toDataUrl = (f: File) =>
+                                  new Promise<string>((resolve) => {
+                                    const reader = new FileReader();
+                                    reader.onload = () => resolve(String(reader.result || ""));
+                                    reader.readAsDataURL(f);
+                                  });
+                                const dataUrl = await toDataUrl(file);
+                                try {
+                                  if (token) {
+                                    const uploaded = await uploadImage(dataUrl, token);
+                                    if (uploaded?.url) {
+                                      setFormData({ ...formData, logoUrl: uploaded.url });
+                                    } else if (uploaded?.dataUrl) {
+                                      setFormData({ ...formData, logoUrl: uploaded.dataUrl });
+                                    }
+                                  }
+                                } catch (e) {
+                                  console.error("Upload failed", e);
+                                }
+                            }}
+                        >
+                            {formData.logoUrl ? (
+                                <div className="flex items-center gap-3">
+                                    <Image src={formData.logoUrl} alt="logo preview" className="h-10 w-10 rounded object-contain" />
+                                    <span className="text-xs text-[rgba(255,255,255,0.7)]">Yeni görsel yüklendi</span>
+                                </div>
+                            ) : (
+                                <span className="text-xs text-[rgba(255,255,255,0.6)]">PNG/JPG/WebP sürükleyip bırakın veya tıklayın</span>
+                            )}
+                        </Dropzone>
+                    </div>
 
                     <div className="space-y-2">
                         <label className="text-sm text-[rgba(255,255,255,0.8)]">Durum</label>

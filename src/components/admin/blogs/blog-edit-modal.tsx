@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import * as Tabs from "@radix-ui/react-tabs";
 import dynamic from "next/dynamic";
+// import { Input } from "@/components/ui/input";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { createBlog, createBlogCategory, getAllBlogCategories, uploadImage, presignUpload } from "@/lib/db";
@@ -33,59 +34,7 @@ type Props = {
     onCreated?: () => void;
 };
 
-function FloatingField({
-    label,
-    value,
-    onChange,
-    type = "text",
-    required,
-    placeholder,
-}: {
-    label: string;
-    value: string;
-    onChange: (v: string) => void;
-    type?: string;
-    required?: boolean;
-    placeholder?: string;
-}) {
-    const hasValue = value && value.length > 0;
-    return (
-        <div className="relative">
-            <Input
-                type={type}
-                value={value}
-                required={required}
-                placeholder={placeholder}
-                onChange={(e) => onChange(e.target.value)}
-                className={cn(
-                    "peer bg-[rgba(3,12,18,0.75)] text-white placeholder-transparent",
-                    "border border-[rgba(0,167,197,0.35)] focus:border-[rgba(0,167,197,0.8)]",
-                    hasValue ? "border-[rgba(0,167,197,0.8)]" : ""
-                )}
-            />
-            <label
-                className={cn(
-                    "pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 transition-all",
-                    "font-semibold",
-                    hasValue ? "top-0" : "",
-                )}
-            >
-                <span
-                    className={cn(
-                        "rounded-md px-1.5 py-0.5 text-sm text-[rgba(255,255,255,0.85)]",
-                        "bg-[rgba(3,12,18,0.92)]",
-                        "border",
-                        hasValue
-                            ? "border-[rgba(0,167,197,0.8)] text-[color:var(--color-turkish-blue-200)] text-[11px]"
-                            : "border-transparent"
-                    )}
-                >
-                    {label}
-                </span>
-            </label>
-        </div>
-    );
-}
+// Fields use standard Input/textarea with glass styles
 
 export default function BlogEditModal({ open, onClose, onCreated }: Props) {
     // wizard state
@@ -105,13 +54,39 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
     const [creatingCategory, setCreatingCategory] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [showPreview, setShowPreview] = useState(false);
+    const [richEditor, setRichEditor] = useState(false);
 
+    // Load categories and draft when opened
     useEffect(() => {
         if (!open) return;
         getAllBlogCategories().then(setCategories).catch(() => setCategories([]));
+        try {
+            const raw = localStorage.getItem("tengra:blog:new:draft");
+            if (raw) {
+                const d = JSON.parse(raw);
+                if (typeof d.title === "string") setTitle(d.title);
+                if (typeof d.content === "string") setContent(d.content);
+                if (typeof d.image === "string") setImage(d.image);
+                if (Array.isArray(d.selectedCategories)) setSelectedCategories(d.selectedCategories);
+            }
+        } catch {}
     }, [open]);
 
     const token = useMemo(() => (typeof window !== "undefined" ? localStorage.getItem("authToken") : null), []);
+
+    // Draft autosave (debounced)
+    useEffect(() => {
+        if (!open) return;
+        const id = setTimeout(() => {
+            try {
+                localStorage.setItem(
+                    "tengra:blog:new:draft",
+                    JSON.stringify({ title, content, image, selectedCategories })
+                );
+            } catch {}
+        }, 500);
+        return () => clearTimeout(id);
+    }, [open, title, content, image, selectedCategories]);
 
     const toggleCategory = (name: string) => {
         setSelectedCategories((prev) =>
@@ -209,6 +184,7 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
             setUploadFile(null);
             setSelectedCategories([]);
             setStep(0);
+            try { localStorage.removeItem("tengra:blog:new:draft"); } catch {}
         } finally {
             setSubmitting(false);
         }
@@ -221,7 +197,13 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
                 <Tabs.Trigger value="upload" className="rounded-md px-3 py-1 ui-selected:bg-[rgba(0,167,197,0.2)] ui-selected:text-[color:var(--color-turkish-blue-300)]">Yükle</Tabs.Trigger>
             </Tabs.List>
             <Tabs.Content value="url" className="outline-none">
-                <FloatingField label="Görsel URL" value={image} onChange={setImage} placeholder="https://..." />
+                <label className="text-xs text-[rgba(255,255,255,0.7)]">Görsel URL</label>
+                <Input
+                    value={image}
+                    onChange={(e) => setImage(e.currentTarget.value)}
+                    placeholder="https://..."
+                    className="mt-1 border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.75)] text-white"
+                />
             </Tabs.Content>
             <Tabs.Content value="upload" className="outline-none">
                 <div className="rounded-lg border border-dashed border-[rgba(0,167,197,0.35)] bg-[rgba(3,12,18,0.4)] p-4 text-center text-sm text-gray-300">
@@ -285,19 +267,24 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
                     {/* Step bodies */}
                     {step === 0 && (
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <FloatingField label="Başlık" value={title} onChange={setTitle} required />
+                            <div>
+                                <label className="text-xs text-[rgba(255,255,255,0.7)]">Başlık</label>
+                                <Input value={title} onChange={(e) => setTitle(e.currentTarget.value)} required className="mt-1 border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.75)] text-white" />
+                            </div>
                         </div>
                     )}
 
                     {step === 1 && (
                         <div className="space-y-3">
                             <div className="flex items-center gap-2">
-                                <Input
-                                    placeholder="Yeni kategori adı"
-                                    value={newCategory}
-                                    onChange={(e) => setNewCategory(e.target.value)}
-                                    className="max-w-[240px] border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] text-white"
-                                />
+                                <div className="max-w-[260px] w-full">
+                                    <Input
+                                        placeholder="Yeni kategori adı"
+                                        value={newCategory}
+                                        onChange={(e) => setNewCategory(e.currentTarget.value)}
+                                        className="border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.75)] text-white"
+                                    />
+                                </div>
                                 <Button type="button" onClick={handleCreateCategory} disabled={creatingCategory} className="bg-[color:var(--color-turkish-blue-500)] text-black">
                                     {creatingCategory ? "Ekleniyor..." : "Kategori Ekle"}
                                 </Button>
@@ -323,15 +310,31 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
                     )}
 
                     {step === 2 && (
-                        <div className="space-y-2" data-color-mode="dark">
+                        <div className="space-y-3" data-color-mode="dark">
                             <div className="flex items-center justify-between">
-                                <label className="text-sm text-[rgba(255,255,255,0.8)]">İçerik (Markdown)</label>
-                                <button type="button" onClick={() => setShowPreview((p) => !p)} className="rounded-md border border-[rgba(0,167,197,0.35)] p-1 text-[rgba(255,255,255,0.8)] hover:text-[color:var(--color-turkish-blue-300)]">
-                                    <Eye size={16} />
-                                </button>
+                                <label className="text-sm text-[rgba(255,255,255,0.8)]">İçerik</label>
+                                <div className="flex items-center gap-2">
+                                    {richEditor && (
+                                        <button type="button" onClick={() => setShowPreview((p) => !p)} className="rounded-md border border-[rgba(0,167,197,0.35)] p-1 text-[rgba(255,255,255,0.8)] hover:text-[color:var(--color-turkish-blue-300)]" aria-label="Önizleme">
+                                            <Eye size={16} />
+                                        </button>
+                                    )}
+                                    <Button type="button" variant="outline" className="border-[rgba(0,167,197,0.35)]" onClick={() => setRichEditor((v) => !v)}>
+                                        {richEditor ? "Basit Editör" : "Gelişmiş Editör"}
+                                    </Button>
+                                </div>
                             </div>
                             <div className="rounded-lg border border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.6)] p-2">
-                                <MDEditor value={content} onChange={(v = "") => setContent(v)} preview={showPreview ? "preview" : "edit"} height={320} style={{ background: "transparent" }} />
+                                {richEditor ? (
+                                    <MDEditor value={content} onChange={(v = "") => setContent(v)} preview={showPreview ? "preview" : "edit"} height={320} style={{ background: "transparent" }} />
+                                ) : (
+                                    <textarea
+                                        value={content}
+                                        onChange={(e) => setContent(e.currentTarget.value)}
+                                        rows={10}
+                                        className="w-full rounded-md border border-[rgba(0,167,197,0.35)] bg-[rgba(3,12,18,0.75)] p-3 text-white outline-none"
+                                    />
+                                )}
                             </div>
                         </div>
                     )}

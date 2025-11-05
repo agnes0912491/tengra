@@ -21,7 +21,7 @@ export default function Network() {
 
         <motion.a
           href="/forum"
-          className="relative inline-flex items-center justify-center px-8 py-3 font-medium tracking-widest uppercase text-sm text-[color:var(--color-turkish-blue-400)] border border-[rgba(0,167,197,0.4)] rounded-lg btn-ripple"
+          className="relative inline-flex items-center justify-center px-8 py-3 font-medium tracking-widest uppercase text-sm text-[color:var(--text-invert)] bg-[color:var(--color-turkish-blue-500)] rounded-lg shadow-[var(--glow-soft)] hover:bg-[color:var(--color-turkish-blue-400)] hover:shadow-[var(--glow-strong)] btn-ripple"
         >
           {t("cta")}
           <span className="absolute inset-0 rounded-lg opacity-30 bg-[radial-gradient(circle,rgba(0,167,197,0.6)_0%,transparent_80%)] blur-xl" />

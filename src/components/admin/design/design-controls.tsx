@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+// import { Input } from "@/components/ui/input";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -60,17 +61,17 @@ export default function DesignControls() {
                     <label className="text-sm text-[rgba(255,255,255,0.8)]">Birincil</label>
                     <div className="flex items-center gap-3">
                         <input type="color" value={settings.primary} onChange={(e) => setSettings((s) => ({ ...s, primary: e.target.value }))} />
-                        <Input value={settings.primary} onChange={(e) => setSettings((s) => ({ ...s, primary: e.target.value }))} />
+                        <Input value={settings.primary} onChange={(e) => setSettings((s) => ({ ...s, primary: e.currentTarget.value }))} />
                     </div>
                     <label className="text-sm text-[rgba(255,255,255,0.8)]">Arkaplan</label>
                     <div className="flex items-center gap-3">
                         <input type="color" value={settings.background} onChange={(e) => setSettings((s) => ({ ...s, background: e.target.value }))} />
-                        <Input value={settings.background} onChange={(e) => setSettings((s) => ({ ...s, background: e.target.value }))} />
+                        <Input value={settings.background} onChange={(e) => setSettings((s) => ({ ...s, background: e.currentTarget.value }))} />
                     </div>
                     <label className="text-sm text-[rgba(255,255,255,0.8)]">Metin</label>
                     <div className="flex items-center gap-3">
                         <input type="color" value={settings.text} onChange={(e) => setSettings((s) => ({ ...s, text: e.target.value }))} />
-                        <Input value={settings.text} onChange={(e) => setSettings((s) => ({ ...s, text: e.target.value }))} />
+                        <Input value={settings.text} onChange={(e) => setSettings((s) => ({ ...s, text: e.currentTarget.value }))} />
                     </div>
                 </div>
             </div>
@@ -80,7 +81,7 @@ export default function DesignControls() {
                 <div className="space-y-3">
                     <div className="grid grid-cols-[120px_1fr] items-center gap-3">
                         <label className="text-sm text-[rgba(255,255,255,0.8)]">Yazı Tipi</label>
-                        <Input value={settings.fontFamily} onChange={(e) => setSettings((s) => ({ ...s, fontFamily: e.target.value }))} />
+                        <Input value={settings.fontFamily} onChange={(e) => setSettings((s) => ({ ...s, fontFamily: e.currentTarget.value }))} />
                     </div>
                     <div className="grid grid-cols-[120px_1fr] items-center gap-3">
                         <label className="text-sm text-[rgba(255,255,255,0.8)]">Köşe Yarıçapı</label>

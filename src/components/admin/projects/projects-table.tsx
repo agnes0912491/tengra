@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import type { Project } from "@/types/project";
 import { Delete, Edit } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { editProject as ep, deleteProject as dp } from "@/lib/db";
 import { toast } from "@/lib/react-toastify";
@@ -130,30 +131,16 @@ export default function ProjectsTable({ projects }: Props) {
             <div className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm text-[rgba(255,255,255,0.8)]">Proje Adı</label>
-                <input
-                  name="name"
-                  value={project?.name || ""}
-                  className="w-full rounded-lg border border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] p-3 text-white focus:border-[rgba(0,167,197,0.6)] focus:outline-none"
-                  required
-                />
+                <Input name="name" defaultValue={project?.name || ""} required className="border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] text-white" />
               </div>
               <div className="space-y-2">
                 <label className="text-sm text-[rgba(255,255,255,0.8)]">Açıklama</label>
-                <textarea
-                  name="description"
-                  value={project?.description || ""}
-                  className="min-h-[120px] w-full rounded-lg border border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] p-3 text-white focus:border-[rgba(0,167,197,0.6)] focus:outline-none"
-                  rows={5}
-                />
+                <textarea name="description" defaultValue={project?.description || ""} rows={5} className="min-h-[120px] w-full rounded-lg border border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] p-3 text-white focus:border-[rgba(0,167,197,0.6)] focus:outline-none" />
               </div>
               {/** Logo URL alanı kaldırıldı */}
               <div className="space-y-2">
                 <label className="text-sm text-[rgba(255,255,255,0.8)]">Durum</label>
-                <select
-                  name="status"
-                  value={project?.status || "draft"}
-                  className="w-full rounded-lg border border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] p-3 text-white focus:border-[rgba(0,167,197,0.6)] focus:outline-none"
-                >
+                <select name="status" defaultValue={project?.status || "draft"} className="w-full rounded-lg border border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] p-2 text-white focus:border-[rgba(0,167,197,0.6)] focus:outline-none">
                   <option value="draft">Taslak</option>
                   <option value="in_progress">Geliştiriliyor</option>
                   <option value="on_hold">Beklemede</option>
@@ -163,11 +150,7 @@ export default function ProjectsTable({ projects }: Props) {
               </div>
               <div className="space-y-2">
                 <label className="text-sm text-[rgba(255,255,255,0.8)]">Tür</label>
-                <select
-                  name="type"
-                  value={project?.type || "other"}
-                  className="w-full rounded-lg border border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] p-3 text-white focus:border-[rgba(0,167,197,0.6)] focus:outline-none"
-                >
+                <select name="type" defaultValue={project?.type || "other"} className="w-full rounded-lg border border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] p-2 text-white focus:border-[rgba(0,167,197,0.6)] focus:outline-none">
                   <option value="game">Oyun</option>
                   <option value="website">Web Sitesi</option>
                   <option value="tool">Araç</option>

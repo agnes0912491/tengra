@@ -504,7 +504,7 @@ export const getAllProjects = async (
 };
 
 export const createProject = async (
-  { name, description, status, type }: Project,
+  { name, description, status, type, logoUrl }: Project,
   token: string
 ): Promise<Project | null> => {
   if (!token) {
@@ -518,7 +518,7 @@ export const createProject = async (
       Accept: "application/json",
       Authorization: `Bearer ${token}`,
     },
-  body: JSON.stringify({ name, description, status, type }),
+  body: JSON.stringify({ name, description, status, type, logoUrl }),
   });
 
   if (!response.ok) {
@@ -849,12 +849,12 @@ export const getTopBlogViews = async (token: string): Promise<{ id: string; coun
 };
 
 // Per-page analytics
-export const incrementPageView = async (path: string, ua?: string): Promise<void> => {
+export const incrementPageView = async (path: string, ua?: string, country?: string): Promise<void> => {
   try {
     await fetch(`${ANALYTICS_API_URL}/page/increment`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ path, ua: ua ?? "" }),
+      body: JSON.stringify({ path, ua: ua ?? "", country: country ?? "" }),
     });
   } catch {}
 };
@@ -883,6 +883,20 @@ export const getTopAgents = async (
   const json = (await res.json().catch(() => null)) as { top?: { agent?: string; count?: string | number }[] } | null;
   const list = Array.isArray(json?.top) ? json!.top! : [];
   return list.map((i) => ({ agent: String(i.agent ?? "Other"), count: Number(i.count ?? 0) || 0 }));
+};
+
+// Countries analytics
+export const getTopCountries = async (
+  token: string
+): Promise<{ country: string; count: number }[]> => {
+  const res = await fetch(`${ANALYTICS_API_URL}/countries/top`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  if (!res.ok) return [];
+  const json = (await res.json().catch(() => null)) as { top?: { country?: string; count?: string | number }[] } | null;
+  const list = Array.isArray(json?.top) ? json!.top! : [];
+  return list.map((i) => ({ country: String(i.country ?? "Unknown"), count: Number(i.count ?? 0) || 0 }));
 };
 
 export const updateUserRole = async (

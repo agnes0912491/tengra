@@ -3,11 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+// import { cn } from "@/lib/utils";
 import Cookies from "js-cookie";
 import { ADMIN_SESSION_COOKIE_CANDIDATES } from "@/lib/auth";
 import { createFaq, deleteFaq, getFaqs, updateFaq, type FaqItem } from "@/lib/db";
 import { routing } from "@/i18n/routing";
+import { ArrowDown, ArrowUp } from "lucide-react";
 
 const SUPPORTED_LOCALES = routing.locales;
 
@@ -68,20 +69,25 @@ export default function FaqAdmin() {
 
     return (
         <div className="rounded-3xl border border-[rgba(110,211,225,0.16)] bg-[rgba(6,20,27,0.6)]/80 p-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                    <span className="text-sm text-[rgba(255,255,255,0.75)]">Dil</span>
-                    <select
-                        value={locale}
-                        onChange={(e) => setLocale(e.target.value as (typeof SUPPORTED_LOCALES)[number])}
-                        className="rounded-lg border border-[rgba(110,211,225,0.35)] bg-[rgba(4,18,24,0.85)] px-3 py-1 text-sm text-white"
-                    >
-                        {(SUPPORTED_LOCALES as readonly string[]).map((loc) => (
-                            <option key={loc} value={loc}>
-                                {loc}
-                            </option>
-                        ))}
-                    </select>
+                    <div className="w-40">
+                        <select
+                            value={locale}
+                            onChange={(e) => {
+                                const el = e.target as HTMLSelectElement | null;
+                                const v = (el?.value || locale) as (typeof SUPPORTED_LOCALES)[number];
+                                setLocale(v);
+                            }}
+                            className="w-full rounded-lg border border-[rgba(110,211,225,0.35)] bg-[rgba(4,18,24,0.85)] px-3 py-2 text-sm text-white"
+                        >
+                            {(SUPPORTED_LOCALES as readonly string[]).map((loc) => (
+                                <option key={loc} value={loc}>
+                                    {loc}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
                 <Button onClick={addNew} className="bg-[color:var(--color-turkish-blue-500)] text-black">Yeni SSS</Button>
             </div>
@@ -97,10 +103,7 @@ export default function FaqAdmin() {
                 )}
 
                 {items.map((item) => (
-                    <div
-                        key={item.id}
-                        className="rounded-xl border border-[rgba(110,211,225,0.25)] bg-[rgba(8,28,38,0.5)] p-4"
-                    >
+                    <div key={item.id} className="rounded-xl border border-[rgba(110,211,225,0.25)] bg-[rgba(8,28,38,0.5)] p-4">
                         <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-2">
                                 <span className="text-xs text-[rgba(255,255,255,0.6)]">Sıra</span>
@@ -108,12 +111,48 @@ export default function FaqAdmin() {
                                     type="number"
                                     value={item.order}
                                     onChange={(e) => {
-                                        const v = Number(e.target.value) || 0;
+                                        const v = Number(e.currentTarget.value) || 0;
                                         setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, order: v } : i)));
                                     }}
                                     onBlur={() => saveItem(item.id, { order: item.order })}
                                     className="w-20 rounded-md border border-[rgba(110,211,225,0.25)] bg-[rgba(4,18,24,0.85)] px-2 py-1 text-xs text-white"
                                 />
+                                <button
+                                    type="button"
+                                    className="rounded-md border border-[rgba(110,211,225,0.3)] p-1 text-[rgba(255,255,255,0.75)] hover:text-[color:var(--color-turkish-blue-300)]"
+                                    aria-label="Yukarı taşı"
+                                    onClick={() => {
+                                        setItems((prev) => {
+                                            const idx = prev.findIndex((i) => i.id === item.id);
+                                            if (idx <= 0) return prev;
+                                            const copy = [...prev];
+                                            const [moved] = copy.splice(idx, 1);
+                                            copy.splice(idx - 1, 0, moved);
+                                            return copy.map((it, i) => ({ ...it, order: i }));
+                                        });
+                                        void saveItem(item.id, { order: Math.max(0, item.order - 1) });
+                                    }}
+                                >
+                                    <ArrowUp size={14} />
+                                </button>
+                                <button
+                                    type="button"
+                                    className="rounded-md border border-[rgba(110,211,225,0.3)] p-1 text-[rgba(255,255,255,0.75)] hover:text-[color:var(--color-turkish-blue-300)]"
+                                    aria-label="Aşağı taşı"
+                                    onClick={() => {
+                                        setItems((prev) => {
+                                            const idx = prev.findIndex((i) => i.id === item.id);
+                                            if (idx < 0 || idx >= prev.length - 1) return prev;
+                                            const copy = [...prev];
+                                            const [moved] = copy.splice(idx, 1);
+                                            copy.splice(idx + 1, 0, moved);
+                                            return copy.map((it, i) => ({ ...it, order: i }));
+                                        });
+                                        void saveItem(item.id, { order: item.order + 1 });
+                                    }}
+                                >
+                                    <ArrowDown size={14} />
+                                </button>
                             </div>
 
                             <div className="flex items-center gap-3">
@@ -136,25 +175,29 @@ export default function FaqAdmin() {
                         </div>
 
                         <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-                            <div className="relative">
+                            <div>
+                                <label className="text-xs text-[rgba(255,255,255,0.7)]">Soru</label>
                                 <Input
                                     value={item.question}
-                                    onChange={(e) => setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, question: e.target.value } : i)))}
+                                    onChange={(e) => {
+                                        const v = (e.target as HTMLInputElement | null)?.value ?? "";
+                                        setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, question: v } : i)));
+                                    }}
                                     onBlur={() => saveItem(item.id, { question: item.question })}
-                                    className="peer border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.75)] text-white placeholder-transparent"
-                                    placeholder="Soru"
+                                    className="mt-1 border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.75)] text-white"
                                 />
-                                <label className={cn("pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[rgba(255,255,255,0.65)] transition-all", "peer-focus:top-0 peer-focus:text-xs peer-focus:text-[color:var(--color-turkish-blue-300)]", "top-0 text-xs")}>Soru</label>
                             </div>
-                            <div className="relative">
+                            <div>
+                                <label className="text-xs text-[rgba(255,255,255,0.7)]">Cevap</label>
                                 <Input
                                     value={item.answer}
-                                    onChange={(e) => setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, answer: e.target.value } : i)))}
+                                    onChange={(e) => {
+                                        const v = (e.target as HTMLInputElement | null)?.value ?? "";
+                                        setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, answer: v } : i)));
+                                    }}
                                     onBlur={() => saveItem(item.id, { answer: item.answer })}
-                                    className="peer border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.75)] text-white placeholder-transparent"
-                                    placeholder="Cevap"
+                                    className="mt-1 border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.75)] text-white"
                                 />
-                                <label className={cn("pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[rgba(255,255,255,0.65)] transition-all", "peer-focus:top-0 peer-focus:text-xs peer-focus:text-[color:var(--color-turkish-blue-300)]", "top-0 text-xs")}>Cevap</label>
                             </div>
                         </div>
                     </div>
@@ -163,4 +206,3 @@ export default function FaqAdmin() {
         </div>
     );
 }
-

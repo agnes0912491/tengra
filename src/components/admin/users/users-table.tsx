@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import type { Role, User } from "@/lib/auth/users";
 import { ADMIN_SESSION_COOKIE_CANDIDATES } from "@/lib/auth";
 import { updateUserRole } from "@/lib/db";
+// plain select for compact UI
 
 const ROLE_OPTIONS: { value: Role; label: string }[] = [
   { value: "admin", label: "Yönetici" },
@@ -123,22 +124,22 @@ export default function UsersTable({ initialUsers, currentUserId, currentUserRol
               <td className="px-6 py-4 text-right">
                 {currentUserId !== user.id && !isHigherRole(user.role as Role, currentUserRole) ? (
                   <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(110,211,225,0.25)] bg-[rgba(8,28,38,0.55)] px-3 py-2">
-                    <label htmlFor={`role-${user.id}`} className="text-[10px] uppercase tracking-[0.35em] text-[rgba(255,255,255,0.45)]">
-                      Rolü değiştir
-                    </label>
-                    <select
-                      id={`role-${user.id}`}
-                      value={user.role}
-                      disabled={isBusy}
-                      onChange={(event) => handleRoleChange(user.id, event.target.value as Role)}
-                      className="rounded-full border border-[rgba(110,211,225,0.25)] bg-[rgba(4,18,24,0.85)] px-3 py-1 text-xs text-[rgba(255,255,255,0.85)] focus:border-[rgba(110,211,225,0.55)] focus:outline-none"
-                    >
-                      {ROLE_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="w-44">
+                      <select
+                        id={`role-${user.id}`}
+                        value={user.role}
+                        disabled={isBusy}
+                        onChange={(event) => handleRoleChange(user.id, event.target.value as Role)}
+                        className="w-full rounded-md border border-[rgba(110,211,225,0.35)] bg-[rgba(4,18,24,0.85)] px-3 py-2 text-xs text-[rgba(255,255,255,0.85)] focus:border-[rgba(110,211,225,0.65)] focus:outline-none"
+                        aria-label="Rol"
+                      >
+                        {ROLE_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 ) : null}
               </td>

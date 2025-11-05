@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+// keep simple textarea for JSON
 
 type HomepageContent = {
     targets?: Array<{ title: string; body: string }>;
@@ -56,12 +57,12 @@ export default function HomepageEditor({ initial }: { initial: HomepageContent }
 
     return (
         <div className="space-y-4">
-            <div>
-                <label className="block text-sm font-medium text-gray-700">Homepage JSON</label>
+            <div className="text-black">
+                <label className="block text-sm font-medium">Homepage JSON</label>
                 <textarea
                     rows={18}
                     value={text}
-                    onChange={(e) => setText(e.target.value)}
+                    onChange={(e) => setText(e.currentTarget.value)}
                     className="mt-1 block w-full font-mono text-sm p-2 border rounded-md"
                 />
             </div>

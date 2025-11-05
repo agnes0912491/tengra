@@ -15,13 +15,13 @@ const config: Config = {
           600: "#00A7C5",
         },
         base: {
-          black: "#0A0F12",
-          dark: "#0F1418",
-          white: "#EAEAEA",
+          black: "#03090C",
+          dark: "#0A1014",
+          white: "#E6EEF2",
         },
         accent: {
-          silver: "#C0C0C0",
-          teal: "#0AA6A6",
+          silver: "#D3DEE4",
+          teal: "#0BA8B0",
         },
       },
       fontFamily: {

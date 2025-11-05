@@ -5,6 +5,7 @@ import type { Project } from "@/types/project";
 import { getProjectStats, type ProjectStat } from "@/lib/db";
 import Cookies from "js-cookie";
 import { ADMIN_SESSION_COOKIE_CANDIDATES } from "@/lib/auth";
+// glass select
 
 type Props = {
     initialProjects: Project[];
@@ -69,15 +70,17 @@ export default function ProjectStatsViewer({ initialProjects }: Props) {
                     <h3 className="text-base font-semibold text-[color:var(--color-turkish-blue-200)]">Proje Seçin</h3>
                     <p className="text-xs text-[rgba(255,255,255,0.6)]">Son 30 güne ait özet metrikler</p>
                 </div>
-                <select
-                    className="max-w-xs rounded-lg border border-[rgba(110,211,225,0.24)] bg-[rgba(8,28,38,0.7)] p-2 text-white"
-                    value={selectedId}
-                    onChange={(e) => setSelectedId(e.target.value)}
-                >
-                    {initialProjects.map((p) => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
-                    ))}
-                </select>
+                <div className="max-w-xs">
+                    <select
+                        value={selectedId}
+                        onChange={(e) => setSelectedId(e.target.value)}
+                        className="w-full rounded-lg border border-[rgba(110,211,225,0.24)] bg-[rgba(8,28,38,0.7)] p-2 text-white"
+                    >
+                        {initialProjects.map((p) => (
+                            <option key={p.id} value={p.id}>{p.name}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
 
             {metrics.length === 0 ? (

@@ -31,8 +31,10 @@ export default function AnalyticsTracker() {
         } catch { }
 
         const ua = window.navigator?.userAgent || "";
+        const lang = (window.navigator?.languages && window.navigator.languages[0]) || window.navigator?.language || "";
+        const country = (lang.includes("-") ? lang.split("-").pop() : "") || "";
         // Fire and forget
-        incrementPageView(path, ua);
+        incrementPageView(path, ua, country?.toUpperCase());
     }, [pathname]);
 
     return null;

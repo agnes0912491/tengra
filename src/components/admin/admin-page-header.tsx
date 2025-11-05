@@ -57,6 +57,8 @@ export default function AdminPageHeader({
       name: project.name,
       description: project.description,
       status: project.status,
+      type: project.type,
+      logoUrl: project.logoUrl,
     } as Project, token)
       .then(() => {
         setIsOpen(false);

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
@@ -22,13 +22,7 @@ export default function AdminLoginForm() {
   const [credentials, setCredentials] = useState({ username: "", password: "" });
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = event.target;
-    setCredentials((prev) => ({
-      ...prev,
-      [id as "username" | "password"]: value,
-    }));
-  };
+  // inputs update state inline in JSX
 
   useEffect(() => {
     if (isAuthenticated && user?.role === "admin") {
@@ -110,8 +104,8 @@ export default function AdminLoginForm() {
               autoComplete="username"
               required
               value={credentials.username}
-              onChange={handleChange}
-              placeholder={t("usernamePlaceholder")}
+              onChange={(e) => setCredentials((p) => ({ ...p, username: e.currentTarget.value }))}
+              className="border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] text-white"
             />
           </div>
 
@@ -125,8 +119,8 @@ export default function AdminLoginForm() {
               autoComplete="current-password"
               required
               value={credentials.password}
-              onChange={handleChange}
-              placeholder="••••••••"
+              onChange={(e) => setCredentials((p) => ({ ...p, password: e.currentTarget.value }))}
+              className="border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] text-white"
             />
           </div>
 
