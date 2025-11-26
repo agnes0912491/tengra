@@ -116,8 +116,7 @@ export default function AuthProvider({
             return;
           }
 
-          try {
-            console.log("[AuthProvider] finalizing 2FA, payload:", verifiedPayload);
+          try { 
 
             // Persist the tokens first (some codepaths may read from storage/cookies)
             localStorage.setItem("authToken", verifiedPayload.token);
@@ -129,8 +128,7 @@ export default function AuthProvider({
 
             // Now attempt to load the user with the token. Logging results helps
             // diagnose why the dashboard navigation may not trigger.
-            const userObj = await getUserWithToken(verifiedPayload.token);
-            console.log("[AuthProvider] getUserWithToken result:", userObj);
+            const userObj = await getUserWithToken(verifiedPayload.token); 
 
             if (!userObj) {
               // If we couldn't fetch the user, surface a helpful toast and keep the tokens
@@ -160,8 +158,7 @@ export default function AuthProvider({
                 Cookies.remove(legacyName, { path: "/" });
               }
             }
-          } catch (err) {
-            console.error("[AuthProvider] error finalizing 2FA:", err);
+          } catch (err) { 
             toast.error("Doğrulama sırasında bir hata oluştu. Lütfen tekrar deneyin.");
           } finally {
             // clear refs

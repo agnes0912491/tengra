@@ -8,6 +8,7 @@ import { BlogCategory, Blog } from "@/types/blog";
 import { useTranslations } from "next-intl";
 import { safeJsonLd } from "@/lib/jsonld";
 import dynamic from "next/dynamic";
+import { resolveCdnUrl } from "@/lib/constants";
 
 const BlogCreateCta = dynamic(() => import("@/components/admin/blogs/blog-create-cta"), { ssr: false });
 
@@ -96,7 +97,11 @@ export default function BlogsClient({ posts, categories }: Props) {
               className="group relative overflow-hidden rounded-2xl border border-[rgba(0,167,197,0.18)] bg-[rgba(5,18,24,0.78)]/90 backdrop-blur-xl transition-all hover:border-[rgba(0,167,197,0.45)] hover:shadow-[0_0_35px_rgba(0,167,197,0.15)]"
             >
               <Image
-                src={post.image && post.image.length ? post.image : "/tengra_without_text.png"}
+                src={
+                  post.image && post.image.length
+                    ? resolveCdnUrl(post.image)
+                    : resolveCdnUrl("/uploads/tengra_without_text.png")
+                }
                 alt={post.title}
                 className="w-full h-48 object-cover opacity-85 group-hover:opacity-100 transition"
                 width={800}

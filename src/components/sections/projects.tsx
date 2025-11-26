@@ -9,8 +9,9 @@ import { useTranslations } from "next-intl";
 import { useAuth } from "@/components/providers/auth-provider";
 import { getAllProjects } from "@/lib/db";
 import type { Project } from "@/types/project";
+import { resolveCdnUrl } from "@/lib/constants";
 
-const FALLBACK_IMAGE = "/tengra_without_text.png";
+const FALLBACK_IMAGE = resolveCdnUrl("/uploads/tengra_without_text.png");
 
 export default function Projects() {
   const t = useTranslations("Projects");
@@ -102,33 +103,40 @@ export default function Projects() {
               {projects.map((proj, index) => {
                 const title = proj.name;
                 const description = proj.description ?? "";
-                const image = proj.logoUrl || FALLBACK_IMAGE;
+                const image = resolveCdnUrl(proj.logoUrl || FALLBACK_IMAGE);
 
                 return (
-                  <motion.div
+                  <Link
                     key={proj.id ?? `${title}-${index}`}
-                    initial={{ opacity: 0, y: 40 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05, duration: 0.45 }}
-                    viewport={{ once: true }}
+                    href={proj.id ? `/projects/${proj.id}` : "/projects"}
                     className="glass relative h-[260px] w-[320px] shrink-0 snap-center overflow-hidden rounded-xl border border-[rgba(0,167,197,0.15)] transition-all duration-500 hover:border-[rgba(0,167,197,0.5)]"
                   >
-                    <div className="relative h-[150px] w-full overflow-hidden">
-                      <Image
-                        src={image}
-                        alt={title}
-                        fill
-                        className="object-cover opacity-80 transition-all duration-700 group-hover/slider:opacity-100"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60" />
-                    </div>
-                    <div className="p-4 text-left">
-                      <h3 className="mb-1 line-clamp-1 text-lg font-display text-[color:var(--color-turkish-blue-400)]">
-                        {title}
-                      </h3>
-                      <p className="line-clamp-3 text-[12px] text-[rgba(255,255,255,0.7)]">{description}</p>
-                    </div>
-                  </motion.div>
+                    <motion.div
+                      initial={{ opacity: 0, y: 40 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05, duration: 0.45 }}
+                      viewport={{ once: true }}
+                      className="h-full w-full"
+                    >
+                      <div className="relative h-[150px] w-full overflow-hidden">
+                        <Image
+                          src={image}
+                          alt={title}
+                          fill
+                          className="object-cover opacity-80 transition-all duration-700 group-hover/slider:opacity-100"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60" />
+                      </div>
+                      <div className="p-4 text-left">
+                        <h3 className="mb-1 line-clamp-1 text-lg font-display text-[color:var(--color-turkish-blue-400)]">
+                          {title}
+                        </h3>
+                        <p className="line-clamp-3 text-[12px] text-[rgba(255,255,255,0.7)]">
+                          {description}
+                        </p>
+                      </div>
+                    </motion.div>
+                  </Link>
                 );
               })}
             </div>
@@ -137,38 +145,42 @@ export default function Projects() {
           projects.map((proj, index) => {
             const title = proj.name;
             const description = proj.description ?? "";
-            const image = proj.logoUrl || FALLBACK_IMAGE;
+            const image = resolveCdnUrl(proj.logoUrl || FALLBACK_IMAGE);
 
             return (
-              <motion.div
+              <Link
                 key={proj.id ?? `${title}-${index}`}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1, duration: 0.6 }}
-                viewport={{ once: true }}
+                href={proj.id ? `/projects/${proj.id}` : "/projects"}
                 className="group relative overflow-hidden rounded-xl glass border border-[rgba(0,167,197,0.15)] transition-all duration-500 hover:border-[rgba(0,167,197,0.5)]"
               >
-                <div className="relative w-full h-56 overflow-hidden">
-                  <Image
-                    src={image}
-                    alt={title}
-                    fill
-                    className="object-cover opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60 group-hover:to-black/30 transition-all" />
-                </div>
+                <motion.div
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1, duration: 0.6 }}
+                  viewport={{ once: true }}
+                >
+                  <div className="relative w-full h-56 overflow-hidden">
+                    <Image
+                      src={image}
+                      alt={title}
+                      fill
+                      className="object-cover opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60 group-hover:to-black/30 transition-all" />
+                  </div>
 
-                <div className="p-6 text-left">
-                  <h3 className="text-xl font-display text-[color:var(--color-turkish-blue-400)] mb-2 group-hover:text-[color:var(--color-turkish-blue-300)] transition-colors">
-                    {title}
-                  </h3>
-                  <p className="text-xs text-[rgba(255,255,255,0.6)]">
-                    {description}
-                  </p>
-                </div>
+                  <div className="p-6 text-left">
+                    <h3 className="text-xl font-display text-[color:var(--color-turkish-blue-400)] mb-2 group-hover:text-[color:var(--color-turkish-blue-300)] transition-colors">
+                      {title}
+                    </h3>
+                    <p className="text-xs text-[rgba(255,255,255,0.6)]">
+                      {description}
+                    </p>
+                  </div>
 
-                <div className="absolute inset-0 rounded-xl pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-700 shadow-[0_0_20px_rgba(0,167,197,0.6)]" />
-              </motion.div>
+                  <div className="absolute inset-0 rounded-xl pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-700 shadow-[0_0_20px_rgba(0,167,197,0.6)]" />
+                </motion.div>
+              </Link>
             );
           })
         )}

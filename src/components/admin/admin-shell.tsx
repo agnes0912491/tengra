@@ -9,7 +9,8 @@ import { toast } from "react-toastify";
 import ProtectedRoute from "@/components/auth/protected-route";
 import PublishListener from "@/components/admin/publish-listener";
 import { useAuth } from "@/components/providers/auth-provider";
-import Logo from "../../../public/tengra_without_text.png";
+import { resolveCdnUrl } from "@/lib/constants";
+const ADMIN_LOGO_SRC = resolveCdnUrl("/uploads/tengra_without_text.png");
 import SidebarItem, { type NavItem } from "@/components/admin/navigation/sidebar-item";
 import {
   LayoutDashboard,
@@ -123,7 +124,7 @@ export default function AdminShell({ children }: Props) {
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(120%_80%_at_0%_0%,rgba(110,211,225,0.16),transparent),linear-gradient(145deg,rgba(255,255,255,0.06),transparent_45%)]" />
           <header className="relative flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[rgba(110,211,225,0.35)] bg-[rgba(0,167,197,0.12)] shadow-[0_0_22px_rgba(0,167,197,0.4)]">
-              <Image src={Logo.src} alt="Tengra Logo" width={32} height={32} className="opacity-90" />
+              <Image src={ADMIN_LOGO_SRC} alt="Tengra Logo" width={32} height={32} className="opacity-90" />
             </div>
             <div className="leading-tight text-[rgba(255,255,255,0.85)]">
               <p className="text-[10px] uppercase tracking-[0.35em] text-[color:var(--color-turkish-blue-300)]">Tengra</p>

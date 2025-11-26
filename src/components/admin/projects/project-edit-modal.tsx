@@ -9,6 +9,9 @@ import type { Project, ProjectType } from "@/types/project";
 import Dropzone from "@/components/ui/dropzone";
 import { uploadImage } from "@/lib/db";
 import Image from "next/image";
+import Cookies from "js-cookie";
+import { ADMIN_SESSION_COOKIE_CANDIDATES } from "@/lib/auth";
+import { toast } from "@/lib/react-toastify";
 
 type Props = {
     open: boolean;
@@ -71,31 +74,47 @@ export default function ProjectEditModal({ open, onClose, onSave }: Props) {
                             onDrop={async (files) => {
                                 const file = files[0];
                                 if (!file) return;
-                                const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+                                const token =
+                                    typeof window !== "undefined"
+                                        ? ADMIN_SESSION_COOKIE_CANDIDATES.map((name) => Cookies.get(name)).find(Boolean) ||
+                                          localStorage.getItem("authToken")
+                                        : null;
                                 const toDataUrl = (f: File) =>
-                                  new Promise<string>((resolve) => {
-                                    const reader = new FileReader();
-                                    reader.onload = () => resolve(String(reader.result || ""));
-                                    reader.readAsDataURL(f);
-                                  });
+                                    new Promise<string>((resolve) => {
+                                        const reader = new FileReader();
+                                        reader.onload = () => resolve(String(reader.result || ""));
+                                        reader.readAsDataURL(f);
+                                    });
                                 const dataUrl = await toDataUrl(file);
                                 try {
-                                  if (token) {
+                                    if (!token) {
+                                        console.error("Upload failed: missing auth token");
+                                        toast.error("Görsel yüklemek için önce giriş yapın.");
+                                        return;
+                                    }
                                     const uploaded = await uploadImage(dataUrl, token);
                                     if (uploaded?.url) {
-                                      setFormData({ ...formData, logoUrl: uploaded.url });
+                                        setFormData((prev) => ({ ...prev, logoUrl: uploaded.url }));
                                     } else if (uploaded?.dataUrl) {
-                                      setFormData({ ...formData, logoUrl: uploaded.dataUrl });
+                                        setFormData((prev) => ({ ...prev, logoUrl: uploaded.dataUrl }));
+                                    } else {
+                                        toast.error("Görsel yüklenemedi.");
                                     }
-                                  }
                                 } catch (e) {
-                                  console.error("Upload failed", e);
+                                    console.error("Upload failed", e);
+                                    toast.error("Görsel yüklenirken bir hata oluştu.");
                                 }
                             }}
                         >
                             {formData.logoUrl ? (
                                 <div className="flex items-center gap-3">
-                                    <Image src={formData.logoUrl} alt="logo preview" className="h-10 w-10 rounded object-contain" />
+                                    <Image
+                                        src={formData.logoUrl}
+                                        alt="logo preview"
+                                        width={40}
+                                        height={40}
+                                        className="h-10 w-10 rounded object-contain"
+                                    />
                                     <span className="text-xs text-[rgba(255,255,255,0.7)]">Yeni görsel yüklendi</span>
                                 </div>
                             ) : (

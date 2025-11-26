@@ -113,15 +113,17 @@ export default function FaqAdmin() {
             const srcIdx = prev.findIndex((i) => i.id === dragId);
             const dstIdx = prev.findIndex((i) => i.id === overId);
             if (srcIdx < 0 || dstIdx < 0) return prev;
-            const next = prev.map(i => ({ ...i }));
+            const next = prev.map((i) => ({ ...i }));
             const [moved] = next.splice(srcIdx, 1);
             next.splice(dstIdx, 0, moved);
-            next.forEach((it, index) => { it.order = index; });
+            next.forEach((it, index) => {
+                it.order = index;
+            });
             return next;
         });
         setOrderDirty(true);
         setDragId(null);
-    }, [dragId, saveItem]);
+    }, [dragId]);
 
     const saveOrder = async () => {
         if (!token) return;
@@ -138,8 +140,41 @@ export default function FaqAdmin() {
 
     const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
     const setDraftField = (id: string, field: keyof FaqItem, value: string) => {
-        setDrafts(prev => prev.map(i => i.id === id ? { ...i, [field]: value } : i));
-        setDirty(prev => { const s = new Set(prev); s.add(id); return s; });
+        // Avoid unnecessary updates when incoming value matches the
+        // current draft and original item – this helps prevent cases
+        // where the editor calls onChange on mount and falsely marks
+        // items as "dirty" even though the user has not edited them.
+        setDrafts((prev) => {
+            let changed = false;
+            const next = prev.map((i) => {
+                if (i.id !== id) return i;
+                // If the value is identical, do not allocate a new object
+                if (i[field] === (value as unknown as FaqItem[typeof field])) {
+                    return i;
+                }
+                changed = true;
+                return { ...i, [field]: value };
+            });
+            return changed ? next : prev;
+        });
+
+        const original = items.find((i) => i.id === id);
+        const isDirtyNow =
+            !original ||
+            // Only compare string fields; we currently use setDraftField
+            // for question/answer updates.
+            original[field] !== (value as unknown as FaqItem[typeof field]);
+
+        setDirty((prev) => {
+            const s = new Set(prev);
+            if (isDirtyNow) {
+                s.add(id);
+            } else {
+                s.delete(id);
+            }
+            return s;
+        });
+
         if (timers.current[id]) clearTimeout(timers.current[id]);
         timers.current[id] = setTimeout(() => {}, 250);
     };
@@ -176,7 +211,7 @@ export default function FaqAdmin() {
                       <Button onClick={async () => {
                         setSavingAll(true);
                         try {
-                          const payloads = Array.from(dirty.values()).map(() => null);
+                          //const payloads = Array.from(dirty.values()).map(() => null);
                           // Persist only dirty items' question/answer
                           const ops: Array<Promise<unknown>> = [];
                           drafts.forEach((d) => {

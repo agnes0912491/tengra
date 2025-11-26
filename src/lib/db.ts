@@ -2,6 +2,7 @@ import type { Blog, BlogCategory } from "@/types/blog";
 import type { Project, ProjectStatus, ProjectType } from "@/types/project";
 import { Role, User } from "./auth/users";
 import { AuthUserPayload } from "@/types/auth";
+import { resolveCdnUrl } from "@/lib/constants";
 
 // Base API URL for the backend. Fallback to localhost in development to avoid
 // generating an invalid URL when the env var is absent.
@@ -525,7 +526,7 @@ export const createProject = async (
       Accept: "application/json",
       Authorization: `Bearer ${token}`,
     },
-  body: JSON.stringify({ name, description, status, type, logoUrl }),
+    body: JSON.stringify({ name, description, status, type, logoUrl }),
   });
 
   if (!response.ok) {
@@ -535,13 +536,53 @@ export const createProject = async (
   const json = (await response.json().catch(() => null)) as
     | { project?: unknown }
     | unknown;
-  const project = (json && typeof json === "object" && "project" in json
-    ? (json as { project?: unknown }).project
-    : json) as unknown;
+  const project =
+    json && typeof json === "object" && "project" in json
+      ? (json as { project?: unknown }).project
+      : (json as unknown);
   return normalizeProject(project);
-}
+};
 
-export const editProject = async({name,description,status, type}: Partial<Project>, projectId: string, token: string): Promise<Project | null> => {
+export const getProjectById = async (
+  projectId: string,
+  token?: string
+): Promise<Project | null> => {
+  if (!projectId) return null;
+  try {
+    const headers: Record<string, string> = {
+      Accept: "application/json",
+    };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    const response = await fetch(
+      `${PROJECTS_API_URL}/${encodeURIComponent(projectId)}`,
+      {
+        headers,
+        cache: "no-store",
+      }
+    );
+    if (!response.ok) {
+      return null;
+    }
+    const json = (await response.json().catch(() => null)) as
+      | { project?: unknown }
+      | unknown;
+    const project =
+      json && typeof json === "object" && "project" in json
+        ? (json as { project?: unknown }).project
+        : (json as unknown);
+    return normalizeProject(project);
+  } catch {
+    return null;
+  }
+};
+
+export const editProject = async (
+  { name, description, status, type, logoUrl }: Partial<Project>,
+  projectId: string,
+  token: string
+): Promise<Project | null> => {
   if (!token) {
     throw new Error("Yetkilendirme anahtarı eksik.");
   }
@@ -557,7 +598,7 @@ export const editProject = async({name,description,status, type}: Partial<Projec
       Accept: "application/json",
       Authorization: `Bearer ${token}`,
     },
-  body: JSON.stringify({ name, description, status, type }),
+    body: JSON.stringify({ name, description, status, type, logoUrl }),
   });
 
   if (!response.ok) {
@@ -567,11 +608,12 @@ export const editProject = async({name,description,status, type}: Partial<Projec
   const json = (await response.json().catch(() => null)) as
     | { project?: unknown }
     | unknown;
-  const project = (json && typeof json === "object" && "project" in json
-    ? (json as { project?: unknown }).project
-    : json) as unknown;
+  const project =
+    json && typeof json === "object" && "project" in json
+      ? (json as { project?: unknown }).project
+      : (json as unknown);
   return normalizeProject(project);
-}
+};
 
 export const deleteProject = async(projectId: string, token: string): Promise<boolean> => {
   if (!token) {
@@ -635,6 +677,34 @@ export const recordProjectStat = async (
   return res.ok;
 };
 
+export const recordProjectVisit = async (
+  projectId: string,
+  path?: string,
+  token?: string
+): Promise<boolean> => {
+  if (!projectId) return false;
+  try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    const res = await fetch(
+      `${PROJECTS_API_URL}/${encodeURIComponent(projectId)}/visits`,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify(path ? { path } : {}),
+      }
+    );
+    return res.ok;
+  } catch {
+    return false;
+  }
+};
+
 // --- Blogs: create a new blog post (admin) ---
 export const createBlog = async (
   payload: {
@@ -695,7 +765,9 @@ export const uploadImage = async (
     | null;
   if (!json || json.success !== true) return null;
   const out: { url?: string; dataUrl?: string; filename?: string } = {};
-  if (typeof json.url === "string") out.url = json.url;
+  if (typeof json.url === "string") {
+    out.url = resolveCdnUrl(json.url);
+  }
   if (typeof json.dataUrl === "string") out.dataUrl = json.dataUrl;
   if (typeof json.filename === "string") out.filename = json.filename;
   return out;
@@ -1010,8 +1082,11 @@ export const createFaq = async (
   const s = (v: unknown, fb = "") => (typeof v === "string" ? v : fb);
   const n = (v: unknown, fb = 0) => (typeof v === "number" ? v : typeof v === "string" ? Number(v) || fb : fb);
   const b = (v: unknown, fb = true) => (typeof v === "boolean" ? v : typeof v === "string" ? v === "true" || v === "1" : fb);
+  const rawId = rec.id;
   return {
-    id: s(rec.id, ""),
+    // Backend dönen id değeri sayı da olabildiği için,
+    // hem string hem number durumlarını güvenli şekilde stringe çeviriyoruz.
+    id: typeof rawId === "string" || typeof rawId === "number" ? String(rawId) : "",
     locale: s(rec.locale, payload.locale),
     question: s(rec.question, payload.question),
     answer: s(rec.answer, payload.answer),

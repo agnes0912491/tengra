@@ -61,8 +61,7 @@ export default function AdminLoginForm() {
         // Show a neutral/info toast so the user knows to check their email.
         // Use a stable hard-coded string to avoid throwing if a translation
         // key is missing in some locales.
-        // Debug log the rest so we can confirm the payload in the browser console.
-        console.log("login result (requires2FA):", result);
+        // Debug log the rest so we can confirm the payload in the browser console. 
         toast.info("İki adımlı doğrulama gerekli — lütfen e-postanızı kontrol edin.");
         return;
       }
@@ -104,7 +103,7 @@ export default function AdminLoginForm() {
               autoComplete="username"
               required
               value={credentials.username}
-              onChange={(e) => setCredentials((p) => ({ ...p, username: e.currentTarget.value }))}
+              onChange={(e) => setCredentials((p) => ({ ...p, username: e.target.value }))}
               className="border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] text-white"
             />
           </div>
@@ -119,7 +118,7 @@ export default function AdminLoginForm() {
               autoComplete="current-password"
               required
               value={credentials.password}
-              onChange={(e) => setCredentials((p) => ({ ...p, password: e.currentTarget.value }))}
+              onChange={(e) => setCredentials((p) => ({ ...p, password: e.target.value }))}
               className="border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] text-white"
             />
           </div>

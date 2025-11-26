@@ -4,8 +4,9 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { Github, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { resolveCdnUrl } from "@/lib/constants";
 
-import Agnes from "../../../public/agnes.jpg";
+const AGNES_IMAGE_SRC = resolveCdnUrl("/uploads/agnes.jpg");
 
 type TeamMemberKey = "agnes";
 
@@ -22,7 +23,7 @@ type TeamMember = {
 const team: TeamMember[] = [
   {
     key: "agnes",
-    image: Agnes.src,
+    image: AGNES_IMAGE_SRC,
     socials: {
       twitter: "https://x.com/agnes0912491",
       github: "https://github.com/agnes0912491",

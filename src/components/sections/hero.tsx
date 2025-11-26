@@ -4,8 +4,9 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { resolveCdnUrl } from "@/lib/constants";
 
-import Img from "../../../public/tengra_without_text.png";
+const HERO_LOGO_SRC = resolveCdnUrl("/uploads/tengra_without_text.png");
 
 type TypingTextProps = {
   texts: string[];
@@ -94,7 +95,7 @@ export default function Hero() {
           }}
         >
           <Image
-            src={Img.src}
+            src={HERO_LOGO_SRC}
             alt={t("symbolAlt")}
             width={140}
             height={140}

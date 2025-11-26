@@ -5,9 +5,15 @@ import type { Project } from "@/types/project";
 import { Delete, Edit } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
-import { editProject as ep, deleteProject as dp } from "@/lib/db";
+import { editProject as ep, deleteProject as dp, uploadImage } from "@/lib/db";
 import { toast } from "@/lib/react-toastify";
-import { Dialog, DialogContent, DialogTitle, DialogHeader } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogHeader,
+} from "@/components/ui/dialog";
+import Dropzone from "@/components/ui/dropzone";
 
 const formatDateTime = (value?: string | null) => {
   if (!value) {
@@ -51,12 +57,26 @@ export default function ProjectsTable({ projects }: Props) {
   const [deleteProjectModalOpen, setDeleteProjectModalOpen] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [project, setProject] = useState<Project | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoUploading, setLogoUploading] = useState(false);
 
   useEffect(() => {
     const fetchToken = async () => {
       try {
-        if (localStorage.getItem("authToken")) {
-          setToken(localStorage.getItem("authToken"));
+        if (typeof window === "undefined") return;
+        const fromStorage = localStorage.getItem("authToken");
+        if (fromStorage) {
+          setToken(fromStorage);
+          return;
+        }
+        // Fallback to admin cookies (aligned with other admin tools)
+        const { ADMIN_SESSION_COOKIE_CANDIDATES } = await import("@/lib/auth");
+        const { default: Cookies } = await import("js-cookie");
+        const fromCookies =
+          ADMIN_SESSION_COOKIE_CANDIDATES.map((name) => Cookies.get(name)).find(Boolean) ||
+          null;
+        if (fromCookies) {
+          setToken(fromCookies);
         }
       } catch (error) {
         console.error("Failed to read authToken from localStorage:", error);
@@ -76,6 +96,7 @@ export default function ProjectsTable({ projects }: Props) {
   const openEditModal = (project: Project) => {
     setEditProjectModalOpen(true);
     setProject(project);
+    setLogoPreview(project.logoUrl ?? null);
   };
   const openDeleteModal = (project: Project) => {
     setDeleteProjectModalOpen(true);
@@ -83,7 +104,13 @@ export default function ProjectsTable({ projects }: Props) {
   };
 
   const editProject = async (
-    options: { name?: string; description?: string; status?: Project["status"]; type?: Project["type"] },
+    options: {
+      name?: string;
+      description?: string;
+      status?: Project["status"];
+      type?: Project["type"];
+      logoUrl?: string | null;
+    },
     projectId: string
   ) => {
     if (!token) {
@@ -122,8 +149,13 @@ export default function ProjectsTable({ projects }: Props) {
               const description = formData.get("description") as string;
               const status = formData.get("status") as Project["status"];
               const type = formData.get("type") as Project["type"];
+              const logoUrlRaw = (formData.get("logoUrl") as string) || "";
+              const logoUrl = logoUrlRaw.trim() || undefined;
 
-              editProject({ name, description, status, type }, project.id as string);
+              editProject(
+                { name, description, status, type, logoUrl },
+                project.id as string
+              );
               setEditProjectModalOpen(false);
             }}
           >
@@ -137,7 +169,73 @@ export default function ProjectsTable({ projects }: Props) {
                 <label className="text-sm text-[rgba(255,255,255,0.8)]">Açıklama</label>
                 <textarea name="description" defaultValue={project?.description || ""} rows={5} className="min-h-[120px] w-full rounded-lg border border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] p-3 text-white focus:border-[rgba(0,167,197,0.6)] focus:outline-none" />
               </div>
-              {/** Logo URL alanı kaldırıldı */}
+              <div className="space-y-2">
+                <label className="text-sm text-[rgba(255,255,255,0.8)]">
+                  Logo / Görsel
+                </label>
+                <input
+                  type="hidden"
+                  name="logoUrl"
+                  value={logoPreview ?? project?.logoUrl ?? ""}
+                />
+                <Dropzone
+                  accept={{
+                    "image/*": [".png", ".jpg", ".jpeg", ".webp", ".gif"],
+                  }}
+                  onDrop={async (files) => {
+                    const file = files[0];
+                    if (!file) return;
+                    if (!token) {
+                      toast.error(
+                        "Görsel yüklemek için önce yeniden giriş yapın."
+                      );
+                      return;
+                    }
+                    setLogoUploading(true);
+                    try {
+                      const toDataUrl = (f: File) =>
+                        new Promise<string>((resolve) => {
+                          const reader = new FileReader();
+                          reader.onload = () =>
+                            resolve(String(reader.result || ""));
+                          reader.readAsDataURL(f);
+                        });
+                      const dataUrl = await toDataUrl(file);
+                      const uploaded = await uploadImage(dataUrl, token);
+                      if (uploaded?.url) {
+                        setLogoPreview(uploaded.url);
+                      } else if (uploaded?.dataUrl) {
+                        setLogoPreview(uploaded.dataUrl);
+                      } else {
+                        toast.error("Görsel yüklenemedi.");
+                      }
+                    } catch (err) {
+                      console.error("Logo upload failed", err);
+                      toast.error("Görsel yüklenirken bir hata oluştu.");
+                    } finally {
+                      setLogoUploading(false);
+                    }
+                  }}
+                >
+                  {logoPreview || project?.logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={logoPreview || project?.logoUrl || ""}
+                      alt="logo"
+                      className="h-10 w-10 rounded object-contain"
+                    />
+                  ) : (
+                    <span className="text-xs text-[rgba(255,255,255,0.6)]">
+                      PNG/JPG/WebP sürükleyip bırakın veya tıklayın
+                    </span>
+                  )}
+                </Dropzone>
+                {logoUploading && (
+                  <p className="text-xs text-[rgba(255,255,255,0.7)]">
+                    Görsel yükleniyor…
+                  </p>
+                )}
+              </div>
               <div className="space-y-2">
                 <label className="text-sm text-[rgba(255,255,255,0.8)]">Durum</label>
                 <select name="status" defaultValue={project?.status || "draft"} className="w-full rounded-lg border border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] p-2 text-white focus:border-[rgba(0,167,197,0.6)] focus:outline-none">

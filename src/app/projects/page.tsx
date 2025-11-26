@@ -1,5 +1,7 @@
 import { getAllProjects } from "@/lib/db";
 import type { Project } from "@/types/project";
+import Link from "next/link";
+import { resolveCdnUrl } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -18,24 +20,35 @@ export default async function ProjectsPage() {
             ) : (
                 <div className="mx-auto grid max-w-6xl grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
                     {projects.map((proj) => (
-                        <article
+                        <Link
                             key={proj.id}
+                            href={`/projects/${proj.id}`}
                             className="group rounded-2xl border border-[rgba(110,211,225,0.18)] bg-[rgba(8,28,38,0.55)]/80 p-5 backdrop-blur-xl transition hover:border-[rgba(110,211,225,0.35)] hover:bg-[rgba(8,28,38,0.65)]"
                         >
-                            <header className="mb-3 flex items-center gap-3">
-                                {proj.logoUrl ? (
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img src={proj.logoUrl} alt="logo" className="h-8 w-8 rounded object-contain" />
+                            <article>
+                                <header className="mb-3 flex items-center gap-3">
+                                    {proj.logoUrl ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img
+                                            src={resolveCdnUrl(proj.logoUrl)}
+                                            alt="logo"
+                                            className="h-8 w-8 rounded object-contain"
+                                        />
+                                    ) : null}
+                                    <h2 className="font-display text-lg tracking-widest text-white">
+                                        {proj.name}
+                                    </h2>
+                                </header>
+                                {proj.description ? (
+                                    <p className="text-sm text-[rgba(255,255,255,0.8)]">
+                                        {proj.description}
+                                    </p>
                                 ) : null}
-                                <h2 className="font-display text-lg tracking-widest text-white">{proj.name}</h2>
-                            </header>
-                            {proj.description ? (
-                                <p className="text-sm text-[rgba(255,255,255,0.8)]">{proj.description}</p>
-                            ) : null}
-                            <footer className="mt-4 text-xs uppercase tracking-[0.3em] text-[color:var(--color-turkish-blue-200)]">
-                                {proj.status ? formatStatus(proj.status) : ""}
-                            </footer>
-                        </article>
+                                <footer className="mt-4 text-xs uppercase tracking-[0.3em] text-[color:var(--color-turkish-blue-200)]">
+                                    {proj.status ? formatStatus(proj.status) : ""}
+                                </footer>
+                            </article>
+                        </Link>
                     ))}
                 </div>
             )}

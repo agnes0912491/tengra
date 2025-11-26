@@ -14,6 +14,15 @@ const nextConfig: NextConfig = {
       fullUrl: true,
     },
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cdn.tengra.studio",
+        pathname: "/**",
+      },
+    ],
+  },
   poweredByHeader: false,
 };
 

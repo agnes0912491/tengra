@@ -9,8 +9,7 @@ import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { ChevronDown } from "lucide-react";
-
-import Img from "../../../public/tengra_without_text.png";
+import { resolveCdnUrl } from "@/lib/constants";
 import LocaleSwitcher from "@/components/layout/locale-switcher";
 import { useAuth } from "@/components/providers/auth-provider";
 import {
@@ -87,7 +86,7 @@ export default function Footer() {
         <div className="hidden items-center justify-between gap-6 sm:flex">
           <div className="flex items-center gap-3">
             <Image
-              src={Img.src}
+              src={resolveCdnUrl("/uploads/tengra_without_text.png")}
               alt="Tengra"
               width={42}
               height={42}
