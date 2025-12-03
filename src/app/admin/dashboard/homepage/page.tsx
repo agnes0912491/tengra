@@ -1,29 +1,14 @@
-import React from "react";
-import HomepageEditor from "@/components/admin/homepage-editor";
+import AdminPageHeader from "@/components/admin/admin-page-header";
+import GoalsAdmin from "@/components/admin/goals/goals-admin";
 
-async function fetchContent() {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/api/admin/homepage`, {
-        cache: "no-store",
-    });
-    if (!res.ok) {
-        return { targets: [], faqs: [] };
-    }
-    try {
-        return await res.json();
-    } catch {
-        return { targets: [], faqs: [] };
-    }
-}
-
-export default async function Page() {
-    const content = await fetchContent();
-
-    return (
-        <div className="container mx-auto p-4">
-            <h1 className="text-2xl font-bold mb-4">Homepage Editor</h1>
-            <div className="bg-white dark:bg-slate-800 p-4 rounded shadow">
-                <HomepageEditor initial={content} />
-            </div>
-        </div>
-    );
+export default function AdminHomepagePage() {
+  return (
+    <div className="flex flex-col gap-8">
+      <AdminPageHeader
+        title="Homepage Hedefleri"
+        description="Ana sayfada kullanılan hedef içeriklerini çok dilli olarak yönetin."
+      />
+      <GoalsAdmin />
+    </div>
+  );
 }

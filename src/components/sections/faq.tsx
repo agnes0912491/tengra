@@ -26,11 +26,14 @@ export default function FaqSection() {
 
   return (
     <section className="relative py-24 px-6 md:px-20">
-      <h2 className="section-title neon-text text-center">{tNav("faq")}</h2>
-      <div className="w-16 h-[1px] mx-auto mt-3 mb-10 bg-[rgba(0,167,197,0.4)]" />
+      <h2 className="section-title text-center">{tNav("faq")}</h2>
+      <div className="w-16 h-[1px] mx-auto mt-4 mb-10 bg-[rgba(0,167,197,0.4)]" />
       <div className="mx-auto w-full space-y-3">
         {items.map((it) => (
-          <div key={it.id} className="rounded-2xl border border-[rgba(110,211,225,0.18)] bg-[rgba(8,28,38,0.55)]/80 backdrop-blur-xl">
+          <div
+            key={it.id}
+            className="rounded-2xl border border-[rgba(110,211,225,0.18)] bg-[rgba(8,28,38,0.7)]/80 backdrop-blur-xl"
+          >
             <button
               type="button"
               onClick={() => setOpenId((p) => (p === it.id ? null : it.id))}
@@ -39,10 +42,22 @@ export default function FaqSection() {
                 openId === it.id ? "text-[color:var(--color-turkish-blue-200)]" : "text-white"
               )}
             >
-              <span className="font-semibold">{it.question}</span>
-              <span className="text-sm opacity-70">{openId === it.id ? "−" : "+"}</span>
+              <span className="flex items-center gap-2 font-semibold text-sm md:text-base">
+                <span className="inline-flex size-5 items-center justify-center rounded-full border border-[rgba(110,211,225,0.4)] text-[10px] text-[rgba(255,255,255,0.7)]">
+                  ?
+                </span>
+                {it.question}
+              </span>
+              <span className="text-base opacity-70">{openId === it.id ? "−" : "+"}</span>
             </button>
-            <div className={cn("px-5 pb-5 text-[rgba(255,255,255,0.8)]", openId === it.id ? "block" : "hidden")}>{it.answer}</div>
+            <div
+              className={cn(
+                "px-5 pb-5 text-sm md:text-base text-[rgba(255,255,255,0.8)]",
+                openId === it.id ? "block" : "hidden"
+              )}
+            >
+              {it.answer}
+            </div>
           </div>
         ))}
       </div>

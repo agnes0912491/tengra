@@ -4,12 +4,12 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { useAuth } from "@/components/providers/auth-provider";
 import { getAllProjects } from "@/lib/db";
 import type { Project } from "@/types/project";
-import { resolveCdnUrl } from "@/lib/constants";
+import { resolveCdnUrl, getLocalizedText } from "@/lib/constants";
 
 const FALLBACK_IMAGE = resolveCdnUrl("/uploads/tengra_without_text.png");
 
@@ -20,6 +20,7 @@ export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const locale = useLocale();
 
   useEffect(() => {
     let cancel = false;
@@ -39,6 +40,21 @@ export default function Projects() {
   }, []);
 
   const isSlider = projects.length > 5;
+
+  const renderMeta = (project: Project) => {
+    const type = project.type ?? "other";
+    const status = project.status ?? "draft";
+    return (
+      <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-[rgba(255,255,255,0.65)]">
+        <span className="badge-muted">
+          {type}
+        </span>
+        <span className="badge-muted">
+          {status}
+        </span>
+      </div>
+    );
+  };
 
   return (
     <section
@@ -102,14 +118,15 @@ export default function Projects() {
             >
               {projects.map((proj, index) => {
                 const title = proj.name;
-                const description = proj.description ?? "";
+                const description =
+                  getLocalizedText(proj.description ?? "", locale) ?? "";
                 const image = resolveCdnUrl(proj.logoUrl || FALLBACK_IMAGE);
 
                 return (
                   <Link
                     key={proj.id ?? `${title}-${index}`}
                     href={proj.id ? `/projects/${proj.id}` : "/projects"}
-                    className="glass relative h-[260px] w-[320px] shrink-0 snap-center overflow-hidden rounded-xl border border-[rgba(0,167,197,0.15)] transition-all duration-500 hover:border-[rgba(0,167,197,0.5)]"
+                    className="glass relative h-[280px] w-[320px] shrink-0 snap-center overflow-hidden rounded-xl border border-[rgba(0,167,197,0.15)] transition-all duration-500 hover:border-[rgba(0,167,197,0.5)]"
                   >
                     <motion.div
                       initial={{ opacity: 0, y: 40 }}
@@ -119,7 +136,7 @@ export default function Projects() {
                       className="h-full w-full"
                     >
                       <div className="relative h-[150px] w-full overflow-hidden">
-                        <Image
+                        <Image crossOrigin="anonymous"
                           src={image}
                           alt={title}
                           fill
@@ -134,17 +151,30 @@ export default function Projects() {
                         <p className="line-clamp-3 text-[12px] text-[rgba(255,255,255,0.7)]">
                           {description}
                         </p>
+                        {renderMeta(proj)}
                       </div>
                     </motion.div>
                   </Link>
                 );
               })}
             </div>
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-[rgba(3,12,18,0.9)] to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[rgba(3,12,18,0.9)] to-transparent" />
+            <div className="mt-6 flex items-center justify-between px-1 text-[11px] text-[rgba(255,255,255,0.6)]">
+              <span>{projects.length} projects</span>
+              <Link
+                href="/projects"
+                className="text-[11px] uppercase tracking-[0.25em] text-[color:var(--color-turkish-blue-300)] hover:text-[color:var(--color-turkish-blue-200)]"
+              >
+                View all
+              </Link>
+            </div>
           </div>
         ) : (
           projects.map((proj, index) => {
             const title = proj.name;
-            const description = proj.description ?? "";
+            const description =
+              getLocalizedText(proj.description ?? "", locale) ?? "";
             const image = resolveCdnUrl(proj.logoUrl || FALLBACK_IMAGE);
 
             return (
@@ -160,7 +190,7 @@ export default function Projects() {
                   viewport={{ once: true }}
                 >
                   <div className="relative w-full h-56 overflow-hidden">
-                    <Image
+                    <Image crossOrigin="anonymous"
                       src={image}
                       alt={title}
                       fill

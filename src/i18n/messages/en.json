@@ -13,7 +13,14 @@
     "scrollCta": "SCROLL DOWN",
     "symbolAlt": "Tengra Symbol",
     "typingWordOne": "𐱅𐰭𐰍𐰺𐰀",
-    "typingWordTwo": "TENGRA"
+    "typingWordTwo": "TENGRA",
+    "eyebrow": "Creative Technology Studio",
+    "intro": "Tengra is a studio exploring the sacred edge between myth, software and play — building games, tools and experiences that feel like artifacts from another timeline.",
+    "primaryCta": "Explore projects",
+    "secondaryCta": "Join the network",
+    "pillOne": "Games & interactive worlds",
+    "pillTwo": "Agent-powered tools",
+    "pillThree": "Experimental infrastructures"
   },
   "Navigation": {
     "goals": "Goals",
@@ -22,7 +29,8 @@
     "team": "Team",
     "blogs": "Blog",
     "faq": "F.A.Q.",
-    "forum": "Forum"
+    "forum": "Forum",
+    "contact": "Contact"
   },
   "Projects": {
     "title": "Projects", 
@@ -33,6 +41,17 @@
       "newProject": "Add Project",
       "placeholderAction": "Example action"
     }
+  },
+  "Team": {
+    "title": "Team",
+    "members": {
+      "agnes": {
+        "name": "A. Agnes Ö.",
+        "role": "Founder / Vision Architect",
+        "description": "Shaping the balance between the divine and technology."
+      }
+    },
+    "website": "Website"
   },
   "Network": {
     "title": "TENGRA NETWORK",
@@ -53,6 +72,27 @@
       "greeting": "Signed in as {name}"
     }
   },
+  "Contact": {
+    "title": "Contact",
+    "description": "Tell us about your idea, project or question — we’ll get back shortly.",
+    "name": "Name",
+    "email": "Email",
+    "subject": "Subject",
+    "phone": "Phone",
+    "optional": "Optional",
+    "message": "Message",
+    "submit": "Send message",
+    "saving": "Sending…",
+    "success": "Thanks, we received your message.",
+    "error": "We couldn't save your message. Please try again."
+  },
+  "FooterSubscribe": {
+    "title": "Stay in the loop",
+    "placeholder": "Your email",
+    "button": "Subscribe",
+    "success": "Subscription saved. We'll keep you posted on new drops.",
+    "error": "Could not save subscription. Please try again."
+  },
   "Header": {
     "home": "Home",
     "blogs": "Blogs",
@@ -67,7 +107,29 @@
     "tr": "Türkçe"
   },
   "Goals": {
-    "title": "Goals"
+    "title": "Goals",
+    "defaults": {
+      "inception": {
+        "title": "Inception",
+        "body": "Where myth, code and sound converge into the first spark of a new world."
+      },
+      "creation": {
+        "title": "Creation",
+        "body": "We craft games, tools and systems with the care of artifacts, not features."
+      },
+      "expansion": {
+        "title": "Expansion",
+        "body": "Each project is a node in a larger constellation of experiences and infrastructure."
+      },
+      "harmony": {
+        "title": "Harmony",
+        "body": "Balancing sacred nuance with production-ready engineering so nothing feels disposable."
+      },
+      "beyond": {
+        "title": "Beyond",
+        "body": "Leaving room for the unexpected — emergent behaviors, communities and collaborations."
+      }
+    }
   },
   "AdminLogin": {
     "toast": {
@@ -118,6 +180,48 @@
     "unauthorizedMessage": "You need an administrator account to view the dashboard.",
     "goToLogin": "Go to admin login"
   }, 
+  "AdminContent": {
+    "goalsDescription": "Manage the goals content with full locale support.",
+    "faqDescription": "Manage frequently asked questions with full locale support.",
+    "newGoalTitle": "New goal",
+    "newGoalBody": "Description",
+    "newGoal": "New Goal",
+    "newFaq": "New FAQ",
+    "newFaqQuestion": "New question",
+    "newFaqAnswer": "New answer",
+    "save": "Save",
+    "saving": "Saving…",
+    "saveAll": "Save all changes",
+    "cancelAll": "Discard all",
+    "orderSave": "Save order",
+    "saved": "Saved",
+    "loading": "Loading…",
+    "noRecords": "No records found.",
+    "order": "Order",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "active": "Active",
+    "delete": "Delete",
+    "title": "Title",
+    "body": "Description",
+    "question": "Question",
+    "answer": "Answer",
+    "dragToSort": "Drag to reorder",
+    "cancel": "Cancel",
+    "confirmResetTitle": "Revert all changes?",
+    "confirmResetDesc": "All unsaved changes will be discarded. This action cannot be undone.",
+    "confirmCancel": "Cancel",
+    "confirmDiscard": "Yes, discard",
+    "contactTitle": "Contact submissions",
+    "contactDescription": "Messages sent from the public contact form (stored locally until the API is wired).",
+    "contactEmpty": "No contact submissions yet.",
+    "contactClear": "Clear all",
+    "submittedAt": "Submitted at",
+    "location": "Location",
+    "subscriptionsTitle": "Newsletter subscriptions",
+    "subscriptionsDesc": "Email addresses collected from the footer subscription form.",
+    "subscriptionsEmpty": "No subscriptions yet."
+  },
   "AuthContext": {
     "authorization": {
       "defaultErrorMessage": "Authorization failed. Please try again.",

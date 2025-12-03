@@ -15,6 +15,7 @@ import type { Project } from "@/types/project";
 import type { Blog } from "@/types/blog";
 import type { User } from "@/lib/auth/users";
 import AdminMetrics from "@/components/admin/dashboard/metrics";
+import ActiveAgents from "@/components/admin/dashboard/active-agents";
 
 const formatDuration = (seconds?: number) => { 
   if (!seconds || Number.isNaN(seconds)) {
@@ -155,6 +156,11 @@ export default async function AdminOverviewPage() {
       <section aria-labelledby="admin-dashboard-metrics">
         <h2 id="admin-dashboard-metrics" className="sr-only">Sistem ve Trafik</h2>
         <AdminMetrics />
+      </section>
+
+      <section aria-labelledby="admin-dashboard-active-agents">
+        <h2 id="admin-dashboard-active-agents" className="sr-only">Aktif Agentlar</h2>
+        <ActiveAgents />
       </section>
     </div>
   );

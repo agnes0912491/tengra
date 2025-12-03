@@ -183,13 +183,18 @@ export const getAllUsers = async (token: string): Promise<User[]> => {
   const json = await response.json().catch(() => null);
   if (!json) return [];
 
+  const mapAndNormalize = (list: unknown[]): User[] =>
+    list
+      .map((raw) => normalizeUser(raw as RawUser))
+      .filter((u): u is User => Boolean(u));
+
   if (Array.isArray(json)) {
-    return json as User[];
+    return mapAndNormalize(json);
   }
 
   const asObj = json as { users?: unknown };
   if (Array.isArray(asObj.users)) {
-    return asObj.users as User[];
+    return mapAndNormalize(asObj.users);
   }
 
   // Unexpected shape
@@ -406,6 +411,20 @@ export const getUserWithToken = async (token: string): Promise<User | null> => {
   return normalizeUser(rawUser);
 };
 
+// --- Contact submissions ---
+export type ContactSubmission = {
+  id?: string | number;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  phone?: string;
+  ipAddress?: string;
+  city?: string;
+  country?: string;
+  createdAt?: string;
+};
+
 const normalizeProject = (project: unknown): Project | null => {
   if (!project || typeof project !== "object") {
     return null;
@@ -450,7 +469,7 @@ const normalizeProject = (project: unknown): Project | null => {
     return typeof value === "string" ? value : undefined;
   };
 
-  return {
+  const out: Project = {
     id: String(id),
     name: String(name),
     slug: candidate.slug ? String(candidate.slug) : undefined,
@@ -460,9 +479,13 @@ const normalizeProject = (project: unknown): Project | null => {
         : candidate.summary && typeof candidate.summary === "string"
         ? candidate.summary
         : undefined,
-    logoUrl: getStr(candidate, "logoUrl") ?? getStr(candidate, "logo") ?? getStr(candidate, "image") ?? undefined,
+    logoUrl:
+      getStr(candidate, "logoUrl") ??
+      getStr(candidate, "logo") ??
+      getStr(candidate, "image") ??
+      undefined,
     status,
-  type,
+    type,
     lastUpdatedAt:
       typeof candidate.updatedAt === "string"
         ? candidate.updatedAt
@@ -474,6 +497,7 @@ const normalizeProject = (project: unknown): Project | null => {
         ? candidate.createdAt
         : undefined,
   };
+  return out;
 };
 
 export const getAllProjects = async (
@@ -705,6 +729,88 @@ export const recordProjectVisit = async (
   }
 };
 
+// --- Contact submissions ---
+export const createContactSubmission = async (
+  payload: { name: string; email: string; subject: string; message: string; phone?: string; ipAddress?: string; city?: string; country?: string }
+): Promise<ContactSubmission | null> => {
+  const res = await fetch(`${API_BASE}/contact`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) return null;
+  const json = (await res.json().catch(() => null)) as { item?: ContactSubmission } | null;
+  return (json && json.item) || null;
+};
+
+export const getContactSubmissions = async (token: string): Promise<ContactSubmission[]> => {
+  if (!token) return [];
+  const res = await fetch(`${API_BASE}/contact`, {
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) return [];
+  const json = (await res.json().catch(() => null)) as { items?: ContactSubmission[] } | null;
+  return Array.isArray(json?.items) ? json!.items! : [];
+};
+
+export const deleteContactSubmission = async (id: string | number, token: string): Promise<boolean> => {
+  if (!token) return false;
+  const res = await fetch(`${API_BASE}/contact/${encodeURIComponent(String(id))}`, {
+    method: "DELETE",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.ok;
+};
+
+// --- Contact subscriptions ---
+export const createContactSubscription = async (email: string): Promise<{ id?: string | number; email?: string; createdAt?: string } | null> => {
+  const res = await fetch(`${API_BASE}/contact/subscriptions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ email }),
+  });
+  if (!res.ok) return null;
+  const json = (await res.json().catch(() => null)) as { item?: { id?: string | number; email?: string; createdAt?: string } } | null;
+  return (json && json.item) || null;
+};
+
+export const getContactSubscriptions = async (token: string): Promise<Array<{ id: string | number; email: string; createdAt?: string }>> => {
+  if (!token) return [];
+  const res = await fetch(`${API_BASE}/contact/subscriptions`, {
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) return [];
+  const json = (await res.json().catch(() => null)) as { items?: Array<{ id: string | number; email: string; createdAt?: string }> } | null;
+  return Array.isArray(json?.items) ? json!.items! : [];
+};
+
+export const deleteContactSubscription = async (id: string | number, token: string): Promise<boolean> => {
+  if (!token) return false;
+  const res = await fetch(`${API_BASE}/contact/subscriptions/${encodeURIComponent(String(id))}`, {
+    method: "DELETE",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.ok;
+};
+
 // --- Blogs: create a new blog post (admin) ---
 export const createBlog = async (
   payload: {
@@ -930,11 +1036,25 @@ export const getTopBlogViews = async (token: string): Promise<{ id: string; coun
 // Per-page analytics
 export const incrementPageView = async (path: string, ua?: string, country?: string): Promise<void> => {
   try {
-    await fetch(`${ANALYTICS_API_URL}/page/increment`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ path, ua: ua ?? "", country: country ?? "" }),
-    });
+    // Skip obviously malicious paths from analytics
+    const lowered = (path || "").toLowerCase();
+    if (lowered.includes("/cgi-bin") || lowered.includes("stok=")) {
+      return;
+    }
+    const payload = { path, ua: ua ?? "", country: country ?? "" };
+    // Fire page-level increment and aggregate visits counter in parallel
+    await Promise.all([
+      fetch(`${ANALYTICS_API_URL}/page/increment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }),
+      fetch(`${ANALYTICS_API_URL}/visits/increment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      }),
+    ]);
   } catch {}
 };
 
@@ -962,6 +1082,32 @@ export const getTopAgents = async (
   const json = (await res.json().catch(() => null)) as { top?: { agent?: string; count?: string | number }[] } | null;
   const list = Array.isArray(json?.top) ? json!.top! : [];
   return list.map((i) => ({ agent: String(i.agent ?? "Other"), count: Number(i.count ?? 0) || 0 }));
+};
+
+// Active agents (live visitors) – backend endpoint expected to return:
+// { agents: [{ id, agent, startedAt, lastSeenAt, pages: string[] }] }
+export type ActiveAgent = {
+  id: string;
+  agent: string;
+  startedAt?: string;
+  lastSeenAt?: string;
+  pages?: string[];
+  accepted?: number;
+  declined?: number;
+};
+
+export const getActiveAgents = async (token: string): Promise<ActiveAgent[]> => {
+  if (!token) return [];
+  const res = await fetch(`${ANALYTICS_API_URL}/agents/active`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+    cache: "no-store",
+  });
+  if (!res.ok) return [];
+  const json = (await res.json().catch(() => null)) as { agents?: ActiveAgent[] } | ActiveAgent[] | null;
+  if (!json) return [];
+  if (Array.isArray(json)) return json;
+  if (Array.isArray(json.agents)) return json.agents;
+  return [];
 };
 
 // Countries analytics

@@ -1,5 +1,5 @@
 import AnimatedWrapper from "@/components/ui/animated-wrapper";
-import Footer from "@/components/layout/footer";
+import Header from "@/components/layout/header";
 
 type SiteShellProps = {
   children: React.ReactNode;
@@ -11,11 +11,11 @@ export default function SiteShell({
   disableAnimation = false,
 }: SiteShellProps) {
   return (
-    <>
-      <main className="relative flex min-h-screen flex-col pb-32 pt-10">
+    <div className="flex min-h-screen flex-col">
+      <Header />
+      <main className="relative flex flex-1 flex-col pb-16 pt-24">
         {disableAnimation ? children : <AnimatedWrapper>{children}</AnimatedWrapper>}
       </main>
-      <Footer />
-    </>
+    </div>
   );
 }

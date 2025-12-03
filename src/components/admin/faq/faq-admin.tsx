@@ -11,6 +11,7 @@ import { ADMIN_SESSION_COOKIE_CANDIDATES } from "@/lib/auth";
 import { createFaq, deleteFaq, getFaqs, updateFaq, type FaqItem } from "@/lib/db";
 import { routing } from "@/i18n/routing";
 import { GripVertical, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 const MDEditor = dynamic<{
   value?: string;
   onChange?: (v?: string) => void;
@@ -30,6 +31,7 @@ const MDEditor = dynamic<{
 const SUPPORTED_LOCALES = routing.locales;
 
 export default function FaqAdmin() {
+    const t = useTranslations("AdminContent");
     const [locale, setLocale] = useState<(typeof SUPPORTED_LOCALES)[number]>("tr");
     const [items, setItems] = useState<FaqItem[]>([]);
     const [drafts, setDrafts] = useState<FaqItem[]>([]);
@@ -71,8 +73,8 @@ export default function FaqAdmin() {
         const created = await createFaq(
             {
                 locale,
-                question: "Yeni soru",
-                answer: "Yeni cevap",
+                question: t("newFaqQuestion"),
+                answer: t("newFaqAnswer"),
                 order: items.length,
                 isActive: true,
             },
@@ -181,7 +183,7 @@ export default function FaqAdmin() {
 
     return (
       <>
-        <div className="rounded-3xl border border-[rgba(110,211,225,0.16)] bg-[rgba(6,20,27,0.6)]/80 p-6">
+        <div className="rounded-3xl border border-[rgba(110,211,225,0.14)] bg-[rgba(6,18,26,0.78)]/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.35)]">
             <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                     <div className="w-40">
@@ -192,7 +194,7 @@ export default function FaqAdmin() {
                                 const v = (el?.value || locale) as (typeof SUPPORTED_LOCALES)[number];
                                 setLocale(v);
                             }}
-                            className="w-full rounded-lg border border-[rgba(110,211,225,0.35)] bg-[rgba(4,18,24,0.85)] px-3 py-2 text-sm text-white"
+                            className="w-full rounded-lg border border-[rgba(110,211,225,0.3)] bg-[rgba(4,18,24,0.85)] px-3 py-2 text-sm text-white"
                         >
                             {(SUPPORTED_LOCALES as readonly string[]).map((loc) => (
                                 <option key={loc} value={loc}>
@@ -204,7 +206,7 @@ export default function FaqAdmin() {
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   {orderDirty && (
-                    <DebouncedSave onSave={saveOrder} label="Sıralamayı Kaydet" />
+                    <DebouncedSave onSave={saveOrder} label={t("orderSave")} busyLabel={t("saving")} />
                   )}
                   {dirty.size > 0 && (
                     <>
@@ -227,22 +229,22 @@ export default function FaqAdmin() {
                           setSavingAll(false);
                         }
                       }} disabled={savingAll} className="bg-[color:var(--color-turkish-blue-500)] text-black">
-                        {savingAll ? "Kaydediliyor…" : "Tüm Değişiklikleri Kaydet"}
+                        {savingAll ? t("saving") : t("saveAll")}
                       </Button>
-                      <Button variant="outline" onClick={() => setOpenConfirmAll(true)}>Tümünü İptal Et</Button>
+                      <Button variant="outline" onClick={() => setOpenConfirmAll(true)}>{t("cancelAll")}</Button>
                     </>
                   )}
-                  <Button onClick={addNew} className="bg-[color:var(--color-turkish-blue-500)] text-black">Yeni SSS</Button>
+                  <Button onClick={addNew} className="bg-[color:var(--color-turkish-blue-500)] text-black">{t("newFaq")}</Button>
                 </div>
             </div>
 
-            {loading && <p className="mt-4 text-sm text-[rgba(255,255,255,0.7)]">Yükleniyor…</p>}
+            {loading && <p className="mt-4 text-sm text-[rgba(255,255,255,0.75)]">{t("loading")}</p>}
             {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
 
             <div className="mt-4 space-y-3">
                 {drafts.length === 0 && !loading && (
-                    <div className="rounded-xl border border-dashed border-[rgba(110,211,225,0.25)] bg-[rgba(8,28,38,0.5)] p-8 text-center text-sm text-[rgba(255,255,255,0.7)]">
-                        Kayıt bulunamadı.
+                    <div className="rounded-xl border border-dashed border-[rgba(110,211,225,0.2)] bg-[rgba(8,28,38,0.5)] p-8 text-center text-sm text-[rgba(255,255,255,0.75)]">
+                        {t("noRecords")}
                     </div>
                 )}
 
@@ -260,9 +262,9 @@ export default function FaqAdmin() {
                             #{index + 1}
                         </div>
                         <div className="flex items-start justify-between gap-3 pl-8">
-                            <div className="flex items-center gap-2 text-[rgba(255,255,255,0.7)]">
+                            <div className="flex items-center gap-2 text-[rgba(255,255,255,0.72)]">
                                 <GripVertical className="h-4 w-4 opacity-70" />
-                                <span className="text-xs">Sürükleyerek sırala</span>
+                                <span className="text-xs">{t("dragToSort")}</span>
                             </div>
                             <Button
                                 type="button"
@@ -276,30 +278,30 @@ export default function FaqAdmin() {
                             </Button>
                         </div>
 
-                        <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
+                        <div className="mt-3 grid grid-cols-1 gap-3">
                             <div>
-                                <label className="text-xs text-[rgba(255,255,255,0.7)]">Soru</label>
+                                <label className="text-xs text-[rgba(255,255,255,0.75)]">{t("question")}</label>
                                 <Input
                                     value={item.question}
                                     onChange={(e) => setDraftField(item.id, "question", e.currentTarget.value)}
-                                    className="mt-1 border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.75)] text-white"
+                                    className="mt-1 border-[rgba(0,167,197,0.28)] bg-[rgba(3,12,18,0.72)] text-white"
                                 />
                             </div>
                             <div>
-                                <label className="text-xs text-[rgba(255,255,255,0.7)]">Cevap</label>
-                                <div data-color-mode="dark" className="rounded-lg border border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.6)] p-2">
+                                <label className="text-xs text-[rgba(255,255,255,0.75)]">{t("answer")}</label>
+                                <div data-color-mode="dark" className="rounded-lg border border-[rgba(0,167,197,0.28)] bg-[rgba(3,12,18,0.62)] p-2">
                                   <MDEditor value={item.answer} onChange={(v: string = "") => setDraftField(item.id, "answer", v)} height={180} style={{ background: "transparent" }} preview="edit" />
                                 </div>
                             </div>
                         </div>
                         {dirty.has(item.id) && (
                           <div className="mt-3 flex items-center gap-2">
-                            <Button onClick={() => saveItem(item.id, { question: item.question, answer: item.answer })} className="bg-[color:var(--color-turkish-blue-500)] text-black">Kaydet</Button>
+                            <Button onClick={() => saveItem(item.id, { question: item.question, answer: item.answer })} className="bg-[color:var(--color-turkish-blue-500)] text-black">{t("save")}</Button>
                             <Button variant="outline" onClick={() => {
                               const original = items.find(i => i.id === item.id);
                               if (original) setDrafts(prev => prev.map(d => d.id === item.id ? { ...original } : d));
                               setDirty(prev => { const s = new Set(prev); s.delete(item.id); return s; });
-                            }}>İptal</Button>
+                            }}>{t("cancel")}</Button>
                           </div>
                         )}
                     </div>
@@ -311,12 +313,12 @@ export default function FaqAdmin() {
           <Dialog.Portal>
             <Dialog.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-sm" />
             <Dialog.Content className="fixed left-1/2 top-1/2 w-[90vw] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.9)] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.55)]">
-              <Dialog.Title className="text-lg font-semibold text-white">Tüm değişiklikleri geri al?</Dialog.Title>
+              <Dialog.Title className="text-lg font-semibold text-white">{t("confirmResetTitle")}</Dialog.Title>
               <Dialog.Description className="mt-2 text-sm text-[rgba(255,255,255,0.7)]">
-                Kaydedilmemiş tüm değişiklikler silinecek. Bu işlem geri alınamaz.
+                {t("confirmResetDesc")}
               </Dialog.Description>
               <div className="mt-5 flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setOpenConfirmAll(false)}>Vazgeç</Button>
+                <Button variant="outline" onClick={() => setOpenConfirmAll(false)}>{t("confirmCancel")}</Button>
                 <Button
                   variant="destructive"
                   onClick={() => {
@@ -325,11 +327,11 @@ export default function FaqAdmin() {
                     setOpenConfirmAll(false);
                   }}
                 >
-                  Evet, geri al
+                  {t("confirmDiscard")}
                 </Button>
               </div>
               <Dialog.Close asChild>
-                <button aria-label="Kapat" className="absolute right-3 top-3 h-6 w-6 rounded-full text-[rgba(255,255,255,0.6)] hover:text-white">×</button>
+                <button aria-label={t("confirmCancel")} className="absolute right-3 top-3 h-6 w-6 rounded-full text-[rgba(255,255,255,0.6)] hover:text-white">×</button>
               </Dialog.Close>
             </Dialog.Content>
           </Dialog.Portal>
@@ -338,7 +340,7 @@ export default function FaqAdmin() {
     );
 }
 
-function DebouncedSave({ onSave, label }: { onSave: () => Promise<void> | void; label: string }) {
+function DebouncedSave({ onSave, label, busyLabel }: { onSave: () => Promise<void> | void; label: string; busyLabel: string }) {
   const [busy, setBusy] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const click = () => {
@@ -354,7 +356,7 @@ function DebouncedSave({ onSave, label }: { onSave: () => Promise<void> | void; 
   };
   return (
     <Button onClick={click} disabled={busy} className="bg-[color:var(--color-turkish-blue-500)] text-black">
-      {busy ? "Kaydediliyor…" : label}
+      {busy ? busyLabel : label}
     </Button>
   );
 }

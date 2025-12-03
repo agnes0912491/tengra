@@ -13,11 +13,14 @@ export default async function AdminFaqPage() {
   });
   const { messages } = getMessages(locale);
   const title = messages?.Navigation?.faq ?? "S.S.S.";
+  const description =
+    (messages as { AdminContent?: { faqDescription?: string } })?.AdminContent?.faqDescription ??
+    "Sıkça sorulan soruları çok dilli olarak yönetin.";
   return (
     <div className="flex flex-col gap-8">
       <AdminPageHeader
         title={title}
-        description="Sıkça sorulan soruları çok dilli olarak yönetin."
+        description={description}
       />
       <FaqAdmin />
     </div>

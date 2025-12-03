@@ -1,11 +1,9 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 
 import type { Role, User } from "@/lib/auth/users";
-import { ADMIN_SESSION_COOKIE_CANDIDATES } from "@/lib/auth";
 import { updateUserRole } from "@/lib/db";
 // plain select for compact UI
 
@@ -14,6 +12,13 @@ const ROLE_OPTIONS: { value: Role; label: string }[] = [
   { value: "moderator", label: "Moderatör" },
   { value: "user", label: "Standart" },
 ];
+
+const normalizeRoleValue = (role: string | Role | null | undefined): Role => {
+  const lowered = (role ?? "").toString().toLowerCase();
+  if (lowered === "admin") return "admin";
+  if (lowered === "moderator") return "moderator";
+  return "user";
+};
 
 type Props = {
   initialUsers: User[];
@@ -34,7 +39,7 @@ const isHigherRole = (a: Role, b: Role | undefined) => {
 
 export default function UsersTable({ initialUsers, currentUserId, currentUserRole }: Props) {
   const [users, setUsers] = useState<LocalUser[]>(() =>
-    initialUsers.map((user) => ({ ...user, isUpdating: false }))
+    initialUsers.map((user) => ({ ...user, role: normalizeRoleValue(user.role), isUpdating: false }))
   );
   const [isPending, startTransition] = useTransition();
 
@@ -43,27 +48,26 @@ export default function UsersTable({ initialUsers, currentUserId, currentUserRol
       toast.error("Kendi rolünüzü değiştiremezsiniz.");
       return;
     }
-    const token = ADMIN_SESSION_COOKIE_CANDIDATES.map((name) => Cookies.get(name)).find(
-      (value): value is string => Boolean(value)
-    );
+    const token = typeof window !== "undefined" ? window.localStorage.getItem("authToken") : null;
     if (!token) {
       toast.error("Yetkilendirme bilgisi bulunamadı.");
       return;
     }
 
+    const previousRole = users.find((u) => u.id === userId)?.role ?? "user";
+
     setUsers((current) =>
-      current.map((user) =>
-        user.id === userId ? { ...user, role, isUpdating: true } : user
-      )
+      current.map((user) => (user.id === userId ? { ...user, role, isUpdating: true } : user))
     );
 
     startTransition(async () => {
       try {
         const updatedUser = await updateUserRole(userId, role, token);
+        const normalized = { ...updatedUser, role: normalizeRoleValue(updatedUser.role) };
         setUsers((current) =>
           current.map((user) =>
             user.id === userId
-              ? { ...updatedUser, isUpdating: false }
+              ? { ...normalized, isUpdating: false }
               : { ...user, isUpdating: false }
           )
         );
@@ -72,7 +76,7 @@ export default function UsersTable({ initialUsers, currentUserId, currentUserRol
         console.error("Failed to update user role", error);
         setUsers((current) =>
           current.map((user) =>
-            user.id === userId ? { ...user, isUpdating: false } : user
+            user.id === userId ? { ...user, role: previousRole, isUpdating: false } : user
           )
         );
         toast.error("Rol güncellenemedi. Lütfen tekrar deneyin.");
@@ -96,15 +100,15 @@ export default function UsersTable({ initialUsers, currentUserId, currentUserRol
   return (
     <div className="overflow-hidden rounded-3xl border border-[rgba(110,211,225,0.16)] bg-[rgba(6,20,27,0.55)]/80 shadow-[0_25px_70px_rgba(0,0,0,0.45)] backdrop-blur-xl">
       <table className="min-w-full divide-y divide-[rgba(110,211,225,0.15)]">
-        <thead className="bg-[rgba(8,24,32,0.8)] text-[rgba(255,255,255,0.65)]">
+        <thead className="bg-[rgba(8,24,32,0.9)] text-[rgba(255,255,255,0.75)]">
           <tr>
-            <th scope="col" className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.35em]">
+            <th scope="col" className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.22em]">
               Kullanıcı
             </th>
-            <th scope="col" className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.35em]">
+            <th scope="col" className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.22em]">
               Rol
             </th>
-            <th scope="col" className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-[0.35em]">
+            <th scope="col" className="px-6 py-4 text-right text-[11px] font-semibold uppercase tracking-[0.22em]">
               İşlem
             </th>
           </tr>

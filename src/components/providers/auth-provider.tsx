@@ -158,7 +158,7 @@ export default function AuthProvider({
                 Cookies.remove(legacyName, { path: "/" });
               }
             }
-          } catch (err) { 
+          } catch { 
             toast.error("Doğrulama sırasında bir hata oluştu. Lütfen tekrar deneyin.");
           } finally {
             // clear refs

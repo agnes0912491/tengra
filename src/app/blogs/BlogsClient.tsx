@@ -96,7 +96,7 @@ export default function BlogsClient({ posts, categories }: Props) {
               href={`/blogs/${post.id}`}
               className="group relative overflow-hidden rounded-2xl border border-[rgba(0,167,197,0.18)] bg-[rgba(5,18,24,0.78)]/90 backdrop-blur-xl transition-all hover:border-[rgba(0,167,197,0.45)] hover:shadow-[0_0_35px_rgba(0,167,197,0.15)]"
             >
-              <Image
+              <Image crossOrigin="anonymous"
                 src={
                   post.image && post.image.length
                     ? resolveCdnUrl(post.image)

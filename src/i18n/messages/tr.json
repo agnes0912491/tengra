@@ -13,7 +13,14 @@
     "scrollCta": "AŞAĞI KAYDIR",
     "symbolAlt": "Tengra Sembolü",
     "typingWordOne": "𐱅𐰭𐰍𐰺𐰀",
-    "typingWordTwo": "TENGRA"
+    "typingWordTwo": "TENGRA",
+    "eyebrow": "Yaratıcı Teknoloji Stüdyosu",
+    "intro": "Tengra; mit, yazılım ve oyunun kesiştiği kutsal eşiği keşfeden bir stüdyo. Başka bir zaman çizgisinden gelmiş gibi hissedilen oyunlar, araçlar ve deneyimler tasarlıyoruz.",
+    "primaryCta": "Projeleri keşfet",
+    "secondaryCta": "Ağa katıl",
+    "pillOne": "Oyunlar ve etkileşimli dünyalar",
+    "pillTwo": "Agent destekli üretken araçlar",
+    "pillThree": "Deneysel altyapılar"
   },
   "Navigation": {
     "goals": "Hedefler",
@@ -22,7 +29,8 @@
     "team": "Ekip",
     "blogs": "Blog",
     "faq": "S.S.S.",
-    "forum": "Forum"
+    "forum": "Forum",
+    "contact": "İletişim"
   }, 
   "Projects": {
     "title": "Projeler", 
@@ -64,6 +72,27 @@
       "greeting": "{name} olarak giriş yaptın"
     }
   },
+  "Contact": {
+    "title": "İletişim",
+    "description": "Fikrini, projenizi veya sorunuzu paylaşın — en kısa sürede dönüş yapacağız.",
+    "name": "İsim",
+    "email": "E-posta",
+    "phone": "Telefon",
+    "optional": "Opsiyonel",
+    "subject": "Konu",
+    "message": "Mesaj",
+    "submit": "Mesajı Gönder",
+    "saving": "Gönderiliyor…",
+    "success": "Teşekkürler, mesajını aldık.",
+    "error": "Mesaj kaydedilemedi. Lütfen tekrar deneyin."
+  },
+  "FooterSubscribe": {
+    "title": "Gelişmelerden haberdar ol",
+    "placeholder": "E-posta adresin",
+    "button": "Abone ol",
+    "success": "Abonelik kaydedildi. Yeni güncellemeleri paylaşacağız.",
+    "error": "Abonelik kaydedilemedi. Lütfen tekrar deneyin."
+  },
   "Header": {
     "home": "Ana Sayfa",
     "blogs": "Bloglar",
@@ -78,7 +107,29 @@
     "tr": "Türkçe" 
   },
   "Goals": {
-    "title": "Hedefler"
+    "title": "Hedefler",
+    "defaults": {
+      "inception": {
+        "title": "Başlangıç",
+        "body": "Mit, kod ve sesin yeni bir dünyanın ilk kıvılcımında birleştiği yer."
+      },
+      "creation": {
+        "title": "Yaratım",
+        "body": "Özellik değil, eser gibi hissedilen oyunlar, araçlar ve sistemler tasarlıyoruz."
+      },
+      "expansion": {
+        "title": "Genişleme",
+        "body": "Her proje, daha büyük bir deneyim ve altyapı takımyıldızının bir düğümü."
+      },
+      "harmony": {
+        "title": "Denge",
+        "body": "Kutsal ayrıntıyla üretim seviyesindeki mühendisliği dengeliyoruz; hiçbir şey atıl hissettirmez."
+      },
+      "beyond": {
+        "title": "Ötesi",
+        "body": "Beklenmeyene alan açıyoruz — ortaya çıkan davranışlar, topluluklar ve işbirlikleri."
+      }
+    }
   },
   "AdminLogin": {
     "toast": {
@@ -128,6 +179,48 @@
     "unauthorizedAccess": "Erişim kısıtlı",
     "unauthorizedMessage": "Paneli görüntülemek için yönetici hesabına ihtiyaç vardır.",
     "goToLogin": "Yönetici girişine git"
+  },
+  "AdminContent": {
+    "goalsDescription": "Hedefleri çok dilli olarak yönetin.",
+    "faqDescription": "Sıkça sorulan soruları çok dilli olarak yönetin.",
+    "newGoalTitle": "Yeni hedef",
+    "newGoalBody": "Açıklama",
+    "newGoal": "Yeni Hedef",
+    "newFaq": "Yeni SSS",
+    "newFaqQuestion": "Yeni soru",
+    "newFaqAnswer": "Yeni cevap",
+    "save": "Kaydet",
+    "saving": "Kaydediliyor…",
+    "saveAll": "Tüm değişiklikleri kaydet",
+    "cancelAll": "Tümünü iptal et",
+    "orderSave": "Sıralamayı kaydet",
+    "saved": "Kaydedildi",
+    "loading": "Yükleniyor…",
+    "noRecords": "Kayıt bulunamadı.",
+    "order": "Sıra",
+    "moveUp": "Yukarı taşı",
+    "moveDown": "Aşağı taşı",
+    "active": "Aktif",
+    "delete": "Sil",
+    "title": "Başlık",
+    "body": "Açıklama",
+    "question": "Soru",
+    "answer": "Cevap",
+    "dragToSort": "Sürükleyerek sırala",
+    "cancel": "İptal",
+    "confirmResetTitle": "Tüm değişiklikleri geri al?",
+    "confirmResetDesc": "Kaydedilmemiş tüm değişiklikler silinecek. Bu işlem geri alınamaz.",
+    "confirmCancel": "Vazgeç",
+    "confirmDiscard": "Evet, geri al",
+    "contactTitle": "İletişim formları",
+    "contactDescription": "Genel iletişim formundan gelen mesajlar (API bağlanana kadar lokal).",
+    "contactEmpty": "Henüz iletişim kaydı yok.",
+    "contactClear": "Tümünü temizle",
+    "submittedAt": "Gönderim",
+    "location": "Konum",
+    "subscriptionsTitle": "Bülten abonelikleri",
+    "subscriptionsDesc": "Footer abonelik formundan toplanan e-postalar.",
+    "subscriptionsEmpty": "Henüz abonelik yok."
   },
   "AuthContext": {
     "authorization": {

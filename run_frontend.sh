@@ -13,7 +13,13 @@ CUR=$(git rev-parse HEAD 2>/dev/null || echo "nogit")
 LAST=$(cat .last_build 2>/dev/null || echo "none")
 
 if [[ "$CUR" != "$LAST" || ! -f .next/BUILD_ID ]]; then
-  nice -n 10 ionice -c2 -n7 npm ci --no-audit --no-fund
+  # İlk kurulumda veya node_modules yoksa tam temiz kurulum yap
+  if [[ ! -d node_modules ]]; then
+    nice -n 10 ionice -c2 -n7 npm ci --no-audit --no-fund
+  else
+    # Mevcut modülleri silmeden sadece eksikleri / güncellemeleri al
+    nice -n 10 ionice -c2 -n7 npm install --no-audit --no-fund
+  fi
   nice -n 10 ionice -c2 -n7 npm run build -- --no-lint
   echo "$CUR" > .last_build
 fi

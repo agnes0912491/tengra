@@ -14,6 +14,7 @@ import {
   DialogHeader,
 } from "@/components/ui/dialog";
 import Dropzone from "@/components/ui/dropzone";
+import { routing } from "@/i18n/routing";
 
 const formatDateTime = (value?: string | null) => {
   if (!value) {
@@ -59,6 +60,9 @@ export default function ProjectsTable({ projects }: Props) {
   const [project, setProject] = useState<Project | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoUploading, setLogoUploading] = useState(false);
+  const [descriptionsByLocale, setDescriptionsByLocale] = useState<Record<string, string>>({});
+
+  const locales = routing.locales;
 
   useEffect(() => {
     const fetchToken = async () => {
@@ -97,6 +101,27 @@ export default function ProjectsTable({ projects }: Props) {
     setEditProjectModalOpen(true);
     setProject(project);
     setLogoPreview(project.logoUrl ?? null);
+    // Parse existing description JSON if present
+    const current: Record<string, string> = {};
+    if (project.description) {
+      try {
+        const parsed = JSON.parse(project.description) as unknown;
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          const rec = parsed as Record<string, unknown>;
+          for (const loc of locales) {
+            const value = rec[loc];
+            if (typeof value === "string") {
+              current[loc] = value;
+            }
+          }
+        } else {
+          current[locales[0]] = project.description;
+        }
+      } catch {
+        current[locales[0]] = project.description;
+      }
+    }
+    setDescriptionsByLocale(current);
   };
   const openDeleteModal = (project: Project) => {
     setDeleteProjectModalOpen(true);
@@ -134,7 +159,7 @@ export default function ProjectsTable({ projects }: Props) {
   return (
     <>
       <Dialog open={editProjectModalOpen} onOpenChange={() => setEditProjectModalOpen(false)}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl border border-[rgba(110,211,225,0.25)] bg-[rgba(6,18,26,0.9)] shadow-[0_22px_60px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
           <DialogHeader>
             <DialogTitle>Projeyi Düzenle</DialogTitle>
           </DialogHeader>
@@ -146,11 +171,22 @@ export default function ProjectsTable({ projects }: Props) {
               const form = e.target as HTMLFormElement;
               const formData = new FormData(form);
               const name = formData.get("name") as string;
-              const description = formData.get("description") as string;
               const status = formData.get("status") as Project["status"];
               const type = formData.get("type") as Project["type"];
               const logoUrlRaw = (formData.get("logoUrl") as string) || "";
               const logoUrl = logoUrlRaw.trim() || undefined;
+
+              const cleanedDescriptions: Record<string, string> = {};
+              locales.forEach((loc) => {
+                const value = descriptionsByLocale[loc];
+                if (typeof value === "string" && value.trim().length > 0) {
+                  cleanedDescriptions[loc] = value;
+                }
+              });
+              const description =
+                Object.keys(cleanedDescriptions).length > 0
+                  ? JSON.stringify(cleanedDescriptions)
+                  : "";
 
               editProject(
                 { name, description, status, type, logoUrl },
@@ -165,9 +201,29 @@ export default function ProjectsTable({ projects }: Props) {
                 <label className="text-sm text-[rgba(255,255,255,0.8)]">Proje Adı</label>
                 <Input name="name" defaultValue={project?.name || ""} required className="border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] text-white" />
               </div>
-              <div className="space-y-2">
-                <label className="text-sm text-[rgba(255,255,255,0.8)]">Açıklama</label>
-                <textarea name="description" defaultValue={project?.description || ""} rows={5} className="min-h-[120px] w-full rounded-lg border border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] p-3 text-white focus:border-[rgba(0,167,197,0.6)] focus:outline-none" />
+              <div className="space-y-3">
+                <label className="text-sm text-[rgba(255,255,255,0.8)]">
+                  Açıklama (çok dilli)
+                </label>
+                {locales.map((loc) => (
+                  <div key={loc} className="space-y-1">
+                    <span className="text-[11px] uppercase tracking-[0.25em] text-[rgba(255,255,255,0.65)]">
+                      {loc.toUpperCase()}
+                    </span>
+                    <textarea
+                      value={descriptionsByLocale[loc] || ""}
+                      onChange={(event) => {
+                        const value = event.currentTarget.value;
+                        setDescriptionsByLocale((prev) => ({
+                          ...prev,
+                          [loc]: value,
+                        }));
+                      }}
+                      className="min-h-[80px] w-full rounded-lg border border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] p-3 text-white focus:border-[rgba(0,167,197,0.6)] focus:outline-none text-sm"
+                      rows={4}
+                    />
+                  </div>
+                ))}
               </div>
               <div className="space-y-2">
                 <label className="text-sm text-[rgba(255,255,255,0.8)]">
@@ -218,18 +274,28 @@ export default function ProjectsTable({ projects }: Props) {
                   }}
                 >
                   {logoPreview || project?.logoUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={logoPreview || project?.logoUrl || ""}
-                      alt="logo"
-                      className="h-10 w-10 rounded object-contain"
-                    />
+                    <span className="text-xs text-[rgba(255,255,255,0.8)]">
+                      Yeni görsel seçmek için tıklayın veya sürükleyip bırakın.
+                    </span>
                   ) : (
                     <span className="text-xs text-[rgba(255,255,255,0.6)]">
                       PNG/JPG/WebP sürükleyip bırakın veya tıklayın
                     </span>
                   )}
                 </Dropzone>
+                {(logoPreview || project?.logoUrl) && (
+                  <div className="mt-2 rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(4,18,24,0.85)] p-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={logoPreview || project?.logoUrl || ""}
+                      alt="logo"
+                      className="h-12 w-12 rounded object-contain"
+                    />
+                    <p className="mt-1 text-[11px] text-[rgba(255,255,255,0.65)]">
+                      Mevcut logo önizlemesi
+                    </p>
+                  </div>
+                )}
                 {logoUploading && (
                   <p className="text-xs text-[rgba(255,255,255,0.7)]">
                     Görsel yükleniyor…
@@ -293,18 +359,18 @@ export default function ProjectsTable({ projects }: Props) {
       </Dialog>
       <div className="overflow-hidden rounded-3xl border border-[rgba(110,211,225,0.16)] bg-[rgba(6,20,27,0.55)]/80 shadow-[0_25px_70px_rgba(0,0,0,0.45)] backdrop-blur-xl">
         <table className="min-w-full divide-y divide-[rgba(110,211,225,0.15)]">
-          <thead className="bg-[rgba(8,24,32,0.8)] text-[rgba(255,255,255,0.65)]">
+          <thead className="bg-[rgba(8,24,32,0.9)] text-[rgba(255,255,255,0.75)]">
             <tr>
-              <th scope="col" className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.35em]">
+              <th scope="col" className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.22em]">
                 Proje
               </th>
-              <th scope="col" className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.35em]">
+              <th scope="col" className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.22em]">
                 Tür
               </th>
-              <th scope="col" className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.35em]">
+              <th scope="col" className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.22em]">
                 Durum
               </th>
-              <th scope="col" className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.35em]">
+              <th scope="col" className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.22em]">
                 Son Güncelleme
               </th>
             </tr>

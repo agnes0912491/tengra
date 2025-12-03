@@ -32,15 +32,15 @@ export default function BlogsTable({ blogs }: Props) {
   return (
     <div className="overflow-hidden rounded-3xl border border-[rgba(110,211,225,0.16)] bg-[rgba(6,20,27,0.55)]/80 shadow-[0_25px_70px_rgba(0,0,0,0.45)] backdrop-blur-xl">
       <table className="min-w-full divide-y divide-[rgba(110,211,225,0.15)]">
-        <thead className="bg-[rgba(8,24,32,0.8)] text-[rgba(255,255,255,0.65)]">
+        <thead className="bg-[rgba(8,24,32,0.9)] text-[rgba(255,255,255,0.75)]">
           <tr>
-            <th scope="col" className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.35em]">
+            <th scope="col" className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.22em]">
               Başlık
             </th>
-            <th scope="col" className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.35em]">
+            <th scope="col" className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.22em]">
               Yazar
             </th>
-            <th scope="col" className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.35em]">
+            <th scope="col" className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.22em]">
               Son Güncelleme
             </th>
           </tr>

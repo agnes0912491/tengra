@@ -55,7 +55,7 @@ export default function Team() {
               className="glass relative overflow-hidden rounded-xl border border-[rgba(0,167,197,0.15)] hover:border-[rgba(0,167,197,0.4)] transition-all duration-500"
             >
               <div className="relative w-full h-56 overflow-hidden">
-                <Image src={image} alt={name} fill className="object-cover opacity-80 group-hover:scale-105 transition-all duration-700" />
+                <Image crossOrigin="anonymous" src={image} alt={name} fill className="object-cover opacity-80 group-hover:scale-105 transition-all duration-700" />
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60" />
               </div>
 

@@ -31,7 +31,7 @@ export default function AdminStatCard({
     <div
       className={cn(
         "relative overflow-hidden rounded-3xl border border-[rgba(110,211,225,0.16)] p-6",
-        "shadow-[0_25px_70px_rgba(0,0,0,0.45)] backdrop-blur-xl",
+        "shadow-[0_22px_60px_rgba(0,0,0,0.4)] backdrop-blur-xl",
         "bg-gradient-to-br",
         toneClasses[tone]
       )}
@@ -44,10 +44,12 @@ export default function AdminStatCard({
           </div>
         ) : null}
         <div>
-          <p className="text-xs uppercase tracking-[0.35em] text-[rgba(255,255,255,0.55)]">{label}</p>
+          <p className="text-[11px] uppercase tracking-[0.22em] text-[rgba(255,255,255,0.65)]">
+            {label}
+          </p>
           <p className="mt-2 text-3xl font-semibold text-white">{value}</p>
           {sublabel ? (
-            <p className="mt-2 text-xs text-[rgba(255,255,255,0.55)]">{sublabel}</p>
+            <p className="mt-2 text-xs text-[rgba(255,255,255,0.7)]">{sublabel}</p>
           ) : null}
         </div>
       </div>

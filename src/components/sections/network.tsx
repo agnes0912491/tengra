@@ -7,7 +7,7 @@ export default function Network() {
   const t = useTranslations("Network");
 
   return (
-    <section id="network" className="relative flex flex-col items-center justify-center text-center py-32 px-4 overflow-hidden">
+    <section id="network" className="relative flex flex-col items-center justify-center text-center py-28 px-4 overflow-hidden">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -15,9 +15,16 @@ export default function Network() {
         viewport={{ once: true }}
         className="relative z-10 max-w-3xl mx-auto"
       >
-        <h2 className="section-title mb-8 neon-text">{t("title")}</h2>
+        <h2 className="section-title mb-6">{t("title")}</h2>
 
-        <p className="text-sm md:text-base text-[rgba(255,255,255,0.7)] leading-relaxed mb-10">{t("description")}</p>
+        <p className="text-sm md:text-base text-[rgba(255,255,255,0.78)] leading-relaxed mb-6">
+          {t("description")}
+        </p>
+        <div className="mb-10 flex flex-wrap justify-center gap-3 text-[11px] text-[rgba(255,255,255,0.7)]">
+          <span className="badge-muted">Builders & designers</span>
+          <span className="badge-muted">Players & communities</span>
+          <span className="badge-muted">Partners & collaborators</span>
+        </div>
 
         <motion.a
           href="/forum"

@@ -102,7 +102,7 @@ export default function BlogPost({ postId }: BlogPostProps) {
         <div className="overflow-hidden rounded-2xl border border-[rgba(0,167,197,0.18)] bg-[rgba(5,18,24,0.6)] shadow-[0_0_40px_rgba(0,167,197,0.06)] backdrop-blur-xl">
           {post.image ? (
             <div className="relative h-72 w-full md:h-[380px]">
-              <Image
+              <Image crossOrigin="anonymous"
                 src={post.image}
                 alt={post.title}
                 className="h-full w-full object-cover opacity-90"

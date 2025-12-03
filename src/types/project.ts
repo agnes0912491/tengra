@@ -12,6 +12,12 @@ export type Project = {
   name: string;
   slug?: string;
   description?: string | null;
+  /**
+   * Optional localized descriptions stored as a JSON object
+   * in the backend (e.g. { "tr": "...", "en": "..." }).
+   * The plain `description` field is used as a fallback.
+   */
+  descriptionsByLocale?: Record<string, string> | null;
   // Optional logo/image to represent the project on the homepage
   logoUrl?: string | null;
   status?: ProjectStatus;

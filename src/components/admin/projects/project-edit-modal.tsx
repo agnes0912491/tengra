@@ -12,6 +12,7 @@ import Image from "next/image";
 import Cookies from "js-cookie";
 import { ADMIN_SESSION_COOKIE_CANDIDATES } from "@/lib/auth";
 import { toast } from "@/lib/react-toastify";
+import { routing } from "@/i18n/routing";
 
 type Props = {
     open: boolean;
@@ -20,26 +21,44 @@ type Props = {
 };
 
 export default function ProjectEditModal({ open, onClose, onSave }: Props) {
-    const [formData, setFormData] = useState<Partial<Project>>(
-        {
-            name: "",
-            description: "",
-            status: "draft",
-            type: "other",
-        }
-    );
+    const [formData, setFormData] = useState<Partial<Project>>({
+        name: "",
+        status: "draft",
+        type: "other",
+    });
+    const [descriptionsByLocale, setDescriptionsByLocale] = useState<Record<string, string>>({});
+
+    const locales = routing.locales;
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (formData.name) {
-            onSave(formData as Project);
-            onClose();
+        if (!formData.name) {
+            return;
         }
+
+        const cleanedDescriptions: Record<string, string> = {};
+        locales.forEach((loc) => {
+            const value = descriptionsByLocale[loc];
+            if (typeof value === "string" && value.trim().length > 0) {
+                cleanedDescriptions[loc] = value;
+            }
+        });
+
+        const description =
+            Object.keys(cleanedDescriptions).length > 0
+                ? JSON.stringify(cleanedDescriptions)
+                : "";
+
+        onSave({
+            ...formData,
+            description,
+        } as Project);
+        onClose();
     };
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="max-w-2xl border-[rgba(0,167,197,0.25)] bg-[rgba(5,18,24,0.95)] backdrop-blur-2xl">
+            <DialogContent className="max-w-2xl border border-[rgba(110,211,225,0.25)] bg-[rgba(6,18,26,0.9)] shadow-[0_22px_60px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
                 <DialogHeader>
                     <DialogTitle className="font-display text-xl uppercase tracking-[0.3em] text-[color:var(--color-turkish-blue-300)]">
                         Yeni Proje
@@ -57,14 +76,29 @@ export default function ProjectEditModal({ open, onClose, onSave }: Props) {
                         />
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm text-[rgba(255,255,255,0.8)]">Açıklama</label>
-                        <textarea
-                            value={formData.description || ""}
-                            onChange={(e) => setFormData({ ...formData, description: e.currentTarget.value })}
-                            className="min-h-[120px] w-full rounded-lg border border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] p-3 text-white focus:border-[rgba(0,167,197,0.6)] focus:outline-none"
-                            rows={5}
-                        />
+                    <div className="space-y-3">
+                        <label className="text-sm text-[rgba(255,255,255,0.8)]">
+                            Açıklama (çok dilli)
+                        </label>
+                        {locales.map((loc) => (
+                            <div key={loc} className="space-y-1">
+                                <span className="text-[11px] uppercase tracking-[0.25em] text-[rgba(255,255,255,0.65)]">
+                                    {loc.toUpperCase()}
+                                </span>
+                                <textarea
+                                    value={descriptionsByLocale[loc] || ""}
+                                    onChange={(e) => {
+                                        const value = e.currentTarget.value;
+                                        setDescriptionsByLocale((prev) => ({
+                                            ...prev,
+                                            [loc]: value,
+                                        }));
+                                    }}
+                                    className="min-h-[80px] w-full rounded-lg border border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] p-3 text-white focus:border-[rgba(0,167,197,0.6)] focus:outline-none text-sm"
+                                    rows={4}
+                                />
+                            </div>
+                        ))}
                     </div>
 
                     <div className="space-y-2">
@@ -77,7 +111,7 @@ export default function ProjectEditModal({ open, onClose, onSave }: Props) {
                                 const token =
                                     typeof window !== "undefined"
                                         ? ADMIN_SESSION_COOKIE_CANDIDATES.map((name) => Cookies.get(name)).find(Boolean) ||
-                                          localStorage.getItem("authToken")
+                                        localStorage.getItem("authToken")
                                         : null;
                                 const toDataUrl = (f: File) =>
                                     new Promise<string>((resolve) => {
@@ -108,7 +142,7 @@ export default function ProjectEditModal({ open, onClose, onSave }: Props) {
                         >
                             {formData.logoUrl ? (
                                 <div className="flex items-center gap-3">
-                                    <Image
+                                    <Image crossOrigin="anonymous"
                                         src={formData.logoUrl}
                                         alt="logo preview"
                                         width={40}

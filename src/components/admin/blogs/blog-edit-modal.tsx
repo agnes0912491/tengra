@@ -4,13 +4,14 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import * as Tabs from "@radix-ui/react-tabs";
 import dynamic from "next/dynamic";
-// import { Input } from "@/components/ui/input";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { createBlog, getAllBlogCategories, uploadImage, presignUpload } from "@/lib/db";
+import { createBlog, getAllBlogCategories, uploadImage } from "@/lib/db";
 import type { BlogCategory } from "@/types/blog";
 import { cn } from "@/lib/utils";
 import { Eye } from "lucide-react";
+import Dropzone from "@/components/ui/dropzone";
+import { toast } from "@/lib/react-toastify";
 
 // Lightweight MD editor (client-only)
 type MDEProps = {
@@ -69,10 +70,13 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
                 if (typeof d.image === "string") setImage(d.image);
                 if (Array.isArray(d.selectedCategories)) setSelectedCategories(d.selectedCategories);
             }
-        } catch {}
+        } catch { }
     }, [open]);
 
-    const token = useMemo(() => (typeof window !== "undefined" ? localStorage.getItem("authToken") : null), []);
+    const token = useMemo(
+        () => (typeof window !== "undefined" ? localStorage.getItem("authToken") : null),
+        []
+    );
 
     // Draft autosave (debounced)
     useEffect(() => {
@@ -83,7 +87,7 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
                     "tengra:blog:new:draft",
                     JSON.stringify({ title, content, image, selectedCategories })
                 );
-            } catch {}
+            } catch { }
         }, 500);
         return () => clearTimeout(id);
     }, [open, title, content, image, selectedCategories]);
@@ -134,42 +138,57 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
             reader.readAsDataURL(file);
         });
 
+    const handleContentImageUpload = async (files: File[]) => {
+        if (!files.length) return;
+        if (!token) {
+            toast.error("Görsel yüklemek için önce giriş yapın.");
+            return;
+        }
+
+        try {
+            const urls: string[] = [];
+            for (const file of files) {
+                const dataUrl = await fileToDataUrl(file);
+                const uploaded = await uploadImage(dataUrl, token);
+                const imageUrl = uploaded?.url || uploaded?.dataUrl || "";
+                if (imageUrl) {
+                    urls.push(imageUrl);
+                }
+            }
+
+            if (!urls.length) {
+                toast.error("Görseller yüklenemedi.");
+                return;
+            }
+
+            setContent((prev) => {
+                const prefix = prev.trim().length ? "\n\n" : "";
+                const markdown = urls.map((u) => `![](${u})`).join("\n\n");
+                return `${prev}${prefix}${markdown}\n`;
+            });
+            toast.success("Görseller içeriğe eklendi.");
+        } catch (error) {
+            console.error("Content image upload failed", error);
+            toast.error("Görsel yüklenirken bir hata oluştu.");
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!token) return;
+        if (!token) {
+            toast.error("Oturum bulunamadı. Lütfen tekrar giriş yapın.");
+            return;
+        }
         setSubmitting(true);
         try {
             let imageToSend = image;
             if (!imageToSend && uploadFile) {
-                // Prefer presigned upload (S3/MinIO) and fall back to dataUrl
-                const ext = uploadFile.name.includes(".") ? uploadFile.name.split(".").pop() : undefined;
                 try {
-                    const presigned = await presignUpload({
-                        contentType: uploadFile.type || "application/octet-stream",
-                        extension: ext,
-                        contentLength: uploadFile.size,
-                        keyPrefix: "blog/",
-                    }, token);
-                    if (presigned) {
-                        // PUT directly to object storage
-                        const putRes = await fetch(presigned.url, {
-                            method: presigned.method || "PUT",
-                            headers: uploadFile.type ? { "Content-Type": uploadFile.type } : undefined,
-                            body: uploadFile,
-                        });
-                        if (putRes.ok) {
-                            imageToSend = presigned.publicUrl || presigned.url.split("?")[0];
-                        }
-                    }
-                } catch { }
-                if (!imageToSend) {
-                    try {
-                        const dataUrl = await fileToDataUrl(uploadFile);
-                        const uploaded = await uploadImage(dataUrl, token);
-                        imageToSend = uploaded?.url || uploaded?.dataUrl || "";
-                    } catch {
-                        imageToSend = "";
-                    }
+                    const dataUrl = await fileToDataUrl(uploadFile);
+                    const uploaded = await uploadImage(dataUrl, token);
+                    imageToSend = uploaded?.url || uploaded?.dataUrl || "";
+                } catch {
+                    imageToSend = "";
                 }
             }
             if (!title.trim() || !content.trim()) {
@@ -194,7 +213,7 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
             setUploadFile(null);
             setSelectedCategories([]);
             setStep(0);
-            try { localStorage.removeItem("tengra:blog:new:draft"); } catch {}
+            try { localStorage.removeItem("tengra:blog:new:draft"); } catch { }
         } finally {
             setSubmitting(false);
         }
@@ -216,17 +235,26 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
                 />
             </Tabs.Content>
             <Tabs.Content value="upload" className="outline-none">
-                <div className="rounded-lg border border-dashed border-[rgba(0,167,197,0.35)] bg-[rgba(3,12,18,0.4)] p-4 text-center text-sm text-gray-300">
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => setUploadFile(e.target.files?.[0] ?? null)}
-                        className="block w-full text-xs text-[rgba(255,255,255,0.8)]"
-                    />
-                    {uploadFile && (
-                        <p className="mt-2 text-[rgba(255,255,255,0.7)]">Seçildi: {uploadFile.name}</p>
+                <Dropzone
+                    accept={{
+                        "image/*": [".png", ".jpg", ".jpeg", ".webp", ".gif"],
+                    }}
+                    multiple={false}
+                    onDrop={(files) => {
+                        const file = files[0];
+                        setUploadFile(file ?? null);
+                    }}
+                >
+                    {uploadFile ? (
+                        <p className="text-xs text-[rgba(255,255,255,0.8)]">
+                            Seçildi: {uploadFile.name}
+                        </p>
+                    ) : (
+                        <span className="text-xs text-[rgba(255,255,255,0.7)]">
+                            PNG/JPG/WebP sürükleyip bırakın veya tıklayın
+                        </span>
                     )}
-                </div>
+                </Dropzone>
             </Tabs.Content>
             {(image || uploadFile) && (
                 <div className="mt-3 rounded-lg border border-[rgba(0,167,197,0.25)] bg-[rgba(3,12,18,0.6)] p-3">
@@ -242,8 +270,13 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
     );
 
     return (
-        <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="max-w-3xl border-[rgba(0,167,197,0.25)] bg-[rgba(5,18,24,0.95)] backdrop-blur-2xl">
+        <Dialog
+            open={open}
+            onOpenChange={(isOpen) => {
+                if (!isOpen) onClose();
+            }}
+        >
+            <DialogContent className="max-w-4xl border border-[rgba(110,211,225,0.3)] bg-[rgba(5,18,24,0.96)] shadow-[0_24px_80px_rgba(0,0,0,0.75)] backdrop-blur-2xl">
                 <DialogHeader>
                     <DialogTitle className="font-display text-xl uppercase tracking-[0.3em] text-[color:var(--color-turkish-blue-300)]">
                         Yeni Blog Yazısı
@@ -325,11 +358,21 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
                                 <label className="text-sm text-[rgba(255,255,255,0.8)]">İçerik</label>
                                 <div className="flex items-center gap-2">
                                     {richEditor && (
-                                        <button type="button" onClick={() => setShowPreview((p) => !p)} className="rounded-md border border-[rgba(0,167,197,0.35)] p-1 text-[rgba(255,255,255,0.8)] hover:text-[color:var(--color-turkish-blue-300)]" aria-label="Önizleme">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPreview((p) => !p)}
+                                            className="rounded-md border border-[rgba(0,167,197,0.35)] p-1 text-[rgba(255,255,255,0.8)] hover:text-[color:var(--color-turkish-blue-300)]"
+                                            aria-label="Önizleme"
+                                        >
                                             <Eye size={16} />
                                         </button>
                                     )}
-                                    <Button type="button" variant="outline" className="border-[rgba(0,167,197,0.35)]" onClick={() => setRichEditor((v) => !v)}>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="border-[rgba(0,167,197,0.35)]"
+                                        onClick={() => setRichEditor((v) => !v)}
+                                    >
                                         {richEditor ? "Basit Editör" : "Gelişmiş Editör"}
                                     </Button>
                                 </div>
@@ -347,6 +390,24 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
                                         className="w-full rounded-md border border-[rgba(0,167,197,0.35)] bg-[rgba(3,12,18,0.75)] p-3 text-white outline-none"
                                     />
                                 )}
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs text-[rgba(255,255,255,0.75)]">
+                                    İçeriğe Görsel Ekle
+                                </label>
+                                <Dropzone
+                                    accept={{
+                                        "image/*": [".png", ".jpg", ".jpeg", ".webp", ".gif"],
+                                    }}
+                                    multiple
+                                    onDrop={handleContentImageUpload}
+                                >
+                                    <span className="text-xs text-[rgba(255,255,255,0.7)]">
+                                        Bir veya birden fazla PNG/JPG/WebP dosyasını sürükleyip
+                                        bırakın ya da tıklayarak seçin. Görseller markdown olarak
+                                        içeriğin sonuna eklenir.
+                                    </span>
+                                </Dropzone>
                             </div>
                         </div>
                     )}

@@ -391,7 +391,7 @@
 }
 
 .tengra-text {
-  font-family: "Noto Sans Old Turkic", "Noto Sans", "Segoe UI Symbol", "Arial Unicode MS", sans-serif !important;
+  font-family: var(--font-old-turkic), "Noto Sans", "Segoe UI Symbol", "Arial Unicode MS", sans-serif !important;
   font-feature-settings: "kern";
 }
 

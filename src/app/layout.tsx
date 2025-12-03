@@ -1,12 +1,12 @@
 // Sunucu bileşeni, "use client" yok!
 import "./globals.css";
-import Icon from "../../public/tengra_without_text.png";
+
 import { Metadata, Viewport } from "next";
 import { cookies, headers } from "next/headers";
 import ParticlesClientWrapper from "@/components/ui/particles-client-wrapper";
 import GlobalToastContainer from "@/components/ui/global-toast-container";
 import { Inter, Orbitron } from "next/font/google";
-import "@fontsource/noto-sans-old-turkic";
+import localFont from "next/font/local";
 
 import Script from "next/script";
 import ConsentBanner from "@/components/consent/ConsentBanner";
@@ -15,38 +15,52 @@ import IntlProviderClient from "@/components/providers/intl-provider-client";
 import { getMessages } from "@/i18n/get-messages";
 import { resolvePreferredLocale } from "@/i18n/resolve-preferred-locale";
 import AnalyticsTracker from "@/components/analytics/AnalyticsTracker";
+import Footer from "@/components/layout/footer";
 
 export const dynamic = "force-dynamic";
+const Icon = "uploads/tengra_without_text.png";
 
 const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const notoOldTurkic = localFont({
+  src: "../fonts/noto-sans-old-turkic-400-normal.woff2",
+  weight: "400",
+  style: "normal",
+  variable: "--font-old-turkic",
+  display: "swap",
+  preload: true,
+  fallback: ["Noto Sans", "Segoe UI Symbol", "Arial Unicode MS", "sans-serif"],
+});
 
 const metadataBaseUrl =
   process.env.NEXT_PUBLIC_SITE_URL ??
   process.env.NEXT_PUBLIC_METADATA_BASE ??
   "http://localhost:3000";
 export const metadataBase = new URL(metadataBaseUrl);
+const siteUrl = metadataBase.toString().replace(/\/$/, "");
+const logoUrl = `https://cdn.tengra.studio/${Icon}`;
 
 export const metadata: Metadata = {
-  title: "TENGRA | Forging the Divine and the Technological",
+  title: "Tengra Studio",
   description:
-    "TENGRA — a studio uniting divine inspiration with cutting-edge technology. Games, software, and innovation.",
+    "Tengra Studio builds artefact-like games, AI-driven worlds, and experimental systems. Myth + Code + Play.",
   keywords: [
     "Tengra",
-    "Tengri",
-    "Game Studio",
-    "Software Development",
-    "Futuristic Design",
-    "End-to-End Encryption",
+    "Tengra Studio",
+    "game studio",
+    "indie game dev",
+    "GeoFrontier",
+    "stylized worlds",
   ],
   openGraph: {
-    title: "TENGRA",
-    description: "Forging the Divine and the Technological",
-    url: metadataBase.toString(),
-    siteName: "TENGRA",
+    title: "Tengra Studio",
+    description:
+      "Artefact-like games, worlds and systems forged from myth and code.",
+    url: siteUrl,
+    siteName: "Tengra Studio",
     images: [
       {
-        url: new URL(Icon.src, metadataBase).toString(),
+        url: "https://cdn.tengra.studio/uploads/tengra_without_text.png",
         width: 1200,
         height: 630,
       },
@@ -56,15 +70,15 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    site: "@tengra",
-    title: "TENGRA",
-    description: "Forging the Divine and the Technological",
-    images: [new URL(Icon.src, metadataBase).toString()],
+    images: ["https://cdn.tengra.studio/uploads/tengra_without_text.png"],
+  },
+  alternates: {
+    canonical: siteUrl,
   },
   icons: {
-    icon: new URL(Icon.src, metadataBase).toString(),
-    shortcut: new URL(Icon.src, metadataBase).toString(),
-    apple: new URL(Icon.src, metadataBase).toString(),
+    icon: logoUrl,
+    shortcut: logoUrl,
+    apple: logoUrl,
   },
   other: {
     "google-adsense-account": "ca-pub-1840126959284939",
@@ -91,8 +105,37 @@ export default async function RootLayout({
   // Nonce'u runtime'da almaya çalışma, sadece Script'lerde kullan
   const isProd = process.env.NODE_ENV === "production";
 
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Tengra",
+    url: siteUrl,
+    logo: logoUrl,
+    sameAs: [
+      "https://x.com/tengra",
+      "https://github.com/TengraStudio",
+      "https://www.linkedin.com/company/tengra",
+    ],
+  };
+
+  const webSiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Tengra",
+    url: siteUrl,
+  };
+
   return (
-    <html lang={locale} className={`${orbitron.variable} ${inter.variable}`}>
+    <html
+      lang={locale}
+      className={`${orbitron.variable} ${inter.variable} ${notoOldTurkic.variable}`}
+    >
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify([organizationSchema, webSiteSchema]) }}
+        />
+      </head>
       <body className="font-sans bg-[color:var(--background)] text-[color:var(--foreground)] w-full min-h-screen">
         {/* Consent Mode default */}
         <Script id="consent-mode-default" strategy="beforeInteractive">
@@ -154,7 +197,10 @@ export default async function RootLayout({
             <ConsentBanner />
             {/* Per-page analytics tracker */}
             <AnalyticsTracker />
-            {children}
+            <div className="flex min-h-screen flex-col">
+              {children}
+              <Footer />
+            </div>
           </IntlProviderClient>
           <GlobalToastContainer />
         </ClientUserProvider>
