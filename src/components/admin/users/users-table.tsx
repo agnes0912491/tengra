@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 
 import type { Role, User } from "@/lib/auth/users";
 import { updateUserRole } from "@/lib/db";
+import { useAdminToken } from "@/hooks/use-admin-token";
 // plain select for compact UI
 
 const ROLE_OPTIONS: { value: Role; label: string }[] = [
@@ -42,13 +43,13 @@ export default function UsersTable({ initialUsers, currentUserId, currentUserRol
     initialUsers.map((user) => ({ ...user, role: normalizeRoleValue(user.role), isUpdating: false }))
   );
   const [isPending, startTransition] = useTransition();
+  const { token } = useAdminToken();
 
   const handleRoleChange = (userId: string, role: Role) => {
     if (currentUserId && currentUserId === userId) {
       toast.error("Kendi rolünüzü değiştiremezsiniz.");
       return;
     }
-    const token = typeof window !== "undefined" ? window.localStorage.getItem("authToken") : null;
     if (!token) {
       toast.error("Yetkilendirme bilgisi bulunamadı.");
       return;

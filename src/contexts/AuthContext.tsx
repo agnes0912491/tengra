@@ -60,7 +60,15 @@ const AUTH_TOKEN_KEY = "authToken";
 const REFRESH_TOKEN_KEY = "refreshToken";
 const CSRF_TOKEN_KEY = "csrfToken";
 
-const STORAGE_KEYS = [AUTH_TOKEN_KEY, REFRESH_TOKEN_KEY, CSRF_TOKEN_KEY];
+const STORAGE_KEYS = [
+  AUTH_TOKEN_KEY,
+  REFRESH_TOKEN_KEY,
+  CSRF_TOKEN_KEY,
+  "sessionToken",
+  "user",
+  "tengra:user",
+  "tengra:auth",
+];
 
 const persistAuthPayload = (data: AuthSuccessPayload) => {
   if (!data) return;
@@ -82,11 +90,58 @@ const persistAuthPayload = (data: AuthSuccessPayload) => {
 };
 
 const clearStoredAuth = () => {
+  // Clear localStorage
   STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
+
+  // Clear cookies
   Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/" });
   for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
-    Cookies.remove(legacyName, { path: "/" });
+  Cookies.remove(legacyName, { path: "/" });
   }
+
+  // Clear sessionStorage
+  sessionStorage.clear();
+};
+
+const decodeJwtExp = (token: string): number | null => {
+  try {
+    const parts = token.split(".");
+    if (parts.length < 2) return null;
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
+    if (payload && typeof payload.exp === "number") {
+      return payload.exp;
+    }
+  } catch {
+    // ignore malformed token
+  }
+  return null;
+};
+
+const isExpired = (token: string | null): boolean => {
+  if (!token) return true;
+  const exp = decodeJwtExp(token);
+  if (!exp) return false;
+  return exp * 1000 <= Date.now();
+};
+
+const purgeExpiredTokens = (): { clearedAuth: boolean } => {
+  const authToken = localStorage.getItem(AUTH_TOKEN_KEY);
+  if (authToken && isExpired(authToken)) {
+    clearStoredAuth();
+    return { clearedAuth: true };
+  }
+
+  const refresh = localStorage.getItem(REFRESH_TOKEN_KEY);
+  if (refresh && isExpired(refresh)) {
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+  }
+
+  const csrf = localStorage.getItem(CSRF_TOKEN_KEY);
+  if (csrf && isExpired(csrf)) {
+    localStorage.removeItem(CSRF_TOKEN_KEY);
+  }
+
+  return { clearedAuth: false };
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -95,18 +150,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const t = useTranslations("AuthContext");
   const defaultErrorMessage = t("authorization.defaultErrorMessage");
+  const handleInvalidAuth = useCallback(() => {
+    clearStoredAuth();
+    setUser(null);
+  }, []);
 
   useEffect(() => {
     // Check if user is logged in on mount
+    const { clearedAuth } = purgeExpiredTokens();
     const token = localStorage.getItem(AUTH_TOKEN_KEY);
-    if (token) {
+    if (token && !clearedAuth && !isExpired(token)) {
       fetchCurrentUser(token);
     } else {
+      clearStoredAuth();
+      setUser(null);
       setLoading(false);
     }
-  }, []);
 
-  const fetchCurrentUser = async (token: string) => {
+    const interval = setInterval(() => {
+      const result = purgeExpiredTokens();
+      if (result.clearedAuth) {
+        setUser(null);
+        setLoading(false);
+      }
+    }, 5 * 60 * 1000);
+
+    const handleStorage = () => {
+      const auth = localStorage.getItem(AUTH_TOKEN_KEY);
+      if (!auth || isExpired(auth)) {
+        clearStoredAuth();
+        setUser(null);
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, [fetchCurrentUser]);
+
+  const fetchCurrentUser = useCallback(async (token: string) => {
     try {
       const response = await fetch(`${BACKEND_API_URL}/api/auth/me`, {
         headers: {
@@ -115,22 +199,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data.user);
-      } else {
-        // Token invalid, clear it
-        clearStoredAuth();
-        setUser(null);
+      if (!response.ok) {
+        handleInvalidAuth();
+        return;
       }
+
+      const data = await response.json().catch(() => null);
+      const hasUser = data && typeof data === "object" && "user" in data && data.user;
+      const successFlag = data && typeof data.success === "boolean" ? data.success : true;
+
+      if (!hasUser || !successFlag) {
+        handleInvalidAuth();
+        return;
+      }
+
+      setUser((data as { user: User }).user);
     } catch (error) {
       console.error("Failed to fetch current user:", error);
-      clearStoredAuth();
-      setUser(null);
+      handleInvalidAuth();
     } finally {
       setLoading(false);
     }
-  };
+  }, [handleInvalidAuth]);
 
   const login = async (
     username: string,
@@ -193,16 +283,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
 
       // Redirect to login
-      router.push("/admin/login");
+      router.push("/login");
     }
   };
 
   const refreshAuth = async () => {
+    const { clearedAuth } = purgeExpiredTokens();
     const token = localStorage.getItem(AUTH_TOKEN_KEY);
-    if (token) {
+    if (token && !clearedAuth && !isExpired(token)) {
       await fetchCurrentUser(token);
+    } else {
+      clearStoredAuth();
+      setUser(null);
     }
   };
+
+  useEffect(() => {
+    if (!loading && !user) {
+      clearStoredAuth();
+    }
+  }, [loading, user]);
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout, refreshAuth }}>

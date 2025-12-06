@@ -30,7 +30,8 @@ export default function ProtectedRoute({
     }
 
     if (!isAuthenticated) {
-      router.replace("/admin/login");
+      const next = encodeURIComponent(window.location.pathname || "/admin/dashboard");
+      router.replace(`/login?next=${next}`);
       return;
     }
 

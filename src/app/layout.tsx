@@ -15,7 +15,10 @@ import IntlProviderClient from "@/components/providers/intl-provider-client";
 import { getMessages } from "@/i18n/get-messages";
 import { resolvePreferredLocale } from "@/i18n/resolve-preferred-locale";
 import AnalyticsTracker from "@/components/analytics/AnalyticsTracker";
+import AdblockDetector from "@/components/analytics/AdblockDetector";
+import AdblockNotice from "@/components/analytics/AdblockNotice";
 import Footer from "@/components/layout/footer";
+import PWAProvider from "@/components/pwa/pwa-provider";
 
 export const dynamic = "force-dynamic";
 const Icon = "uploads/tengra_without_text.png";
@@ -131,6 +134,12 @@ export default async function RootLayout({
       className={`${orbitron.variable} ${inter.variable} ${notoOldTurkic.variable}`}
     >
       <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#06141B" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Tengra" />
+        <link rel="apple-touch-icon" href="https://cdn.tengra.studio/uploads/tengra_without_text.png" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify([organizationSchema, webSiteSchema]) }}
@@ -196,7 +205,10 @@ export default async function RootLayout({
           <IntlProviderClient locale={locale} messages={messages}>
             <ConsentBanner />
             {/* Per-page analytics tracker */}
+            <AdblockDetector />
+            <AdblockNotice />
             <AnalyticsTracker />
+            <PWAProvider />
             <div className="flex min-h-screen flex-col">
               {children}
               <Footer />

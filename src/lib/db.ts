@@ -1,8 +1,9 @@
-import type { Blog, BlogCategory } from "@/types/blog";
-import type { Project, ProjectStatus, ProjectType } from "@/types/project";
+import type { Blog, BlogCategory, BlogSEO, BlogStatus } from "@/types/blog";
+import type { Project, ProjectStatus, ProjectType, ProjectPlatform } from "@/types/project";
 import { Role, User } from "./auth/users";
 import { AuthUserPayload } from "@/types/auth";
 import { resolveCdnUrl } from "@/lib/constants";
+import { slugify } from "@/lib/utils";
 
 // Base API URL for the backend. Fallback to localhost in development to avoid
 // generating an invalid URL when the env var is absent.
@@ -21,13 +22,41 @@ type BlogCategoriesResponse = {
 // Backend blog API response shapes
 type RawBlogPost = {
   id?: number | string;
+  slug?: string;
+  subtitle?: string;
   author_id?: number | string;
+  author_name?: string;
+  author?: string;
+  editor?: string;
   title?: string;
   content?: string;
+  html?: string;
+  format?: string;
   createdAt?: string;
+  updatedAt?: string;
+  publishAt?: string;
+  publishedAt?: string;
+  unpublishAt?: string;
+  status?: string;
+  excerpt?: string;
+  summary?: string;
   image?: string;
+  heroImage?: string;
+  coverAlt?: string;
+  tags?: string[];
+  categories?: Array<string | { name?: string; description?: string; slug?: string }>;
+  seo?: BlogSEO;
+  locale?: string;
+  canonicalUrl?: string;
+  views?: number;
+  metrics?: {
+    views?: number;
+    likes?: number;
+    reads?: number;
+    bookmarks?: number;
+  };
+  pinned?: boolean;
 };
- 
 
 type BlogSingleResponse = {
   post?: RawBlogPost;
@@ -72,35 +101,98 @@ export const createBlogCategory = async (name: string): Promise<BlogCategory | n
   return json?.category ?? null;
 };
 
+const computeReadingTime = (text: string): number | undefined => {
+  const words = text.replace(/<[^>]*>/g, " ").trim().split(/\s+/).filter(Boolean).length;
+  if (!words) return undefined;
+  return Math.max(1, Math.round(words / 180));
+};
+
+const normalizeBlogCategories = (rawCats: RawBlogPost["categories"]): BlogCategory[] => {
+  if (!Array.isArray(rawCats)) return [];
+  return rawCats
+    .map((cat) => {
+      if (typeof cat === "string") {
+        return { name: cat, description: cat, slug: slugify(cat) };
+      }
+      if (cat && typeof cat === "object" && typeof cat.name === "string") {
+        return {
+          name: cat.name,
+          description: cat.description ?? cat.name,
+          slug: cat.slug ?? slugify(cat.name),
+        };
+      }
+      return null;
+    })
+    .filter((c): c is BlogCategory => Boolean(c));
+};
+
 /**
  * Fetches all public blogs.
  */
 const normalizeBlog = (raw: RawBlogPost | null | undefined): Blog | null => {
   if (!raw) return null;
 
-  const id = raw.id ?? undefined;
-  const title = raw.title ?? undefined;
-  const content = raw.content ?? "";
+  const id = raw.id ?? raw.slug ?? undefined;
+  const title = raw.title?.trim() ?? undefined;
+  const content = raw.content ?? raw.html ?? "";
   const createdAt = raw.createdAt ?? "";
-  const authorId = raw.author_id ?? undefined;
+  const updatedAt = raw.updatedAt ?? createdAt ?? "";
 
   if (id === undefined || title === undefined) return null;
 
-  // Derive minimal fields required by Blog type; fill gaps with sensible defaults
-  const date = createdAt || new Date().toISOString();
-  const excerpt = content ? content.slice(0, 160) : "";
+  const format: "markdown" | "html" = raw.html ? "html" : /<[^>]+>/.test(content) ? "html" : "markdown";
+  const publishAt = raw.publishAt ?? raw.publishedAt ?? createdAt ?? updatedAt ?? "";
+  const date = publishAt || createdAt || new Date().toISOString();
+  const excerpt = raw.summary ?? raw.excerpt ?? (content ? content.slice(0, 180) : "");
+  const slug = raw.slug ?? slugify(title) || String(id);
+  const readingTime = computeReadingTime(content);
+  const categories = normalizeBlogCategories(raw.categories);
+  const tags = Array.isArray(raw.tags) ? raw.tags.map((t) => String(t)) : [];
+  const author =
+    (typeof raw.author === "string" && raw.author) ||
+    (typeof raw.author_name === "string" && raw.author_name) ||
+    (raw.author_id !== undefined ? String(raw.author_id) : "");
+  const seo: BlogSEO = raw.seo ?? {
+    title,
+    description: excerpt,
+    canonicalUrl:
+      process.env.NEXT_PUBLIC_SITE_URL && slug ? `${process.env.NEXT_PUBLIC_SITE_URL}/blogs/${slug}` : undefined,
+    ogImage: raw.image ?? raw.heroImage,
+  };
+  const metrics = raw.metrics ?? (raw.views ? { views: raw.views } : undefined);
+  const canonicalUrl =
+    raw.seo?.canonicalUrl ||
+    raw.canonicalUrl ||
+    (process.env.NEXT_PUBLIC_SITE_URL && slug ? `${process.env.NEXT_PUBLIC_SITE_URL}/blogs/${slug}` : undefined);
 
   return {
     id: String(id),
     title,
+    subtitle: raw.subtitle,
+    slug,
     date,
-    author: authorId !== undefined ? String(authorId) : "",
+    author,
     excerpt,
+    summary: raw.summary ?? excerpt,
     content,
-    image: raw.image ?? "",
-    categories: [],
-    createdAt: date,
-    updatedAt: date,
+    format,
+    contentHtml: raw.html,
+    image: raw.image ?? raw.heroImage ?? "",
+    heroImage: raw.heroImage,
+    coverAlt: raw.coverAlt,
+    tags,
+    categories,
+    createdAt: createdAt || date,
+    updatedAt: updatedAt || date,
+    publishAt: publishAt || date,
+    unpublishAt: undefined,
+    status: (raw.status as BlogStatus) || "published",
+    seo,
+    metrics,
+    featured: raw.pinned ?? false,
+    locale: raw.locale,
+    readingTimeMinutes: readingTime,
+    canonicalUrl,
   };
 };
 
@@ -117,24 +209,23 @@ export const getAllBlogs = async (): Promise<Blog[]> => {
   }
 
   const raw = await response.text();
-  type RawPost = { id?: number | string; title?: string; content?: string; createdAt?: string; image?: string };
-  let list: RawPost[] = [];
+  let list: RawBlogPost[] = [];
   try {
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) {
-      list = parsed as RawPost[];
+      list = parsed as RawBlogPost[];
     } else if (parsed && typeof parsed === "object" && Array.isArray((parsed as { posts?: unknown }).posts)) {
-      list = (parsed as { posts: RawPost[] }).posts;
+      list = (parsed as { posts: RawBlogPost[] }).posts;
     }
   } catch {
     list = [];
   }
-  const posts: RawPost[] = Array.isArray(list) ? list : [];
+  const posts: RawBlogPost[] = Array.isArray(list) ? list : [];
 
   return posts
-    .map((post) => normalizeBlog(post as RawPost))
+    .map((post) => normalizeBlog(post))
     .filter((p): p is Blog => Boolean(p))
-    .sort((a, b) => b.date.localeCompare(a.date));
+    .sort((a, b) => (b.publishAt ?? b.date).localeCompare(a.publishAt ?? a.date));
 };
 
 /**
@@ -156,7 +247,7 @@ export const getBlogById = async (id: string): Promise<Blog | null> => {
   const json = (await response
     .json()
     .catch(() => ({} as BlogSingleResponse))) as BlogSingleResponse;
-  const normalized = normalizeBlog(json.post);
+  const normalized = normalizeBlog(json.post ?? (json as unknown as RawBlogPost));
   return normalized ?? null;
 };
 
@@ -352,6 +443,20 @@ type RawUser = Partial<User> & {
   email?: string | null;
   role?: string | null;
   avatar?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  lastLoginAt?: string | null;
+  lastLoginIp?: string | null;
+  lastLoginDevice?: string | null;
+  lastLoginCountry?: string | null;
+  lastLoginCity?: string | null;
+  source?: string | null;
+  // Common snake_case fallbacks from backend
+  last_login_at?: string | null;
+  last_login_ip?: string | null;
+  last_login_device?: string | null;
+  last_login_country?: string | null;
+  last_login_city?: string | null;
 };
 
 type AuthMePayload = {
@@ -371,13 +476,37 @@ const normalizeUser = (raw: RawUser | null | undefined): User | null => {
  
   const role = (raw.role ?? "user").toString().toLowerCase();
 
+  // Normalize optional metadata
+  const lastLoginAt =
+    raw.lastLoginAt ??
+    (raw as { last_login_at?: string | null }).last_login_at ??
+    (raw as { lastLogin?: string | null }).lastLogin ??
+    null;
+
+  const lastLoginIp =
+    raw.lastLoginIp ?? (raw as { last_login_ip?: string | null }).last_login_ip ?? null;
+  const lastLoginDevice =
+    raw.lastLoginDevice ?? (raw as { last_login_device?: string | null }).last_login_device ?? null;
+  const lastLoginCountry =
+    raw.lastLoginCountry ?? (raw as { last_login_country?: string | null }).last_login_country ?? null;
+  const lastLoginCity =
+    raw.lastLoginCity ?? (raw as { last_login_city?: string | null }).last_login_city ?? null;
+
   return {
     id: String(id), 
     email,
-  role: role === "admin" ? "admin" : role === "moderator" ? "moderator" : "user",
+    role: role === "admin" ? "admin" : role === "moderator" ? "moderator" : "user",
     username: raw.username ?? undefined,
     displayName: raw.displayName ?? raw.name ?? undefined,
     avatar: raw.avatar ?? undefined,
+    createdAt: raw.createdAt ?? undefined,
+    updatedAt: raw.updatedAt ?? undefined,
+    lastLoginAt: lastLoginAt ?? undefined,
+    lastLoginIp: lastLoginIp ?? undefined,
+    lastLoginDevice: lastLoginDevice ?? undefined,
+    lastLoginCountry: lastLoginCountry ?? undefined,
+    lastLoginCity: lastLoginCity ?? undefined,
+    source: raw.source ? (raw.source as string) : undefined,
   };
 };
 
@@ -469,6 +598,32 @@ const normalizeProject = (project: unknown): Project | null => {
     return typeof value === "string" ? value : undefined;
   };
 
+  const getNum = (obj: unknown, key: string): number | undefined => {
+    if (!obj || typeof obj !== "object") return undefined;
+    const value = (obj as Record<string, unknown>)[key];
+    if (typeof value === "number") return value;
+    if (typeof value === "string") {
+      const parsed = parseFloat(value);
+      return isNaN(parsed) ? undefined : parsed;
+    }
+    return undefined;
+  };
+
+  const getArray = (obj: unknown, key: string): unknown[] | undefined => {
+    if (!obj || typeof obj !== "object") return undefined;
+    const value = (obj as Record<string, unknown>)[key];
+    if (Array.isArray(value)) return value;
+    if (typeof value === "string") {
+      try {
+        const parsed = JSON.parse(value);
+        if (Array.isArray(parsed)) return parsed;
+      } catch {
+        return undefined;
+      }
+    }
+    return undefined;
+  };
+
   const out: Project = {
     id: String(id),
     name: String(name),
@@ -486,6 +641,18 @@ const normalizeProject = (project: unknown): Project | null => {
       undefined,
     status,
     type,
+    // App Store fields
+    tagline: getStr(candidate, "tagline"),
+    version: getStr(candidate, "version"),
+    links: getArray(candidate, "links") as Project["links"],
+    platforms: getArray(candidate, "platforms") as ProjectPlatform[] | undefined,
+    categories: getArray(candidate, "categories") as string[] | undefined,
+    screenshots: getArray(candidate, "screenshots") as Project["screenshots"],
+    features: getArray(candidate, "features") as Project["features"],
+    rating: getNum(candidate, "rating"),
+    reviewCount: getNum(candidate, "reviewCount"),
+    downloadCount: getNum(candidate, "downloadCount"),
+    viewCount: getNum(candidate, "viewCount"),
     lastUpdatedAt:
       typeof candidate.updatedAt === "string"
         ? candidate.updatedAt
@@ -536,7 +703,7 @@ export const getAllProjects = async (
 };
 
 export const createProject = async (
-  { name, description, status, type, logoUrl }: Project,
+  data: Partial<Project> & { name: string },
   token: string
 ): Promise<Project | null> => {
   if (!token) {
@@ -550,7 +717,7 @@ export const createProject = async (
       Accept: "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ name, description, status, type, logoUrl }),
+    body: JSON.stringify(data),
   });
 
   if (!response.ok) {
@@ -812,32 +979,53 @@ export const deleteContactSubscription = async (id: string | number, token: stri
 };
 
 // --- Blogs: create a new blog post (admin) ---
-export const createBlog = async (
-  payload: {
-    title: string;
-    content: string; // markdown or html
-    excerpt?: string;
-    image?: string; // thumbnail url
-    categories?: string[]; // names or ids depending on backend
-    author?: string;
-  },
-  token: string
-): Promise<Blog | null> => {
+export type BlogSavePayload = {
+  id?: string | number;
+  title: string;
+  slug?: string;
+  subtitle?: string;
+  content: string; // markdown or html
+  format?: "markdown" | "html";
+  excerpt?: string;
+  image?: string; // thumbnail url
+  heroImage?: string;
+  coverAlt?: string;
+  categories?: string[]; // names or ids depending on backend
+  tags?: string[];
+  status?: BlogStatus;
+  publishAt?: string;
+  seo?: BlogSEO;
+  author?: string;
+};
+
+const buildBlogRequestBody = (payload: BlogSavePayload, token: string) => ({
+  title: payload.title,
+  slug: payload.slug ?? slugify(payload.title),
+  subtitle: payload.subtitle,
+  content: payload.content,
+  format: payload.format ?? "markdown",
+  excerpt: payload.excerpt,
+  image: payload.image ?? payload.heroImage ?? undefined,
+  heroImage: payload.heroImage ?? undefined,
+  coverAlt: payload.coverAlt ?? undefined,
+  categories: payload.categories ?? undefined,
+  tags: payload.tags ?? undefined,
+  status: payload.status ?? undefined,
+  publishAt: payload.publishAt ?? undefined,
+  seo: payload.seo ?? undefined,
+  token, // required by backend to resolve author
+});
+
+export const createBlog = async (payload: BlogSavePayload, token: string): Promise<Blog | null> => {
   if (!token) throw new Error("Yetkilendirme anahtarı eksik.");
 
-  // Backend expects token in the JSON body (not Authorization header)
   const response = await fetch(BLOGS_API_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
     },
-    body: JSON.stringify({
-      title: payload.title,
-      content: payload.content,
-      image: payload.image ?? undefined,
-      token, // required by backend to resolve author
-    }),
+    body: JSON.stringify(buildBlogRequestBody(payload, token)),
   });
 
   if (!response.ok) {
@@ -847,7 +1035,34 @@ export const createBlog = async (
   const json = (await response
     .json()
     .catch(() => ({} as BlogSingleResponse))) as BlogSingleResponse;
-  const normalized = normalizeBlog(json.post);
+  const normalized = normalizeBlog(json.post ?? (json as unknown as RawBlogPost));
+  return normalized ?? null;
+};
+
+export const updateBlog = async (
+  id: string | number,
+  payload: BlogSavePayload,
+  token: string
+): Promise<Blog | null> => {
+  if (!token) throw new Error("Yetkilendirme anahtarı eksik.");
+
+  const response = await fetch(`${BLOGS_API_URL}/${encodeURIComponent(String(id))}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(buildBlogRequestBody({ ...payload, id }, token)),
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const json = (await response
+    .json()
+    .catch(() => ({} as BlogSingleResponse))) as BlogSingleResponse;
+  const normalized = normalizeBlog(json.post ?? (json as unknown as RawBlogPost));
   return normalized ?? null;
 };
 
@@ -877,6 +1092,44 @@ export const uploadImage = async (
   if (typeof json.dataUrl === "string") out.dataUrl = json.dataUrl;
   if (typeof json.filename === "string") out.filename = json.filename;
   return out;
+};
+
+const postJson = async (url: string, body: unknown) => {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  return res;
+};
+
+export const requestPasswordReset = async (email: string): Promise<boolean> => {
+  const endpoints = [`${API_BASE}/account/forgot-password`, `${API_BASE}/auth/forgot-password`];
+  for (const url of endpoints) {
+    try {
+      const res = await postJson(url, { email });
+      if (res.ok) return true;
+    } catch {
+      // try next
+    }
+  }
+  return false;
+};
+
+export const resetPassword = async (token: string, password: string): Promise<boolean> => {
+  const endpoints = [`${API_BASE}/account/reset-password`, `${API_BASE}/auth/reset-password`];
+  for (const url of endpoints) {
+    try {
+      const res = await postJson(url, { token, password });
+      if (res.ok) return true;
+    } catch {
+      // try next
+    }
+  }
+  return false;
 };
 
 // Presigned upload (S3/MinIO)

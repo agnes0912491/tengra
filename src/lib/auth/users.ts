@@ -7,6 +7,21 @@ import {
 } from "../db";
 
 export type Role = "admin" | "moderator" | "user";
+export type UserSource = "geofrontier" | "lova" | "tengra" | "biodefenders";
+
+export type UserSession = {
+  id: string;
+  ipAddress: string;
+  userAgent: string;
+  device: string;
+  browser: string;
+  os: string;
+  country?: string;
+  city?: string;
+  lastActiveAt: string;
+  createdAt: string;
+  isCurrent: boolean;
+};
 
 export type User = {
   id: string; 
@@ -15,6 +30,17 @@ export type User = {
   username?: string;
   displayName?: string | null;
   avatar?: string | null;
+  phoneNumber?: string | null;
+  bio?: string | null;
+  source?: UserSource;
+  createdAt?: string;
+  updatedAt?: string;
+  lastLoginAt?: string | null;
+  lastLoginIp?: string | null;
+  lastLoginDevice?: string | null;
+  lastLoginCountry?: string | null;
+  lastLoginCity?: string | null;
+  sessions?: UserSession[];
 };
 
 type AuthenticatedUser = { authToken: AuthUserPayload; user: User };

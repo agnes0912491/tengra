@@ -7,7 +7,7 @@ type AuthMeResponse = { user?: { role?: string | null } | null };
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:5000";
 const BACKEND_AUTH_ME = `${API_BASE}/auth/me`;
 
-const PUBLIC_PATH_PREFIXES = ["/admin/login", "/forum"];
+const PUBLIC_PATH_PREFIXES = ["/login", "/register", "/forgot-password", "/reset-password", "/forum"];
 
 const stripLocaleFromPath = (pathname: string) => {
   const segments = pathname.split("/").filter(Boolean);
@@ -73,12 +73,12 @@ export async function proxy(request: NextRequest) {
   }
 
   if (!isProd) {
-    if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
+    if (pathname.startsWith("/admin") && pathname !== "/login") {
       const sessionToken = resolveAdminSessionToken(
         (name) => request.cookies.get(name)?.value
       );
       if (!sessionToken) {
-        const loginUrl = new URL("/admin/login", request.url);
+        const loginUrl = new URL("/login", request.url);
         loginUrl.searchParams.set("next", pathname);
         return applyLocaleCookie(NextResponse.redirect(loginUrl));
       }
@@ -109,7 +109,7 @@ export async function proxy(request: NextRequest) {
   } else {
     // Admin auth
     const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
-    const isAdminPublic = pathname === "/admin/login";
+    const isAdminPublic = false;
 
     if (!isAdminRoute) {
       response = NextResponse.next();
@@ -148,7 +148,7 @@ export async function proxy(request: NextRequest) {
         (name) => request.cookies.get(name)?.value
       );
       if (!sessionToken) {
-        const loginUrl = new URL("/admin/login", request.url);
+        const loginUrl = new URL("/login", request.url);
         loginUrl.searchParams.set("next", pathname);
         response = NextResponse.redirect(loginUrl);
       } else {
@@ -160,13 +160,13 @@ export async function proxy(request: NextRequest) {
             signal: AbortSignal.timeout(3000),
           });
           if (!res.ok) {
-            const loginUrl = new URL("/admin/login", request.url);
+            const loginUrl = new URL("/login", request.url);
             loginUrl.searchParams.set("next", pathname);
             response = NextResponse.redirect(loginUrl);
           } else {
             const data = (await res.json().catch(() => ({}))) as AuthMeResponse;
             if (!data.user || (data.user.role !== "admin" && data.user.role !== "ADMIN")) {
-              const loginUrl = new URL("/admin/login", request.url);
+              const loginUrl = new URL("/login", request.url);
               loginUrl.searchParams.set("next", pathname);
               response = NextResponse.redirect(loginUrl);
             } else {
@@ -174,7 +174,7 @@ export async function proxy(request: NextRequest) {
             }
           }
         } catch {
-          const loginUrl = new URL("/admin/login", request.url);
+          const loginUrl = new URL("/login", request.url);
           loginUrl.searchParams.set("next", pathname);
           response = NextResponse.redirect(loginUrl);
         }
@@ -184,8 +184,8 @@ export async function proxy(request: NextRequest) {
 
   // Production CSP headers
   if (isProd) {
-    const nonce = `${crypto.randomUUID()}${Math.random().toString(36).slice(2)}`;
-    
+    const nonce = request.headers.get("x-nonce") || crypto.randomUUID();
+
     const scriptSrc = [
       "'self'",
       `'nonce-${nonce}'`,
@@ -208,6 +208,8 @@ export async function proxy(request: NextRequest) {
       "https://pagead2.googlesyndication.com",
     ].join(" ");
 
+    // Explicit CSP to avoid upstream defaults like script-src 'none' being applied
+    response.headers.delete("Content-Security-Policy-Report-Only");
     response.headers.set(
       "Content-Security-Policy",
       [
@@ -225,6 +227,10 @@ export async function proxy(request: NextRequest) {
         "upgrade-insecure-requests",
       ].join("; ")
     );
+
+    // Soften COEP/CORP to allow our CDN assets (images/fonts) without blocking
+    response.headers.set("Cross-Origin-Embedder-Policy", "unsafe-none");
+    response.headers.set("Cross-Origin-Resource-Policy", "cross-origin");
 
     response.headers.set("X-Content-Type-Options", "nosniff");
     response.headers.set("X-Frame-Options", "DENY");

@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 
 import AdminPageHeader from "@/components/admin/admin-page-header";
-import ProjectsTable from "@/components/admin/projects/projects-table";
+import ProjectsAdmin from "@/components/admin/projects/projects-admin";
 import { resolveAdminSessionToken } from "@/lib/auth";
 import { getAllProjects } from "@/lib/db";
 
@@ -14,10 +14,9 @@ export default async function AdminProjectsPage() {
     <div className="flex flex-col gap-8">
       <AdminPageHeader
         title="Projeler"
-        description="Stüdyonun vitrinindeki projeleri güncelleyin veya yenilerini ekleyin."
-        ctaLabel="Yeni Proje"
+        description="App Store tarzında proje yönetimi. Ekran görüntüleri, özellikler ve daha fazlasını düzenleyin."
       />
-      <ProjectsTable projects={projects} />
+      <ProjectsAdmin projects={projects} />
     </div>
   );
 }

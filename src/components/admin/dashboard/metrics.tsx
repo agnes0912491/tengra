@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Cookies from "js-cookie";
-import { getServerHealth, getTopBlogViews, getTopPages, getTopAgents, getVisits, incrementPageView, type ServerHealth } from "@/lib/db";
-import { ADMIN_SESSION_COOKIE_CANDIDATES } from "@/lib/auth";
+import { getServerHealth, getTopBlogViews, getTopPages, getTopAgents, getVisits, type ServerHealth } from "@/lib/db";
 import StatCard from "@/components/admin/ui/stat-card";
 import ChartCard from "@/components/admin/ui/chart-card";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { useAdminToken } from "@/hooks/use-admin-token";
 
 type Visit = { date: string; count: number };
 type RangeKey = "daily" | "weekly" | "monthly";
@@ -60,44 +59,35 @@ export default function AdminMetrics() {
     const [range, setRange] = useState<RangeKey>("weekly");
     const [pagePage, setPagePage] = useState(0);
     const [agentPage, setAgentPage] = useState(0);
+    const [error, setError] = useState<string | null>(null);
+    const [adblockEnabled, setAdblockEnabled] = useState<"true" | "false" | "unknown">("unknown");
+    const [reloadAt, setReloadAt] = useState<number>(0);
     const feUptime = useFrontendUptime();
 
-    const token = useMemo(() => {
-        if (typeof window === "undefined") return "";
-        return (
-            window.localStorage.getItem("authToken") ||
-            ADMIN_SESSION_COOKIE_CANDIDATES.map((name) => Cookies.get(name)).find(Boolean) ||
-            ""
-        );
-    }, []);
+    const { token, refresh } = useAdminToken();
 
     useEffect(() => {
         let mounted = true;
         const load = async () => {
-            const [h, v, t, p, a] = await Promise.all([
-                getServerHealth(token).catch(() => ({ status: "offline" as const })),
-                // prefer short-lived caching on server
-                token ? getVisits(token).catch(() => []) : Promise.resolve([]),
-                token ? getTopBlogViews(token).catch(() => []) : Promise.resolve([]),
-                token ? getTopPages(token).catch(() => []) : Promise.resolve([]),
-                token ? getTopAgents(token).catch(() => []) : Promise.resolve([]),
-            ]);
-            if (!mounted) return;
-            setHealth(h);
-            setVisits(v);
-            setTopBlogs(t);
-            setTopPages(p);
-            setTopAgents(a);
-            // If visits table is empty, trigger a lightweight increment to seed data, then refetch once.
-            if ((v?.length ?? 0) === 0 && typeof window !== "undefined") {
-                const path = window.location?.pathname || "/";
-                const ua = window.navigator?.userAgent || "";
-                incrementPageView(path, ua).finally(async () => {
-                    const refreshed = await getVisits(token).catch(() => []);
-                    if (mounted) {
-                        setVisits(refreshed);
-                    }
-                });
+            setError(null);
+            try {
+                const [h, v, t, p, a] = await Promise.all([
+                    getServerHealth(token).catch(() => ({ status: "offline" as const })),
+                    token ? getVisits(token).catch(() => []) : Promise.resolve([]),
+                    token ? getTopBlogViews(token).catch(() => []) : Promise.resolve([]),
+                    token ? getTopPages(token).catch(() => []) : Promise.resolve([]),
+                    token ? getTopAgents(token).catch(() => []) : Promise.resolve([]),
+                ]);
+                if (!mounted) return;
+                setHealth(h);
+                setVisits(v);
+                setTopBlogs(t);
+                setTopPages(p);
+                setTopAgents(a);
+                if (!token) setError("Yetkilendirme bulunamadı.");
+            } catch {
+                if (!mounted) return;
+                setError("Veriler alınamadı. Oturum veya ağ bağlantısını kontrol edin.");
             }
         };
         load();
@@ -106,7 +96,7 @@ export default function AdminMetrics() {
             mounted = false;
             clearInterval(id);
         };
-    }, [token]);
+    }, [token, reloadAt]);
 
     const filteredVisits = useMemo(() => {
         if (!visits.length) return [];
@@ -153,8 +143,52 @@ export default function AdminMetrics() {
         return value;
     };
 
+    useEffect(() => {
+        const read = () => {
+            if (typeof document === "undefined") return;
+            const flag = document.documentElement.dataset.adblock;
+            if (flag === "true" || flag === "false") {
+                setAdblockEnabled(flag);
+            } else {
+                setAdblockEnabled("unknown");
+            }
+        };
+        read();
+        const handler = (e: Event) => {
+            const detail = (e as CustomEvent<{ enabled?: boolean }>).detail;
+            if (detail && typeof detail.enabled === "boolean") {
+                setAdblockEnabled(detail.enabled ? "true" : "false");
+            } else {
+                read();
+            }
+        };
+        window.addEventListener("tengra:adblock-detected", handler);
+        return () => window.removeEventListener("tengra:adblock-detected", handler);
+    }, []);
+
+    const handleRefresh = () => {
+        refresh();
+        setReloadAt(Date.now());
+    };
+
     return (
         <div className="flex flex-col gap-6">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,18,26,0.75)] px-4 py-3 text-sm text-[rgba(255,255,255,0.8)]">
+                <div className="flex items-center gap-3">
+                    <span className="text-[rgba(255,255,255,0.6)]">Adblock</span>
+                    <span className="rounded-full border border-[rgba(110,211,225,0.35)] bg-[rgba(8,24,32,0.8)] px-3 py-1 text-xs uppercase tracking-[0.2em]">
+                        {adblockEnabled === "unknown" ? "Bilinmiyor" : adblockEnabled === "true" ? "Açık" : "Kapalı"}
+                    </span>
+                    {error ? <span className="text-[rgba(255,150,150,0.85)]">{error}</span> : null}
+                </div>
+                <button
+                    type="button"
+                    onClick={handleRefresh}
+                    className="rounded-full border border-[rgba(110,211,225,0.35)] px-3 py-1 text-xs uppercase tracking-[0.25em] text-[rgba(255,255,255,0.9)] hover:border-[rgba(110,211,225,0.6)]"
+                >
+                    Yenile
+                </button>
+            </div>
             {/* Sistem Sağlığı */}
             <StatCard title="Sistem Sağlığı">
                 <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
@@ -306,8 +340,8 @@ export default function AdminMetrics() {
                                 key={key}
                                 onClick={() => setRange(key)}
                                 className={`rounded-full px-3 py-1 transition ${range === key
-                                        ? "bg-[rgba(110,211,225,0.25)] text-white"
-                                        : "text-[rgba(255,255,255,0.7)] hover:text-white"
+                                    ? "bg-[rgba(110,211,225,0.25)] text-white"
+                                    : "text-[rgba(255,255,255,0.7)] hover:text-white"
                                     }`}
                             >
                                 {key === "daily" ? "Günlük" : key === "weekly" ? "Haftalık" : "Aylık"}

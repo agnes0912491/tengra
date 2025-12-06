@@ -1,7 +1,6 @@
 import AdminPageHeader from "@/components/admin/admin-page-header";
-import BlogsTable from "@/components/admin/blogs/blogs-table";
+import BlogStudio from "@/components/admin/blogs/blog-studio";
 import { getAllBlogs } from "@/lib/db";
-import BlogCreateCta from "@/components/admin/blogs/blog-create-cta";
 
 export default async function AdminBlogsPage() {
   const blogs = await getAllBlogs().catch(() => []);
@@ -11,9 +10,8 @@ export default async function AdminBlogsPage() {
       <AdminPageHeader
         title="Bloglar"
         description="Stüdyonun hikayelerini ve araştırmalarını buradan yönetin."
-        actions={<BlogCreateCta />}
       />
-      <BlogsTable blogs={blogs} />
+      <BlogStudio initialBlogs={blogs} />
     </div>
   );
 }

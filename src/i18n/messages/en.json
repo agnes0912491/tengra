@@ -23,6 +23,7 @@
     "pillThree": "Experimental infrastructures"
   },
   "Navigation": {
+    "home": "Home",
     "goals": "Goals",
     "projects": "Projects",
     "network": "Network",
@@ -30,7 +31,8 @@
     "blogs": "Blog",
     "faq": "F.A.Q.",
     "forum": "Forum",
-    "contact": "Contact"
+    "contact": "Contact",
+    "docs": "API Docs"
   },
   "Projects": {
     "title": "Projects", 
@@ -98,8 +100,9 @@
     "blogs": "Blogs",
     "admin": "Admin",
     "greeting": "Hello, {name}",
-    "logout": "Log out",
-    "login": "Log in"
+    "logout": "Logout",
+    "login": "Sign In",
+    "register": "Sign Up"
   },
   "LocaleSwitcher": {
     "label": "Language",
@@ -256,5 +259,129 @@
   },
   "NotFound": {
     "title": "Page not found"
+  },
+  "Auth": {
+    "backToHome": "Back to home",
+    "login": {
+      "title": "Sign In",
+      "description": "Sign in to your account to continue",
+      "emailLabel": "Email",
+      "emailPlaceholder": "example@email.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "••••••••",
+      "forgotPassword": "Forgot password?",
+      "or": "or",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Sign up",
+      "button": {
+        "submit": "Sign In",
+        "loading": "Signing in..."
+      },
+      "toast": {
+        "success": "Successfully signed in!",
+        "missingCredentials": "Email and password are required",
+        "invalidCredentials": "Invalid email or password",
+        "requires2FA": "Two-factor authentication required — please check your email",
+        "genericError": "An error occurred. Please try again."
+      }
+    },
+    "register": {
+      "title": "Sign Up",
+      "description": "Create a new account",
+      "usernameLabel": "Username",
+      "usernamePlaceholder": "username",
+      "emailLabel": "Email",
+      "emailPlaceholder": "example@email.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "••••••••",
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "••••••••",
+      "passwordMismatch": "Passwords do not match",
+      "password": {
+        "minLength": "At least 8 characters",
+        "uppercase": "Uppercase letter",
+        "lowercase": "Lowercase letter",
+        "number": "Number"
+      },
+      "terms": {
+        "prefix": "By signing up, you agree to our",
+        "termsLink": "Terms of Service",
+        "and": "and",
+        "privacyLink": "Privacy Policy",
+        "suffix": "."
+      },
+      "or": "or",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in",
+      "button": {
+        "submit": "Sign Up",
+        "loading": "Creating account..."
+      },
+      "toast": {
+        "success": "Your account has been created!",
+        "missingFields": "Please fill in all fields",
+        "passwordMismatch": "Passwords do not match",
+        "weakPassword": "Password is not strong enough",
+        "genericError": "Registration failed. Please try again."
+      }
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "subtitle": "Get a password reset link",
+      "description": "Enter your email address and we'll send you a link to reset your password.",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "example@email.com",
+      "submit": "Send Reset Link",
+      "sending": "Sending...",
+      "backToLogin": "Back to login",
+      "sentTitle": "Email Sent!",
+      "sentDescription": "If an account exists with this email, a password reset link has been sent. Check your inbox and spam folder.",
+      "tryAnother": "Try another email",
+      "securityNote": "For your security, password reset links expire after 30 minutes.",
+      "toast": {
+        "success": "Password reset link sent",
+        "emailRequired": "Email address is required",
+        "invalidEmail": "Please enter a valid email address"
+      }
+    },
+    "resetPassword": {
+      "title": "Set New Password",
+      "subtitle": "Create a new password for your account",
+      "newPasswordLabel": "New Password",
+      "newPasswordPlaceholder": "••••••••",
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "••••••••",
+      "submit": "Reset Password",
+      "resetting": "Resetting...",
+      "backToLogin": "Back to login",
+      "passwordsMatch": "Passwords match",
+      "passwordsDontMatch": "Passwords don't match",
+      "requirements": {
+        "length": "At least 8 characters",
+        "uppercase": "At least one uppercase letter",
+        "lowercase": "At least one lowercase letter",
+        "number": "At least one number"
+      },
+      "success": {
+        "title": "Password Changed!",
+        "description": "Your password has been successfully updated. You can now sign in with your new password.",
+        "loginButton": "Sign In"
+      },
+      "invalidLink": {
+        "title": "Invalid Link",
+        "description": "This password reset link is invalid or has expired.",
+        "requestNew": "Request a new link"
+      },
+      "errors": {
+        "missingToken": "Invalid or missing reset link",
+        "expiredToken": "Password reset link has expired",
+        "generic": "An error occurred. Please try again."
+      },
+      "toast": {
+        "success": "Your password has been changed!",
+        "weakPassword": "Password requirements not met",
+        "passwordMismatch": "Passwords don't match"
+      }
+    }
   }
 }

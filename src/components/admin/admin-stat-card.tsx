@@ -9,15 +9,34 @@ type Props = {
   tone?: "default" | "success" | "warning" | "danger";
 };
 
-const toneClasses: Record<NonNullable<Props["tone"]>, string> = {
-  default:
-    "from-[rgba(8,32,41,0.7)] via-[rgba(6,24,33,0.65)] to-[rgba(2,14,19,0.7)]",
-  success:
-    "from-[rgba(12,52,40,0.75)] via-[rgba(10,68,56,0.7)] to-[rgba(2,20,18,0.75)]",
-  warning:
-    "from-[rgba(54,42,22,0.75)] via-[rgba(66,52,28,0.7)] to-[rgba(24,18,10,0.75)]",
-  danger:
-    "from-[rgba(54,20,24,0.75)] via-[rgba(72,26,30,0.7)] to-[rgba(28,10,12,0.75)]",
+const toneClasses: Record<NonNullable<Props["tone"]>, { bg: string; border: string; glow: string }> = {
+  default: {
+    bg: "bg-[rgba(15,31,54,0.6)]",
+    border: "border-[rgba(72,213,255,0.12)]",
+    glow: "bg-[radial-gradient(circle,rgba(30,184,255,0.15)_0%,transparent_70%)]",
+  },
+  success: {
+    bg: "bg-[rgba(15,54,40,0.6)]",
+    border: "border-[rgba(34,197,94,0.2)]",
+    glow: "bg-[radial-gradient(circle,rgba(34,197,94,0.15)_0%,transparent_70%)]",
+  },
+  warning: {
+    bg: "bg-[rgba(54,42,22,0.6)]",
+    border: "border-[rgba(234,179,8,0.2)]",
+    glow: "bg-[radial-gradient(circle,rgba(234,179,8,0.15)_0%,transparent_70%)]",
+  },
+  danger: {
+    bg: "bg-[rgba(54,20,24,0.6)]",
+    border: "border-[rgba(239,68,68,0.2)]",
+    glow: "bg-[radial-gradient(circle,rgba(239,68,68,0.15)_0%,transparent_70%)]",
+  },
+};
+
+const valueColors: Record<NonNullable<Props["tone"]>, string> = {
+  default: "text-[var(--color-turkish-blue-300)]",
+  success: "text-emerald-400",
+  warning: "text-amber-400",
+  danger: "text-red-400",
 };
 
 export default function AdminStatCard({
@@ -27,29 +46,38 @@ export default function AdminStatCard({
   icon,
   tone = "default",
 }: Props) {
+  const { bg, border, glow } = toneClasses[tone];
+
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-3xl border border-[rgba(110,211,225,0.16)] p-6",
-        "shadow-[0_22px_60px_rgba(0,0,0,0.4)] backdrop-blur-xl",
-        "bg-gradient-to-br",
-        toneClasses[tone]
+        "relative overflow-hidden rounded-2xl p-6 backdrop-blur-xl",
+        "shadow-[0_20px_50px_rgba(0,0,0,0.3),0_0_20px_rgba(30,184,255,0.05)]",
+        "hover:shadow-[0_25px_60px_rgba(0,0,0,0.4),0_0_30px_rgba(30,184,255,0.08)]",
+        "hover:-translate-y-0.5 transition-all duration-300",
+        bg,
+        border,
+        "border"
       )}
     >
-      <div className="absolute -left-10 -top-10 h-36 w-36 rounded-full bg-[rgba(0,167,197,0.12)] blur-3xl" />
-      <div className="relative flex items-center gap-4">
+      {/* Glow effect */}
+      <div className={cn("absolute -left-10 -top-10 h-32 w-32 rounded-full blur-3xl opacity-60", glow)} />
+
+      <div className="relative flex items-start gap-4">
         {icon ? (
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[rgba(110,211,225,0.35)] bg-[rgba(0,167,197,0.12)] text-[color:var(--color-turkish-blue-300)]">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[rgba(30,184,255,0.1)] border border-[rgba(72,213,255,0.2)] text-[var(--color-turkish-blue-300)]">
             {icon}
           </div>
         ) : null}
-        <div>
-          <p className="text-[11px] uppercase tracking-[0.22em] text-[rgba(255,255,255,0.65)]">
+        <div className="flex-1">
+          <p className="text-[11px] uppercase tracking-[0.15em] text-[var(--text-muted)] font-medium">
             {label}
           </p>
-          <p className="mt-2 text-3xl font-semibold text-white">{value}</p>
+          <p className={cn("mt-2 text-3xl font-bold", valueColors[tone])}>
+            {value}
+          </p>
           {sublabel ? (
-            <p className="mt-2 text-xs text-[rgba(255,255,255,0.7)]">{sublabel}</p>
+            <p className="mt-2 text-xs text-[var(--text-muted)] leading-relaxed">{sublabel}</p>
           ) : null}
         </div>
       </div>

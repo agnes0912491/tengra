@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { Github, X } from "lucide-react";
+import { Github, Twitter, Globe } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { resolveCdnUrl } from "@/lib/constants";
 
@@ -36,75 +36,109 @@ export default function Team() {
   const t = useTranslations("Team");
 
   return (
-    <section id="team" className="relative flex flex-col items-center justify-center py-32 px-4 text-center">
-      <h2 className="section-title mb-20 neon-text">{t("title")}</h2>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto relative z-10">
-        {team.map(({ key, image, socials }, index) => {
-          const name = t(`members.${key}.name` as const);
-          const role = t(`members.${key}.role` as const);
-          const description = t(`members.${key}.description` as const);
-
-          return (
-            <motion.div
-              key={key}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1, duration: 0.6 }}
-              viewport={{ once: true }}
-              className="glass relative overflow-hidden rounded-xl border border-[rgba(0,167,197,0.15)] hover:border-[rgba(0,167,197,0.4)] transition-all duration-500"
-            >
-              <div className="relative w-full h-56 overflow-hidden">
-                <Image crossOrigin="anonymous" src={image} alt={name} fill className="object-cover opacity-80 group-hover:scale-105 transition-all duration-700" />
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60" />
-              </div>
-
-              <div className="p-6 text-left">
-                <h3 className="text-xl font-display text-[color:var(--color-turkish-blue-400)] mb-1">{name}</h3>
-                <p className="text-[rgba(255,255,255,0.6)] text-sm mb-2">{role}</p>
-                <p className="text-xs text-[rgba(255,255,255,0.5)] leading-relaxed">{description}</p>
-              </div>
-
-              <div className="absolute top-4 right-4 flex flex-col gap-3">
-                {socials.twitter && (
-                  <a
-                    href={socials.twitter}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[rgba(255,255,255,0.6)] hover:text-[color:var(--color-turkish-blue-300)] transition-colors bg-[var(--background)] px-2 py-1 rounded-md text-xs font-medium"
-                  >
-                    <X className="inline w-5 h-5 mr-1" />
-                  </a>
-                )}
-                {socials.github && (
-                  <a
-                    href={socials.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[rgba(255,255,255,0.6)] hover:text-[color:var(--color-turkish-blue-300)] transition-colors bg-[var(--background)] px-2 py-1 rounded-md text-xs font-medium"
-                  >
-                    <Github className="inline w-5 h-5 mr-1" />
-                  </a>
-                )}
-                {socials.website && (
-                  <a
-                    href={socials.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[rgba(255,255,255,0.6)] hover:text-[color:var(--color-turkish-blue-300)] transition-colors bg-[var(--background)] px-2 py-1 rounded-md text-xs font-medium"
-                  >
-                    {t("website")}
-                  </a>
-                )}
-              </div>
-
-              <div className="absolute inset-0 rounded-xl pointer-events-none opacity-0 hover:opacity-100 transition-all duration-700 shadow-[0_0_25px_rgba(0,167,197,0.4)]" />
-            </motion.div>
-          );
-        })}
+    <section id="team" className="relative py-24 md:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-[radial-gradient(circle,rgba(30,184,255,0.08)_0%,transparent_60%)]" />
       </div>
 
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,167,197,0.05)_0%,transparent_70%)] blur-3xl pointer-events-none" />
+      <div className="relative z-10 max-w-6xl mx-auto">
+        {/* Section Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <h2 className="section-title">{t("title")}</h2>
+          <div className="divider mt-6 mb-6" />
+          <p className="text-[var(--text-secondary)] max-w-2xl mx-auto">
+            Meet the talented individuals behind Tengra&apos;s vision.
+          </p>
+        </motion.div>
+
+        {/* Team Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-4xl mx-auto">
+          {team.map(({ key, image, socials }, index) => {
+            const name = t(`members.${key}.name` as const);
+            const role = t(`members.${key}.role` as const);
+            const description = t(`members.${key}.description` as const);
+
+            return (
+              <motion.div
+                key={key}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1, duration: 0.5 }}
+                viewport={{ once: true }}
+                className="group"
+              >
+                <div className="relative rounded-2xl bg-[rgba(15,31,54,0.6)] border border-[rgba(72,213,255,0.12)] backdrop-blur-xl overflow-hidden hover:border-[rgba(72,213,255,0.3)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.4),0_0_30px_rgba(30,184,255,0.1)] hover:-translate-y-1 transition-all duration-300">
+                  {/* Image Container */}
+                  <div className="relative h-64 overflow-hidden">
+                    <Image
+                      crossOrigin="anonymous"
+                      src={image}
+                      alt={name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[rgba(15,31,54,1)] via-[rgba(15,31,54,0.3)] to-transparent" />
+
+                    {/* Social Links Overlay */}
+                    <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      {socials.twitter && (
+                        <a
+                          href={socials.twitter}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 rounded-lg bg-[rgba(15,31,54,0.9)] border border-[rgba(72,213,255,0.2)] text-[var(--text-muted)] hover:text-[var(--color-turkish-blue-400)] hover:border-[rgba(72,213,255,0.4)] transition-all"
+                        >
+                          <Twitter className="w-4 h-4" />
+                        </a>
+                      )}
+                      {socials.github && (
+                        <a
+                          href={socials.github}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 rounded-lg bg-[rgba(15,31,54,0.9)] border border-[rgba(72,213,255,0.2)] text-[var(--text-muted)] hover:text-[var(--color-turkish-blue-400)] hover:border-[rgba(72,213,255,0.4)] transition-all"
+                        >
+                          <Github className="w-4 h-4" />
+                        </a>
+                      )}
+                      {socials.website && (
+                        <a
+                          href={socials.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 rounded-lg bg-[rgba(15,31,54,0.9)] border border-[rgba(72,213,255,0.2)] text-[var(--text-muted)] hover:text-[var(--color-turkish-blue-400)] hover:border-[rgba(72,213,255,0.4)] transition-all"
+                        >
+                          <Globe className="w-4 h-4" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-6">
+                    <h3 className="text-xl font-display font-semibold text-[var(--text-primary)] group-hover:text-[var(--color-turkish-blue-300)] transition-colors">
+                      {name}
+                    </h3>
+                    <p className="mt-1 text-sm font-medium text-[var(--color-turkish-blue-400)]">
+                      {role}
+                    </p>
+                    <p className="mt-3 text-sm text-[var(--text-muted)] leading-relaxed">
+                      {description}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
     </section>
   );
 }

@@ -4,9 +4,9 @@ import { cookies, headers } from "next/headers";
 import { resolvePreferredLocale } from "@/i18n/resolve-preferred-locale";
 import { getMessages } from "@/i18n/get-messages";
 
-export default function AdminGoalsPage() {
-  const cookieStore = cookies();
-  const headersList = headers();
+export default async function AdminGoalsPage() {
+  const cookieStore = await cookies();
+  const headersList = await headers();
   const { locale } = resolvePreferredLocale({
     cookieLocale: cookieStore.get("NEXT_LOCALE")?.value,
     acceptLanguage: headersList.get("accept-language"),

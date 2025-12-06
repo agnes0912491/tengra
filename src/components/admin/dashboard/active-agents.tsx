@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import Cookies from "js-cookie";
-import { ADMIN_SESSION_COOKIE_CANDIDATES } from "@/lib/auth";
+import { useEffect, useState } from "react";
 import type { ActiveAgent } from "@/lib/db";
 import { getActiveAgents } from "@/lib/db";
+import { useAdminToken } from "@/hooks/use-admin-token";
 
 type Props = {
   title?: string;
@@ -26,14 +25,7 @@ export default function ActiveAgents({ title = "Aktif Agentlar" }: Props) {
   const [agents, setAgents] = useState<ActiveAgent[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const token = useMemo(() => {
-    if (typeof window === "undefined") return "";
-    return (
-      window.localStorage.getItem("authToken") ||
-      ADMIN_SESSION_COOKIE_CANDIDATES.map((name) => Cookies.get(name)).find(Boolean) ||
-      ""
-    );
-  }, []);
+  const { token } = useAdminToken();
 
   useEffect(() => {
     let mounted = true;

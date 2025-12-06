@@ -23,6 +23,7 @@
     "pillThree": "Deneysel altyapılar"
   },
   "Navigation": {
+    "home": "Ana Sayfa",
     "goals": "Hedefler",
     "projects": "Projeler",
     "network": "Ağ",
@@ -30,7 +31,8 @@
     "blogs": "Blog",
     "faq": "S.S.S.",
     "forum": "Forum",
-    "contact": "İletişim"
+    "contact": "İletişim",
+    "docs": "API Docs"
   }, 
   "Projects": {
     "title": "Projeler", 
@@ -99,7 +101,8 @@
     "admin": "Yönetim",
     "greeting": "Merhaba, {name}",
     "logout": "Çıkış Yap",
-    "login": "Giriş Yap"
+    "login": "Giriş Yap",
+    "register": "Kayıt Ol"
   },
   "LocaleSwitcher": {
     "label": "Dil",
@@ -256,5 +259,129 @@
   },
   "NotFound": {
     "title": "Sayfa bulunamadı"
+  },
+  "Auth": {
+    "backToHome": "Ana sayfaya dön",
+    "login": {
+      "title": "Giriş Yap",
+      "description": "Hesabınıza giriş yaparak devam edin",
+      "emailLabel": "E-posta",
+      "emailPlaceholder": "ornek@email.com",
+      "passwordLabel": "Şifre",
+      "passwordPlaceholder": "••••••••",
+      "forgotPassword": "Şifremi unuttum",
+      "or": "veya",
+      "noAccount": "Hesabınız yok mu?",
+      "registerLink": "Kayıt ol",
+      "button": {
+        "submit": "Giriş Yap",
+        "loading": "Giriş yapılıyor..."
+      },
+      "toast": {
+        "success": "Başarıyla giriş yapıldı!",
+        "missingCredentials": "E-posta ve şifre gereklidir",
+        "invalidCredentials": "E-posta veya şifre hatalı",
+        "requires2FA": "İki adımlı doğrulama gerekli — lütfen e-postanızı kontrol edin",
+        "genericError": "Bir hata oluştu. Lütfen tekrar deneyin."
+      }
+    },
+    "register": {
+      "title": "Kayıt Ol",
+      "description": "Yeni bir hesap oluşturun",
+      "usernameLabel": "Kullanıcı Adı",
+      "usernamePlaceholder": "kullanici_adi",
+      "emailLabel": "E-posta",
+      "emailPlaceholder": "ornek@email.com",
+      "passwordLabel": "Şifre",
+      "passwordPlaceholder": "••••••••",
+      "confirmPasswordLabel": "Şifre Tekrar",
+      "confirmPasswordPlaceholder": "••••••••",
+      "passwordMismatch": "Şifreler eşleşmiyor",
+      "password": {
+        "minLength": "En az 8 karakter",
+        "uppercase": "Büyük harf",
+        "lowercase": "Küçük harf",
+        "number": "Rakam"
+      },
+      "terms": {
+        "prefix": "Kayıt olarak",
+        "termsLink": "Kullanım Şartları",
+        "and": "ve",
+        "privacyLink": "Gizlilik Politikası",
+        "suffix": "'nı kabul ediyorsunuz."
+      },
+      "or": "veya",
+      "hasAccount": "Zaten hesabınız var mı?",
+      "loginLink": "Giriş yap",
+      "button": {
+        "submit": "Kayıt Ol",
+        "loading": "Kayıt yapılıyor..."
+      },
+      "toast": {
+        "success": "Hesabınız başarıyla oluşturuldu!",
+        "missingFields": "Tüm alanları doldurun",
+        "passwordMismatch": "Şifreler eşleşmiyor",
+        "weakPassword": "Şifre yeterince güçlü değil",
+        "genericError": "Kayıt başarısız. Lütfen tekrar deneyin."
+      }
+    },
+    "forgotPassword": {
+      "title": "Şifremi Unuttum",
+      "subtitle": "Şifre sıfırlama bağlantısı al",
+      "description": "E-posta adresinizi girin, size şifre sıfırlama bağlantısı gönderelim.",
+      "emailLabel": "E-posta Adresi",
+      "emailPlaceholder": "ornek@email.com",
+      "submit": "Sıfırlama Bağlantısı Gönder",
+      "sending": "Gönderiliyor...",
+      "backToLogin": "Giriş sayfasına dön",
+      "sentTitle": "E-posta Gönderildi!",
+      "sentDescription": "Eğer bu e-posta ile kayıtlı bir hesap varsa, şifre sıfırlama bağlantısı gönderildi. Gelen kutunuzu ve spam klasörünüzü kontrol edin.",
+      "tryAnother": "Başka bir e-posta dene",
+      "securityNote": "Güvenliğiniz için şifre sıfırlama bağlantıları 30 dakika içinde geçersiz olur.",
+      "toast": {
+        "success": "Şifre sıfırlama bağlantısı gönderildi",
+        "emailRequired": "E-posta adresi gerekli",
+        "invalidEmail": "Geçerli bir e-posta adresi girin"
+      }
+    },
+    "resetPassword": {
+      "title": "Yeni Şifre Belirle",
+      "subtitle": "Hesabınız için yeni bir şifre oluşturun",
+      "newPasswordLabel": "Yeni Şifre",
+      "newPasswordPlaceholder": "••••••••",
+      "confirmPasswordLabel": "Şifre Tekrar",
+      "confirmPasswordPlaceholder": "••••••••",
+      "submit": "Şifreyi Değiştir",
+      "resetting": "Değiştiriliyor...",
+      "backToLogin": "Giriş sayfasına dön",
+      "passwordsMatch": "Şifreler eşleşiyor",
+      "passwordsDontMatch": "Şifreler eşleşmiyor",
+      "requirements": {
+        "length": "En az 8 karakter",
+        "uppercase": "En az bir büyük harf",
+        "lowercase": "En az bir küçük harf",
+        "number": "En az bir rakam"
+      },
+      "success": {
+        "title": "Şifre Değiştirildi!",
+        "description": "Şifreniz başarıyla güncellendi. Artık yeni şifrenizle giriş yapabilirsiniz.",
+        "loginButton": "Giriş Yap"
+      },
+      "invalidLink": {
+        "title": "Geçersiz Bağlantı",
+        "description": "Bu şifre sıfırlama bağlantısı geçersiz veya süresi dolmuş olabilir.",
+        "requestNew": "Yeni bağlantı iste"
+      },
+      "errors": {
+        "missingToken": "Geçersiz veya eksik sıfırlama bağlantısı",
+        "expiredToken": "Şifre sıfırlama bağlantısının süresi dolmuş",
+        "generic": "Bir hata oluştu. Lütfen tekrar deneyin."
+      },
+      "toast": {
+        "success": "Şifreniz başarıyla değiştirildi!",
+        "weakPassword": "Şifre gereksinimleri karşılanmıyor",
+        "passwordMismatch": "Şifreler eşleşmiyor"
+      }
+    }
   }
 }

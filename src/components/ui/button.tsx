@@ -6,41 +6,45 @@ import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
   [
-    "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium",
-    "transition-all disabled:pointer-events-none disabled:opacity-50",
+    "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold",
+    "transition-all duration-200 disabled:pointer-events-none disabled:opacity-50",
     "[&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0",
-    // Glass + ring focus styled by tokens
-    "outline-none focus-visible:ring-[3px] focus-visible:ring-[color:var(--ring)]",
+    "outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-turkish-blue-500)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface-900)]",
   ].join(" "),
   {
     variants: {
       variant: {
         default: [
-          "bg-[color:var(--color-turkish-blue-500)] text-[color:var(--text-invert)]",
-          "shadow-[var(--glow-soft)] hover:bg-[color:var(--color-turkish-blue-400)] hover:shadow-[var(--glow-strong)]",
+          "bg-gradient-to-r from-[var(--color-turkish-blue-500)] to-[var(--color-turkish-blue-600)] text-white",
+          "shadow-[0_4px_20px_rgba(30,184,255,0.25)] hover:shadow-[0_6px_30px_rgba(30,184,255,0.35)]",
+          "hover:scale-[1.02] active:scale-[0.98]",
         ].join(" "),
         destructive: [
-          "bg-[color:var(--color-danger)] text-white hover:bg-[color:var(--color-danger)]/90",
-          "focus-visible:ring-[color:var(--color-danger)]/30",
+          "bg-gradient-to-r from-red-500 to-red-600 text-white",
+          "shadow-[0_4px_20px_rgba(239,68,68,0.25)] hover:shadow-[0_6px_30px_rgba(239,68,68,0.35)]",
+          "hover:scale-[1.02] active:scale-[0.98]",
         ].join(" "),
         outline: [
-          "border border-[rgba(0,167,197,0.35)] bg-[rgba(3,12,18,0.6)] text-[color:var(--color-turkish-blue-100)]",
-          "hover:bg-[rgba(0,167,197,0.12)]",
+          "border border-[rgba(72,213,255,0.25)] bg-[rgba(15,31,54,0.5)] text-[var(--color-turkish-blue-300)]",
+          "backdrop-blur-sm hover:bg-[rgba(30,184,255,0.1)] hover:border-[rgba(72,213,255,0.4)]",
         ].join(" "),
         secondary: [
-          "bg-[rgba(255,255,255,0.06)] text-[color:var(--text-primary)]",
-          "hover:bg-[rgba(255,255,255,0.1)]",
+          "bg-[rgba(30,184,255,0.1)] text-[var(--color-turkish-blue-300)] border border-[rgba(72,213,255,0.15)]",
+          "hover:bg-[rgba(30,184,255,0.15)] hover:border-[rgba(72,213,255,0.25)]",
         ].join(" "),
-        ghost: "text-[color:var(--color-turkish-blue-200)] hover:bg-[rgba(0,167,197,0.12)]",
-        link: "text-[color:var(--color-turkish-blue-400)] underline-offset-4 hover:underline",
+        ghost: [
+          "text-[var(--color-turkish-blue-300)]",
+          "hover:bg-[rgba(30,184,255,0.1)]",
+        ].join(" "),
+        link: "text-[var(--color-turkish-blue-400)] underline-offset-4 hover:underline p-0 h-auto",
       },
       size: {
-        default: "h-9 px-4 py-2 has-[>svg]:px-3",
-        sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
-        lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
-        icon: "size-9",
-        "icon-sm": "size-8",
-        "icon-lg": "size-10",
+        default: "h-10 px-5 py-2.5",
+        sm: "h-8 rounded-lg gap-1.5 px-3 text-xs",
+        lg: "h-12 rounded-xl px-8 text-base",
+        icon: "size-10 rounded-xl",
+        "icon-sm": "size-8 rounded-lg",
+        "icon-lg": "size-12 rounded-xl",
       },
     },
     defaultVariants: {

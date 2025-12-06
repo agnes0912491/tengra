@@ -11,7 +11,7 @@ export default function AdminCurrentUserCard() {
 
   const handleLogout = useCallback(() => {
     logout();
-    router.replace("/admin/login");
+    router.replace("/login");
     router.refresh();
   }, [logout, router]);
 

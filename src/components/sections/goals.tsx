@@ -10,14 +10,15 @@ type GoalKey = "inception" | "creation" | "expansion" | "harmony" | "beyond";
 type GoalDefinition = {
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   key: GoalKey;
+  color: string;
 };
 
 const goals: GoalDefinition[] = [
-  { icon: Sparkles, key: "inception" },
-  { icon: Code, key: "creation" },
-  { icon: Globe, key: "expansion" },
-  { icon: Infinity, key: "harmony" },
-  { icon: Zap, key: "beyond" },
+  { icon: Sparkles, key: "inception", color: "from-[#f0b429] to-[#f59e0b]" },
+  { icon: Code, key: "creation", color: "from-[var(--color-turkish-blue-400)] to-[var(--color-turkish-blue-600)]" },
+  { icon: Globe, key: "expansion", color: "from-[#10b981] to-[#059669]" },
+  { icon: Infinity, key: "harmony", color: "from-[#8b5cf6] to-[#7c3aed]" },
+  { icon: Zap, key: "beyond", color: "from-[var(--color-turkish-blue-300)] to-[var(--color-turkish-blue-500)]" },
 ];
 
 export default function Goals() {
@@ -51,52 +52,103 @@ export default function Goals() {
   }, [locale]);
 
   return (
-    <section id="goals" className="relative flex flex-col items-center justify-center py-28 px-4 text-center">
-      <h2 className="section-title">{t("title")}</h2>
-      <div className="w-16 h-[1px] mx-auto mt-4 mb-10 bg-[rgba(0,167,197,0.4)]" />
-      <div className="absolute left-1/2 top-0 -translate-x-1/2 h-full w-[1px] opacity-40 timeline-line" />
+    <section id="goals" className="relative py-24 md:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-[radial-gradient(circle,rgba(30,184,255,0.08)_0%,transparent_60%)]" />
+      </div>
 
-      <div className="relative w-full max-w-3xl mx-auto">
-        <ol className="relative z-10 space-y-12">
-          {(adminGoals.length > 0
-            ? adminGoals.map((g, idx) => ({
+      <div className="relative z-10 max-w-6xl mx-auto">
+        {/* Section Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <h2 className="section-title">{t("title")}</h2>
+          <div className="divider mt-6 mb-6" />
+          <p className="text-[var(--text-secondary)] max-w-2xl mx-auto">
+            Our journey from concept to reality, building the future one milestone at a time.
+          </p>
+        </motion.div>
+
+        {/* Timeline */}
+        <div className="relative">
+          {/* Vertical Line */}
+          <div className="absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-[var(--color-turkish-blue-500)] to-transparent opacity-30 hidden md:block" />
+
+          <div className="space-y-12 md:space-y-0">
+            {(adminGoals.length > 0
+              ? adminGoals.map((g, idx) => ({
                 icon: goals[idx % goals.length].icon,
+                color: goals[idx % goals.length].color,
                 title: g.title,
                 description: g.body,
               }))
-            : goals.map(({ icon, key }) => ({
+              : goals.map(({ icon, key, color }) => ({
                 icon,
+                color,
                 title: t(`defaults.${key}.title` as never),
                 description: t(`defaults.${key}.body` as never),
               })))
-          .map(({ icon: Icon, title, description }, index) => {
-            const isLeft = index % 2 === 0;
+              .map(({ icon: Icon, color, title, description }, index) => {
+                const isLeft = index % 2 === 0;
 
-            return (
-              <motion.li
-                key={`${title}-${index}`}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1, duration: 0.6 }}
-                viewport={{ once: true }}
-                className={`relative flex flex-col ${isLeft ? "md:flex-row-reverse" : "md:flex-row"} items-center justify-between gap-6`}
-              >
-                <div className="absolute left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-[rgba(0,167,197,0.08)] border border-[rgba(0,167,197,0.4)] flex items-center justify-center shadow-[0_0_10px_rgba(0,167,197,0.35)]">
-                  <Icon className="w-3.5 h-3.5 text-[color:var(--color-turkish-blue-400)]" />
-                </div>
+                return (
+                  <motion.div
+                    key={`${title}-${index}`}
+                    initial={{ opacity: 0, y: 40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1, duration: 0.6 }}
+                    viewport={{ once: true }}
+                    className={`relative flex flex-col md:flex-row items-center gap-8 ${isLeft ? "md:flex-row" : "md:flex-row-reverse"
+                      }`}
+                  >
+                    {/* Content Card */}
+                    <div className={`flex-1 ${isLeft ? "md:text-right md:pr-12" : "md:text-left md:pl-12"}`}>
+                      <div className={`group relative p-6 rounded-2xl bg-[rgba(15,31,54,0.6)] border border-[rgba(72,213,255,0.12)] backdrop-blur-xl hover:border-[rgba(72,213,255,0.3)] transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.4),0_0_30px_rgba(30,184,255,0.1)] ${isLeft ? "md:ml-auto" : "md:mr-auto"} max-w-lg`}>
+                        {/* Gradient Accent */}
+                        <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${color} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
 
-                <div className={`relative mt-12 w-full md:w-[46%] ${isLeft ? "md:ml-auto" : "md:mr-auto"}`}>
-                  <div className="p-[1px] rounded-2xl bg-gradient-to-br from-[rgba(110,211,225,0.25)]/40 via-transparent to-transparent">
-                    <div className="rounded-[calc(1rem-1px)] border border-[rgba(110,211,225,0.18)] bg-[rgba(6,20,27,0.6)]/80 backdrop-blur-xl p-5 shadow-[0_22px_60px_rgba(0,0,0,0.4)] transition hover:shadow-[0_26px_80px_rgba(0,0,0,0.6)] hover:border-[rgba(110,211,225,0.35)]">
-                      <h3 className="text-xl font-display text-[color:var(--color-turkish-blue-300)] mb-2">{title}</h3>
-                      <p className="text-sm text-[color:var(--text-muted)]">{description}</p>
+                        <div className={`flex items-start gap-4 ${isLeft ? "md:flex-row-reverse" : ""}`}>
+                          {/* Icon Container - Mobile */}
+                          <div className={`md:hidden flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center shadow-lg`}>
+                            <Icon className="w-6 h-6 text-white" />
+                          </div>
+
+                          <div className="flex-1">
+                            <h3 className={`text-xl font-display font-semibold text-[var(--text-primary)] mb-2 ${isLeft ? "md:text-right" : ""}`}>
+                              {title}
+                            </h3>
+                            <p className={`text-sm text-[var(--text-secondary)] leading-relaxed ${isLeft ? "md:text-right" : ""}`}>
+                              {description}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Step Number */}
+                        <div className={`absolute -bottom-3 ${isLeft ? "right-6" : "left-6"} px-3 py-1 rounded-full bg-[var(--color-surface-800)] border border-[rgba(72,213,255,0.2)] text-xs font-semibold text-[var(--color-turkish-blue-400)]`}>
+                          {String(index + 1).padStart(2, "0")}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </motion.li>
-            );
-          })}
-        </ol>
+
+                    {/* Center Icon - Desktop */}
+                    <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 z-10">
+                      <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center shadow-[0_8px_30px_rgba(0,0,0,0.3)] ring-4 ring-[var(--color-surface-900)]`}>
+                        <Icon className="w-7 h-7 text-white" />
+                      </div>
+                    </div>
+
+                    {/* Spacer for alignment */}
+                    <div className="hidden md:block flex-1" />
+                  </motion.div>
+                );
+              })}
+          </div>
+        </div>
       </div>
     </section>
   );

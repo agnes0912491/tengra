@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import type { Project } from "@/types/project";
 import { Delete, Edit } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { editProject as ep, deleteProject as dp, uploadImage } from "@/lib/db";
 import { toast } from "@/lib/react-toastify";
 import {
@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/dialog";
 import Dropzone from "@/components/ui/dropzone";
 import { routing } from "@/i18n/routing";
+import { useAdminToken } from "@/hooks/use-admin-token";
+import Image from "next/image";
 
 const formatDateTime = (value?: string | null) => {
   if (!value) {
@@ -56,38 +58,19 @@ type Props = {
 export default function ProjectsTable({ projects }: Props) {
   const [editProjectModalOpen, setEditProjectModalOpen] = useState(false);
   const [deleteProjectModalOpen, setDeleteProjectModalOpen] = useState(false);
-  const [token, setToken] = useState<string | null>(null);
   const [project, setProject] = useState<Project | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoUploading, setLogoUploading] = useState(false);
   const [descriptionsByLocale, setDescriptionsByLocale] = useState<Record<string, string>>({});
+  const [localProjects, setLocalProjects] = useState<Project[]>(projects);
+  const [isPending, startTransition] = useTransition();
 
   const locales = routing.locales;
+  const { token } = useAdminToken();
 
   useEffect(() => {
-    const fetchToken = async () => {
-      try {
-        if (typeof window === "undefined") return;
-        const fromStorage = localStorage.getItem("authToken");
-        if (fromStorage) {
-          setToken(fromStorage);
-          return;
-        }
-        // Fallback to admin cookies (aligned with other admin tools)
-        const { ADMIN_SESSION_COOKIE_CANDIDATES } = await import("@/lib/auth");
-        const { default: Cookies } = await import("js-cookie");
-        const fromCookies =
-          ADMIN_SESSION_COOKIE_CANDIDATES.map((name) => Cookies.get(name)).find(Boolean) ||
-          null;
-        if (fromCookies) {
-          setToken(fromCookies);
-        }
-      } catch (error) {
-        console.error("Failed to read authToken from localStorage:", error);
-      }
-    };
-    fetchToken();
-  }, []);
+    setLocalProjects(projects);
+  }, [projects]);
 
   if (projects.length === 0) {
     return (
@@ -142,8 +125,15 @@ export default function ProjectsTable({ projects }: Props) {
       toast.error("Yetkilendirme belirteci eksik. Lütfen tekrar giriş yapın.");
       return;
     }
-    await ep(options, projectId, token);
-    toast.success("Proje başarıyla güncellendi.");
+    startTransition(async () => {
+      const updated = await ep(options, projectId, token);
+      if (!updated) {
+        toast.error("Proje güncellenemedi.");
+        return;
+      }
+      setLocalProjects((prev) => prev.map((p) => (p.id === projectId ? { ...p, ...updated } : p)));
+      toast.success("Proje başarıyla güncellendi.");
+    });
   };
 
   const deleteProject = async (projectId: string) => {
@@ -152,8 +142,11 @@ export default function ProjectsTable({ projects }: Props) {
       return;
     }
 
-    await dp(projectId, token);
-    toast.success("Proje başarıyla silindi.");
+    startTransition(async () => {
+      await dp(projectId, token);
+      setLocalProjects((prev) => prev.filter((p) => p.id !== projectId));
+      toast.success("Proje başarıyla silindi.");
+    });
   };
 
   return (
@@ -343,6 +336,7 @@ export default function ProjectsTable({ projects }: Props) {
               </Button>
               <Button
                 variant="destructive"
+                disabled={isPending}
                 onClick={() => {
                   if (!project) return;
                   const projectId = project.id;
@@ -376,13 +370,21 @@ export default function ProjectsTable({ projects }: Props) {
             </tr>
           </thead>
           <tbody className="divide-y divide-[rgba(110,211,225,0.08)] text-sm text-[rgba(255,255,255,0.8)]">
-            {projects.map((project) => (
+            {localProjects.map((project) => (
               <tr key={project.id} className="hover:bg-[rgba(8,32,42,0.55)]">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
                     {project.logoUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={project.logoUrl} alt="logo" className="h-8 w-8 rounded object-contain" />
+                      <div className="relative h-8 w-8 rounded overflow-hidden">
+                        <Image
+                          src={project.logoUrl}
+                          alt="logo"
+                          fill
+                          className="object-contain"
+                          sizes="32px"
+                          unoptimized={!project.logoUrl.startsWith('https://cdn.tengra.studio')}
+                        />
+                      </div>
                     ) : null}
                     <p className="font-semibold text-white">{project.name}</p>
                   </div>
@@ -406,12 +408,12 @@ export default function ProjectsTable({ projects }: Props) {
                   {formatDateTime(project.lastUpdatedAt ?? project.createdAt ?? undefined)}
                 </td>
                 <td>
-                  <Button onClick={() => openEditModal(project)} variant="link" size="sm" className="ml-auto px-4 py-2">
+                  <Button onClick={() => openEditModal(project)} variant="link" size="sm" className="ml-auto px-4 py-2" disabled={isPending}>
                     <Edit className="mr-2 h-4 w-4" />
                   </Button>
                 </td>
                 <td>
-                  <Button onClick={() => openDeleteModal(project)} variant="link" size="sm" className="ml-auto px-4 py-2">
+                  <Button onClick={() => openDeleteModal(project)} variant="link" size="sm" className="ml-auto px-4 py-2" disabled={isPending}>
                     <Delete className="mr-2 h-4 w-4" />
                   </Button>
                 </td>

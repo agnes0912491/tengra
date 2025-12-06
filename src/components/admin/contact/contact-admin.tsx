@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { getContactSubmissions, deleteContactSubmission, type ContactSubmission, getContactSubscriptions, deleteContactSubscription } from "@/lib/db";
-import Cookies from "js-cookie";
-import { ADMIN_SESSION_COOKIE_CANDIDATES } from "@/lib/auth";
+import { useAdminToken } from "@/hooks/use-admin-token";
 
 export default function ContactAdmin() {
   const t = useTranslations("AdminContent");
@@ -14,16 +13,12 @@ export default function ContactAdmin() {
   const [subscriptions, setSubscriptions] = useState<Array<{ id: string | number; email: string; createdAt?: string }>>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const getToken = () => {
-    return ADMIN_SESSION_COOKIE_CANDIDATES.map((n) => Cookies.get(n)).find(Boolean) || null;
-  };
+  const { token } = useAdminToken();
 
   const load = async () => {
     setLoading(true);
     setError(null);
     try {
-      const token = getToken();
       if (!token) {
         setError("Yetkilendirme bulunamadı.");
         setItems([]);
@@ -46,7 +41,6 @@ export default function ContactAdmin() {
   }, []);
 
   const clearAll = () => {
-    const token = getToken();
     if (!token) {
       setError("Yetkilendirme bulunamadı.");
       return;

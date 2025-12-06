@@ -116,7 +116,7 @@ export default function AuthProvider({
             return;
           }
 
-          try { 
+          try {
 
             // Persist the tokens first (some codepaths may read from storage/cookies)
             localStorage.setItem("authToken", verifiedPayload.token);
@@ -128,7 +128,7 @@ export default function AuthProvider({
 
             // Now attempt to load the user with the token. Logging results helps
             // diagnose why the dashboard navigation may not trigger.
-            const userObj = await getUserWithToken(verifiedPayload.token); 
+            const userObj = await getUserWithToken(verifiedPayload.token);
 
             if (!userObj) {
               // If we couldn't fetch the user, surface a helpful toast and keep the tokens
@@ -158,7 +158,7 @@ export default function AuthProvider({
                 Cookies.remove(legacyName, { path: "/" });
               }
             }
-          } catch { 
+          } catch {
             toast.error("Doğrulama sırasında bir hata oluştu. Lütfen tekrar deneyin.");
           } finally {
             // clear refs
@@ -269,13 +269,27 @@ export default function AuthProvider({
    */
   const logout = useCallback(() => {
     setUser(null);
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("csrfToken");
+
+    // Clear all auth-related localStorage keys
+    const authKeys = [
+      "authToken",
+      "refreshToken",
+      "csrfToken",
+      "sessionToken",
+      "user",
+      "tengra:user",
+      "tengra:auth",
+    ];
+    authKeys.forEach(key => localStorage.removeItem(key));
+
+    // Clear cookies
     Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/" });
     for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
       Cookies.remove(legacyName, { path: "/" });
     }
+
+    // Clear any session storage as well
+    sessionStorage.clear();
   }, []);
 
   const value = useMemo(

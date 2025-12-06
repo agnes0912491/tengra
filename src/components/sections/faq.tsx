@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { getFaqs, type FaqItem } from "@/lib/db";
 import { useLocale, useTranslations } from "next-intl";
+import { ChevronDown, HelpCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function FaqSection() {
@@ -25,41 +27,88 @@ export default function FaqSection() {
   if (!items.length) return null;
 
   return (
-    <section className="relative py-24 px-6 md:px-20">
-      <h2 className="section-title text-center">{tNav("faq")}</h2>
-      <div className="w-16 h-[1px] mx-auto mt-4 mb-10 bg-[rgba(0,167,197,0.4)]" />
-      <div className="mx-auto w-full space-y-3">
-        {items.map((it) => (
-          <div
-            key={it.id}
-            className="rounded-2xl border border-[rgba(110,211,225,0.18)] bg-[rgba(8,28,38,0.7)]/80 backdrop-blur-xl"
-          >
-            <button
-              type="button"
-              onClick={() => setOpenId((p) => (p === it.id ? null : it.id))}
-              className={cn(
-                "flex w-full items-center justify-between px-5 py-4 text-left",
-                openId === it.id ? "text-[color:var(--color-turkish-blue-200)]" : "text-white"
-              )}
+    <section className="relative py-24 md:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full bg-[radial-gradient(circle,rgba(30,184,255,0.06)_0%,transparent_60%)]" />
+      </div>
+
+      <div className="relative z-10 max-w-3xl mx-auto">
+        {/* Section Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+          className="text-center mb-12"
+        >
+          <h2 className="section-title">{tNav("faq")}</h2>
+          <div className="divider mt-6 mb-6" />
+          <p className="text-[var(--text-secondary)]">
+            Find answers to commonly asked questions about Tengra.
+          </p>
+        </motion.div>
+
+        {/* FAQ Items */}
+        <div className="space-y-3">
+          {items.map((it, index) => (
+            <motion.div
+              key={it.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05, duration: 0.4 }}
+              viewport={{ once: true }}
+              className="rounded-2xl bg-[rgba(15,31,54,0.6)] border border-[rgba(72,213,255,0.12)] backdrop-blur-xl overflow-hidden hover:border-[rgba(72,213,255,0.25)] transition-all duration-300"
             >
-              <span className="flex items-center gap-2 font-semibold text-sm md:text-base">
-                <span className="inline-flex size-5 items-center justify-center rounded-full border border-[rgba(110,211,225,0.4)] text-[10px] text-[rgba(255,255,255,0.7)]">
-                  ?
-                </span>
-                {it.question}
-              </span>
-              <span className="text-base opacity-70">{openId === it.id ? "−" : "+"}</span>
-            </button>
-            <div
-              className={cn(
-                "px-5 pb-5 text-sm md:text-base text-[rgba(255,255,255,0.8)]",
-                openId === it.id ? "block" : "hidden"
-              )}
-            >
-              {it.answer}
-            </div>
-          </div>
-        ))}
+              <button
+                type="button"
+                onClick={() => setOpenId((p) => (p === it.id ? null : it.id))}
+                className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={cn(
+                    "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
+                    openId === it.id
+                      ? "bg-[var(--color-turkish-blue-500)] text-white"
+                      : "bg-[rgba(30,184,255,0.1)] text-[var(--color-turkish-blue-400)]"
+                  )}>
+                    <HelpCircle className="w-4 h-4" />
+                  </div>
+                  <span className={cn(
+                    "font-medium text-sm md:text-base transition-colors",
+                    openId === it.id ? "text-[var(--color-turkish-blue-300)]" : "text-[var(--text-primary)]"
+                  )}>
+                    {it.question}
+                  </span>
+                </div>
+                <ChevronDown
+                  className={cn(
+                    "w-5 h-5 flex-shrink-0 text-[var(--text-muted)] transition-transform duration-300",
+                    openId === it.id && "rotate-180 text-[var(--color-turkish-blue-400)]"
+                  )}
+                />
+              </button>
+
+              <AnimatePresence>
+                {openId === it.id && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-6 pb-5 pl-[4.25rem]">
+                      <p className="text-sm md:text-base text-[var(--text-secondary)] leading-relaxed">
+                        {it.answer}
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );
