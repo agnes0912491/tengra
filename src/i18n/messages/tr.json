@@ -1,0 +1,398 @@
+{
+  "Metadata": {
+    "title": "Tengra Studio",
+    "description": "Kutsal olan ile teknolojiyi buluşturan sürükleyici dijital işçilik.",
+    "keywords": "Tengra Studio, yaratıcı teknoloji stüdyosu, dijital inovasyon, sürükleyici deneyimler, tasarım kolektifi",
+    "ogTitle": "Tengra Studio — İlahi olan ile teknolojiyi işliyoruz",
+    "siteName": "Tengra Studio",
+    "ogLocale": "tr_TR"
+  },
+  "Hero": {
+    "taglineLine1": "İlahi Olanı Şekillendirmek",
+    "taglineLine2": "ve Teknolojiyi İşlemek",
+    "scrollCta": "AŞAĞI KAYDIR",
+    "symbolAlt": "Tengra Sembolü",
+    "typingWordOne": "𐱅𐰭𐰍𐰺𐰀",
+    "typingWordTwo": "TENGRA",
+    "eyebrow": "Yaratıcı Teknoloji Stüdyosu",
+    "intro": "Tengra; mit, yazılım ve oyunun kesiştiği kutsal eşiği keşfeden bir stüdyo. Başka bir zaman çizgisinden gelmiş gibi hissedilen oyunlar, araçlar ve deneyimler tasarlıyoruz.",
+    "primaryCta": "Projeleri keşfet",
+    "secondaryCta": "Ağa katıl",
+    "pillOne": "Oyunlar ve etkileşimli dünyalar",
+    "pillTwo": "Agent destekli üretken araçlar",
+    "pillThree": "Deneysel altyapılar"
+  },
+  "Navigation": {
+    "home": "Ana Sayfa",
+    "goals": "Hedefler",
+    "projects": "Projeler",
+    "network": "Ağ",
+    "team": "Ekip",
+    "blogs": "Blog",
+    "faq": "S.S.S.",
+    "forum": "Forum",
+    "contact": "İletişim",
+    "docs": "API Docs"
+  }, 
+  "Projects": {
+    "title": "Projeler", 
+    "admin": {
+      "toolsTitle": "Yönetim Araçları",
+      "toolsDescription": "Yalnızca yöneticilere görünür. Proje kartlarını panelden yönetin.",
+      "backToAdmin": "Yönetim Paneline Dön",
+      "newProject": "Yeni Proje Ekle",
+      "placeholderAction": "Örnek aksiyon"
+    }
+  },
+  "Team": {
+    "title": "Ekip",
+    "members": {
+      "agnes": {
+        "name": "A. Agnes Ö.",
+        "role": "Kurucu / Vizyon Mimarı",
+        "description": "İlahi olan ile teknolojinin dengesini şekillendiriyor."
+      }
+    },
+    "website": "Web Sitesi"
+  },
+  "Network": {
+    "title": "TENGRA AĞI",
+    "description": "Teknolojinin kutsal geleceğini birlikte keşfeden düşünürlerin, yapımcıların ve koruyucuların bir araya geldiği takımyıldıza katılın.",
+    "cta": "Ağa Katıl"
+  },
+  "Footer": {
+    "admin": "Yönetim Konsolu",
+    "checking": "Kontrol ediliyor...",
+    "logout": "Çıkış Yap",
+    "logoutShort": "Çıkış",
+    "login": "Giriş Yap",
+    "copyright": "© {year} Tengra Studio",
+    "logoutSuccess": "Oturum kapatıldı.",
+    "adminMenu": {
+      "label": "Yönetim",
+      "dashboard": "Paneli aç",
+      "greeting": "{name} olarak giriş yaptın"
+    }
+  },
+  "Contact": {
+    "title": "İletişim",
+    "description": "Fikrini, projenizi veya sorunuzu paylaşın — en kısa sürede dönüş yapacağız.",
+    "name": "İsim",
+    "email": "E-posta",
+    "phone": "Telefon",
+    "optional": "Opsiyonel",
+    "subject": "Konu",
+    "message": "Mesaj",
+    "submit": "Mesajı Gönder",
+    "saving": "Gönderiliyor…",
+    "success": "Teşekkürler, mesajını aldık.",
+    "error": "Mesaj kaydedilemedi. Lütfen tekrar deneyin."
+  },
+  "FooterSubscribe": {
+    "title": "Gelişmelerden haberdar ol",
+    "placeholder": "E-posta adresin",
+    "button": "Abone ol",
+    "success": "Abonelik kaydedildi. Yeni güncellemeleri paylaşacağız.",
+    "error": "Abonelik kaydedilemedi. Lütfen tekrar deneyin."
+  },
+  "Header": {
+    "home": "Ana Sayfa",
+    "blogs": "Bloglar",
+    "admin": "Yönetim",
+    "greeting": "Merhaba, {name}",
+    "logout": "Çıkış Yap",
+    "login": "Giriş Yap",
+    "register": "Kayıt Ol"
+  },
+  "LocaleSwitcher": {
+    "label": "Dil",
+    "en": "İngilizce",
+    "tr": "Türkçe" 
+  },
+  "Goals": {
+    "title": "Hedefler",
+    "defaults": {
+      "inception": {
+        "title": "Başlangıç",
+        "body": "Mit, kod ve sesin yeni bir dünyanın ilk kıvılcımında birleştiği yer."
+      },
+      "creation": {
+        "title": "Yaratım",
+        "body": "Özellik değil, eser gibi hissedilen oyunlar, araçlar ve sistemler tasarlıyoruz."
+      },
+      "expansion": {
+        "title": "Genişleme",
+        "body": "Her proje, daha büyük bir deneyim ve altyapı takımyıldızının bir düğümü."
+      },
+      "harmony": {
+        "title": "Denge",
+        "body": "Kutsal ayrıntıyla üretim seviyesindeki mühendisliği dengeliyoruz; hiçbir şey atıl hissettirmez."
+      },
+      "beyond": {
+        "title": "Ötesi",
+        "body": "Beklenmeyene alan açıyoruz — ortaya çıkan davranışlar, topluluklar ve işbirlikleri."
+      }
+    }
+  },
+  "AdminLogin": {
+    "toast": {
+      "missingCredentials": "Kullanıcı adı ve şifre gereklidir.",
+      "success": "Giriş başarılı.",
+      "invalidCredentials": "Girdiğiniz bilgiler hatalı.",
+      "genericError": "Giriş başarısız oldu. Lütfen tekrar deneyin.",
+      "otpSent": "6 haneli doğrulama kodunu e-posta adresine gönderdik.",
+      "otpInvalid": "Doğrulama kodu geçersiz.",
+      "otpExpired": "Doğrulama kodunun süresi doldu. Lütfen yeniden deneyin."
+    },
+    "title": "Yönetici girişi",
+    "description": "Tengra Studio’yu yönetmek için yönetici bilgilerinle giriş yap.",
+    "usernameLabel": "Kullanıcı adı",
+    "usernamePlaceholder": "Kullanıcı adını gir",
+    "passwordLabel": "Şifre",
+    "button": {
+      "loading": "Giriş yapılıyor...",
+      "submit": "Giriş yap"
+    },
+    "otp": {
+      "title": "Doğrulama kodunu gir",
+      "description": "E-postana gönderilen 6 haneli kodu kontrol et. Devam etmek için 5 dakika içinde gir.",
+      "codeLabel": "Doğrulama kodu",
+      "codePlaceholder": "123456",
+      "expiresIn": "Kod {minutes}:{seconds} içinde sona eriyor.",
+      "expired": "Kodun süresi doldu. Yeni bir kod almak için yeniden giriş yap.",
+      "button": {
+        "submit": "Kodu doğrula",
+        "loading": "Doğrulanıyor..."
+      },
+      "back": "Giriş ekranına dön"
+    },
+    "footer": "Erişim yalnızca yetkili Tengra Studio yöneticileriyle sınırlıdır."
+  },
+  "AdminDashboard": {
+    "toast": {
+      "fetchUsersError": "Kullanıcı listesi yüklenemedi. Lütfen tekrar deneyin.",
+      "logout": "Yönetici oturumu kapatıldı."
+    },
+    "navigation": {
+      "overview": "Genel Bakış",
+      "projects": "Projeler",
+      "blogs": "Bloglar",
+      "users": "Kullanıcılar"
+    },
+    "unauthorizedAccess": "Erişim kısıtlı",
+    "unauthorizedMessage": "Paneli görüntülemek için yönetici hesabına ihtiyaç vardır.",
+    "goToLogin": "Yönetici girişine git"
+  },
+  "AdminContent": {
+    "goalsDescription": "Hedefleri çok dilli olarak yönetin.",
+    "faqDescription": "Sıkça sorulan soruları çok dilli olarak yönetin.",
+    "newGoalTitle": "Yeni hedef",
+    "newGoalBody": "Açıklama",
+    "newGoal": "Yeni Hedef",
+    "newFaq": "Yeni SSS",
+    "newFaqQuestion": "Yeni soru",
+    "newFaqAnswer": "Yeni cevap",
+    "save": "Kaydet",
+    "saving": "Kaydediliyor…",
+    "saveAll": "Tüm değişiklikleri kaydet",
+    "cancelAll": "Tümünü iptal et",
+    "orderSave": "Sıralamayı kaydet",
+    "saved": "Kaydedildi",
+    "loading": "Yükleniyor…",
+    "noRecords": "Kayıt bulunamadı.",
+    "order": "Sıra",
+    "moveUp": "Yukarı taşı",
+    "moveDown": "Aşağı taşı",
+    "active": "Aktif",
+    "delete": "Sil",
+    "title": "Başlık",
+    "body": "Açıklama",
+    "question": "Soru",
+    "answer": "Cevap",
+    "dragToSort": "Sürükleyerek sırala",
+    "cancel": "İptal",
+    "confirmResetTitle": "Tüm değişiklikleri geri al?",
+    "confirmResetDesc": "Kaydedilmemiş tüm değişiklikler silinecek. Bu işlem geri alınamaz.",
+    "confirmCancel": "Vazgeç",
+    "confirmDiscard": "Evet, geri al",
+    "contactTitle": "İletişim formları",
+    "contactDescription": "Genel iletişim formundan gelen mesajlar (API bağlanana kadar lokal).",
+    "contactEmpty": "Henüz iletişim kaydı yok.",
+    "contactClear": "Tümünü temizle",
+    "submittedAt": "Gönderim",
+    "location": "Konum",
+    "subscriptionsTitle": "Bülten abonelikleri",
+    "subscriptionsDesc": "Footer abonelik formundan toplanan e-postalar.",
+    "subscriptionsEmpty": "Henüz abonelik yok."
+  },
+  "AuthContext": {
+    "authorization": {
+      "defaultErrorMessage": "Yetkilendirme başarısız oldu. Lütfen tekrar deneyin.",
+      "invalidCredentials": "Sağlanan kimlik bilgileri hatalı."
+    }
+  },
+  "ProtectedRoute": {
+    "authorization": {
+      "loading": "Yetkilendirme kontrol ediliyor..."
+    }
+  },
+  "ConsentBanner": {
+    "description": "İçeriği kişiselleştirmek ve trafiğimizi analiz etmek için çerezler kullanıyoruz. Tercihini istediğin zaman değiştirebilirsin.",
+    "deny": "Reddet",
+    "allow": "Tümüne izin ver"
+  },
+  "Blogs": {
+    "seoTitle": "Tengra Studio Blogu",
+    "seoDescription": "Tengra Studio kolektifinden içgörüler, hikâyeler ve araştırmalar.",
+    "title": "Tengra Studio Blogu",
+    "adminPanelTitle": "Yönetici araçları",
+    "adminPanelDesc": "Blog sayfasındaki bu hızlı işlemler yalnızca yöneticilere görünür.",
+    "goToAdminPanel": "Yönetim panelini aç",
+    "createNewPost": "Yeni yazı oluştur",
+    "by": "Yazan",
+    "toast": {
+      "fetchError": "Blog yazıları yüklenemedi. Lütfen tekrar deneyin."
+    }
+  },
+  "common": {
+    "backToBlogs": "Tüm yazılara dön"
+  },
+  "NotFound": {
+    "title": "Sayfa bulunamadı"
+  },
+  "Auth": {
+    "backToHome": "Ana sayfaya dön",
+    "login": {
+      "title": "Giriş Yap",
+      "description": "Hesabınıza giriş yaparak devam edin",
+      "emailLabel": "E-posta",
+      "emailPlaceholder": "ornek@email.com",
+      "passwordLabel": "Şifre",
+      "passwordPlaceholder": "••••••••",
+      "forgotPassword": "Şifremi unuttum",
+      "or": "veya",
+      "noAccount": "Hesabınız yok mu?",
+      "registerLink": "Kayıt ol",
+      "button": {
+        "submit": "Giriş Yap",
+        "loading": "Giriş yapılıyor..."
+      },
+      "toast": {
+        "success": "Başarıyla giriş yapıldı!",
+        "missingCredentials": "E-posta ve şifre gereklidir",
+        "invalidCredentials": "E-posta veya şifre hatalı",
+        "requires2FA": "İki adımlı doğrulama gerekli — lütfen e-postanızı kontrol edin",
+        "genericError": "Bir hata oluştu. Lütfen tekrar deneyin."
+      }
+    },
+    "register": {
+      "title": "Kayıt Ol",
+      "description": "Yeni bir hesap oluşturun",
+      "usernameLabel": "Kullanıcı Adı",
+      "usernamePlaceholder": "kullanici_adi",
+      "emailLabel": "E-posta",
+      "emailPlaceholder": "ornek@email.com",
+      "passwordLabel": "Şifre",
+      "passwordPlaceholder": "••••••••",
+      "confirmPasswordLabel": "Şifre Tekrar",
+      "confirmPasswordPlaceholder": "••••••••",
+      "passwordMismatch": "Şifreler eşleşmiyor",
+      "password": {
+        "minLength": "En az 8 karakter",
+        "uppercase": "Büyük harf",
+        "lowercase": "Küçük harf",
+        "number": "Rakam"
+      },
+      "avatar": {
+        "label": "Avatar (opsiyonel)",
+        "helper": "Profilinizi kişiselleştirmek için bir fotoğraf ekleyin.",
+        "hint": "PNG, JPG veya WEBP — maksimum 10 MB.",
+        "invalidType": "Lütfen bir görsel dosyası seçin.",
+        "tooLarge": "Görsel boyutu 10 MB'tan küçük olmalıdır.",
+        "remove": "Avatarı kaldır",
+        "uploadFailed": "Avatar yüklenemedi. Lütfen tekrar deneyin.",
+        "uploaded": "Avatar yüklendi."
+      },
+      "terms": {
+        "prefix": "Kayıt olarak",
+        "termsLink": "Kullanım Şartları",
+        "and": "ve",
+        "privacyLink": "Gizlilik Politikası",
+        "suffix": "'nı kabul ediyorsunuz."
+      },
+      "or": "veya",
+      "hasAccount": "Zaten hesabınız var mı?",
+      "loginLink": "Giriş yap",
+      "button": {
+        "submit": "Kayıt Ol",
+        "loading": "Kayıt yapılıyor..."
+      },
+      "toast": {
+        "success": "Hesabınız başarıyla oluşturuldu!",
+        "missingFields": "Tüm alanları doldurun",
+        "passwordMismatch": "Şifreler eşleşmiyor",
+        "weakPassword": "Şifre yeterince güçlü değil",
+        "genericError": "Kayıt başarısız. Lütfen tekrar deneyin.",
+        "timeout": "Sunucu yanıt vermedi. Birkaç saniye sonra tekrar deneyin."
+      }
+    },
+    "forgotPassword": {
+      "title": "Şifremi Unuttum",
+      "subtitle": "Şifre sıfırlama bağlantısı al",
+      "description": "E-posta adresinizi girin, size şifre sıfırlama bağlantısı gönderelim.",
+      "emailLabel": "E-posta Adresi",
+      "emailPlaceholder": "ornek@email.com",
+      "submit": "Sıfırlama Bağlantısı Gönder",
+      "sending": "Gönderiliyor...",
+      "backToLogin": "Giriş sayfasına dön",
+      "sentTitle": "E-posta Gönderildi!",
+      "sentDescription": "Eğer bu e-posta ile kayıtlı bir hesap varsa, şifre sıfırlama bağlantısı gönderildi. Gelen kutunuzu ve spam klasörünüzü kontrol edin.",
+      "tryAnother": "Başka bir e-posta dene",
+      "securityNote": "Güvenliğiniz için şifre sıfırlama bağlantıları 30 dakika içinde geçersiz olur.",
+      "toast": {
+        "success": "Şifre sıfırlama bağlantısı gönderildi",
+        "emailRequired": "E-posta adresi gerekli",
+        "invalidEmail": "Geçerli bir e-posta adresi girin"
+      }
+    },
+    "resetPassword": {
+      "title": "Yeni Şifre Belirle",
+      "subtitle": "Hesabınız için yeni bir şifre oluşturun",
+      "newPasswordLabel": "Yeni Şifre",
+      "newPasswordPlaceholder": "••••••••",
+      "confirmPasswordLabel": "Şifre Tekrar",
+      "confirmPasswordPlaceholder": "••••••••",
+      "submit": "Şifreyi Değiştir",
+      "resetting": "Değiştiriliyor...",
+      "backToLogin": "Giriş sayfasına dön",
+      "passwordsMatch": "Şifreler eşleşiyor",
+      "passwordsDontMatch": "Şifreler eşleşmiyor",
+      "requirements": {
+        "length": "En az 8 karakter",
+        "uppercase": "En az bir büyük harf",
+        "lowercase": "En az bir küçük harf",
+        "number": "En az bir rakam"
+      },
+      "success": {
+        "title": "Şifre Değiştirildi!",
+        "description": "Şifreniz başarıyla güncellendi. Artık yeni şifrenizle giriş yapabilirsiniz.",
+        "loginButton": "Giriş Yap"
+      },
+      "invalidLink": {
+        "title": "Geçersiz Bağlantı",
+        "description": "Bu şifre sıfırlama bağlantısı geçersiz veya süresi dolmuş olabilir.",
+        "requestNew": "Yeni bağlantı iste"
+      },
+      "errors": {
+        "missingToken": "Geçersiz veya eksik sıfırlama bağlantısı",
+        "expiredToken": "Şifre sıfırlama bağlantısının süresi dolmuş",
+        "generic": "Bir hata oluştu. Lütfen tekrar deneyin."
+      },
+      "toast": {
+        "success": "Şifreniz başarıyla değiştirildi!",
+        "weakPassword": "Şifre gereksinimleri karşılanmıyor",
+        "passwordMismatch": "Şifreler eşleşmiyor"
+      }
+    }
+  }
+}
