@@ -7,7 +7,7 @@ import {
 } from "../db";
 
 export type Role = "admin" | "moderator" | "user";
-export type UserSource = "geofrontier" | "lova" | "tengra" | "biodefenders";
+export type UserSource = "geofrontier" | "lova" | "tengra" | "biodefenders" | "both";
 
 export type UserSession = {
   id: string;

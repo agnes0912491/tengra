@@ -1,16 +1,18 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/components/providers/auth-provider";
-import { registerUser } from "@/lib/db";
+import { registerUser, uploadRegisterAvatar } from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UserPlus, Lock, Mail, User, Eye, EyeOff, Check, X } from "lucide-react";
+import Dropzone from "@/components/ui/dropzone";
+import { UserPlus, Lock, Mail, User, Eye, EyeOff, Check, X, ImagePlus, Trash2 } from "lucide-react";
 
 export default function RegisterForm() {
     const router = useRouter();
@@ -23,6 +25,9 @@ export default function RegisterForm() {
         password: "",
         confirmPassword: "",
     });
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+    const [avatarError, setAvatarError] = useState<string | null>(null);
+    const [avatarUploadedUrl, setAvatarUploadedUrl] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -38,6 +43,96 @@ export default function RegisterForm() {
 
     const passwordStrength = Object.values(passwordChecks).filter(Boolean).length;
     const passwordsMatch = formData.password === formData.confirmPassword && formData.confirmPassword.length > 0;
+
+    const handleAvatarDrop = useCallback(
+        async (files: File[]) => {
+            const file = files[0];
+            if (!file) return;
+            if (!file.type.startsWith("image/")) {
+                setAvatarError(t("register.avatar.invalidType"));
+                setAvatarPreview(null);
+                setAvatarUploadedUrl(null);
+                return;
+            }
+            if (file.size > 10 * 1024 * 1024) {
+                setAvatarError(t("register.avatar.tooLarge"));
+                setAvatarPreview(null);
+                setAvatarUploadedUrl(null);
+                return;
+            }
+
+            const compressImage = async (input: File): Promise<{ blob: Blob; preview: string }> => {
+                const dataUrl = await new Promise<string>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result as string);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(input);
+                });
+
+                try {
+                    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+                        const image = new Image();
+                        image.onload = () => resolve(image);
+                        image.onerror = reject;
+                        image.src = dataUrl;
+                    });
+
+                    const maxSide = 512;
+                    const ratio = Math.min(maxSide / img.width, maxSide / img.height, 1);
+                    const targetW = Math.max(1, Math.round(img.width * ratio));
+                    const targetH = Math.max(1, Math.round(img.height * ratio));
+
+                    const canvas = document.createElement("canvas");
+                    canvas.width = targetW;
+                    canvas.height = targetH;
+                    const ctx = canvas.getContext("2d");
+                    if (!ctx) throw new Error("canvas ctx missing");
+                    ctx.drawImage(img, 0, 0, targetW, targetH);
+
+                    const blob = await new Promise<Blob>((resolve) => {
+                        canvas.toBlob(
+                            (b) => resolve(b || input),
+                            "image/webp",
+                            0.82
+                        );
+                    });
+
+                    const previewUrl = canvas.toDataURL("image/webp", 0.82);
+                    return { blob, preview: previewUrl };
+                } catch {
+                    return { blob: input, preview: dataUrl };
+                }
+            };
+
+            setAvatarError(null);
+            const { blob, preview } = await compressImage(file);
+
+            if (blob.size > 10 * 1024 * 1024) {
+                setAvatarError(t("register.avatar.tooLarge"));
+                setAvatarPreview(null);
+                setAvatarUploadedUrl(null);
+                return;
+            }
+
+            setAvatarPreview(preview);
+
+            // Upload to server immediately
+            try {
+                const uploaded = await uploadRegisterAvatar(blob);
+                if (uploaded) {
+                    setAvatarUploadedUrl(uploaded);
+                } else {
+                    setAvatarUploadedUrl(null);
+                    setAvatarError(t("register.avatar.uploadFailed"));
+                }
+            } catch (e) {
+                console.error("Avatar upload failed:", e);
+                setAvatarUploadedUrl(null);
+                setAvatarError(t("register.avatar.uploadFailed"));
+            }
+        },
+        [t]
+    );
 
     useEffect(() => {
         if (isAuthenticated && user) {
@@ -68,9 +163,16 @@ export default function RegisterForm() {
 
             setLoading(true);
 
-            const result = await registerUser(username.trim(), email.trim(), password);
+            const result = await registerUser(
+                username.trim(),
+                email.trim(),
+                password,
+                undefined,
+                username.trim(),
+                avatarUploadedUrl || undefined
+            );
 
-            if (result) {
+            if (result.success) {
                 toast.success(t("register.toast.success"));
 
                 // Auto-login after successful registration
@@ -84,7 +186,11 @@ export default function RegisterForm() {
                 return;
             }
 
-            toast.error(t("register.toast.genericError"));
+            if (result.reason === "timeout") {
+                toast.error(t("register.toast.timeout"));
+            } else {
+                toast.error(t("register.toast.genericError"));
+            }
         } catch (err) {
             console.error("Registration failed:", err);
             toast.error(t("register.toast.genericError"));
@@ -137,6 +243,47 @@ export default function RegisterForm() {
 
                     {/* Form */}
                     <form onSubmit={handleSubmit} className="space-y-4">
+                        {/* Avatar */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-[var(--text-secondary)]">
+                                {t("register.avatar.label")}
+                            </label>
+                            <Dropzone accept={{ "image/*": [] }} onDrop={handleAvatarDrop}>
+                                <div className="flex w-full items-center gap-4">
+                                    <div className="relative h-16 w-16 rounded-full overflow-hidden border border-[rgba(72,213,255,0.2)] bg-[rgba(30,184,255,0.08)] flex items-center justify-center">
+                                    {avatarPreview ? (
+                                            <Image src={avatarPreview} alt="Avatar preview" fill className="object-cover" />
+                                        ) : (
+                                            <ImagePlus className="w-6 h-6 text-[var(--text-muted)]" />
+                                        )}
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-sm text-[var(--text-secondary)]">{t("register.avatar.helper")}</p>
+                                        <p className="text-xs text-[var(--text-muted)]">{t("register.avatar.hint")}</p>
+                                    </div>
+                                    {avatarPreview ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setAvatarPreview(null);
+                                                setAvatarError(null);
+                                            }}
+                                            className="p-2 rounded-lg bg-red-500/10 text-red-300 hover:bg-red-500/20 transition-colors"
+                                            aria-label={t("register.avatar.remove")}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    ) : null}
+                                </div>
+                            </Dropzone>
+                            {avatarError ? <p className="text-xs text-red-400">{avatarError}</p> : null}
+                            {avatarUploadedUrl ? (
+                                <p className="text-xs text-green-400 break-all">
+                                    {t("register.avatar.uploaded")}
+                                </p>
+                            ) : null}
+                        </div>
+
                         {/* Username */}
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-[var(--text-secondary)]" htmlFor="username">

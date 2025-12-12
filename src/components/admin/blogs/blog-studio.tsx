@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { toast } from "react-toastify";
 import { CalendarClock, Edit3, Eye, FilePlus, Filter, Loader2, Save, Search, Upload, X } from "lucide-react";
@@ -9,8 +8,7 @@ import { CalendarClock, Edit3, Eye, FilePlus, Filter, Loader2, Save, Search, Upl
 import type { Blog, BlogCategory } from "@/types/blog";
 import { createBlog, getAllBlogCategories, updateBlog, uploadImage } from "@/lib/db";
 import { cn, slugify } from "@/lib/utils";
-
-const MDEditor = dynamic(() => import("@uiw/react-md-editor").then((mod) => mod.default), { ssr: false });
+import { MarkdownEditor } from "@/components/ui/markdown-editor";
 
 type BlogStudioProps = {
   initialBlogs: Blog[];
@@ -213,11 +211,10 @@ function DraftForm({
           <span className="text-[10px] uppercase tracking-[0.18em] text-[rgba(255,255,255,0.5)]">Rich text</span>
         </div>
         <div className="overflow-hidden rounded-xl border border-[rgba(72,213,255,0.2)] bg-[rgba(8,18,26,0.65)]">
-          <MDEditor
+          <MarkdownEditor
             value={draft.content}
             onChange={(v) => onChange({ ...draft, content: v ?? "" })}
             height={360}
-            preview="edit"
           />
         </div>
       </div>
@@ -477,8 +474,8 @@ export default function BlogStudio({ initialBlogs }: BlogStudioProps) {
                   blog.status === "published"
                     ? "bg-green-500/15 text-green-300"
                     : blog.status === "scheduled"
-                    ? "bg-yellow-500/15 text-yellow-300"
-                    : "bg-[rgba(255,255,255,0.08)] text-[rgba(255,255,255,0.65)]"
+                      ? "bg-yellow-500/15 text-yellow-300"
+                      : "bg-[rgba(255,255,255,0.08)] text-[rgba(255,255,255,0.65)]"
                 )}
               >
                 <CalendarClock className="h-4 w-4" />

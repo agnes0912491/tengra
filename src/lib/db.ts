@@ -1,14 +1,14 @@
 import type { Blog, BlogCategory, BlogSEO, BlogStatus } from "@/types/blog";
 import type { Project, ProjectStatus, ProjectType, ProjectPlatform } from "@/types/project";
-import { Role, User } from "./auth/users";
+import { Role, User, UserSource } from "./auth/users";
 import { AuthUserPayload } from "@/types/auth";
 import { resolveCdnUrl } from "@/lib/constants";
 import { slugify } from "@/lib/utils";
 
-// Base API URL for the backend. Fallback to localhost in development to avoid
-// generating an invalid URL when the env var is absent.
+// Base API URL for the backend. Use environment variable in production.
 const API_BASE =
-  process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:5000";
+  process.env.NEXT_PUBLIC_BACKEND_API_URL || 
+  (typeof window === "undefined" ? "http://127.0.0.1:5000" : "http://localhost:5000");
 // All public content endpoints are served under /api on the backend Router.
 const BLOGS_API_URL = `${API_BASE}/blogs`;
 const PROJECTS_API_URL = `${API_BASE}/projects`;
@@ -109,21 +109,20 @@ const computeReadingTime = (text: string): number | undefined => {
 
 const normalizeBlogCategories = (rawCats: RawBlogPost["categories"]): BlogCategory[] => {
   if (!Array.isArray(rawCats)) return [];
-  return rawCats
-    .map((cat) => {
-      if (typeof cat === "string") {
-        return { name: cat, description: cat, slug: slugify(cat) };
-      }
-      if (cat && typeof cat === "object" && typeof cat.name === "string") {
-        return {
-          name: cat.name,
-          description: cat.description ?? cat.name,
-          slug: cat.slug ?? slugify(cat.name),
-        };
-      }
-      return null;
-    })
-    .filter((c): c is BlogCategory => Boolean(c));
+  const mapped = rawCats.map((cat): { name: string; description: string; slug: string } | null => {
+    if (typeof cat === "string") {
+      return { name: cat, description: cat, slug: slugify(cat) };
+    }
+    if (cat && typeof cat === "object" && typeof cat.name === "string") {
+      return {
+        name: cat.name,
+        description: cat.description ?? cat.name,
+        slug: cat.slug ?? slugify(cat.name),
+      };
+    }
+    return null;
+  });
+  return mapped.filter((c): c is { name: string; description: string; slug: string } => c !== null);
 };
 
 /**
@@ -144,7 +143,7 @@ const normalizeBlog = (raw: RawBlogPost | null | undefined): Blog | null => {
   const publishAt = raw.publishAt ?? raw.publishedAt ?? createdAt ?? updatedAt ?? "";
   const date = publishAt || createdAt || new Date().toISOString();
   const excerpt = raw.summary ?? raw.excerpt ?? (content ? content.slice(0, 180) : "");
-  const slug = raw.slug ?? slugify(title) || String(id);
+  const slug = raw.slug ?? (slugify(title) || String(id));
   const readingTime = computeReadingTime(content);
   const categories = normalizeBlogCategories(raw.categories);
   const tags = Array.isArray(raw.tags) ? raw.tags.map((t) => String(t)) : [];
@@ -256,7 +255,7 @@ export const getAllUsers = async (token: string): Promise<User[]> => {
     throw new Error("Token sağlanmadı.");
   }
 
-  const response = await fetch(`${API_BASE}/users`, {
+  const response = await fetch(`${API_BASE}/admin/users`, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
@@ -416,22 +415,74 @@ export const getUserWithId = async (id: string): Promise<User | null> => {
 export const registerUser = async (
   username: string,
   email: string,
-  password: string
-): Promise<User | null> => {
-  const response = await fetch(`${API_BASE}/auth/register`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({ username, email, password }),
-  });
+  password: string,
+  avatarDataUrl?: string,
+  displayName?: string,
+  avatarUrl?: string
+): Promise<{ success: boolean; reason?: "timeout" | "error" }> => {
+  const payload: Record<string, string> = { username, email, password };
+  if (avatarDataUrl) payload.avatarDataUrl = avatarDataUrl;
+  if (displayName) payload.displayName = displayName;
+  if (avatarUrl) payload.avatarUrl = avatarUrl;
 
-  if (!response.ok) {
-    return null;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12000);
+
+  try {
+    const response = await fetch(`${API_BASE}/auth/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      return { success: false, reason: "error" };
+    }
+
+    const json = (await response.json().catch(() => null)) as { success?: boolean } | null;
+    return { success: json?.success === true, reason: json?.success ? undefined : "error" };
+  } catch (err) {
+    if ((err as Error).name === "AbortError") {
+      return { success: false, reason: "timeout" };
+    }
+    return { success: false, reason: "error" };
+  } finally {
+    clearTimeout(timeout);
   }
+};
 
-  return (await response.json().catch(() => null)) as User | null;
+export const uploadRegisterAvatar = async (file: Blob): Promise<string | null> => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+  try {
+    const res = await fetch(`${UPLOAD_API_URL}/register-avatar`, {
+      method: "POST",
+      headers: {
+        "Content-Type": file.type || "application/octet-stream",
+      },
+      body: file,
+      signal: controller.signal,
+    });
+
+    if (!res.ok) return null;
+    const json = (await res.json().catch(() => null)) as { url?: string; success?: boolean } | null;
+    if (json?.success && typeof json.url === "string") {
+      return resolveCdnUrl(json.url);
+    }
+    return null;
+  } catch (e) {
+    if ((e as Error).name === "AbortError") {
+      console.error("Avatar upload timeout after 30 seconds");
+    }
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
 };
 
 type RawUser = Partial<User> & {
@@ -506,7 +557,7 @@ const normalizeUser = (raw: RawUser | null | undefined): User | null => {
     lastLoginDevice: lastLoginDevice ?? undefined,
     lastLoginCountry: lastLoginCountry ?? undefined,
     lastLoginCity: lastLoginCity ?? undefined,
-    source: raw.source ? (raw.source as string) : undefined,
+    source: raw.source ? (raw.source as UserSource) : undefined,
   };
 };
 
@@ -552,6 +603,27 @@ export type ContactSubmission = {
   city?: string;
   country?: string;
   createdAt?: string;
+};
+
+const safeJsonParse = <T>(input: string): T | null => {
+  try {
+    return JSON.parse(input) as T;
+  } catch {
+    return null;
+  }
+};
+
+// Some legacy project endpoints return malformed JSON when description includes raw quotes.
+// Attempt a minimal repair so admin pages don't render a 404 despite existing data.
+const repairProjectPayload = (raw: string): string | null => {
+  if (!raw.includes("\"description\"")) return null;
+
+  const fixed = raw.replace(
+    /"description"\s*:\s*"({[\s\S]*?})"/,
+    (_match, inner) => `"description": ${JSON.stringify(inner)}`
+  );
+
+  return fixed === raw ? null : fixed;
 };
 
 const normalizeProject = (project: unknown): Project | null => {
@@ -752,13 +824,20 @@ export const getProjectById = async (
         headers,
         cache: "no-store",
       }
-    );
+    ); 
     if (!response.ok) {
       return null;
     }
-    const json = (await response.json().catch(() => null)) as
-      | { project?: unknown }
-      | unknown;
+    const rawText = await response.text().catch(() => "");
+    const repaired = repairProjectPayload(rawText);
+    const json =
+      safeJsonParse<{ project?: unknown } | unknown>(rawText) ??
+      (repaired ? safeJsonParse<{ project?: unknown } | unknown>(repaired) : null);
+
+    if (!json) {
+      return null;
+    }
+
     const project =
       json && typeof json === "object" && "project" in json
         ? (json as { project?: unknown }).project
@@ -1390,7 +1469,7 @@ export const updateUserRole = async (
     throw new Error("Yetkilendirme anahtarı eksik.");
   }
 
-  const response = await fetch(`${API_BASE}/users/${userId}/role`, {
+  const response = await fetch(`${API_BASE}/admin/users/${userId}/role`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -1417,6 +1496,15 @@ export const updateUserRole = async (
   }
 
   return user;
+};
+
+export const deleteUser = async (userId: string, token: string): Promise<boolean> => {
+  if (!token) throw new Error("Token eksik.");
+  const res = await fetch(`${API_BASE}/admin/users/${userId}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.ok;
 };
 
 // --- FAQ (S.S.S.) ---
@@ -1534,4 +1622,34 @@ export const deleteFaq = async (id: string, token: string): Promise<boolean> => 
     headers: { Authorization: `Bearer ${token}` },
   });
   return res.ok;
+};
+
+export const createAdminUser = async (data: Record<string, unknown>, token: string): Promise<User | null> => {
+  if (!token) throw new Error("Token eksik.");
+  const res = await fetch(`${API_BASE}/admin/users`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) return null;
+  const json = await res.json();
+  return normalizeUser(json.user);
+};
+
+export const updateAdminUser = async (userId: string, data: Record<string, unknown>, token: string): Promise<User | null> => {
+  if (!token) throw new Error("Token eksik.");
+  const res = await fetch(`${API_BASE}/admin/users/${userId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) return null;
+  const json = await res.json();
+  return normalizeUser(json.user);
 };

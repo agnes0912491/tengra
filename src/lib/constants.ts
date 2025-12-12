@@ -1,6 +1,6 @@
 export const CDN_BASE_URL =
   (process.env.NEXT_PUBLIC_CDN_BASE_URL || "").replace(/\/+$/, "") ||
-  (process.env.NEXT_PUBLIC_BACKEND_API_URL || "").replace(/\/+$/, "");
+  "https://cdn.tengra.studio";
 
 export const resolveCdnUrl = (path: string | null | undefined): string => {
   if (!path) return "";

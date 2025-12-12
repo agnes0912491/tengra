@@ -303,6 +303,16 @@
         "lowercase": "Lowercase letter",
         "number": "Number"
       },
+      "avatar": {
+        "label": "Profile picture (optional)",
+        "helper": "Add a photo to personalize your profile.",
+        "hint": "PNG, JPG or WEBP up to 10 MB.",
+        "invalidType": "Please choose an image file.",
+        "tooLarge": "Image size must be under 10 MB.",
+        "remove": "Remove avatar",
+        "uploadFailed": "Avatar upload failed. Please try again.",
+        "uploaded": "Avatar uploaded."
+      },
       "terms": {
         "prefix": "By signing up, you agree to our",
         "termsLink": "Terms of Service",
@@ -322,7 +332,8 @@
         "missingFields": "Please fill in all fields",
         "passwordMismatch": "Passwords do not match",
         "weakPassword": "Password is not strong enough",
-        "genericError": "Registration failed. Please try again."
+        "genericError": "Registration failed. Please try again.",
+        "timeout": "Server did not respond. Please retry in a few seconds."
       }
     },
     "forgotPassword": {

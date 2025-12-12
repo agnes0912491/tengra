@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 import SiteShell from "@/components/layout/site-shell";
 import { useAuth } from "@/components/providers/auth-provider";
 import { Button } from "@/components/ui/button";
+import { createForumPost, fetchThreadDetail } from "@/lib/forum";
+import { ForumCategory, ForumPost, ForumThread } from "@/types/forum";
 import {
     ChevronRight,
     MessageSquare,
@@ -18,209 +21,117 @@ import {
     Share2,
     Flag,
     Quote,
-    CheckCircle,
     Award,
     Shield,
-
     Reply,
     Heart,
     Bookmark,
     Send,
+    Loader2,
 } from "lucide-react";
 
-// Mock topic data
-const mockTopic = {
-    id: "1",
-    title: "Tengra v2.0 Beta Test Programı - Başvurular Açık!",
-    category: { name: "Duyurular", slug: "duyurular" },
-    author: {
-        name: "Agnes",
-        avatar: null,
-        role: "admin",
-        title: "Kurucu",
-        joinDate: "Ocak 2023",
-        postCount: 1234,
-        reputation: 9876,
-    },
-    content: `
-# Tengra v2.0 Beta Test Programı
+const escapeHtml = (value: string) =>
+    value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
 
-Merhaba değerli topluluk üyeleri! 👋
-
-Uzun süredir üzerinde çalıştığımız **Tengra v2.0** güncellemesinin beta test programını başlatmaktan heyecan duyuyoruz!
-
-## Yeni Özellikler
-
-- 🎮 **Geliştirilmiş Oyun Motoru**: Daha akıcı performans ve görsel iyileştirmeler
-- 🔧 **Yeni API Endpoints**: Geliştiriciler için daha güçlü araçlar
-- 🎨 **UI/UX Yenilikleri**: Modern ve kullanıcı dostu arayüz
-- 🌙 **Gelişmiş Karanlık Mod**: Göz yorgunluğunu azaltan yeni tema
-- 📱 **Mobil Optimizasyon**: Responsive tasarım iyileştirmeleri
-
-## Nasıl Katılabilirim?
-
-1. Bu konuya yorum yaparak ilginizi belirtin
-2. [Beta başvuru formunu](https://forms.tengra.studio/beta) doldurun
-3. Email onayını bekleyin
-4. Beta sürümüne erişin ve test edin!
-
-## Gereksinimler
-
-- Aktif bir Tengra hesabı
-- En az 1 aydır üye olmak
-- Discord sunucumuza katılmış olmak
-
-## Timeline
-
-| Aşama | Tarih |
-|-------|-------|
-| Başvurular | 1-15 Aralık |
-| Seçim | 16-20 Aralık |
-| Beta Başlangıcı | 25 Aralık |
-| Genel Yayın | Ocak 2026 |
-
----
-
-Sorularınız için bu konuya yorum yapabilir veya [Discord sunucumuza](https://discord.tengra.studio) katılabilirsiniz.
-
-Herkese iyi testler! 🚀
-  `,
-    createdAt: "3 gün önce",
-    views: 4523,
-    likes: 234,
-    isPinned: true,
-    isHot: true,
+const renderMarkdown = (value: string) => {
+    if (!value) return "";
+    let html = escapeHtml(value);
+    html = html.replace(/```([\s\S]*?)```/g, '<pre class="my-3 p-3 rounded-lg bg-[rgba(0,0,0,0.3)] text-xs overflow-x-auto"><code>$1</code></pre>');
+    html = html.replace(/^### (.*)$/gm, '<h3 class="text-lg font-semibold text-[var(--text-primary)] mt-4 mb-2">$1</h3>');
+    html = html.replace(/^## (.*)$/gm, '<h2 class="text-xl font-semibold text-[var(--text-primary)] mt-6 mb-3">$1</h2>');
+    html = html.replace(/^# (.*)$/gm, '<h1 class="text-2xl font-bold text-[var(--text-primary)] mb-4">$1</h1>');
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[var(--text-primary)]">$1</strong>');
+    html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
+    html = html.replace(/`([^`]+)`/g, '<code class="px-1 py-0.5 rounded bg-[rgba(0,0,0,0.3)]">$1</code>');
+    html = html.replace(/\n{2,}/g, '</p><p class="mb-4">');
+    html = html.replace(/\n/g, "<br/>");
+    return `<p class="mb-4">${html}</p>`;
 };
 
-// Mock replies
-const mockReplies = [
-    {
-        id: "r1",
-        author: {
-            name: "BetaTester",
-            role: "member",
-            title: "Beta Tester",
-            joinDate: "Mart 2023",
-            postCount: 456,
-            reputation: 1234,
-        },
-        content: "Heyecanla bekliyordum! Hemen başvuru formunu dolduruyorum. Özellikle yeni API endpoint'leri için çok heyecanlıyım. 🎉",
-        createdAt: "2 gün önce",
-        likes: 45,
-        isLiked: true,
-    },
-    {
-        id: "r2",
-        author: {
-            name: "DevMaster",
-            role: "moderator",
-            title: "Kıdemli Geliştirici",
-            joinDate: "Şubat 2023",
-            postCount: 892,
-            reputation: 3456,
-        },
-        content: `API değişiklikleri hakkında daha fazla bilgi alabilir miyiz? Özellikle rate limiting ve yeni authentication flow hakkında merak ediyorum.
-
-\`\`\`javascript
-// Örnek: Yeni API kullanımı
-const client = new TengraClient({
-  apiKey: process.env.TENGRA_API_KEY,
-  version: 'v2'
-});
-\`\`\`
-
-Bu şekilde mi olacak?`,
-        createdAt: "2 gün önce",
-        likes: 78,
-        isLiked: false,
-    },
-    {
-        id: "r3",
-        author: {
-            name: "Agnes",
-            role: "admin",
-            title: "Kurucu",
-            joinDate: "Ocak 2023",
-            postCount: 1234,
-            reputation: 9876,
-        },
-        content: `@DevMaster harika soru! 
-
-Evet, yeni API client tam olarak böyle çalışacak. Ayrıca:
-- Rate limiting artık hesap bazlı değil, endpoint bazlı olacak
-- OAuth 2.0 desteği eklenecek
-- Webhook entegrasyonları gelecek
-
-Detaylı dökümantasyonu beta başladığında yayınlayacağız.`,
-        createdAt: "1 gün önce",
-        likes: 123,
-        isLiked: true,
-        isAccepted: true,
-    },
-    {
-        id: "r4",
-        author: {
-            name: "NewUser",
-            role: "member",
-            title: "Yeni Üye",
-            joinDate: "Kasım 2024",
-            postCount: 12,
-            reputation: 45,
-        },
-        content: "1 aylık üyelik şartını karşılamıyorum ama çok merak ediyorum. Bir sonraki beta programı için bekleyeceğim! 😊",
-        createdAt: "1 gün önce",
-        likes: 15,
-        isLiked: false,
-    },
-    {
-        id: "r5",
-        author: {
-            name: "DesignFan",
-            role: "member",
-            title: "UI Enthusiast",
-            joinDate: "Haziran 2023",
-            postCount: 234,
-            reputation: 890,
-        },
-        content: "UI/UX yeniliklerini duyunca çok heyecanlandım! Özellikle karanlık mod iyileştirmeleri harika olacak. Figma prototipleri paylaşılacak mı?",
-        createdAt: "12 saat önce",
-        likes: 34,
-        isLiked: false,
-    },
-];
+const formatDate = (value?: string | null) => {
+    if (!value) return "";
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+    return parsed.toLocaleString("tr-TR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+};
 
 export default function TopicPage() {
     const params = useParams();
     const topicId = params.id as string;
     const { isAuthenticated } = useAuth();
 
+    const [thread, setThread] = useState<ForumThread | null>(null);
+    const [posts, setPosts] = useState<ForumPost[]>([]);
+    const [category, setCategory] = useState<ForumCategory | null>(null);
     const [replyContent, setReplyContent] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [likedReplies, setLikedReplies] = useState<Set<string>>(new Set(["r1", "r3"]));
+    const [likedReplies, setLikedReplies] = useState<Set<number>>(new Set());
     const [bookmarked, setBookmarked] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleLikeReply = (replyId: string) => {
+    useEffect(() => {
+        let active = true;
+        fetchThreadDetail(topicId)
+            .then((data) => {
+                if (!active) return;
+                setThread(data.thread ?? null);
+                setPosts(data.posts ?? []);
+                setCategory(data.category ?? null);
+                setError(null);
+            })
+            .catch(() => {
+                if (!active) return;
+                setError("Konu yüklenemedi.");
+                setThread(null);
+                setPosts([]);
+            })
+            .finally(() => {
+                if (active) setLoading(false);
+            });
+        return () => {
+            active = false;
+        };
+    }, [topicId]);
+
+    const handleLikeReply = (replyId: number) => {
         setLikedReplies((prev) => {
-            const newSet = new Set(prev);
-            if (newSet.has(replyId)) {
-                newSet.delete(replyId);
+            const next = new Set(prev);
+            if (next.has(replyId)) {
+                next.delete(replyId);
             } else {
-                newSet.add(replyId);
+                next.add(replyId);
             }
-            return newSet;
+            return next;
         });
     };
 
     const handleSubmitReply = async () => {
-        if (!replyContent.trim() || isSubmitting) return;
+        if (!replyContent.trim() || isSubmitting || !thread) return;
+        const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : "";
+        if (!token) {
+            toast.error("Yanıt yazmak için giriş yapmalısınız.");
+            return;
+        }
         setIsSubmitting(true);
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        const newPost = await createForumPost(thread.id, replyContent, token);
+        if (!newPost) {
+            toast.error("Yanıt gönderilirken hata oluştu.");
+            setIsSubmitting(false);
+            return;
+        }
+        const hydrated = newPost.author ? newPost : { ...newPost, author: thread.author };
+        setPosts((prev) => [...prev, hydrated]);
         setReplyContent("");
+        toast.success("Yanıt gönderildi.");
         setIsSubmitting(false);
     };
 
-    const getRoleBadge = (role: string) => {
+    const getRoleBadge = (role?: string) => {
         switch (role) {
             case "admin":
                 return (
@@ -239,6 +150,43 @@ export default function TopicPage() {
         }
     };
 
+    const renderedContent = useMemo(() => renderMarkdown(thread?.content ?? ""), [thread?.content]);
+    const replyCount = posts.length;
+    const categorySlug = category?.slug ?? thread?.category?.slug ?? "";
+    const categoryName = category?.name ?? thread?.category?.name ?? "Kategori";
+    const title = thread?.title ?? "Konu bulunamadı";
+    const authorName = thread?.author?.displayName || thread?.author?.username || "Anonim";
+    const createdAt = formatDate(thread?.createdAt) || "Az önce";
+    const isHot = replyCount > 10;
+    const views = thread?.viewCount ?? 0;
+    const likesTotal = thread?.likeCount ?? 0;
+
+    if (loading) {
+        return (
+            <SiteShell>
+                <div className="min-h-screen flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 text-[var(--color-turkish-blue-400)] animate-spin" />
+                </div>
+            </SiteShell>
+        );
+    }
+
+    if (!thread || error) {
+        return (
+            <SiteShell>
+                <div className="min-h-screen flex items-center justify-center">
+                    <div className="text-center space-y-3">
+                        <h1 className="text-2xl font-bold text-[var(--text-primary)]">Konu bulunamadı</h1>
+                        <p className="text-[var(--text-muted)]">Konu silinmiş veya taşınmış olabilir.</p>
+                        <Link href="/forum">
+                            <Button variant="primary">Foruma Dön</Button>
+                        </Link>
+                    </div>
+                </div>
+            </SiteShell>
+        );
+    }
+
     return (
         <SiteShell>
             <div className="min-h-screen px-4 py-8 md:px-6 lg:px-8">
@@ -252,12 +200,16 @@ export default function TopicPage() {
                         <Link href="/forum" className="hover:text-[var(--color-turkish-blue-400)] transition-colors">
                             Forum
                         </Link>
+                        {categorySlug && (
+                            <>
+                                <ChevronRight className="w-4 h-4" />
+                                <Link href={`/forum/c/${categorySlug}`} className="hover:text-[var(--color-turkish-blue-400)] transition-colors">
+                                    {categoryName}
+                                </Link>
+                            </>
+                        )}
                         <ChevronRight className="w-4 h-4" />
-                        <Link href={`/forum/c/${mockTopic.category.slug}`} className="hover:text-[var(--color-turkish-blue-400)] transition-colors">
-                            {mockTopic.category.name}
-                        </Link>
-                        <ChevronRight className="w-4 h-4" />
-                        <span className="text-[var(--text-secondary)] line-clamp-1">{mockTopic.title}</span>
+                        <span className="text-[var(--text-secondary)] line-clamp-1">{title}</span>
                     </motion.div>
 
                     {/* Topic Header */}
@@ -267,10 +219,10 @@ export default function TopicPage() {
                         className="mb-6"
                     >
                         <div className="flex items-start gap-3 mb-4">
-                            {mockTopic.isPinned && <Pin className="w-5 h-5 text-amber-400 shrink-0 mt-1" />}
-                            {mockTopic.isHot && <Flame className="w-5 h-5 text-orange-400 shrink-0 mt-1" />}
+                            {thread.isPinned && <Pin className="w-5 h-5 text-amber-400 shrink-0 mt-1" />}
+                            {isHot && <Flame className="w-5 h-5 text-orange-400 shrink-0 mt-1" />}
                             <h1 className="text-2xl md:text-3xl font-display font-bold text-[var(--text-primary)]">
-                                {mockTopic.title}
+                                {title}
                             </h1>
                         </div>
 
@@ -278,19 +230,19 @@ export default function TopicPage() {
                         <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--text-muted)]">
                             <span className="flex items-center gap-1.5">
                                 <Clock className="w-4 h-4" />
-                                {mockTopic.createdAt}
+                                {createdAt}
                             </span>
                             <span className="flex items-center gap-1.5">
                                 <Eye className="w-4 h-4" />
-                                {mockTopic.views.toLocaleString()} görüntülenme
+                                {views.toLocaleString("tr-TR")} görüntülenme
                             </span>
                             <span className="flex items-center gap-1.5">
                                 <MessageSquare className="w-4 h-4" />
-                                {mockReplies.length} yanıt
+                                {replyCount} yanıt
                             </span>
                             <span className="flex items-center gap-1.5">
                                 <Heart className="w-4 h-4" />
-                                {mockTopic.likes} beğeni
+                                {likesTotal} beğeni
                             </span>
                         </div>
                     </motion.div>
@@ -306,28 +258,15 @@ export default function TopicPage() {
                             {/* Author Sidebar */}
                             <div className="md:w-48 shrink-0 p-5 bg-[rgba(0,0,0,0.2)] border-b md:border-b-0 md:border-r border-[rgba(72,213,255,0.05)]">
                                 <div className="flex md:flex-col items-center md:items-center gap-4 md:gap-3 text-center">
-                                    {/* Avatar */}
                                     <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white text-2xl font-bold">
-                                        {mockTopic.author.name.charAt(0)}
+                                        {authorName.charAt(0)}
                                     </div>
                                     <div className="md:text-center">
-                                        <p className="font-semibold text-[var(--text-primary)]">{mockTopic.author.name}</p>
-                                        {getRoleBadge(mockTopic.author.role)}
-                                        <p className="text-xs text-[var(--text-muted)] mt-1">{mockTopic.author.title}</p>
-                                    </div>
-                                </div>
-                                <div className="hidden md:block mt-4 pt-4 border-t border-[rgba(72,213,255,0.05)] space-y-2 text-xs text-[var(--text-muted)]">
-                                    <div className="flex justify-between">
-                                        <span>Katılım</span>
-                                        <span className="text-[var(--text-secondary)]">{mockTopic.author.joinDate}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Gönderiler</span>
-                                        <span className="text-[var(--text-secondary)]">{mockTopic.author.postCount}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Puan</span>
-                                        <span className="text-[var(--color-turkish-blue-400)]">{mockTopic.author.reputation}</span>
+                                        <p className="font-semibold text-[var(--text-primary)]">{authorName}</p>
+                                        {getRoleBadge(thread.author?.role)}
+                                        {thread.author?.title && (
+                                            <p className="text-xs text-[var(--text-muted)] mt-1">{thread.author.title}</p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -338,12 +277,7 @@ export default function TopicPage() {
                                     <div
                                         className="text-[var(--text-secondary)] whitespace-pre-wrap"
                                         dangerouslySetInnerHTML={{
-                                            __html: mockTopic.content
-                                                .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold text-[var(--text-primary)] mb-4">$1</h1>')
-                                                .replace(/^## (.*$)/gim, '<h2 class="text-xl font-semibold text-[var(--text-primary)] mt-6 mb-3">$1</h2>')
-                                                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-[var(--text-primary)]">$1</strong>')
-                                                .replace(/\n- /g, '<br/>• ')
-                                                .replace(/\n\n/g, '</p><p class="mb-4">')
+                                            __html: renderedContent,
                                         }}
                                     />
                                 </div>
@@ -353,7 +287,7 @@ export default function TopicPage() {
                                     <div className="flex items-center gap-2">
                                         <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-[var(--text-secondary)] hover:text-[var(--color-turkish-blue-300)] hover:bg-[rgba(30,184,255,0.05)] transition-all">
                                             <Heart className="w-4 h-4" />
-                                            {mockTopic.likes}
+                                            {likesTotal}
                                         </button>
                                         <button
                                             onClick={() => setBookmarked(!bookmarked)}
@@ -386,84 +320,72 @@ export default function TopicPage() {
                     >
                         <h2 className="text-lg font-semibold text-[var(--text-primary)] flex items-center gap-2">
                             <MessageSquare className="w-5 h-5 text-[var(--color-turkish-blue-400)]" />
-                            {mockReplies.length} Yanıt
+                            {replyCount} Yanıt
                         </h2>
 
-                        {mockReplies.map((reply, index) => (
-                            <motion.div
-                                key={reply.id}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.3 + index * 0.05 }}
-                                className={`rounded-xl bg-[rgba(15,31,54,0.6)] border overflow-hidden ${reply.isAccepted
-                                        ? "border-emerald-500/30 ring-1 ring-emerald-500/20"
-                                        : "border-[rgba(72,213,255,0.1)]"
-                                    }`}
-                            >
-                                {reply.isAccepted && (
-                                    <div className="px-4 py-2 bg-emerald-500/10 border-b border-emerald-500/20 flex items-center gap-2 text-sm text-emerald-400">
-                                        <CheckCircle className="w-4 h-4" />
-                                        Kabul Edilen Yanıt
-                                    </div>
-                                )}
-
-                                <div className="flex flex-col md:flex-row">
-                                    {/* Author */}
-                                    <div className="md:w-40 shrink-0 p-4 bg-[rgba(0,0,0,0.1)] border-b md:border-b-0 md:border-r border-[rgba(72,213,255,0.05)]">
-                                        <div className="flex md:flex-col items-center gap-3 md:text-center">
-                                            <div className={`w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center text-white text-sm md:text-lg font-medium ${reply.author.role === "admin"
-                                                    ? "bg-gradient-to-br from-amber-500 to-orange-600"
-                                                    : reply.author.role === "moderator"
-                                                        ? "bg-gradient-to-br from-emerald-500 to-teal-600"
-                                                        : "bg-gradient-to-br from-[var(--color-turkish-blue-500)] to-[var(--color-turkish-blue-600)]"
-                                                }`}>
-                                                {reply.author.name.charAt(0)}
+                        {posts.map((reply, index) => {
+                            const replyAuthorName = reply.author?.displayName || reply.author?.username || "Anonim";
+                            const liked = likedReplies.has(reply.id);
+                            const likes = (reply.likeCount ?? 0) + (liked ? 1 : 0);
+                            return (
+                                <motion.div
+                                    key={reply.id}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.3 + index * 0.05 }}
+                                    className="rounded-xl bg-[rgba(15,31,54,0.6)] border border-[rgba(72,213,255,0.1)] overflow-hidden"
+                                >
+                                    <div className="flex flex-col md:flex-row">
+                                        {/* Author */}
+                                        <div className="md:w-40 shrink-0 p-4 bg-[rgba(0,0,0,0.1)] border-b md:border-b-0 md:border-r border-[rgba(72,213,255,0.05)]">
+                                            <div className="flex md:flex-col items-center gap-3 md:text-center">
+                                                <div className={`w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center text-white text-sm md:text-lg font-medium ${reply.author?.role === "admin"
+                                                        ? "bg-gradient-to-br from-amber-500 to-orange-600"
+                                                        : reply.author?.role === "moderator"
+                                                            ? "bg-gradient-to-br from-emerald-500 to-teal-600"
+                                                            : "bg-gradient-to-br from-[var(--color-turkish-blue-500)] to-[var(--color-turkish-blue-600)]"
+                                                    }`}>
+                                                    {replyAuthorName.charAt(0)}
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium text-sm text-[var(--text-primary)]">{replyAuthorName}</p>
+                                                    {getRoleBadge(reply.author?.role)}
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p className="font-medium text-sm text-[var(--text-primary)]">{reply.author.name}</p>
-                                                {getRoleBadge(reply.author.role)}
+                                        </div>
+
+                                        {/* Content */}
+                                        <div className="flex-1 p-4">
+                                            <div
+                                                className="text-sm text-[var(--text-secondary)] whitespace-pre-wrap mb-4"
+                                                dangerouslySetInnerHTML={{ __html: renderMarkdown(reply.content) }}
+                                            />
+
+                                            {/* Reply Actions */}
+                                            <div className="flex items-center justify-between pt-3 border-t border-[rgba(72,213,255,0.05)]">
+                                                <div className="flex items-center gap-1">
+                                                    <button
+                                                        onClick={() => handleLikeReply(reply.id)}
+                                                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-all ${liked
+                                                                ? "text-[var(--color-turkish-blue-300)] bg-[rgba(30,184,255,0.1)]"
+                                                                : "text-[var(--text-muted)] hover:text-[var(--color-turkish-blue-300)] hover:bg-[rgba(30,184,255,0.05)]"
+                                                            }`}
+                                                    >
+                                                        <Heart className={`w-3.5 h-3.5 ${liked ? "fill-current" : ""}`} />
+                                                        {likes}
+                                                    </button>
+                                                    <button className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs text-[var(--text-muted)] hover:text-[var(--color-turkish-blue-300)] hover:bg-[rgba(30,184,255,0.05)] transition-all">
+                                                        <Quote className="w-3.5 h-3.5" />
+                                                        Alıntıla
+                                                    </button>
+                                                </div>
+                                                <span className="text-xs text-[var(--text-muted)]">{formatDate(reply.createdAt)}</span>
                                             </div>
                                         </div>
                                     </div>
-
-                                    {/* Content */}
-                                    <div className="flex-1 p-4">
-                                        <div className="text-sm text-[var(--text-secondary)] whitespace-pre-wrap mb-4">
-                                            {reply.content.split('```').map((part, i) =>
-                                                i % 2 === 1 ? (
-                                                    <pre key={i} className="my-3 p-3 rounded-lg bg-[rgba(0,0,0,0.3)] text-xs overflow-x-auto">
-                                                        <code>{part.replace(/^[a-z]+\n/, '')}</code>
-                                                    </pre>
-                                                ) : (
-                                                    <span key={i}>{part}</span>
-                                                )
-                                            )}
-                                        </div>
-
-                                        {/* Reply Actions */}
-                                        <div className="flex items-center justify-between pt-3 border-t border-[rgba(72,213,255,0.05)]">
-                                            <div className="flex items-center gap-1">
-                                                <button
-                                                    onClick={() => handleLikeReply(reply.id)}
-                                                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-all ${likedReplies.has(reply.id)
-                                                            ? "text-[var(--color-turkish-blue-300)] bg-[rgba(30,184,255,0.1)]"
-                                                            : "text-[var(--text-muted)] hover:text-[var(--color-turkish-blue-300)] hover:bg-[rgba(30,184,255,0.05)]"
-                                                        }`}
-                                                >
-                                                    <Heart className={`w-3.5 h-3.5 ${likedReplies.has(reply.id) ? "fill-current" : ""}`} />
-                                                    {reply.likes + (likedReplies.has(reply.id) && !reply.isLiked ? 1 : 0) - (!likedReplies.has(reply.id) && reply.isLiked ? 1 : 0)}
-                                                </button>
-                                                <button className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs text-[var(--text-muted)] hover:text-[var(--color-turkish-blue-300)] hover:bg-[rgba(30,184,255,0.05)] transition-all">
-                                                    <Quote className="w-3.5 h-3.5" />
-                                                    Alıntıla
-                                                </button>
-                                            </div>
-                                            <span className="text-xs text-[var(--text-muted)]">{reply.createdAt}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        ))}
+                                </motion.div>
+                            );
+                        })}
                     </motion.div>
 
                     {/* Reply Form */}
@@ -482,7 +404,8 @@ export default function TopicPage() {
                                 <textarea
                                     value={replyContent}
                                     onChange={(e) => setReplyContent(e.target.value)}
-                                    placeholder="Yanıtınızı buraya yazın... Markdown desteklenir."
+                                    placeholder={thread.isLocked ? "Bu konu kilitli." : "Yanıtınızı buraya yazın... Markdown desteklenir."}
+                                    disabled={thread.isLocked}
                                     className="w-full h-32 px-4 py-3 rounded-xl bg-[rgba(0,0,0,0.2)] border border-[rgba(72,213,255,0.1)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[rgba(72,213,255,0.3)] resize-none transition-colors"
                                 />
                                 <div className="flex items-center justify-between mt-4">
@@ -492,7 +415,7 @@ export default function TopicPage() {
                                     <Button
                                         variant="primary"
                                         onClick={handleSubmitReply}
-                                        disabled={!replyContent.trim() || isSubmitting}
+                                        disabled={!replyContent.trim() || isSubmitting || thread.isLocked}
                                     >
                                         {isSubmitting ? (
                                             <span className="flex items-center gap-2">
@@ -523,9 +446,9 @@ export default function TopicPage() {
 
                     {/* Back to Category */}
                     <div className="mt-8">
-                        <Link href={`/forum/c/${mockTopic.category.slug}`} className="inline-flex items-center gap-2 text-sm text-[var(--text-muted)] hover:text-[var(--color-turkish-blue-400)] transition-colors">
+                        <Link href={categorySlug ? `/forum/c/${categorySlug}` : "/forum"} className="inline-flex items-center gap-2 text-sm text-[var(--text-muted)] hover:text-[var(--color-turkish-blue-400)] transition-colors">
                             <ArrowLeft className="w-4 h-4" />
-                            {mockTopic.category.name} kategorisine dön
+                            {categoryName} kategorisine dön
                         </Link>
                     </div>
                 </div>

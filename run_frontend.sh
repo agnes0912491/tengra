@@ -21,7 +21,7 @@ if [[ "$CUR" != "$LAST" || ! -f .next/BUILD_ID ]]; then
     # Mevcut modülleri silmeden sadece eksikleri / güncellemeleri al
     nice -n 10 ionice -c2 -n7 npm install --no-audit --no-fund --production=false
   fi
-  nice -n 10 ionice -c2 -n7 npm run build -- --no-lint
+  nice -n 10 ionice -c2 -n7 npm run build
   echo "$CUR" > .last_build
 fi
 

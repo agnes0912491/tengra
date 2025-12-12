@@ -41,7 +41,7 @@ export type Project = {
   
   // Basic info
   tagline?: string | null; // Short catchy phrase like "Build the future"
-  description?: string | null;
+  description?: string | object | null;
   descriptionsByLocale?: Record<string, string> | null;
   
   // Visual assets

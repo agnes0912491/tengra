@@ -1,13 +1,8 @@
-import type { Metadata } from "next";
+// Admin layout - just passes through to child routes
+// Auth protection is handled in AdminShell component for /dashboard routes
+// and directly in page components for other admin routes
 
-export const metadata: Metadata = {
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
-
-export default function AdminRootLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;

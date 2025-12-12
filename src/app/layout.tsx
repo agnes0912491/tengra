@@ -20,7 +20,6 @@ import AdblockNotice from "@/components/analytics/AdblockNotice";
 import Footer from "@/components/layout/footer";
 import PWAProvider from "@/components/pwa/pwa-provider";
 
-export const dynamic = "force-dynamic";
 const Icon = "uploads/tengra_without_text.png";
 
 const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
@@ -39,57 +38,68 @@ const metadataBaseUrl =
   process.env.NEXT_PUBLIC_SITE_URL ??
   process.env.NEXT_PUBLIC_METADATA_BASE ??
   "http://localhost:3000";
-export const metadataBase = new URL(metadataBaseUrl);
-const siteUrl = metadataBase.toString().replace(/\/$/, "");
+const siteUrl = metadataBaseUrl.replace(/\/$/, "");
 const logoUrl = `https://cdn.tengra.studio/${Icon}`;
 
-export const metadata: Metadata = {
-  title: "Tengra Studio",
-  description:
-    "Tengra Studio builds artefact-like games, AI-driven worlds, and experimental systems. Myth + Code + Play.",
-  keywords: [
-    "Tengra",
-    "Tengra Studio",
-    "game studio",
-    "indie game dev",
-    "GeoFrontier",
-    "stylized worlds",
-  ],
-  openGraph: {
+// export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    metadataBase: new URL(metadataBaseUrl),
     title: "Tengra Studio",
     description:
-      "Artefact-like games, worlds and systems forged from myth and code.",
-    url: siteUrl,
-    siteName: "Tengra Studio",
-    images: [
-      {
-        url: "https://cdn.tengra.studio/uploads/tengra_without_text.png",
-        width: 1200,
-        height: 630,
-      },
+      "Tengra Studio builds artefact-like games, AI-driven worlds, and experimental systems. Myth + Code + Play.",
+    keywords: [
+      "Tengra",
+      "Tengra Studio",
+      "game studio",
+      "indie game dev",
+      "GeoFrontier",
+      "stylized worlds",
     ],
-    locale: "en_US",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    images: ["https://cdn.tengra.studio/uploads/tengra_without_text.png"],
-  },
-  alternates: {
-    canonical: siteUrl,
-  },
-  icons: {
-    icon: logoUrl,
-    shortcut: logoUrl,
-    apple: logoUrl,
-  },
-  other: {
-    "google-adsense-account": "ca-pub-1840126959284939",
-  },
-};
+    openGraph: {
+      title: "Tengra Studio",
+      description:
+        "Artefact-like games, worlds and systems forged from myth and code.",
+      url: siteUrl,
+      siteName: "Tengra Studio",
+      images: [
+        {
+          url: "https://cdn.tengra.studio/uploads/tengra_without_text.png",
+          width: 1200,
+          height: 630,
+        },
+      ],
+      locale: "en_US",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      images: ["https://cdn.tengra.studio/uploads/tengra_without_text.png"],
+    },
+    alternates: {
+      canonical: siteUrl,
+    },
+    icons: {
+      icon: logoUrl,
+      shortcut: logoUrl,
+      apple: logoUrl,
+    },
+    manifest: "/manifest.json",
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "black-translucent",
+      title: "Tengra",
+    },
+    other: {
+      "google-adsense-account": "ca-pub-1840126959284939",
+    },
+  };
+}
 
 export const viewport: Viewport = {
   colorScheme: "dark light",
+  themeColor: "#06141B",
 };
 
 export default async function RootLayout({
@@ -103,7 +113,7 @@ export default async function RootLayout({
     cookieLocale: cookieStore.get("NEXT_LOCALE")?.value,
     acceptLanguage: headersList.get("accept-language"),
   });
-  const { locale, messages } = getMessages(preferredLocale);
+  const { locale, messages } = getMessages(preferredLocale); 
 
   // Nonce'u runtime'da almaya çalışma, sadece Script'lerde kullan
   const isProd = process.env.NODE_ENV === "production";
@@ -129,23 +139,16 @@ export default async function RootLayout({
   };
 
   return (
-    <html
+    <html suppressHydrationWarning
       lang={locale}
       className={`${orbitron.variable} ${inter.variable} ${notoOldTurkic.variable}`}
     >
-      <head>
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#06141B" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="Tengra" />
-        <link rel="apple-touch-icon" href="https://cdn.tengra.studio/uploads/tengra_without_text.png" />
+      <head />
+      <body className="font-sans bg-[color:var(--background)] text-[color:var(--foreground)] w-full min-h-screen">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify([organizationSchema, webSiteSchema]) }}
         />
-      </head>
-      <body className="font-sans bg-[color:var(--background)] text-[color:var(--foreground)] w-full min-h-screen">
         {/* Consent Mode default */}
         <Script id="consent-mode-default" strategy="beforeInteractive">
           {`
@@ -192,13 +195,13 @@ export default async function RootLayout({
         ) : null}
 
         {/* Cloudflare Insights (opsiyonel) */}
-        {/* {isProd && (
+        {isProd && (
           <Script
             src="https://static.cloudflareinsights.com/beacon.min.js"
             strategy="afterInteractive"
-            data-cf-beacon='{"token": "YOUR_TOKEN_HERE"}'
+            data-cf-beacon='{"token": "KfJh_-de2bWWjAP7HKTmShXmoWBIb4ODqtral_fv"}'
           />
-        )} */}
+        )}
 
         <ClientUserProvider>
           <ParticlesClientWrapper />

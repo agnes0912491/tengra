@@ -5,9 +5,11 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 
 import AdminPageHeader from "@/components/admin/admin-page-header";
-import { getAllUsers, getUserWithToken } from "@/lib/db";
+import UserCreateModal from "@/components/admin/users/user-create-modal";
+import { getAllUsers, getUserWithToken, deleteUser, updateUserRole } from "@/lib/db";
 import type { Role, User, UserSource } from "@/lib/auth/users";
 import { resolveCdnUrl } from "@/lib/constants";
+import { toast } from "react-toastify";
 import {
   Users,
   Shield,
@@ -104,9 +106,12 @@ type UserCardProps = {
   user: User;
   isCurrentUser: boolean;
   currentUserRole?: Role;
+  onDelete: (userId: string) => void;
+  onRoleChange: (userId: string, role: Role) => void;
+  onEdit: (user: User) => void;
 };
 
-function UserCard({ user, isCurrentUser, currentUserRole }: UserCardProps) {
+function UserCard({ user, isCurrentUser, currentUserRole, onDelete, onRoleChange, onEdit }: UserCardProps) {
   const [showActions, setShowActions] = useState(false);
   const roleConfig = ROLE_CONFIG[user.role];
   const sourceConfig = SOURCE_CONFIG[user.source || "tengra"];
@@ -175,17 +180,45 @@ function UserCard({ user, isCurrentUser, currentUserRole }: UserCardProps) {
               </button>
               {showActions && (
                 <div className="absolute right-0 top-full mt-1 w-48 rounded-xl bg-[rgba(15,31,54,0.95)] border border-[rgba(72,213,255,0.15)] shadow-xl backdrop-blur-xl z-10 py-1">
-                  <button className="w-full px-4 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.05)] flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      onEdit(user);
+                      setShowActions(false);
+                    }}
+                    className="w-full px-4 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.05)] flex items-center gap-2"
+                  >
                     <Edit className="w-4 h-4" /> Düzenle
                   </button>
-                  <button className="w-full px-4 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.05)] flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4" /> Moderatör Yap
-                  </button>
-                  <button className="w-full px-4 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.05)] flex items-center gap-2">
-                    <ShieldOff className="w-4 h-4" /> Yetkiyi Kaldır
-                  </button>
+                  {user.role !== "moderator" && (
+                    <button
+                      onClick={() => {
+                        onRoleChange(user.id, "moderator");
+                        setShowActions(false);
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.05)] flex items-center gap-2"
+                    >
+                      <ShieldCheck className="w-4 h-4" /> Moderatör Yap
+                    </button>
+                  )}
+                  {user.role !== "user" && (
+                    <button
+                      onClick={() => {
+                        onRoleChange(user.id, "user");
+                        setShowActions(false);
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.05)] flex items-center gap-2"
+                    >
+                      <ShieldOff className="w-4 h-4" /> Yetkiyi Kaldır
+                    </button>
+                  )}
                   <hr className="my-1 border-[rgba(72,213,255,0.1)]" />
-                  <button className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-[rgba(255,255,255,0.05)] flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      onDelete(user.id);
+                      setShowActions(false);
+                    }}
+                    className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-[rgba(255,255,255,0.05)] flex items-center gap-2"
+                  >
                     <Trash2 className="w-4 h-4" /> Sil
                   </button>
                 </div>
@@ -269,6 +302,7 @@ export default function AdminUsersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<Role | "all">("all");
   const [sourceFilter, setSourceFilter] = useState<UserSource | "all">("all");
+  const [userModalOpen, setUserModalOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -325,18 +359,55 @@ export default function AdminUsersPage() {
     return { total, admins, moderators, regular };
   }, [users]);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleRoleChange = (userId: string, role: Role) => {
-    // TODO: Implement role change API call
-    console.log("Change role", userId, role);
+  const handleRoleChange = async (userId: string, role: Role) => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return;
+    try {
+      await updateUserRole(userId, role, token);
+      toast.success("Rol güncellendi.");
+      refreshUsers();
+    } catch {
+      toast.error("Rol güncellenemedi.");
+    }
+  };
+
+  const handleDelete = async (userId: string) => {
+    if (!confirm("Bu kullanıcıyı silmek istediğinize emin misiniz?")) return;
+    const token = localStorage.getItem("authToken");
+    if (!token) return;
+    try {
+      await deleteUser(userId, token);
+      toast.success("Kullanıcı silindi.");
+      refreshUsers();
+    } catch {
+      toast.error("Silme işlemi başarısız.");
+    }
+  };
+
+  const handleEdit = () => {
+    // For now we don't have a distinct edit modal, preventing error.
+    // Ideally show UserEditModal here.
+    toast.info("Düzenleme henüz aktif değil.");
+  };
+
+  const refreshUsers = () => {
+    const token = typeof window !== "undefined" ? window.localStorage.getItem("authToken") : null;
+    if (!token) return;
+    getAllUsers(token).then(setUsers).catch(console.error);
   };
 
   return (
     <div className="flex flex-col gap-8">
+      <UserCreateModal
+        open={userModalOpen}
+        onClose={() => setUserModalOpen(false)}
+        onSuccess={refreshUsers}
+      />
       <AdminPageHeader
         title="Kullanıcılar"
         description="Platforma kayıtlı kullanıcıların rollerini, oturumlarını ve erişimlerini yönetin."
         ctaLabel="Yeni Kullanıcı"
+        onCtaClick={() => setUserModalOpen(true)}
       />
 
       {/* Stats Cards */}
@@ -494,6 +565,9 @@ export default function AdminUsersPage() {
               user={user}
               isCurrentUser={currentUser?.id === user.id}
               currentUserRole={currentUser?.role}
+              onDelete={handleDelete}
+              onRoleChange={handleRoleChange}
+              onEdit={handleEdit}
             />
           ))}
         </div>

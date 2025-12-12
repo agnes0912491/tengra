@@ -4,63 +4,67 @@ export type ForumCategory = {
   id: number;
   name: string;
   slug: string;
-  description: string | null;
-  icon: string | null;
-  color: string;
-  parentId: number | null;
-  sortOrder: number;
-  isLocked: boolean;
-  isHidden: boolean;
-  threadCount: number;
-  postCount: number;
-  lastThreadId: number | null;
-  lastPostAt: string | null;
-  createdAt: string;
-  updatedAt: string;
+  description?: string | null;
+  icon?: string | null;
+  color?: string | null;
+  parentId?: number | null;
+  sortOrder?: number;
+  isLocked?: boolean;
+  isHidden?: boolean;
+  threadCount?: number;
+  postCount?: number;
+  lastThreadId?: number | null;
+  lastPostAt?: string | null;
+  lastActivityAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
   children?: ForumCategory[];
+  lastThread?: ForumThread | null;
 };
 
 export type ForumThread = {
   id: number;
-  categoryId: number;
-  authorId: number;
+  categoryId?: number;
+  authorId?: number;
   title: string;
-  slug: string;
+  slug?: string;
   content: string;
-  contentHtml: string | null;
-  isPinned: boolean;
-  isLocked: boolean;
-  isHidden: boolean;
-  isAnnouncement: boolean;
-  viewCount: number;
-  replyCount: number;
-  likeCount: number;
-  lastPostId: number | null;
-  lastPostAt: string | null;
-  lastPostBy: number | null;
-  tags: string[];
-  createdAt: string;
-  updatedAt: string;
+  contentHtml?: string | null;
+  isPinned?: boolean;
+  isLocked?: boolean;
+  isHidden?: boolean;
+  isAnnouncement?: boolean;
+  viewCount?: number;
+  replyCount?: number;
+  likeCount?: number;
+  lastPostId?: number | null;
+  lastPostAt?: string | null;
+  lastPostBy?: number | null;
+  tags?: string[];
+  createdAt?: string;
+  updatedAt?: string;
   // Joined data
   author?: ForumUser;
   category?: ForumCategory;
+  lastReplyAt?: string | null;
+  lastReplyAuthor?: ForumUser;
 };
 
 export type ForumPost = {
   id: number;
   threadId: number;
-  authorId: number;
-  parentId: number | null;
+  authorId?: number;
+  parentId?: number | null;
   content: string;
-  contentHtml: string | null;
-  isSolution: boolean;
-  isHidden: boolean;
-  likeCount: number;
-  editCount: number;
-  editedAt: string | null;
-  editedBy: number | null;
-  createdAt: string;
-  updatedAt: string;
+  contentHtml?: string | null;
+  isSolution?: boolean;
+  isHidden?: boolean;
+  likeCount?: number;
+  editCount?: number;
+  editedAt?: string | null;
+  editedBy?: number | null;
+  createdAt?: string;
+  updatedAt?: string;
   // Joined data
   author?: ForumUser;
   replies?: ForumPost[];
@@ -256,6 +260,15 @@ export type ForumSearchResult = {
   threads: ForumThread[];
   posts: ForumPost[];
   total: number;
+};
+
+export type ForumOnlineUser = {
+  id: number;
+  username: string;
+  displayName: string;
+  role: 'admin' | 'moderator' | 'user' | string;
+  lastSeenAt: string;
+  device?: string;
 };
 
 // User rank definitions

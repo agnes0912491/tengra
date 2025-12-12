@@ -42,6 +42,21 @@ export default function Projects() {
 
   const isSlider = projects.length > 5;
 
+  const buildProjectUrl = (name?: string | null, id?: number | string | null) => {
+    if (!name && !id) return "#";
+    const sub = name
+      ? name
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+      : `project-${id}`;
+
+    // Ensure we use the subdomain
+    return `https://${sub}.tengra.studio`;
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
@@ -170,10 +185,12 @@ export default function Projects() {
                     const image = resolveCdnUrl(proj.logoUrl || FALLBACK_IMAGE);
 
                     return (
-                      <Link
+                      <a
                         key={proj.id ?? `${title}-${index}`}
-                        href={proj.id ? `/projects/${proj.id}` : "/projects"}
+                        href={buildProjectUrl(proj.name, proj.id)}
                         className="group relative flex-shrink-0 w-[320px] snap-center"
+                        target="_blank"
+                        rel="noreferrer"
                       >
                         <motion.div
                           initial={{ opacity: 0, y: 20 }}
@@ -209,7 +226,7 @@ export default function Projects() {
                             {renderMeta(proj)}
                           </div>
                         </motion.div>
-                      </Link>
+                      </a>
                     );
                   })}
                 </div>
@@ -221,13 +238,10 @@ export default function Projects() {
                 {/* Footer */}
                 <div className="mt-6 flex items-center justify-between px-2">
                   <span className="text-sm text-[var(--text-muted)]">{projects.length} projects</span>
-                  <Link
-                    href="/projects"
-                    className="inline-flex items-center gap-2 text-sm font-medium text-[var(--color-turkish-blue-400)] hover:text-[var(--color-turkish-blue-300)] transition-colors"
-                  >
-                    View all
+                  <span className="inline-flex items-center gap-2 text-sm font-medium text-[var(--color-turkish-blue-400)]">
+                    Explore
                     <ArrowRight className="w-4 h-4" />
-                  </Link>
+                  </span>
                 </div>
               </div>
             ) : (
@@ -238,10 +252,12 @@ export default function Projects() {
                 const image = resolveCdnUrl(proj.logoUrl || FALLBACK_IMAGE);
 
                 return (
-                  <Link
+                  <a
                     key={proj.id ?? `${title}-${index}`}
-                    href={proj.id ? `/projects/${proj.id}` : "/projects"}
+                    href={buildProjectUrl(proj.name, proj.id)}
                     className="group"
+                    target="_blank"
+                    rel="noreferrer"
                   >
                     <motion.div
                       initial={{ opacity: 0, y: 30 }}
@@ -277,7 +293,7 @@ export default function Projects() {
                         {renderMeta(proj)}
                       </div>
                     </motion.div>
-                  </Link>
+                  </a>
                 );
               })
             )}

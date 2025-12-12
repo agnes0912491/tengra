@@ -31,7 +31,7 @@ export default function Footer() {
       title: "Resources",
       links: [
         { label: "Projects", href: "/#projects" },
-        { label: "Forum", href: "/forum" },
+        { label: "Forum", href: "https://forum.tengra.studio" },
         { label: "FAQ", href: "/#faq" },
       ],
     },
@@ -188,7 +188,7 @@ export default function Footer() {
       <div className="border-t border-[rgba(72,213,255,0.08)]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-[var(--text-muted)]">
-            {tFooter("copyright", { year: new Date().getFullYear() })}
+            {tFooter("copyright", { year: 2025 })}
           </p>
           <div className="flex items-center gap-6 text-xs text-[var(--text-muted)]">
             <Link href="/privacy" className="hover:text-[var(--color-turkish-blue-400)] transition-colors">

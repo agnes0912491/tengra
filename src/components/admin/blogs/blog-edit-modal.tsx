@@ -3,7 +3,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import * as Tabs from "@radix-ui/react-tabs";
-import dynamic from "next/dynamic";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { createBlog, getAllBlogCategories, uploadImage } from "@/lib/db";
@@ -13,21 +12,7 @@ import { Eye } from "lucide-react";
 import Dropzone from "@/components/ui/dropzone";
 import { toast } from "@/lib/react-toastify";
 
-// Lightweight MD editor (client-only)
-type MDEProps = {
-    value?: string;
-    onChange?: (v?: string) => void;
-    preview?: "edit" | "live" | "preview";
-    height?: number;
-    style?: React.CSSProperties;
-};
-const MDEditor = dynamic<MDEProps>(
-    () =>
-        import("@uiw/react-md-editor").then((m) =>
-            (m.default as unknown) as React.ComponentType<MDEProps>
-        ),
-    { ssr: false }
-);
+import { MarkdownEditor } from "@/components/ui/markdown-editor";
 
 type Props = {
     open: boolean;
@@ -54,7 +39,6 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
     const [newCategory, setNewCategory] = useState("");
     const [creatingCategory, setCreatingCategory] = useState(false);
     const [submitting, setSubmitting] = useState(false);
-    const [showPreview, setShowPreview] = useState(false);
     const [richEditor, setRichEditor] = useState(false);
 
     // Load categories and draft when opened
@@ -380,7 +364,7 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
                             <div className="rounded-lg border border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.6)] p-2">
                                 {richEditor ? (
                                     <React.Suspense fallback={<div className="space-y-2"><div className="h-6 w-40 rounded-md bg-[rgba(255,255,255,0.06)] animate-pulse" /><div className="h-48 w-full rounded-lg bg-[rgba(255,255,255,0.04)] animate-pulse" /></div>}>
-                                        <MDEditor value={content} onChange={(v = "") => setContent(v)} preview={showPreview ? "preview" : "edit"} height={320} style={{ background: "transparent" }} />
+                                        <MarkdownEditor value={content} onChange={(v = "") => setContent(v)} height={320} />
                                     </React.Suspense>
                                 ) : (
                                     <textarea

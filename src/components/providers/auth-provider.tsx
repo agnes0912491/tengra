@@ -39,6 +39,7 @@ type AuthContextValue = {
     type?: "user" | "admin"
   ) => Promise<LoginResult>;
   logout: () => void;
+  refreshAuth: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -267,7 +268,20 @@ export default function AuthProvider({
   /**
    * logout: clears user state and removes local cache.
    */
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    // Revoke token on server
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      try {
+        await fetch("/api/auth/logout", {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+      } catch (err) {
+        console.warn("Logout API call failed", err);
+      }
+    }
+
     setUser(null);
 
     // Clear all auth-related localStorage keys
@@ -292,15 +306,31 @@ export default function AuthProvider({
     sessionStorage.clear();
   }, []);
 
+  const refreshAuth = useCallback(async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return;
+    try {
+      const userObj = await getUserWithToken(token);
+      if (userObj) {
+        setUser(userObj);
+      }
+    } catch (error) {
+      console.error("Failed to refresh auth:", error);
+    }
+  }, []);
+
+  const isLoading = (hydrating ?? false) || authActionLoading;
+
   const value = useMemo(
     () => ({
       user,
       isAuthenticated: Boolean(user),
-      loading: hydrating || authActionLoading,
+      loading: isLoading,
       login,
       logout,
+      refreshAuth,
     }),
-    [user, hydrating, authActionLoading, login, logout]
+    [user, isLoading, login, logout, refreshAuth]
   );
 
   const handleTwoFactorSuccess = (payload: AuthUserPayload) => {

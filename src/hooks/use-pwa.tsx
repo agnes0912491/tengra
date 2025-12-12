@@ -8,16 +8,21 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export function usePWA() {
-  const getInitialStandalone = () =>
-    typeof window !== "undefined" && window.matchMedia("(display-mode: standalone)").matches;
-  const getInitialOnline = () => (typeof navigator !== "undefined" ? navigator.onLine : true);
-
   const [isInstallable, setIsInstallable] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(() => getInitialStandalone());
-  const [isOnline, setIsOnline] = useState(() => getInitialOnline());
+  const [isInstalled, setIsInstalled] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
+    // Sync initial client state
+    if (typeof window !== "undefined" && window.matchMedia("(display-mode: standalone)").matches) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsInstalled(true);
+    }
+    if (typeof navigator !== "undefined") {
+      setIsOnline(navigator.onLine);
+    }
+
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
@@ -89,12 +94,19 @@ export function usePWA() {
 export function InstallPWAPrompt() {
   const { isInstallable, isInstalled, install } = usePWA();
   const [dismissed, setDismissed] = useState(() => {
-    if (typeof window === "undefined") return false;
-    const dismissedAt = localStorage.getItem("pwa-prompt-dismissed");
-    if (!dismissedAt) return false;
-    const daysSinceDismissed = (Date.now() - parseInt(dismissedAt, 10)) / (1000 * 60 * 60 * 24);
-    return daysSinceDismissed < 7;
+    if (typeof window !== "undefined") {
+      const dismissedAt = localStorage.getItem("pwa-prompt-dismissed");
+      if (dismissedAt) {
+        const daysSinceDismissed = (Date.now() - parseInt(dismissedAt, 10)) / (1000 * 60 * 60 * 24);
+        if (daysSinceDismissed < 7) {
+          return true;
+        }
+      }
+    }
+    return false;
   });
+
+
 
   if (!isInstallable || isInstalled || dismissed) return null;
 

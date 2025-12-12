@@ -117,9 +117,17 @@
     @apply min-h-screen text-[color:var(--foreground)] font-sans antialiased w-full;
     background: var(--color-surface-900);
     background-image: 
+      linear-gradient(rgba(30,184,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(30,184,255,0.03) 1px, transparent 1px),
       radial-gradient(ellipse 80% 50% at 50% -20%, rgba(30, 184, 255, 0.15), transparent),
       radial-gradient(ellipse 60% 40% at 100% 0%, rgba(72, 213, 255, 0.1), transparent),
       radial-gradient(ellipse 50% 30% at 0% 100%, rgba(0, 151, 212, 0.08), transparent);
+    background-size: 
+      60px 60px,
+      60px 60px,
+      auto,
+      auto,
+      auto;
     background-attachment: fixed;
   }
 
@@ -145,6 +153,15 @@
 
   a {
     @apply text-[color:var(--color-turkish-blue-400)] hover:text-[color:var(--color-turkish-blue-300)] transition-all duration-200;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 

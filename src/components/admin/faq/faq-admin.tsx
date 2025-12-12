@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import dynamic from "next/dynamic";
 import { motion, AnimatePresence, Reorder } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,34 +29,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-const MDEditor = dynamic<{
-    value?: string;
-    onChange?: (v?: string) => void;
-    height?: number;
-    preview?: "edit" | "preview" | "live";
-    style?: React.CSSProperties;
-}>(
-    () =>
-        import("@uiw/react-md-editor").then(
-            (m) =>
-                m.default as unknown as React.ComponentType<{
-                    value?: string;
-                    onChange?: (v?: string) => void;
-                    height?: number;
-                    preview?: "edit" | "preview" | "live";
-                    style?: React.CSSProperties;
-                }>
-        ),
-    {
-        ssr: false,
-        loading: () => (
-            <div className="space-y-2 p-4">
-                <div className="h-4 w-32 rounded bg-[rgba(255,255,255,0.06)] animate-pulse" />
-                <div className="h-32 w-full rounded-lg bg-[rgba(255,255,255,0.04)] animate-pulse" />
-            </div>
-        ),
-    }
-);
+import { MarkdownEditor } from "@/components/ui/markdown-editor";
 
 const SUPPORTED_LOCALES = routing.locales;
 
@@ -442,8 +414,8 @@ export default function FaqAdmin() {
                                             initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             className={`relative rounded-xl border transition-all duration-200 ${expandedId === item.id
-                                                    ? "bg-[rgba(30,184,255,0.05)] border-[rgba(72,213,255,0.3)]"
-                                                    : "bg-[rgba(15,31,54,0.4)] border-[rgba(72,213,255,0.1)] hover:border-[rgba(72,213,255,0.2)]"
+                                                ? "bg-[rgba(30,184,255,0.05)] border-[rgba(72,213,255,0.3)]"
+                                                : "bg-[rgba(15,31,54,0.4)] border-[rgba(72,213,255,0.1)] hover:border-[rgba(72,213,255,0.2)]"
                                                 } ${dirty.has(item.id) ? "ring-2 ring-amber-500/30" : ""}`}
                                         >
                                             {/* Header Row */}
@@ -482,8 +454,8 @@ export default function FaqAdmin() {
                                                             setDraftField(item.id, "isActive", !item.isActive);
                                                         }}
                                                         className={`p-2 rounded-lg transition-colors ${item.isActive
-                                                                ? "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
-                                                                : "bg-gray-500/20 text-gray-400 hover:bg-gray-500/30"
+                                                            ? "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
+                                                            : "bg-gray-500/20 text-gray-400 hover:bg-gray-500/30"
                                                             }`}
                                                         title={item.isActive ? "Aktif" : "Pasif"}
                                                     >
@@ -532,12 +504,10 @@ export default function FaqAdmin() {
                                                                     Yanıt (Markdown)
                                                                 </label>
                                                                 <div data-color-mode="dark" className="rounded-xl overflow-hidden border border-[rgba(72,213,255,0.2)]">
-                                                                    <MDEditor
+                                                                    <MarkdownEditor
                                                                         value={item.answer}
                                                                         onChange={(v: string = "") => setDraftField(item.id, "answer", v)}
                                                                         height={200}
-                                                                        style={{ background: "rgba(15,31,54,0.8)" }}
-                                                                        preview="edit"
                                                                     />
                                                                 </div>
                                                             </div>

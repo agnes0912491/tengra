@@ -5,6 +5,7 @@ import React, {
   useContext,
   useState,
   useEffect,
+  useCallback,
   ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
@@ -21,6 +22,7 @@ interface User {
   displayName: string;
   email: string;
   avatar: string;
+  source?: string;
   role: "admin" | "user";
 }
 
@@ -96,7 +98,7 @@ const clearStoredAuth = () => {
   // Clear cookies
   Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/" });
   for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
-  Cookies.remove(legacyName, { path: "/" });
+    Cookies.remove(legacyName, { path: "/" });
   }
 
   // Clear sessionStorage
@@ -155,6 +157,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
+  const fetchCurrentUser = useCallback(async (token: string) => {
+    try {
+      const response = await fetch(`${BACKEND_API_URL}/api/auth/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        handleInvalidAuth();
+        return;
+      }
+
+      const data = await response.json().catch(() => null);
+      const hasUser = data && typeof data === "object" && "user" in data && data.user;
+      const successFlag = data && typeof data.success === "boolean" ? data.success : true;
+
+      if (!hasUser || !successFlag) {
+        handleInvalidAuth();
+        return;
+      }
+
+      setUser((data as { user: User }).user);
+    } catch (error) {
+      console.error("Failed to fetch current user:", error);
+      handleInvalidAuth();
+    } finally {
+      setLoading(false);
+    }
+  }, [handleInvalidAuth]);
+
   useEffect(() => {
     // Check if user is logged in on mount
     const { clearedAuth } = purgeExpiredTokens();
@@ -190,37 +224,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [fetchCurrentUser]);
 
-  const fetchCurrentUser = useCallback(async (token: string) => {
-    try {
-      const response = await fetch(`${BACKEND_API_URL}/api/auth/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        handleInvalidAuth();
-        return;
-      }
-
-      const data = await response.json().catch(() => null);
-      const hasUser = data && typeof data === "object" && "user" in data && data.user;
-      const successFlag = data && typeof data.success === "boolean" ? data.success : true;
-
-      if (!hasUser || !successFlag) {
-        handleInvalidAuth();
-        return;
-      }
-
-      setUser((data as { user: User }).user);
-    } catch (error) {
-      console.error("Failed to fetch current user:", error);
-      handleInvalidAuth();
-    } finally {
-      setLoading(false);
-    }
-  }, [handleInvalidAuth]);
+   
 
   const login = async (
     username: string,

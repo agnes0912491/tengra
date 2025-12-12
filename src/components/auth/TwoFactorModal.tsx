@@ -19,6 +19,7 @@ export default function TwoFactorModal({ tempToken, onSuccess, expirySeconds = 3
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [remaining, setRemaining] = useState<number>(expirySeconds);
+    const [expiresAtMs, setExpiresAtMs] = useState<number>(() => Date.now() + expirySeconds * 1000);
     const [expired, setExpired] = useState(false);
     const [currentTempToken, setCurrentTempToken] = useState<string>(tempToken);
     const [resendCooldown, setResendCooldown] = useState<number>(0);
@@ -27,6 +28,8 @@ export default function TwoFactorModal({ tempToken, onSuccess, expirySeconds = 3
 
     useEffect(() => {
         setCurrentTempToken(tempToken);
+        const newExpires = Date.now() + expirySeconds * 1000;
+        setExpiresAtMs(newExpires);
         setRemaining(expirySeconds);
         setExpired(false);
     }, [tempToken, expirySeconds]);
@@ -50,25 +53,22 @@ export default function TwoFactorModal({ tempToken, onSuccess, expirySeconds = 3
         inputsRef.current[0]?.focus();
 
         // start countdown
-        setRemaining(expirySeconds);
+        const target = expiresAtMs || (Date.now() + expirySeconds * 1000);
         setExpired(false);
         timerRef.current = window.setInterval(() => {
-            setRemaining((r) => {
-                if (r <= 1) {
-                    // expire
-                    window.clearInterval(timerRef.current ?? 0);
-                    timerRef.current = null;
-                    setExpired(true);
-                    return 0;
-                }
-                return r - 1;
-            });
+            const secsLeft = Math.max(0, Math.floor((target - Date.now()) / 1000));
+            setRemaining(secsLeft);
+            if (secsLeft === 0) {
+                window.clearInterval(timerRef.current ?? 0);
+                timerRef.current = null;
+                setExpired(true);
+            }
         }, 1000);
 
         return () => {
             if (timerRef.current) window.clearInterval(timerRef.current);
         };
-    }, [tempToken, expirySeconds]);
+    }, [tempToken, expirySeconds, expiresAtMs]);
 
     useEffect(() => {
         if (expired) {
@@ -207,6 +207,8 @@ export default function TwoFactorModal({ tempToken, onSuccess, expirySeconds = 3
                 setCurrentTempToken(payload.tempToken);
                 const nowSec = Math.floor(Date.now() / 1000);
                 const secs = payload.expiresAt ? Math.max(1, Math.floor(payload.expiresAt - nowSec)) : (payload.expiresIn ?? expirySeconds);
+                const newExpiry = payload.expiresAt ? payload.expiresAt * 1000 : Date.now() + secs * 1000;
+                setExpiresAtMs(newExpiry);
                 setRemaining(secs);
                 setExpired(false);
                 setDigits(["", "", "", "", "", ""]);

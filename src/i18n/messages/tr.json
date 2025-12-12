@@ -303,6 +303,16 @@
         "lowercase": "Küçük harf",
         "number": "Rakam"
       },
+      "avatar": {
+        "label": "Avatar (opsiyonel)",
+        "helper": "Profilinizi kişiselleştirmek için bir fotoğraf ekleyin.",
+        "hint": "PNG, JPG veya WEBP — maksimum 10 MB.",
+        "invalidType": "Lütfen bir görsel dosyası seçin.",
+        "tooLarge": "Görsel boyutu 10 MB'tan küçük olmalıdır.",
+        "remove": "Avatarı kaldır",
+        "uploadFailed": "Avatar yüklenemedi. Lütfen tekrar deneyin.",
+        "uploaded": "Avatar yüklendi."
+      },
       "terms": {
         "prefix": "Kayıt olarak",
         "termsLink": "Kullanım Şartları",
@@ -322,7 +332,8 @@
         "missingFields": "Tüm alanları doldurun",
         "passwordMismatch": "Şifreler eşleşmiyor",
         "weakPassword": "Şifre yeterince güçlü değil",
-        "genericError": "Kayıt başarısız. Lütfen tekrar deneyin."
+        "genericError": "Kayıt başarısız. Lütfen tekrar deneyin.",
+        "timeout": "Sunucu yanıt vermedi. Birkaç saniye sonra tekrar deneyin."
       }
     },
     "forgotPassword": {

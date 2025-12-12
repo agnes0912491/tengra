@@ -9,6 +9,9 @@ import SiteShell from "@/components/layout/site-shell";
 import { useAuth } from "@/components/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { fetchForumCategories, createForumThread } from "@/lib/forum";
+import { getCategoryMeta } from "@/lib/forum-meta";
+import { ForumCategory } from "@/types/forum";
 import {
     ChevronRight,
     ArrowLeft,
@@ -23,28 +26,11 @@ import {
     Link2,
     List,
     ListOrdered,
-
     Quote,
     Heading1,
     Heading2,
-
-    MessageSquare,
-    Gamepad2,
-    Palette,
-    Lightbulb,
-    Bug,
+    Loader2,
 } from "lucide-react";
-
-// Categories
-const categories = [
-    { slug: "genel-tartisma", name: "Genel Tartışma", icon: <MessageSquare className="w-5 h-5" />, description: "Her konuda serbest tartışma" },
-    { slug: "oyunlar", name: "Oyunlar", icon: <Gamepad2 className="w-5 h-5" />, description: "Oyunlar hakkında tartışmalar" },
-    { slug: "gelistirici", name: "Geliştirici Köşesi", icon: <Code className="w-5 h-5" />, description: "Teknik tartışmalar" },
-    { slug: "tasarim", name: "Tasarım & Sanat", icon: <Palette className="w-5 h-5" />, description: "Görsel tasarım paylaşımı" },
-    { slug: "oneriler", name: "Öneriler & Fikirler", icon: <Lightbulb className="w-5 h-5" />, description: "Yeni özellik önerileri" },
-    { slug: "destek", name: "Destek & Yardım", icon: <HelpCircle className="w-5 h-5" />, description: "Sorular ve yardım" },
-    { slug: "bug-raporlari", name: "Bug Raporları", icon: <Bug className="w-5 h-5" />, description: "Hata raporları" },
-];
 
 // Markdown toolbar buttons
 const toolbarButtons = [
@@ -65,6 +51,9 @@ export default function NewTopicPage() {
     const categoryParam = searchParams.get("category");
     const { isAuthenticated } = useAuth();
 
+    const [availableCategories, setAvailableCategories] = useState<ForumCategory[]>([]);
+    const [loadingCategories, setLoadingCategories] = useState(true);
+    const [loadError, setLoadError] = useState<string | null>(null);
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [selectedCategory, setSelectedCategory] = useState(categoryParam || "");
@@ -79,6 +68,34 @@ export default function NewTopicPage() {
             router.replace(`/login?next=/forum/new${categoryParam ? `?category=${categoryParam}` : ""}`);
         }
     }, [isAuthenticated, router, categoryParam]);
+
+    useEffect(() => {
+        let active = true;
+        setLoadingCategories(true);
+        fetchForumCategories()
+            .then((items) => {
+                if (!active) return;
+                setAvailableCategories(items);
+                setSelectedCategory((current) => {
+                    const hasCurrent = current && items.some((cat) => cat.slug === current);
+                    if (hasCurrent) return current;
+                    if (categoryParam && items.some((cat) => cat.slug === categoryParam)) {
+                        return categoryParam;
+                    }
+                    return items[0]?.slug ?? current;
+                });
+            })
+            .catch(() => {
+                if (!active) return;
+                setLoadError("Kategoriler yüklenemedi.");
+            })
+            .finally(() => {
+                if (active) setLoadingCategories(false);
+            });
+        return () => {
+            active = false;
+        };
+    }, [categoryParam]);
 
     const handleAddTag = () => {
         const tag = tagInput.trim().toLowerCase();
@@ -133,14 +150,23 @@ export default function NewTopicPage() {
             return;
         }
 
+        const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : "";
+        if (!token) {
+            toast.error("Oturum bulunamadı. Lütfen tekrar giriş yapın.");
+            router.push(`/login?next=/forum/new${selectedCategory ? `?category=${selectedCategory}` : ""}`);
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 1500));
-
-            toast.success("Konu başarıyla oluşturuldu!");
-            router.push(`/forum/c/${selectedCategory}`);
+            const created = await createForumThread(selectedCategory, title.trim(), content.trim(), token);
+            if (created?.id) {
+                toast.success("Konu başarıyla oluşturuldu!");
+                router.push(`/forum/t/${created.id}`);
+            } else {
+                toast.error("Konu oluşturulamadı. Lütfen tekrar deneyin.");
+            }
         } catch {
             toast.error("Bir hata oluştu. Lütfen tekrar deneyin.");
         } finally {
@@ -201,35 +227,49 @@ export default function NewTopicPage() {
                             <label className="block text-sm font-medium text-[var(--text-primary)] mb-3">
                                 Kategori Seçin *
                             </label>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                {categories.map((cat) => (
-                                    <button
-                                        key={cat.slug}
-                                        type="button"
-                                        onClick={() => setSelectedCategory(cat.slug)}
-                                        className={`flex items-start gap-3 p-3 rounded-xl text-left transition-all ${selectedCategory === cat.slug
-                                                ? "bg-[rgba(30,184,255,0.15)] border-2 border-[var(--color-turkish-blue-400)]"
-                                                : "bg-[rgba(0,0,0,0.2)] border-2 border-transparent hover:border-[rgba(72,213,255,0.2)]"
-                                            }`}
-                                    >
-                                        <div className={`shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${selectedCategory === cat.slug
-                                                ? "bg-[var(--color-turkish-blue-500)] text-white"
-                                                : "bg-[rgba(30,184,255,0.1)] text-[var(--color-turkish-blue-400)]"
-                                            }`}>
-                                            {cat.icon}
-                                        </div>
-                                        <div className="min-w-0">
-                                            <p className={`font-medium text-sm ${selectedCategory === cat.slug
-                                                    ? "text-[var(--color-turkish-blue-300)]"
-                                                    : "text-[var(--text-primary)]"
-                                                }`}>
-                                                {cat.name}
-                                            </p>
-                                            <p className="text-xs text-[var(--text-muted)] line-clamp-1">{cat.description}</p>
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
+                            {loadingCategories ? (
+                                <div className="flex items-center gap-2 text-[var(--text-muted)]">
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    Kategoriler yükleniyor...
+                                </div>
+                            ) : availableCategories.length === 0 ? (
+                                <p className="text-sm text-[var(--text-muted)]">Henüz kategori tanımlı değil.</p>
+                            ) : (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    {availableCategories.map((cat) => {
+                                        const meta = getCategoryMeta(cat.slug);
+                                        const Icon = meta.icon;
+                                        return (
+                                            <button
+                                                key={cat.slug}
+                                                type="button"
+                                                onClick={() => setSelectedCategory(cat.slug)}
+                                                className={`flex items-start gap-3 p-3 rounded-xl text-left transition-all ${selectedCategory === cat.slug
+                                                        ? "bg-[rgba(30,184,255,0.15)] border-2 border-[var(--color-turkish-blue-400)]"
+                                                        : "bg-[rgba(0,0,0,0.2)] border-2 border-transparent hover:border-[rgba(72,213,255,0.2)]"
+                                                    }`}
+                                            >
+                                                <div className={`shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${selectedCategory === cat.slug
+                                                        ? "bg-[var(--color-turkish-blue-500)] text-white"
+                                                        : "bg-[rgba(30,184,255,0.1)] text-[var(--color-turkish-blue-400)]"
+                                                    }`}>
+                                                    <Icon className="w-5 h-5" />
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className={`font-medium text-sm ${selectedCategory === cat.slug
+                                                            ? "text-[var(--color-turkish-blue-300)]"
+                                                            : "text-[var(--text-primary)]"
+                                                        }`}>
+                                                        {cat.name}
+                                                    </p>
+                                                    <p className="text-xs text-[var(--text-muted)] line-clamp-1">{cat.description || meta.description}</p>
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                            {loadError ? <p className="text-xs text-red-300 mt-2">{loadError}</p> : null}
                         </div>
 
                         {/* Title */}

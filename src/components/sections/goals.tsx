@@ -1,9 +1,9 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Code, Globe, Infinity, Sparkles, Zap } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type GoalKey = "inception" | "creation" | "expansion" | "harmony" | "beyond";
 
@@ -25,6 +25,15 @@ export default function Goals() {
   const t = useTranslations("Goals");
   const locale = useLocale();
   const [adminGoals, setAdminGoals] = useState<Array<{ title: string; body: string }>>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Scroll progress for the entire section
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start center", "end center"]
+  });
+
+  const beamHeight = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   useEffect(() => {
     let cancel = false;
@@ -51,102 +60,124 @@ export default function Goals() {
     };
   }, [locale]);
 
+  const activeGoals = adminGoals.length > 0
+    ? adminGoals.map((g, idx) => ({
+      icon: goals[idx % goals.length].icon,
+      color: goals[idx % goals.length].color,
+      title: g.title,
+      description: g.body,
+    }))
+    : goals.map(({ icon, key, color }) => ({
+      icon,
+      color,
+      title: t(`defaults.${key}.title` as never),
+      description: t(`defaults.${key}.body` as never),
+    }));
+
   return (
-    <section id="goals" className="relative py-24 md:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Background */}
+    <section ref={containerRef} id="goals" className="relative py-32 md:py-48 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      {/* Background Ambience */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-[radial-gradient(circle,rgba(30,184,255,0.08)_0%,transparent_60%)]" />
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-full bg-[linear-gradient(90deg,transparent,rgba(30,184,255,0.03),transparent)]" />
+        <div className="absolute top-1/4 left-0 w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(30,184,255,0.04)_0%,transparent_70%)] blur-3xl" />
+        <div className="absolute bottom-1/4 right-0 w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(72,213,255,0.04)_0%,transparent_70%)] blur-3xl" />
       </div>
 
-      <div className="relative z-10 max-w-6xl mx-auto">
+      <div className="relative z-10 max-w-7xl mx-auto">
         {/* Section Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-24 md:mb-32"
         >
-          <h2 className="section-title">{t("title")}</h2>
-          <div className="divider mt-6 mb-6" />
-          <p className="text-[var(--text-secondary)] max-w-2xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[rgba(30,184,255,0.1)] border border-[rgba(30,184,255,0.2)] mb-6">
+            <span className="w-2 h-2 rounded-full bg-[var(--color-turkish-blue-400)] animate-pulse" />
+            <span className="text-xs font-medium text-[var(--color-turkish-blue-300)] uppercase tracking-widest">Roadmap</span>
+          </div>
+          <h2 className="section-title text-4xl md:text-5xl lg:text-6xl mb-6">{t("title")}</h2>
+          <p className="text-[var(--text-secondary)] text-lg max-w-2xl mx-auto">
             Our journey from concept to reality, building the future one milestone at a time.
           </p>
         </motion.div>
 
-        {/* Timeline */}
+        {/* Constellation Timeline */}
         <div className="relative">
-          {/* Vertical Line */}
-          <div className="absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-[var(--color-turkish-blue-500)] to-transparent opacity-30 hidden md:block" />
+          {/* Central Beam Container */}
+          <div className="absolute left-[20px] md:left-1/2 top-0 bottom-0 w-px -translate-x-1/2 md:-translate-x-1/2 bg-[rgba(255,255,255,0.05)]">
+            {/* The Active Beam */}
+            <motion.div
+              style={{ height: beamHeight }}
+              className="absolute top-0 left-0 w-full bg-gradient-to-b from-[var(--color-turkish-blue-400)] via-[var(--color-turkish-blue-500)] to-[var(--color-turkish-blue-300)] shadow-[0_0_15px_rgba(30,184,255,0.5)]"
+            />
+          </div>
 
-          <div className="space-y-12 md:space-y-0">
-            {(adminGoals.length > 0
-              ? adminGoals.map((g, idx) => ({
-                icon: goals[idx % goals.length].icon,
-                color: goals[idx % goals.length].color,
-                title: g.title,
-                description: g.body,
-              }))
-              : goals.map(({ icon, key, color }) => ({
-                icon,
-                color,
-                title: t(`defaults.${key}.title` as never),
-                description: t(`defaults.${key}.body` as never),
-              })))
-              .map(({ icon: Icon, color, title, description }, index) => {
-                const isLeft = index % 2 === 0;
+          <div className="space-y-24 md:space-y-32 pl-12 md:pl-0">
+            {activeGoals.map(({ icon: Icon, color, title, description }, index) => {
+              const isLeft = index % 2 === 0;
 
-                return (
+              return (
+                <div key={`${title}-${index}`} className="relative">
+                  {/* Timeline Node (Stargate) */}
                   <motion.div
-                    key={`${title}-${index}`}
-                    initial={{ opacity: 0, y: 40 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1, duration: 0.6 }}
-                    viewport={{ once: true }}
-                    className={`relative flex flex-col md:flex-row items-center gap-8 ${isLeft ? "md:flex-row" : "md:flex-row-reverse"
-                      }`}
+                    initial={{ opacity: 0, scale: 0 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    className="absolute left-[-29px] md:left-1/2 top-0 md:-translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-[18px] h-[18px]"
                   >
+                    <div className={`absolute inset-0 rounded-full bg-gradient-to-br ${color} blur-sm opacity-50 animate-pulse`} />
+                    <div className="w-3 h-3 rounded-full bg-[var(--color-surface-900)] border-2 border-[var(--color-turkish-blue-400)] shadow-[0_0_10px_var(--color-turkish-blue-400)]" />
+                  </motion.div>
+
+                  {/* Content Layout */}
+                  <div className={`flex flex-col md:flex-row items-center gap-8 md:gap-24 ${!isLeft ? "md:flex-row-reverse" : ""}`}>
+
+                    {/* Empty spacer for opposite side */}
+                    <div className="hidden md:block flex-1" />
+
                     {/* Content Card */}
-                    <div className={`flex-1 ${isLeft ? "md:text-right md:pr-12" : "md:text-left md:pl-12"}`}>
-                      <div className={`group relative p-6 rounded-2xl bg-[rgba(15,31,54,0.6)] border border-[rgba(72,213,255,0.12)] backdrop-blur-xl hover:border-[rgba(72,213,255,0.3)] transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.4),0_0_30px_rgba(30,184,255,0.1)] ${isLeft ? "md:ml-auto" : "md:mr-auto"} max-w-lg`}>
-                        {/* Gradient Accent */}
-                        <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${color} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
+                    <motion.div
+                      initial={{ opacity: 0, x: isLeft ? -50 : 50, rotateY: isLeft ? 15 : -15 }}
+                      whileInView={{ opacity: 1, x: 0, rotateY: 0 }}
+                      transition={{ duration: 0.8, ease: "easeOut" }}
+                      viewport={{ once: true, margin: "-50px" }}
+                      className="flex-1 w-full"
+                    >
+                      <div className="group relative p-1 rounded-3xl bg-gradient-to-br from-[rgba(255,255,255,0.05)] to-transparent hover:from-[var(--color-turkish-blue-500)]/30 transition-all duration-500">
+                        {/* Inner Glass Card */}
+                        <div className="relative h-full p-8 rounded-[22px] bg-[rgba(15,31,54,0.85)] border border-[rgba(72,213,255,0.1)] backdrop-blur-2xl overflow-hidden">
+                          {/* Hover Glow */}
+                          <div className={`absolute top-0 right-0 w-[300px] h-[300px] rounded-full bg-gradient-to-br ${color} opacity-0 group-hover:opacity-10 blur-[80px] transition-opacity duration-700 pointer-events-none`} />
 
-                        <div className={`flex items-start gap-4 ${isLeft ? "md:flex-row-reverse" : ""}`}>
-                          {/* Icon Container - Mobile */}
-                          <div className={`md:hidden flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center shadow-lg`}>
-                            <Icon className="w-6 h-6 text-white" />
-                          </div>
+                          <div className="relative z-10">
+                            {/* Icon & Number Header */}
+                            <div className="flex items-center justify-between mb-6">
+                              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${color} p-0.5 shadow-lg`}>
+                                <div className="w-full h-full rounded-[10px] bg-[var(--color-surface-800)] flex items-center justify-center">
+                                  <Icon className="w-6 h-6 text-white" />
+                                </div>
+                              </div>
+                              <span className="text-4xl font-display font-bold text-[rgba(255,255,255,0.05)] group-hover:text-[rgba(255,255,255,0.1)] transition-colors">
+                                {String(index + 1).padStart(2, "0")}
+                              </span>
+                            </div>
 
-                          <div className="flex-1">
-                            <h3 className={`text-xl font-display font-semibold text-[var(--text-primary)] mb-2 ${isLeft ? "md:text-right" : ""}`}>
+                            <h3 className="text-2xl font-display font-bold text-[var(--text-primary)] mb-3 group-hover:text-[var(--color-turkish-blue-300)] transition-colors">
                               {title}
                             </h3>
-                            <p className={`text-sm text-[var(--text-secondary)] leading-relaxed ${isLeft ? "md:text-right" : ""}`}>
+                            <p className="text-[var(--text-secondary)] leading-relaxed">
                               {description}
                             </p>
                           </div>
                         </div>
-
-                        {/* Step Number */}
-                        <div className={`absolute -bottom-3 ${isLeft ? "right-6" : "left-6"} px-3 py-1 rounded-full bg-[var(--color-surface-800)] border border-[rgba(72,213,255,0.2)] text-xs font-semibold text-[var(--color-turkish-blue-400)]`}>
-                          {String(index + 1).padStart(2, "0")}
-                        </div>
                       </div>
-                    </div>
-
-                    {/* Center Icon - Desktop */}
-                    <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 z-10">
-                      <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center shadow-[0_8px_30px_rgba(0,0,0,0.3)] ring-4 ring-[var(--color-surface-900)]`}>
-                        <Icon className="w-7 h-7 text-white" />
-                      </div>
-                    </div>
-
-                    {/* Spacer for alignment */}
-                    <div className="hidden md:block flex-1" />
-                  </motion.div>
-                );
-              })}
+                    </motion.div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

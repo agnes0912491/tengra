@@ -32,6 +32,22 @@ const isAssetPath = (p: string) =>
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const host = request.headers.get("host") || "";
+  
+  // Handle forum subdomain
+  // Force http protocol for internal rewrites since Next.js server runs on HTTP
+  if (host === "forum.tengra.studio") {
+    if (!pathname.startsWith("/forum")) {
+      const url = request.nextUrl.clone();
+      url.protocol = "http:";
+      url.host = "127.0.0.1:3000";
+      url.pathname = `/forum${pathname === "/" ? "" : pathname}`;
+      return NextResponse.rewrite(url);
+    }
+  }
+
+
+
   const isProd = process.env.NODE_ENV === "production";
   const segments = pathname.split("/").filter(Boolean);
   const localeFromPath = segments.length > 0 ? resolveLocale(segments[0]) : null;
@@ -184,18 +200,22 @@ export async function proxy(request: NextRequest) {
 
   // Production CSP headers
   if (isProd) {
-    const nonce = request.headers.get("x-nonce") || crypto.randomUUID();
-
     const scriptSrc = [
       "'self'",
-      `'nonce-${nonce}'`,
-      "'strict-dynamic'",
       "'unsafe-inline'",
       "https://static.cloudflareinsights.com",
       "https://fundingchoicesmessages.google.com",
       "https://www.googletagmanager.com",
       "https://www.gstatic.com",
       "https://pagead2.googlesyndication.com",
+      "https://googleads.g.doubleclick.net",
+      "https://tpc.googlesyndication.com",
+      "https://adservice.google.com",
+      "https://adservice.google.com.tr",
+      "https://securepubads.g.doubleclick.net",
+      "https://www.googleadservices.com",
+      "https://googleadservices.com",
+      "https://www.googletagservices.com",
     ].join(" ");
 
     const connectSrc = [
@@ -206,6 +226,13 @@ export async function proxy(request: NextRequest) {
       "https://www.google-analytics.com",
       "https://googleads.g.doubleclick.net",
       "https://pagead2.googlesyndication.com",
+      "https://tpc.googlesyndication.com",
+      "https://adservice.google.com",
+      "https://adservice.google.com.tr",
+      "https://securepubads.g.doubleclick.net",
+      "https://www.googleadservices.com",
+      "https://googleadservices.com",
+      "https://www.googletagservices.com",
     ].join(" ");
 
     // Explicit CSP to avoid upstream defaults like script-src 'none' being applied
@@ -227,6 +254,25 @@ export async function proxy(request: NextRequest) {
         "upgrade-insecure-requests",
       ].join("; ")
     );
+
+    /*
+    {
+    key: "Content-Security-Policy",
+    value: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com https://fundingchoicesmessages.google.com 'sha256-Am7bIQNYGtOBwCDBkRu6u9RrSm3a87vYJk/0Ic9SrIE='",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: https://cdn.tengra.studio",
+      "font-src 'self' https://tengra.studio https://cdn.tengra.studio data:",
+      "connect-src 'self' https://cdn.tengra.studio https://tengra.studio https://static.cloudflareinsights.com https://cloudflareinsights.com https://*.cloudflareinsights.com https://fundingchoicesmessages.google.com",
+      "frame-ancestors 'none'",
+      "form-action 'self'",
+      "base-uri 'self'",
+      "object-src 'none'",
+      "upgrade-insecure-requests",
+    ].join("; "),
+  },
+     */
 
     // Soften COEP/CORP to allow our CDN assets (images/fonts) without blocking
     response.headers.set("Cross-Origin-Embedder-Policy", "unsafe-none");

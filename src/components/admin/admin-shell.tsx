@@ -25,6 +25,7 @@ import {
   LogOut,
   Menu,
   X,
+  MessagesSquare,
 } from "lucide-react";
 
 const NAVIGATION_ITEMS: Readonly<NavItem[]> = [
@@ -69,6 +70,12 @@ const NAVIGATION_ITEMS: Readonly<NavItem[]> = [
     label: "İletişim",
     description: "İletişim formu kayıtları",
     Icon: Mail,
+  },
+  {
+    href: "/admin/dashboard/forum",
+    label: "Forum",
+    description: "Kategorileri ve görünürlükleri yönet",
+    Icon: MessagesSquare,
   },
 ];
 
