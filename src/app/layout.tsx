@@ -113,7 +113,7 @@ export default async function RootLayout({
     cookieLocale: cookieStore.get("NEXT_LOCALE")?.value,
     acceptLanguage: headersList.get("accept-language"),
   });
-  const { locale, messages } = getMessages(preferredLocale); 
+  const { locale, messages } = getMessages(preferredLocale);
 
   // Nonce'u runtime'da almaya çalışma, sadece Script'lerde kullan
   const isProd = process.env.NODE_ENV === "production";
@@ -203,6 +203,8 @@ export default async function RootLayout({
           />
         )}
 
+        <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
+
         <ClientUserProvider>
           <ParticlesClientWrapper />
           <IntlProviderClient locale={locale} messages={messages}>
@@ -214,6 +216,7 @@ export default async function RootLayout({
             <PWAProvider />
             <div className="flex min-h-screen flex-col">
               {children}
+              {/* @ts-expect-error React 19 type mismatch */}
               <Footer />
             </div>
           </IntlProviderClient>

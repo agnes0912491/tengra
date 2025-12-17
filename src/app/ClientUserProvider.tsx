@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import AuthProvider from "@/components/providers/auth-provider";
+import { WebSocketProvider } from "@/components/providers/websocket-provider";
 import { User } from "@/lib/auth/users";
 import {
   ADMIN_SESSION_COOKIE,
@@ -29,7 +30,7 @@ export default function ClientUserProvider({
       try {
         storedToken = window.localStorage.getItem("authToken");
       } catch (error) {
-        console.error("Failed to read authToken from localStorage:", error); 
+        console.error("Failed to read authToken from localStorage:", error);
       }
 
       if (!storedToken) {
@@ -73,7 +74,7 @@ export default function ClientUserProvider({
         }
       } catch (error) {
         console.error("Failed to fetch user with token:", error);
-        if (typeof window !== "undefined") { 
+        if (typeof window !== "undefined") {
         }
         Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/" });
         for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
@@ -98,7 +99,9 @@ export default function ClientUserProvider({
 
   return (
     <AuthProvider user={user} hydrating={hydrating}>
-      {children}
+      <WebSocketProvider>
+        {children}
+      </WebSocketProvider>
     </AuthProvider>
   );
 }

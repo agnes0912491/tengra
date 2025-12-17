@@ -62,8 +62,8 @@ export default function TermsPage() {
           <h2 className="text-lg font-semibold text-white">Contact</h2>
           <p className="text-sm text-[color:var(--text-muted)]">
             Questions about these terms? Reach us at{" "}
-            <a className="text-[color:var(--color-turkish-blue-300)] underline" href="mailto:hello@tengra.studio">
-              hello@tengra.studio
+            <a className="text-[color:var(--color-turkish-blue-300)] underline" href="mailto:info@tengra.studio">
+              info@tengra.studio
             </a>
             .
           </p>

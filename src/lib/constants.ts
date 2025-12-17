@@ -20,28 +20,40 @@ export const resolveCdnUrl = (path: string | null | undefined): string => {
 };
 
 export const getLocalizedText = (
-  raw: string | null | undefined,
+  raw: string | object | null | undefined,
   locale: string
 ): string | undefined => {
   if (!raw) return undefined;
-  try {
-    const parsed = JSON.parse(raw) as unknown;
-    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-      const rec = parsed as Record<string, unknown>;
-      const direct = rec[locale];
-      if (typeof direct === "string" && direct.trim().length > 0) {
-        return direct;
-      }
-      for (const key of Object.keys(rec)) {
-        const value = rec[key];
-        if (typeof value === "string" && value.trim().length > 0) {
-          return value;
-        }
-      }
-      return undefined;
+
+  let obj: unknown = raw;
+
+  if (typeof raw === "string") {
+    try {
+      obj = JSON.parse(raw);
+    } catch {
+      // not JSON, return as is
+      return raw;
     }
-  } catch {
-    // not JSON, fall through to raw
   }
-  return raw;
+
+  if (obj && typeof obj === "object" && !Array.isArray(obj)) {
+    const rec = obj as Record<string, unknown>;
+    const direct = rec[locale];
+    if (typeof direct === "string" && direct.trim().length > 0) {
+      return direct;
+    }
+    // Fallback to any string value
+    for (const key of Object.keys(rec)) {
+      const value = rec[key];
+      if (typeof value === "string" && value.trim().length > 0) {
+        return value;
+      }
+    }
+    return undefined;
+  }
+
+  // If it was a string that failed to parse as object, we already returned it above.
+  // If it was an object but failed checks, return undefined.
+  if (typeof raw === "string") return raw;
+  return undefined;
 };

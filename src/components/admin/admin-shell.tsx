@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useMemo, useCallback, useState } from "react";
+import { ReactNode, useMemo, useCallback, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -26,6 +26,9 @@ import {
   Menu,
   X,
   MessagesSquare,
+  Shield,
+  PanelLeftClose,
+  PanelLeft,
 } from "lucide-react";
 
 const NAVIGATION_ITEMS: Readonly<NavItem[]> = [
@@ -77,11 +80,19 @@ const NAVIGATION_ITEMS: Readonly<NavItem[]> = [
     description: "Kategorileri ve görünürlükleri yönet",
     Icon: MessagesSquare,
   },
+  {
+    href: "/admin/dashboard/audit",
+    label: "Audit Logs",
+    description: "Güvenlik olaylarını izle",
+    Icon: Shield,
+  },
 ];
 
 type Props = {
   children: ReactNode;
 };
+
+const SIDEBAR_COLLAPSED_KEY = "admin_sidebar_collapsed";
 
 export default function AdminShell({ children }: Props) {
   const { user, logout } = useAuth();
@@ -90,6 +101,22 @@ export default function AdminShell({ children }: Props) {
   const t = useTranslations("AdminDashboard");
   const tNav = useTranslations("Navigation");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+
+  // Load collapsed state from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+    if (saved === "true") setCollapsed(true);
+  }, []);
+
+  // Save collapsed state
+  const toggleCollapsed = useCallback(() => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(next));
+      return next;
+    });
+  }, []);
 
   const isAdmin = user?.role === "admin";
 
@@ -156,14 +183,24 @@ export default function AdminShell({ children }: Props) {
         {/* Sidebar */}
         <aside
           className={`
-            fixed lg:relative inset-y-0 left-0 z-50 flex min-h-screen w-72 xl:w-80 flex-col justify-between
-            bg-[rgba(8,20,32,0.95)] border-r border-[rgba(72,213,255,0.08)] px-6 py-7 backdrop-blur-xl
-            transform transition-transform duration-300 lg:transform-none
+            fixed lg:relative inset-y-0 left-0 z-50 flex min-h-screen flex-col justify-between
+            bg-[rgba(8,20,32,0.97)] border-r border-[rgba(72,213,255,0.08)] backdrop-blur-xl
+            transform transition-all duration-300 lg:transform-none
+            ${collapsed ? "w-[72px] px-3" : "w-72 xl:w-80 px-6"} py-7
             ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
           `}
           role="complementary"
           aria-label="Yönetim Paneli Yan Menü"
         >
+          {/* Collapse toggle - desktop only */}
+          <button
+            type="button"
+            onClick={toggleCollapsed}
+            className="hidden lg:flex absolute -right-3 top-20 w-6 h-6 items-center justify-center rounded-full bg-[rgba(15,31,54,0.95)] border border-[rgba(72,213,255,0.2)] text-[rgba(130,226,255,0.8)] hover:bg-[rgba(72,213,255,0.15)] transition-all z-10"
+            title={collapsed ? "Genişlet" : "Daralt"}
+          >
+            {collapsed ? <PanelLeft className="w-3.5 h-3.5" /> : <PanelLeftClose className="w-3.5 h-3.5" />}
+          </button>
           {/* Mobile close button */}
           <button
             type="button"
@@ -174,20 +211,22 @@ export default function AdminShell({ children }: Props) {
           </button>
 
           {/* Header */}
-          <header className="relative flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--color-turkish-blue-500)] to-[var(--color-turkish-blue-600)] shadow-[0_4px_20px_rgba(30,184,255,0.25)]">
-              <Image crossOrigin="anonymous" src={ADMIN_LOGO_SRC} alt="Tengra Logo" width={28} height={28} className="opacity-95" />
+          <header className={`relative flex items-center ${collapsed ? "justify-center" : "gap-3"}`}>
+            <div className={`flex items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--color-turkish-blue-500)] to-[var(--color-turkish-blue-600)] shadow-[0_4px_20px_rgba(30,184,255,0.25)] ${collapsed ? "h-11 w-11" : "h-12 w-12"}`}>
+              <Image crossOrigin="anonymous" src={ADMIN_LOGO_SRC} alt="Tengra Logo" width={collapsed ? 24 : 28} height={collapsed ? 24 : 28} className="opacity-95" />
             </div>
-            <div className="leading-tight">
-              <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--color-turkish-blue-400)]">
-                Tengra
-              </p>
-              <p className="text-sm font-semibold text-[var(--text-primary)]">Yönetim Paneli</p>
-            </div>
+            {!collapsed && (
+              <div className="leading-tight">
+                <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--color-turkish-blue-400)]">
+                  Tengra
+                </p>
+                <p className="text-sm font-semibold text-[var(--text-primary)]">Yönetim Paneli</p>
+              </div>
+            )}
           </header>
 
           {/* Navigation */}
-          <nav className="relative mt-8 flex flex-1 flex-col gap-2 overflow-y-auto pr-1 text-sm" role="navigation" aria-label="Ana gezinme">
+          <nav className={`relative mt-8 flex flex-1 flex-col gap-1.5 overflow-y-auto ${collapsed ? "px-0" : "pr-1"} text-sm`} role="navigation" aria-label="Ana gezinme">
             {navigation.map((item) => {
               const localized =
                 item.href === "/admin/dashboard/faq"
@@ -196,35 +235,39 @@ export default function AdminShell({ children }: Props) {
                     ? { ...item, label: tNav("contact") }
                     : item;
               const isActive = pathname === item.href;
-              return <SidebarItem key={item.href} item={localized} isActive={!!isActive} />;
+              return <SidebarItem key={item.href} item={localized} isActive={!!isActive} collapsed={collapsed} />;
             })}
           </nav>
 
           {/* Footer */}
-          <footer className="sticky bottom-0 left-0 w-full border-t border-[rgba(72,213,255,0.1)] pt-6 text-xs">
+          <footer className={`sticky bottom-0 left-0 w-full border-t border-[rgba(72,213,255,0.1)] pt-6 text-xs ${collapsed ? "flex flex-col items-center gap-3" : ""}`}>
             <Link
               href="/"
-              className="mb-4 flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-[var(--color-turkish-blue-500)] to-[var(--color-turkish-blue-600)] hover:from-[var(--color-turkish-blue-400)] hover:to-[var(--color-turkish-blue-500)] shadow-[0_4px_15px_rgba(30,184,255,0.2)] transition-all"
+              className={`flex items-center justify-center rounded-xl text-sm font-medium text-white bg-gradient-to-r from-[var(--color-turkish-blue-500)] to-[var(--color-turkish-blue-600)] hover:from-[var(--color-turkish-blue-400)] hover:to-[var(--color-turkish-blue-500)] shadow-[0_4px_15px_rgba(30,184,255,0.2)] transition-all ${collapsed ? "w-11 h-11 p-0 mb-0" : "gap-2 px-4 py-2.5 mb-4"}`}
+              title="Ana Sayfaya Dön"
             >
               <Home className="h-4 w-4" />
-              Ana Sayfaya Dön
+              {!collapsed && <span>Ana Sayfaya Dön</span>}
             </Link>
 
-            <div className="rounded-xl bg-[rgba(15,31,54,0.5)] border border-[rgba(72,213,255,0.1)] p-4">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--color-turkish-blue-400)]">
-                Kullanıcı
-              </p>
-              <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">{user?.displayName ?? user?.username ?? "Admin"}</p>
-              <p className="text-[11px] text-[var(--text-muted)]">{user?.email}</p>
-            </div>
+            {!collapsed && (
+              <div className="rounded-xl bg-[rgba(15,31,54,0.5)] border border-[rgba(72,213,255,0.1)] p-4">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--color-turkish-blue-400)]">
+                  Kullanıcı
+                </p>
+                <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">{user?.displayName ?? user?.username ?? "Admin"}</p>
+                <p className="text-[11px] text-[var(--text-muted)]">{user?.email}</p>
+              </div>
+            )}
 
             <button
               type="button"
               onClick={handleLogout}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-white bg-[rgba(220,38,38,0.8)] hover:bg-[rgba(220,38,38,0.9)] shadow-[0_4px_15px_rgba(220,38,38,0.2)] transition-all"
+              className={`flex items-center justify-center rounded-xl text-sm font-medium text-white bg-[rgba(220,38,38,0.8)] hover:bg-[rgba(220,38,38,0.9)] shadow-[0_4px_15px_rgba(220,38,38,0.2)] transition-all ${collapsed ? "w-11 h-11 p-0 mt-0" : "mt-4 w-full gap-2 px-4 py-2.5"}`}
+              title="Çıkış Yap"
             >
               <LogOut className="h-4 w-4" />
-              Çıkış Yap
+              {!collapsed && <span>Çıkış Yap</span>}
             </button>
           </footer>
         </aside>

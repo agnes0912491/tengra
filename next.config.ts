@@ -1,21 +1,10 @@
 import type { NextConfig } from "next";
 
 const securityHeaders = [
+  // CSP is managed by the reverse proxy (nginx/caddy)
   // {
   //   key: "Content-Security-Policy",
-  //   value: [
-  //     "default-src 'self'",
-  //     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com https://fundingchoicesmessages.google.com 'sha256-Am7bIQNYGtOBwCDBkRu6u9RrSm3a87vYJk/0Ic9SrIE='",
-  //     "style-src 'self' 'unsafe-inline'",
-  //     "img-src 'self' data: https://cdn.tengra.studio",
-  //     "font-src 'self' https://tengra.studio https://cdn.tengra.studio data:",
-  //     "connect-src 'self' https://cdn.tengra.studio https://tengra.studio https://static.cloudflareinsights.com https://cloudflareinsights.com https://*.cloudflareinsights.com https://fundingchoicesmessages.google.com",
-  //     "frame-ancestors 'none'",
-  //     "form-action 'self'",
-  //     "base-uri 'self'",
-  //     "object-src 'none'",
-  //     "upgrade-insecure-requests",
-  //   ].join("; "),
+  //   value: "..."
   // },
   { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
   { key: "Cross-Origin-Embedder-Policy", value: "credentialless" },
@@ -37,13 +26,13 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   output: "standalone",
   experimental: {
-    optimizePackageImports: ["react", "next"],
     serverSourceMaps: false,
   },
   productionBrowserSourceMaps: false,
   typescript: {
     ignoreBuildErrors: true,
   },
+
   logging: {
     fetches: {
       fullUrl: true,

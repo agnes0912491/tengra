@@ -12,6 +12,7 @@ import { registerUser, uploadRegisterAvatar } from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Dropzone from "@/components/ui/dropzone";
+import { GoogleButton } from "@/components/auth/google-button";
 import { UserPlus, Lock, Mail, User, Eye, EyeOff, Check, X, ImagePlus, Trash2 } from "lucide-react";
 
 export default function RegisterForm() {
@@ -71,7 +72,7 @@ export default function RegisterForm() {
 
                 try {
                     const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-                        const image = new Image();
+                        const image = new window.Image();
                         image.onload = () => resolve(image);
                         image.onerror = reject;
                         image.src = dataUrl;
@@ -140,11 +141,28 @@ export default function RegisterForm() {
         }
     }, [isAuthenticated, router, user]);
 
+    // Handle Google Auto-Fill
+    const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+    useEffect(() => {
+        if (searchParams && searchParams.get("google_token")) {
+            setFormData(prev => ({
+                ...prev,
+                email: searchParams.get("email") || "",
+                username: ((searchParams.get("first_name") || "") + (searchParams.get("last_name") || "")).toLowerCase().replace(/\s/g, ""),
+            }));
+            if (searchParams.get("avatar")) {
+                setAvatarPreview(searchParams.get("avatar"));
+                setAvatarUploadedUrl(searchParams.get("avatar"));
+            }
+        }
+    }, [searchParams]);
+
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
         try {
             const { username, email, password, confirmPassword } = formData;
+            const googleToken = searchParams?.get("google_token"); // Check param
 
             if (!username.trim() || !email.trim() || !password) {
                 toast.error(t("register.toast.missingFields"));
@@ -163,14 +181,15 @@ export default function RegisterForm() {
 
             setLoading(true);
 
-            const result = await registerUser(
-                username.trim(),
-                email.trim(),
+            const result = await registerUser({
+                username: username.trim(),
+                email: email.trim(),
                 password,
-                undefined,
-                username.trim(),
-                avatarUploadedUrl || undefined
-            );
+                firstName: searchParams?.get("first_name") || undefined,
+                lastName: searchParams?.get("last_name") || undefined,
+                avatarUrl: avatarUploadedUrl || undefined,
+                idToken: googleToken || undefined
+            });
 
             if (result.success) {
                 toast.success(t("register.toast.success"));
@@ -191,9 +210,9 @@ export default function RegisterForm() {
             } else {
                 toast.error(t("register.toast.genericError"));
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error("Registration failed:", err);
-            toast.error(t("register.toast.genericError"));
+            toast.error(err.message || t("register.toast.genericError"));
         } finally {
             setLoading(false);
         }
@@ -241,6 +260,66 @@ export default function RegisterForm() {
                         </div>
                     </div>
 
+                    {/* Google Button */}
+                    <div className="w-full">
+                        <GoogleButton
+                            onSuccess={/* reusing login logic is hard, implementing new */ (cred) => {
+                                // Redirect to register with params? No, if they click Google on Register, it should probably auto-fill.
+                                // We can navigate to self with params?
+                                // Actually, handleGoogleSuccess in LoginForm handles Login OR redirect to Register.
+                                // If we duplicate it here, it works.
+                                // But I need to import handleGoogleSuccess logic or re-implement it.
+                                // I'll assume I can just use the same lova-api call.
+                                const verify = async () => {
+                                    try {
+                                        setLoading(true);
+                                        const response = await fetch("https://api.lova.tengra.studio/auth/google-login", {
+                                            method: "POST",
+                                            headers: { "Content-Type": "application/json" },
+                                            body: JSON.stringify({
+                                                idToken: cred,
+                                                source: "web_client_google"
+                                            })
+                                        });
+                                        const data = await response.json();
+                                        if (!response.ok) throw new Error(data.error);
+
+                                        if (data.isNew) {
+                                            // Fill form
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                email: data.googleData.email,
+                                                username: ((data.googleData.firstName || "") + (data.googleData.lastName || "")).toLowerCase().replace(/\s/g, ""),
+                                            }));
+                                            if (data.googleData.avatar) {
+                                                setAvatarPreview(data.googleData.avatar);
+                                                setAvatarUploadedUrl(data.googleData.avatar);
+                                            }
+                                        } else {
+                                            // User exists, login them!
+                                            if (data.token) {
+                                                localStorage.setItem("authToken", data.token);
+                                                window.location.href = "/";
+                                            }
+                                        }
+                                    } catch (e) { toast.error("Google Auth Failed"); } finally { setLoading(false); }
+                                };
+                                verify();
+                            }}
+                            onError={() => toast.error("Google ile bağlanılamadı")}
+                        />
+                    </div>
+                    <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-[rgba(72,213,255,0.1)]" />
+                        </div>
+                        <div className="relative flex justify-center text-xs">
+                            <span className="bg-[rgba(15,31,54,0.9)] px-4 text-[var(--text-muted)]">
+                                VEYA FORM İLE
+                            </span>
+                        </div>
+                    </div>
+
                     {/* Form */}
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {/* Avatar */}
@@ -251,7 +330,7 @@ export default function RegisterForm() {
                             <Dropzone accept={{ "image/*": [] }} onDrop={handleAvatarDrop}>
                                 <div className="flex w-full items-center gap-4">
                                     <div className="relative h-16 w-16 rounded-full overflow-hidden border border-[rgba(72,213,255,0.2)] bg-[rgba(30,184,255,0.08)] flex items-center justify-center">
-                                    {avatarPreview ? (
+                                        {avatarPreview ? (
                                             <Image src={avatarPreview} alt="Avatar preview" fill className="object-cover" />
                                         ) : (
                                             <ImagePlus className="w-6 h-6 text-[var(--text-muted)]" />
@@ -369,12 +448,12 @@ export default function RegisterForm() {
                                             <div
                                                 key={level}
                                                 className={`h-1 flex-1 rounded-full transition-colors ${passwordStrength >= level
-                                                        ? passwordStrength <= 2
-                                                            ? "bg-red-500"
-                                                            : passwordStrength <= 3
-                                                                ? "bg-yellow-500"
-                                                                : "bg-green-500"
-                                                        : "bg-[rgba(72,213,255,0.1)]"
+                                                    ? passwordStrength <= 2
+                                                        ? "bg-red-500"
+                                                        : passwordStrength <= 3
+                                                            ? "bg-yellow-500"
+                                                            : "bg-green-500"
+                                                    : "bg-[rgba(72,213,255,0.1)]"
                                                     }`}
                                             />
                                         ))}
@@ -408,10 +487,10 @@ export default function RegisterForm() {
                                     value={formData.confirmPassword}
                                     onChange={(e) => setFormData((p) => ({ ...p, confirmPassword: e.target.value }))}
                                     className={`pl-11 pr-11 ${formData.confirmPassword.length > 0
-                                            ? passwordsMatch
-                                                ? "border-green-500/50"
-                                                : "border-red-500/50"
-                                            : ""
+                                        ? passwordsMatch
+                                            ? "border-green-500/50"
+                                            : "border-red-500/50"
+                                        : ""
                                         }`}
                                     placeholder={t("register.confirmPasswordPlaceholder")}
                                 />
@@ -443,7 +522,7 @@ export default function RegisterForm() {
 
                         <Button
                             type="submit"
-                            variant="primary"
+                            variant="default"
                             size="lg"
                             className="w-full"
                             disabled={loading || !passwordsMatch || passwordStrength < 3}

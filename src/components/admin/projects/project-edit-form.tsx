@@ -23,8 +23,8 @@ import {
     Upload,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useState, useTransition, useCallback, useEffect, useMemo } from "react";
-import { editProject as ep, deleteProject as dp, uploadImage, createProject as cpApi } from "@/lib/db";
+import { useState, useTransition, useCallback } from "react";
+import { editProject as ep, deleteProject as dp, uploadImage, uploadProjectImage, createProject as cpApi } from "@/lib/db";
 import { toast } from "@/lib/react-toastify";
 import Dropzone from "@/components/ui/dropzone";
 import { routing } from "@/i18n/routing";
@@ -255,7 +255,7 @@ export default function ProjectEditForm({ project, isNew }: Props) {
     const isDirty = normalizeForComparison(editData) !== initialState;
 
     // Image Upload
-    const handleImageUpload = async (file: File): Promise<string | null> => {
+    const handleImageUpload = async (file: File, uploader = uploadImage): Promise<string | null> => {
         if (!token) {
             toast.error("Yetkilendirme hatası");
             return null;
@@ -266,7 +266,7 @@ export default function ProjectEditForm({ project, isNew }: Props) {
                 reader.onload = () => resolve(String(reader.result || ""));
                 reader.readAsDataURL(file);
             });
-            const result = await uploadImage(dataUrl, token);
+            const result = await uploader(dataUrl, token);
             return result?.url || null;
         } catch {
             toast.error("Resim yüklenemedi");
@@ -276,7 +276,7 @@ export default function ProjectEditForm({ project, isNew }: Props) {
 
     const handleLogoDrop = async (files: File[]) => {
         setLogoUploading(true);
-        const url = await handleImageUpload(files[0]);
+        const url = await handleImageUpload(files[0], uploadProjectImage);
         if (url) {
             setLogoPreview(url);
             setEditData(prev => ({ ...prev, logoUrl: url }));
@@ -407,9 +407,9 @@ export default function ProjectEditForm({ project, isNew }: Props) {
 
                 {/* Content Area */}
                 <div className="min-h-[600px] relative">
-                    {/* @ts-expect-error React 19 compatibility issue with Framer Motion types */}
+
                     <AnimatePresence mode="wait">
-                        {/* @ts-expect-error React 19 compatibility issue with Framer Motion types */}
+
                         <motion.div
                             key={activeTab}
                             initial={{ opacity: 0, y: 10, scale: 0.98 }}
@@ -622,10 +622,10 @@ export default function ProjectEditForm({ project, isNew }: Props) {
                                             </Button>
                                         </div>
 
-                                        {/* @ts-expect-error React 19 compatibility issue with Framer Motion */}
+
                                         <Reorder.Group axis="y" values={editData.screenshots || []} onReorder={(v) => setEditData(prev => ({ ...prev, screenshots: v }))} className="space-y-3">
                                             {(editData.screenshots || []).map((ss: ProjectScreenshot, idx: number) => (
-                                                /* @ts-expect-error React 19 compatibility issue with Framer Motion */
+
                                                 <Reorder.Item key={idx} value={ss} className="flex gap-4 p-4 rounded-xl bg-black/20 border border-white/5 items-start group">
                                                     <div className="mt-2 cursor-grab active:cursor-grabbing text-slate-600 hover:text-white">
                                                         <GripVertical className="h-5 w-5" />
@@ -799,10 +799,10 @@ export default function ProjectEditForm({ project, isNew }: Props) {
             </main>
 
             {/* Sticky Save Buttons - Centered at Bottom when Dirty */}
-            {/* @ts-expect-error React 19 compatibility issue with Framer Motion types */}
+
             <AnimatePresence>
                 {isDirty && (
-                    /* @ts-expect-error React 19 compatibility issue with Framer Motion types */
+
                     <motion.div
                         initial={{ y: 100, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}

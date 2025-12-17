@@ -2,12 +2,13 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { incrementPageView } from "@/lib/db";
 
 /**
- * Lightweight client tracker to record per-page views and a coarse user-agent label.
+ * Lightweight client tracker to record per-page views.
+ * Uses server-side API route for IP-based geolocation.
  * - Fires on initial mount and whenever the path changes
- * - Sends only pathname and userAgent (no query, no IP)
+ * - Sends pathname and userAgent
+ * - Server extracts visitor IP from headers
  */
 export default function AnalyticsTracker() {
     const pathname = usePathname();
@@ -31,11 +32,17 @@ export default function AnalyticsTracker() {
         } catch { }
 
         const ua = window.navigator?.userAgent || "";
-        const lang = (window.navigator?.languages && window.navigator.languages[0]) || window.navigator?.language || "";
-        const country = (lang.includes("-") ? lang.split("-").pop() : "") || "";
-        // Fire and forget
-        incrementPageView(path, ua, country?.toUpperCase());
+
+        // Fire and forget - use server-side API route for IP forwarding
+        fetch("/api/analytics/track", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ path, ua }),
+        }).catch(() => {
+            // Silent fail for analytics
+        });
     }, [pathname]);
 
     return null;
 }
+

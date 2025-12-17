@@ -10,6 +10,7 @@ import { useAuth } from "@/components/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LogIn, Lock, Mail, Eye, EyeOff } from "lucide-react";
+import { GoogleButton } from "@/components/auth/google-button";
 
 export default function LoginForm() {
     const router = useRouter();
@@ -74,6 +75,61 @@ export default function LoginForm() {
         }
     };
 
+    const handleGoogleSuccess = async (credential: string) => {
+        setLoading(true);
+        try {
+            // Using lova-api for Google Verification
+            const response = await fetch("https://api.lova.tengra.studio/auth/google-login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    idToken: credential,
+                    source: "web_client_google"
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Google login failed");
+            }
+
+            if (data.isNew) {
+                // Redirect to Register page with Google Data token
+                // We pass the ID Token in URL to let Register page pre-fill
+                const params = new URLSearchParams();
+                params.set("google_token", credential);
+                params.set("email", data.googleData.email);
+                params.set("first_name", data.googleData.firstName || "");
+                params.set("last_name", data.googleData.lastName || "");
+                params.set("avatar", data.googleData.avatar || "");
+
+                router.push(`/register?${params.toString()}`);
+            } else {
+                // Existing User - We have a token from lova-api, BUT web-client expects login against localhost:5000 (core-cpp) usually
+                // However, creating a session via lova-api (which writes to shared DB) should validly log us in?
+                // web-client auth-provider uses `localStorage.setItem("authToken", token)`
+                // The token returned by lova-api is valid for the ecosystem if they share secrets.
+                // Assuming they share secrets or DB-session mechanism.
+                // If not, we might need to "login" again.
+                // But let's try using the token.
+
+                if (data.token) {
+                    localStorage.setItem("authToken", data.token);
+                    // Force a reload/refresh to pick up auth state
+                    window.location.href = safeNextUrl;
+                } else {
+                    toast.error("Giriş başarılı fakat token alınamadı.");
+                }
+            }
+        } catch (err: any) {
+            console.error("Google Auth Error:", err);
+            toast.error("Google ile giriş yapılamadı: " + err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <section className="relative min-h-screen flex items-center justify-center px-6 py-20 overflow-hidden">
             {/* Background effects */}
@@ -106,6 +162,25 @@ export default function LoginForm() {
                             <p className="mt-2 text-sm text-[var(--text-muted)]">
                                 {t("login.description")}
                             </p>
+                        </div>
+                    </div>
+
+                    {/* Google Button */}
+                    <div className="w-full">
+                        <GoogleButton
+                            onSuccess={handleGoogleSuccess}
+                            onError={() => toast.error("Google ile bağlanılamadı")}
+                        />
+                    </div>
+
+                    <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-[rgba(72,213,255,0.1)]" />
+                        </div>
+                        <div className="relative flex justify-center text-xs">
+                            <span className="bg-[rgba(15,31,54,0.9)] px-4 text-[var(--text-muted)]">
+                                VEYA E-POSTA İLE
+                            </span>
                         </div>
                     </div>
 
@@ -168,7 +243,7 @@ export default function LoginForm() {
                             </div>
                         </div>
 
-                        <Button type="submit" variant="primary" size="lg" className="w-full" disabled={loading}>
+                        <Button type="submit" variant="default" size="lg" className="w-full" disabled={loading}>
                             {loading ? (
                                 <span className="flex items-center justify-center gap-2">
                                     <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">

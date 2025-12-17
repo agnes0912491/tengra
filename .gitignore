@@ -14,6 +14,11 @@ logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+dev.log
+tsconfig.tsbuildinfo
+
+# Uploads (now handled by CDN)
+public/uploads/
 
 # Environment keys
 .env
@@ -35,3 +40,9 @@ coverage
 # Misc
 .DS_Store
 *.pem
+.build_hash
+.last_build
+.package_hash
+middleware.ts.bak
+nohup.out
+.last_build

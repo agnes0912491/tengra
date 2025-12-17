@@ -33,6 +33,7 @@ import { useAdminToken } from "@/hooks/use-admin-token";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
+import { AdminCard } from "@/components/admin/ui";
 
 // Platform icons
 const platformIcons: Record<string, React.ReactNode> = {
@@ -153,41 +154,41 @@ export default function ProjectsAdmin({ projects }: Props) {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <div className="rounded-xl border border-[rgba(110,211,225,0.15)] bg-[rgba(6,20,27,0.6)] p-4 backdrop-blur-xl">
+                <AdminCard variant="elevated" padding="md">
                     <div className="flex items-center gap-2 text-[rgba(255,255,255,0.5)] text-sm">
                         <Package className="h-4 w-4" />
                         Toplam
                     </div>
                     <p className="text-2xl font-bold text-white mt-1">{stats.total}</p>
-                </div>
-                <div className="rounded-xl border border-[rgba(110,211,225,0.15)] bg-[rgba(6,20,27,0.6)] p-4 backdrop-blur-xl">
-                    <div className="flex items-center gap-2 text-green-400 text-sm">
+                </AdminCard>
+                <AdminCard variant="elevated" padding="md">
+                    <div className="flex items-center gap-2 text-emerald-400 text-sm">
                         <Package className="h-4 w-4" />
                         Tamamlanan
                     </div>
                     <p className="text-2xl font-bold text-white mt-1">{stats.completed}</p>
-                </div>
-                <div className="rounded-xl border border-[rgba(110,211,225,0.15)] bg-[rgba(6,20,27,0.6)] p-4 backdrop-blur-xl">
+                </AdminCard>
+                <AdminCard variant="elevated" padding="md">
                     <div className="flex items-center gap-2 text-blue-400 text-sm">
                         <Package className="h-4 w-4" />
                         Devam Eden
                     </div>
                     <p className="text-2xl font-bold text-white mt-1">{stats.inProgress}</p>
-                </div>
-                <div className="rounded-xl border border-[rgba(110,211,225,0.15)] bg-[rgba(6,20,27,0.6)] p-4 backdrop-blur-xl">
+                </AdminCard>
+                <AdminCard variant="elevated" padding="md">
                     <div className="flex items-center gap-2 text-[rgba(255,255,255,0.5)] text-sm">
                         <Download className="h-4 w-4" />
                         İndirme
                     </div>
                     <p className="text-2xl font-bold text-white mt-1">{stats.totalDownloads.toLocaleString()}</p>
-                </div>
-                <div className="rounded-xl border border-[rgba(110,211,225,0.15)] bg-[rgba(6,20,27,0.6)] p-4 backdrop-blur-xl">
+                </AdminCard>
+                <AdminCard variant="elevated" padding="md">
                     <div className="flex items-center gap-2 text-[rgba(255,255,255,0.5)] text-sm">
                         <Eye className="h-4 w-4" />
                         Görüntülenme
                     </div>
                     <p className="text-2xl font-bold text-white mt-1">{stats.totalViews.toLocaleString()}</p>
-                </div>
+                </AdminCard>
             </div>
 
             {/* Search */}

@@ -33,6 +33,7 @@ export type User = {
   phoneNumber?: string | null;
   bio?: string | null;
   source?: UserSource;
+  subscription?: "premium" | "basic" | null;
   createdAt?: string;
   updatedAt?: string;
   lastLoginAt?: string | null;

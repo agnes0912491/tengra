@@ -33,6 +33,7 @@ type AuthContextValue = {
   user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
+  token: string | null;
   login: (
     email: string,
     password: string,
@@ -321,16 +322,25 @@ export default function AuthProvider({
 
   const isLoading = (hydrating ?? false) || authActionLoading;
 
+  // Get token from localStorage for WebSocket connections
+  const [authToken, setAuthToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("authToken");
+    setAuthToken(stored);
+  }, [user]);
+
   const value = useMemo(
     () => ({
       user,
       isAuthenticated: Boolean(user),
       loading: isLoading,
+      token: authToken,
       login,
       logout,
       refreshAuth,
     }),
-    [user, isLoading, login, logout, refreshAuth]
+    [user, isLoading, authToken, login, logout, refreshAuth]
   );
 
   const handleTwoFactorSuccess = (payload: AuthUserPayload) => {

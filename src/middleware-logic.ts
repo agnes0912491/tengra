@@ -101,7 +101,7 @@ export async function proxy(request: NextRequest) {
     }
     // Increment analytics counters asynchronously (non-blocking)
     try {
-      if (!isAssetPath(pathname) && request.method === "GET") {
+      if (!isAssetPath(pathname) && request.method === "GET" && pathname !== "/404") {
         // site-wide visit (dev only to avoid extra writes in prod)
         fetch(`${API_BASE}/analytics/visits/increment`, { method: "POST", cache: "no-store" }).catch(() => {});
         // per-page with user-agent for bot/human breakdown
@@ -216,11 +216,13 @@ export async function proxy(request: NextRequest) {
       "https://www.googleadservices.com",
       "https://googleadservices.com",
       "https://www.googletagservices.com",
+      "https://accounts.google.com",
     ].join(" ");
 
     const connectSrc = [
       "'self'",
       API_BASE,
+      "https://cdn.tengra.studio",
       "https://cloudflareinsights.com",
       "https://fundingchoicesmessages.google.com",
       "https://www.google-analytics.com",
@@ -233,6 +235,8 @@ export async function proxy(request: NextRequest) {
       "https://www.googleadservices.com",
       "https://googleadservices.com",
       "https://www.googletagservices.com",
+      "https://accounts.google.com",
+      "https://github-contributions-api.jogruber.de",
     ].join(" ");
 
     // Explicit CSP to avoid upstream defaults like script-src 'none' being applied
@@ -246,7 +250,7 @@ export async function proxy(request: NextRequest) {
         "img-src 'self' data: https:",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com data:",
-        "frame-src 'self' https://fundingchoicesmessages.google.com https://googleads.g.doubleclick.net",
+        "frame-src 'self' https://fundingchoicesmessages.google.com https://googleads.g.doubleclick.net https://accounts.google.com",
         "object-src 'none'",
         "base-uri 'self'",
         "form-action 'self'",

@@ -65,8 +65,8 @@ export default function PrivacyPage() {
           <h2 className="text-lg font-semibold text-white">Contact</h2>
           <p className="text-sm text-[color:var(--text-muted)]">
             Questions or requests? Email us at{" "}
-            <a className="text-[color:var(--color-turkish-blue-300)] underline" href="mailto:hello@tengra.studio">
-              hello@tengra.studio
+            <a className="text-[color:var(--color-turkish-blue-300)] underline" href="mailto:info@tengra.studio">
+              info@tengra.studio
             </a>
             .
           </p>

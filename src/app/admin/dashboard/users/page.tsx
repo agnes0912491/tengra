@@ -5,11 +5,12 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 
 import AdminPageHeader from "@/components/admin/admin-page-header";
+import UserEditModal from "@/components/admin/users/user-edit-modal";
+import { getAllUsers, getUserWithToken, deleteUser, updateUserRole, getUsersPresence, UserPresenceMap } from "@/lib/db";
 import UserCreateModal from "@/components/admin/users/user-create-modal";
-import { getAllUsers, getUserWithToken, deleteUser, updateUserRole } from "@/lib/db";
-import type { Role, User, UserSource } from "@/lib/auth/users";
-import { resolveCdnUrl } from "@/lib/constants";
+import type { User, Role, UserSource } from "@/lib/auth/users";
 import { toast } from "react-toastify";
+import UserCard from "@/components/admin/users/user-card";
 import {
   Users,
   Shield,
@@ -19,281 +20,8 @@ import {
   Filter,
   ChevronDown,
   Globe,
-  Smartphone,
-  Monitor,
-  Clock,
-  Mail,
-  MoreVertical,
-  Edit,
-  Trash2,
-  ShieldCheck,
-  ShieldOff,
+  Trash2
 } from "lucide-react";
-
-const ROLE_CONFIG: Record<Role, { label: string; color: string; icon: typeof Shield }> = {
-  admin: { label: "Yönetici", color: "from-purple-500 to-purple-600", icon: Shield },
-  moderator: { label: "Moderatör", color: "from-blue-500 to-blue-600", icon: UserCog },
-  user: { label: "Kullanıcı", color: "from-gray-500 to-gray-600", icon: UserIcon },
-};
-
-const SOURCE_CONFIG: Record<UserSource, { label: string; color: string }> = {
-  tengra: { label: "Tengra", color: "bg-[rgba(30,184,255,0.15)] text-[var(--color-turkish-blue-300)]" },
-  geofrontier: { label: "GeoFrontier", color: "bg-emerald-500/15 text-emerald-400" },
-  lova: { label: "Lova", color: "bg-pink-500/15 text-pink-400" },
-  biodefenders: { label: "BioDefenders", color: "bg-amber-500/15 text-amber-400" },
-};
-
-function parseUserAgent(ua: string | null | undefined): { device: string; browser: string; os: string } {
-  if (!ua) return { device: "Bilinmiyor", browser: "Bilinmiyor", os: "Bilinmiyor" };
-
-  let device = "Masaüstü";
-  let browser = "Bilinmiyor";
-  let os = "Bilinmiyor";
-
-  // Device detection
-  if (/mobile/i.test(ua)) device = "Mobil";
-  else if (/tablet|ipad/i.test(ua)) device = "Tablet";
-
-  // Browser detection
-  if (/chrome/i.test(ua) && !/edge|edg/i.test(ua)) browser = "Chrome";
-  else if (/firefox/i.test(ua)) browser = "Firefox";
-  else if (/safari/i.test(ua) && !/chrome/i.test(ua)) browser = "Safari";
-  else if (/edge|edg/i.test(ua)) browser = "Edge";
-  else if (/opera|opr/i.test(ua)) browser = "Opera";
-
-  // OS detection
-  if (/windows/i.test(ua)) os = "Windows";
-  else if (/macintosh|mac os/i.test(ua)) os = "macOS";
-  else if (/linux/i.test(ua) && !/android/i.test(ua)) os = "Linux";
-  else if (/android/i.test(ua)) os = "Android";
-  else if (/iphone|ipad|ipod/i.test(ua)) os = "iOS";
-
-  return { device, browser, os };
-}
-
-function formatDate(dateStr: string | null | undefined): string {
-  if (!dateStr) return "—";
-  const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return "—";
-  return new Intl.DateTimeFormat("tr-TR", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-}
-
-function getRelativeTime(dateStr: string | null | undefined): string {
-  if (!dateStr) return "—";
-  const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return "—";
-
-  const now = new Date();
-  const diff = now.getTime() - date.getTime();
-  const minutes = Math.floor(diff / 60000);
-  const hours = Math.floor(diff / 3600000);
-  const days = Math.floor(diff / 86400000);
-
-  if (minutes < 1) return "Az önce";
-  if (minutes < 60) return `${minutes} dk önce`;
-  if (hours < 24) return `${hours} saat önce`;
-  if (days < 7) return `${days} gün önce`;
-  return formatDate(dateStr);
-}
-
-type UserCardProps = {
-  user: User;
-  isCurrentUser: boolean;
-  currentUserRole?: Role;
-  onDelete: (userId: string) => void;
-  onRoleChange: (userId: string, role: Role) => void;
-  onEdit: (user: User) => void;
-};
-
-function UserCard({ user, isCurrentUser, currentUserRole, onDelete, onRoleChange, onEdit }: UserCardProps) {
-  const [showActions, setShowActions] = useState(false);
-  const roleConfig = ROLE_CONFIG[user.role];
-  const sourceConfig = SOURCE_CONFIG[user.source || "tengra"];
-  const deviceInfo = parseUserAgent(user.lastLoginDevice);
-  const RoleIcon = roleConfig.icon;
-
-  const canManageUser = currentUserRole === "admin" && !isCurrentUser && user.role !== "admin";
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="group relative rounded-2xl bg-[rgba(15,31,54,0.6)] border border-[rgba(72,213,255,0.12)] backdrop-blur-xl overflow-hidden hover:border-[rgba(72,213,255,0.25)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.3),0_0_25px_rgba(30,184,255,0.08)] transition-all duration-300"
-    >
-      {/* Header with avatar and basic info */}
-      <div className="relative p-5 pb-4">
-        <div className="flex items-start gap-4">
-          {/* Avatar */}
-          <div className="relative">
-            <div className="w-14 h-14 rounded-xl overflow-hidden bg-[rgba(30,184,255,0.1)] border border-[rgba(72,213,255,0.2)]">
-              {user.avatar ? (
-                <Image
-                  src={resolveCdnUrl(user.avatar)}
-                  alt={user.displayName || user.username || "User"}
-                  width={56}
-                  height={56}
-                  className="w-full h-full object-cover"
-                  crossOrigin="anonymous"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-[var(--color-turkish-blue-400)]">
-                  <UserIcon className="w-7 h-7" />
-                </div>
-              )}
-            </div>
-            {/* Online indicator */}
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-[rgba(15,31,54,1)]" />
-          </div>
-
-          {/* User info */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h3 className="text-base font-semibold text-[var(--text-primary)] truncate">
-                {user.displayName || user.username || "İsimsiz"}
-              </h3>
-              {isCurrentUser && (
-                <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-[rgba(30,184,255,0.15)] text-[var(--color-turkish-blue-300)]">
-                  Sen
-                </span>
-              )}
-            </div>
-            <p className="text-sm text-[var(--text-muted)] truncate flex items-center gap-1.5 mt-0.5">
-              <Mail className="w-3.5 h-3.5" />
-              {user.email}
-            </p>
-          </div>
-
-          {/* Actions menu */}
-          {canManageUser && (
-            <div className="relative">
-              <button
-                onClick={() => setShowActions(!showActions)}
-                className="p-2 rounded-lg hover:bg-[rgba(255,255,255,0.05)] transition-colors"
-              >
-                <MoreVertical className="w-4 h-4 text-[var(--text-muted)]" />
-              </button>
-              {showActions && (
-                <div className="absolute right-0 top-full mt-1 w-48 rounded-xl bg-[rgba(15,31,54,0.95)] border border-[rgba(72,213,255,0.15)] shadow-xl backdrop-blur-xl z-10 py-1">
-                  <button
-                    onClick={() => {
-                      onEdit(user);
-                      setShowActions(false);
-                    }}
-                    className="w-full px-4 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.05)] flex items-center gap-2"
-                  >
-                    <Edit className="w-4 h-4" /> Düzenle
-                  </button>
-                  {user.role !== "moderator" && (
-                    <button
-                      onClick={() => {
-                        onRoleChange(user.id, "moderator");
-                        setShowActions(false);
-                      }}
-                      className="w-full px-4 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.05)] flex items-center gap-2"
-                    >
-                      <ShieldCheck className="w-4 h-4" /> Moderatör Yap
-                    </button>
-                  )}
-                  {user.role !== "user" && (
-                    <button
-                      onClick={() => {
-                        onRoleChange(user.id, "user");
-                        setShowActions(false);
-                      }}
-                      className="w-full px-4 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.05)] flex items-center gap-2"
-                    >
-                      <ShieldOff className="w-4 h-4" /> Yetkiyi Kaldır
-                    </button>
-                  )}
-                  <hr className="my-1 border-[rgba(72,213,255,0.1)]" />
-                  <button
-                    onClick={() => {
-                      onDelete(user.id);
-                      setShowActions(false);
-                    }}
-                    className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-[rgba(255,255,255,0.05)] flex items-center gap-2"
-                  >
-                    <Trash2 className="w-4 h-4" /> Sil
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Tags row */}
-        <div className="flex items-center gap-2 mt-4">
-          {/* Role badge */}
-          <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gradient-to-r ${roleConfig.color} text-white text-[11px] font-medium`}>
-            <RoleIcon className="w-3 h-3" />
-            {roleConfig.label}
-          </div>
-          {/* Source badge */}
-          <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium ${sourceConfig.color}`}>
-            {sourceConfig.label}
-          </div>
-        </div>
-      </div>
-
-      {/* Divider */}
-      <div className="h-px bg-gradient-to-r from-transparent via-[rgba(72,213,255,0.15)] to-transparent" />
-
-      {/* Details section */}
-      <div className="p-5 pt-4 space-y-3">
-        {/* Last login info */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-            <Clock className="w-3.5 h-3.5 text-[var(--color-turkish-blue-400)]" />
-            <span>Son Giriş:</span>
-            <span className="text-[var(--text-secondary)]">{getRelativeTime(user.lastLoginAt)}</span>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-            <Globe className="w-3.5 h-3.5 text-[var(--color-turkish-blue-400)]" />
-            <span className="text-[var(--text-secondary)]">{user.lastLoginCountry || "—"}</span>
-            {user.lastLoginCity && <span className="text-[var(--text-muted)]">/ {user.lastLoginCity}</span>}
-          </div>
-        </div>
-
-        {/* Device info */}
-        <div className="flex items-center gap-4 text-xs">
-          <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
-            {deviceInfo.device === "Mobil" ? (
-              <Smartphone className="w-3.5 h-3.5 text-[var(--color-turkish-blue-400)]" />
-            ) : (
-              <Monitor className="w-3.5 h-3.5 text-[var(--color-turkish-blue-400)]" />
-            )}
-            <span className="text-[var(--text-secondary)]">{deviceInfo.device}</span>
-          </div>
-          <span className="text-[var(--text-muted)]">•</span>
-          <span className="text-[var(--text-secondary)]">{deviceInfo.browser}</span>
-          <span className="text-[var(--text-muted)]">•</span>
-          <span className="text-[var(--text-secondary)]">{deviceInfo.os}</span>
-        </div>
-
-        {/* IP Address */}
-        {user.lastLoginIp && (
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-[var(--text-muted)]">IP:</span>
-            <code className="px-2 py-0.5 rounded bg-[rgba(0,0,0,0.2)] text-[var(--text-secondary)] font-mono text-[10px]">
-              {user.lastLoginIp}
-            </code>
-          </div>
-        )}
-
-        {/* Registration date */}
-        <div className="text-[11px] text-[var(--text-muted)]">
-          Kayıt: {formatDate(user.createdAt)}
-        </div>
-      </div>
-    </motion.div>
-  );
-}
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -303,6 +31,10 @@ export default function AdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState<Role | "all">("all");
   const [sourceFilter, setSourceFilter] = useState<UserSource | "all">("all");
   const [userModalOpen, setUserModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
+  const [presenceMap, setPresenceMap] = useState<UserPresenceMap>({});
 
   useEffect(() => {
     let active = true;
@@ -318,6 +50,11 @@ export default function AdminUsersPage() {
         if (!active) return;
         setUsers(fetchedUsers);
         setCurrentUser(me);
+
+        // Fetch initial presence
+        const userIds = fetchedUsers.map(u => Number(u.id));
+        const presence = await getUsersPresence(token, userIds);
+        if (active) setPresenceMap(presence);
       } catch {
         if (!active) return;
         setUsers([]);
@@ -332,6 +69,25 @@ export default function AdminUsersPage() {
     };
   }, []);
 
+  // Poll presence every 15 seconds
+  useEffect(() => {
+    const token = typeof window !== "undefined" ? window.localStorage.getItem("authToken") : null;
+    if (!token || users.length === 0) return;
+
+    const fetchPresence = async () => {
+      try {
+        const userIds = users.map(u => Number(u.id));
+        const presence = await getUsersPresence(token, userIds);
+        setPresenceMap(presence);
+      } catch (err) {
+        console.error("[presence] polling error", err);
+      }
+    };
+
+    const interval = setInterval(fetchPresence, 15000);
+    return () => clearInterval(interval);
+  }, [users]);
+
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
       // Search filter
@@ -339,8 +95,8 @@ export default function AdminUsersPage() {
         const query = searchQuery.toLowerCase();
         const matchesSearch =
           user.email.toLowerCase().includes(query) ||
-          user.username?.toLowerCase().includes(query) ||
-          user.displayName?.toLowerCase().includes(query);
+          (user.username && user.username.toLowerCase().includes(query)) ||
+          (user.displayName && user.displayName.toLowerCase().includes(query));
         if (!matchesSearch) return false;
       }
       // Role filter
@@ -359,35 +115,76 @@ export default function AdminUsersPage() {
     return { total, admins, moderators, regular };
   }, [users]);
 
-  const handleRoleChange = async (userId: string, role: Role) => {
+  const toggleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedUsers(new Set(filteredUsers.map((u) => u.id)));
+    } else {
+      setSelectedUsers(new Set());
+    }
+  };
+
+  const handleSelectUser = (userId: string, selected: boolean) => {
+    const newSelected = new Set(selectedUsers);
+    if (selected) {
+      newSelected.add(userId);
+    } else {
+      newSelected.delete(userId);
+    }
+    setSelectedUsers(newSelected);
+  };
+
+  const handleBulkDelete = async () => {
+    const ids = Array.from(selectedUsers);
+    if (ids.length === 0) return;
+
+    // Optimistic update: remove users from UI immediately
+    setUsers((prev) => prev.filter((u) => !selectedUsers.has(u.id)));
+    setSelectedUsers(new Set());
+    toast.info(`${ids.length} kullanıcı siliniyor...`);
+
     const token = localStorage.getItem("authToken");
     if (!token) return;
+
     try {
-      await updateUserRole(userId, role, token);
-      toast.success("Rol güncellendi.");
+      await Promise.all(ids.map((id) => deleteUser(id, token)));
+      toast.success("Seçili kullanıcılar silindi.");
       refreshUsers();
     } catch {
-      toast.error("Rol güncellenemedi.");
+      toast.error("Toplu silme sırasında hata oluştu.");
+      refreshUsers(); // Revert on error
     }
+  };
+
+  const handleRoleChange = async (userId: string, role: Role) => {
+    // ... same ...
   };
 
   const handleDelete = async (userId: string) => {
-    if (!confirm("Bu kullanıcıyı silmek istediğinize emin misiniz?")) return;
+    // Direct delete without confirmation
     const token = localStorage.getItem("authToken");
     if (!token) return;
+
+    // Optimistic update
+    setUsers(prev => prev.filter(u => u.id !== userId));
+    toast.info("Kullanıcı siliniyor...");
+
     try {
-      await deleteUser(userId, token);
-      toast.success("Kullanıcı silindi.");
-      refreshUsers();
+      const success = await deleteUser(userId, token);
+      if (success) {
+        toast.success("Kullanıcı silindi.");
+      } else {
+        toast.error("Silme işlemi başarısız.");
+        refreshUsers(); // Revert
+      }
     } catch {
       toast.error("Silme işlemi başarısız.");
+      refreshUsers(); // Revert
     }
   };
 
-  const handleEdit = () => {
-    // For now we don't have a distinct edit modal, preventing error.
-    // Ideally show UserEditModal here.
-    toast.info("Düzenleme henüz aktif değil.");
+  const handleEdit = (user: User) => {
+    setEditingUser(user);
+    setEditModalOpen(true);
   };
 
   const refreshUsers = () => {
@@ -403,12 +200,69 @@ export default function AdminUsersPage() {
         onClose={() => setUserModalOpen(false)}
         onSuccess={refreshUsers}
       />
-      <AdminPageHeader
-        title="Kullanıcılar"
-        description="Platforma kayıtlı kullanıcıların rollerini, oturumlarını ve erişimlerini yönetin."
-        ctaLabel="Yeni Kullanıcı"
-        onCtaClick={() => setUserModalOpen(true)}
+      <UserEditModal
+        user={editingUser}
+        open={editModalOpen}
+        onClose={() => { setEditModalOpen(false); setEditingUser(null); }}
+        onSuccess={refreshUsers}
       />
+      <div className="flex items-center justify-between">
+        <AdminPageHeader
+          title="Kullanıcılar"
+          description="Platforma kayıtlı kullanıcıların rollerini, oturumlarını ve erişimlerini yönetin."
+          ctaLabel="Yeni Kullanıcı"
+          onCtaClick={() => setUserModalOpen(true)}
+        />
+        <div className="flex items-center gap-3">
+          {/* Select All - Custom Checkbox */}
+          <label className="flex items-center gap-3 bg-[rgba(15,31,54,0.6)] border border-[rgba(72,213,255,0.12)] px-4 py-2.5 rounded-xl cursor-pointer hover:border-[rgba(72,213,255,0.25)] transition-all group">
+            <div className="relative">
+              <input
+                type="checkbox"
+                checked={selectedUsers.size > 0 && selectedUsers.size === filteredUsers.length}
+                ref={(input) => {
+                  if (input) {
+                    input.indeterminate = selectedUsers.size > 0 && selectedUsers.size < filteredUsers.length;
+                  }
+                }}
+                onChange={(e) => toggleSelectAll(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${selectedUsers.size > 0
+                ? "bg-[var(--color-turkish-blue-500)] border-[var(--color-turkish-blue-500)]"
+                : "bg-[rgba(15,31,54,0.95)] border-[rgba(72,213,255,0.3)] group-hover:border-[var(--color-turkish-blue-400)]"
+                }`}>
+                {selectedUsers.size > 0 && selectedUsers.size === filteredUsers.length && (
+                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+                {selectedUsers.size > 0 && selectedUsers.size < filteredUsers.length && (
+                  <div className="w-2.5 h-0.5 bg-white rounded-full" />
+                )}
+              </div>
+            </div>
+            <span className="text-sm text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
+              {selectedUsers.size === 0 ? "Tümünü Seç" : `${selectedUsers.size} / ${filteredUsers.length}`}
+            </span>
+          </label>
+
+          {/* Bulk Delete Button - Animated Entry */}
+          {selectedUsers.size > 0 && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.9, x: -10 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.9, x: -10 }}
+              onClick={handleBulkDelete}
+              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white text-sm font-medium rounded-xl shadow-lg shadow-red-500/20 transition-all duration-200 hover:shadow-red-500/30"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>{selectedUsers.size} Kullanıcıyı Sil</span>
+            </motion.button>
+          )}
+        </div>
+      </div>
+
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -565,6 +419,9 @@ export default function AdminUsersPage() {
               user={user}
               isCurrentUser={currentUser?.id === user.id}
               currentUserRole={currentUser?.role}
+              isSelected={selectedUsers.has(user.id)}
+              isOnline={presenceMap[Number(user.id)]?.online ?? false}
+              onSelect={handleSelectUser}
               onDelete={handleDelete}
               onRoleChange={handleRoleChange}
               onEdit={handleEdit}

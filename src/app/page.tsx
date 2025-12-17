@@ -3,7 +3,7 @@ import SiteShell from "@/components/layout/site-shell";
 
 export default function IndexPage() {
   return (
-    <SiteShell>
+    <SiteShell fullWidth>
       <HomePage />
     </SiteShell>
   );

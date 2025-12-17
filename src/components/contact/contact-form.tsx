@@ -101,18 +101,15 @@ export default function ContactForm() {
             <div className="relative z-10 space-y-5">
               <h3 className="text-lg font-semibold text-[var(--text-primary)] flex items-center gap-2">
                 <Headphones className="w-5 h-5 text-[var(--color-turkish-blue-400)]" />
-                Hızlı İletişim
+                {t("sidebar.quickContact")}
               </h3>
 
               <div className="space-y-4">
                 <a
-                  href="mailto:hello@tengra.studio"
-                  className="flex items-center gap-3 text-sm text-[var(--text-secondary)] hover:text-[var(--color-turkish-blue-400)] transition-colors group"
+                  href="mailto:info@tengra.studio"
+                  className="text-lg text-[color:var(--color-turkish-blue-400)] dark:text-[color:var(--color-turkish-blue-300)] font-medium hover:underline transition-all"
                 >
-                  <div className="p-2 rounded-lg bg-[rgba(30,184,255,0.1)] group-hover:bg-[rgba(30,184,255,0.2)] transition-colors">
-                    <Mail className="w-4 h-4 text-[var(--color-turkish-blue-400)]" />
-                  </div>
-                  hello@tengra.studio
+                  info@tengra.studio
                 </a>
 
                 <div className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
@@ -138,7 +135,7 @@ export default function ContactForm() {
             <div className="relative z-10 space-y-4">
               <h3 className="text-lg font-semibold text-[var(--text-primary)] flex items-center gap-2">
                 <Clock className="w-5 h-5 text-[var(--color-turkish-blue-400)]" />
-                Yanıt Süresi
+                {t("sidebar.responseTime")}
               </h3>
               <div className="flex items-center gap-3">
                 <div className="flex-1">
@@ -146,10 +143,10 @@ export default function ContactForm() {
                     <div className="h-full w-[85%] rounded-full bg-gradient-to-r from-[var(--color-turkish-blue-500)] to-[var(--color-turkish-blue-400)]" />
                   </div>
                 </div>
-                <span className="text-sm font-medium text-[var(--color-turkish-blue-400)]">~24 saat</span>
+                <span className="text-sm font-medium text-[var(--color-turkish-blue-400)]">{t("sidebar.responseDesc")}</span>
               </div>
               <p className="text-xs text-[var(--text-muted)]">
-                Genellikle 24 saat içinde yanıt veriyoruz. Acil konular için Discord üzerinden ulaşabilirsiniz.
+                {t("sidebar.responseNote")}
               </p>
             </div>
           </div>
@@ -160,7 +157,7 @@ export default function ContactForm() {
             <div className="relative z-10 space-y-4">
               <h3 className="text-lg font-semibold text-[var(--text-primary)] flex items-center gap-2">
                 <MessageCircle className="w-5 h-5 text-[var(--color-turkish-blue-400)]" />
-                Sosyal Medya
+                {t("sidebar.social")}
               </h3>
               <div className="grid grid-cols-2 gap-3">
                 <a
@@ -173,7 +170,7 @@ export default function ContactForm() {
                   <span className="text-sm text-[var(--text-secondary)] group-hover:text-white transition-colors">Discord</span>
                 </a>
                 <a
-                  href="https://github.com/tengra-studio"
+                  href="https://github.com/TengraStudio"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 p-3 rounded-xl bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] transition-all group"
@@ -182,13 +179,13 @@ export default function ContactForm() {
                   <span className="text-sm text-[var(--text-secondary)] group-hover:text-white transition-colors">GitHub</span>
                 </a>
                 <a
-                  href="https://twitter.com/tengrastudio"
+                  href="https://x.com/tengra"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 p-3 rounded-xl bg-[rgba(29,161,242,0.1)] border border-[rgba(29,161,242,0.2)] hover:bg-[rgba(29,161,242,0.2)] transition-all group"
                 >
                   <FaTwitter className="w-5 h-5 text-[#1DA1F2]" />
-                  <span className="text-sm text-[var(--text-secondary)] group-hover:text-white transition-colors">Twitter</span>
+                  <span className="text-sm text-[var(--text-secondary)] group-hover:text-white transition-colors">X</span>
                 </a>
                 <a
                   href="https://linkedin.com/company/tengra"
@@ -207,16 +204,16 @@ export default function ContactForm() {
           <div className="relative rounded-2xl bg-gradient-to-br from-[rgba(30,184,255,0.15)] to-[rgba(15,31,54,0.6)] border border-[rgba(72,213,255,0.2)] backdrop-blur-xl p-6 shadow-[0_20px_40px_rgba(0,0,0,0.3)]">
             <div className="relative z-10 space-y-3">
               <h3 className="text-lg font-semibold text-[var(--text-primary)]">
-                Sıkça Sorulan Sorular
+                {t("sidebar.faqTitle")}
               </h3>
               <p className="text-sm text-[var(--text-secondary)]">
-                Belki aradığınız cevap SSS bölümümüzde vardır.
+                {t("sidebar.faqDesc")}
               </p>
               <Link
                 href="/#faq"
                 className="inline-flex items-center gap-2 text-sm font-medium text-[var(--color-turkish-blue-400)] hover:text-[var(--color-turkish-blue-300)] transition-colors"
               >
-                SSS&apos;ye Git →
+                {t("sidebar.faqLink")}
               </Link>
             </div>
           </div>

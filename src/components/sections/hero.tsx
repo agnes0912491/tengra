@@ -1,266 +1,153 @@
 "use client";
 
-import { motion } from "framer-motion";
-import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight, Rocket, Globe } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { resolveCdnUrl } from "@/lib/constants";
-import { ArrowRight, Sparkles } from "lucide-react";
+import GradientText from "@/components/ui/gradient-text";
+import { Button } from "@/components/ui/button";
 
-const HERO_LOGO_SRC = resolveCdnUrl("/uploads/tengra_without_text.png");
+import LiveGlobe from "@/components/home/live-globe";
 
-type TypingTextProps = {
-  texts: string[];
-};
-
-function TypingText({ texts }: TypingTextProps) {
-  const [index, setIndex] = useState(0);
-  const [displayed, setDisplayed] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
+const Hero = () => {
+  const t = useTranslations("Hero");
+  const [displayText, setDisplayText] = useState("TENGRA");
+  const words = ["𐱅𐰭𐰍𐰺𐰀", "TENGRA"]; // Old Turkic "Tengra" and Latin "TENGRA"
 
   useEffect(() => {
-    if (texts.length === 0) {
-      return;
-    }
-
-    const fullText = texts[index];
-    const speed = isDeleting ? 80 : 120;
-    const pause = 3000;
-    let timeout: ReturnType<typeof setTimeout> | undefined;
-
-    if (!isDeleting && displayed.length < fullText.length) {
-      timeout = setTimeout(() => {
-        setDisplayed(fullText.slice(0, displayed.length + 1));
-      }, speed);
-    } else if (isDeleting && displayed.length > 0) {
-      timeout = setTimeout(() => {
-        setDisplayed(fullText.slice(0, displayed.length - 1));
-      }, speed / 1.5);
-    } else if (!isDeleting && displayed.length === fullText.length) {
-      timeout = setTimeout(() => {
-        setIsDeleting(true);
-      }, pause);
-    } else if (isDeleting && displayed.length === 0) {
-      timeout = setTimeout(() => {
-        setIsDeleting(false);
-        setIndex((prev) => (prev + 1) % texts.length);
-      }, 300);
-    }
-
-    return () => {
-      if (timeout) {
-        clearTimeout(timeout);
-      }
-    };
-  }, [displayed, index, isDeleting, texts]);
+    const interval = setInterval(() => {
+      setDisplayText(current => current === "TENGRA" ? "𐱅𐰭𐰍𐰺𐰀" : "TENGRA");
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <span className="inline-flex items-center">
-      <span className="bg-gradient-to-r from-[var(--color-turkish-blue-300)] via-[var(--color-turkish-blue-400)] to-[var(--color-turkish-blue-500)] bg-clip-text text-transparent tengra-text">
-        {displayed}
-      </span>
-      <span className="ml-1 w-[3px] h-[1.1em] bg-[var(--color-turkish-blue-400)] animate-cursor rounded-full" />
-    </span>
-  );
-}
-
-export default function Hero() {
-  const t = useTranslations("Hero");
-  const texts = useMemo(() => [t("typingWordOne"), t("typingWordTwo")], [t]);
-
-  return (
-    <section
-      id="hero"
-      className="relative min-h-screen w-full flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8 pt-16"
-    >
+    <section className="relative w-full min-h-[90vh] flex flex-col items-center justify-center pt-24 pb-16 overflow-hidden">
       {/* Background Elements */}
-      <div className="absolute inset-0 pointer-events-none">
-        {/* Main Gradient Orb */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-[radial-gradient(circle,rgba(30,184,255,0.15)_0%,transparent_60%)] blur-3xl" />
-
-        {/* Secondary Orbs */}
-        <div className="absolute top-1/2 right-0 w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,rgba(72,213,255,0.1)_0%,transparent_70%)] blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(0,120,171,0.1)_0%,transparent_70%)] blur-3xl" />
-
-        {/* Grid Pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(30,184,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(30,184,255,0.03)_1px,transparent_1px)] bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]" />
+      <div className="absolute inset-0 pointer-events-none z-0">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] opacity-30 md:opacity-40">
+          <LiveGlobe />
+        </div>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[rgba(0,167,197,0.15)] via-[rgba(6,20,27,0)] to-transparent blur-3xl opacity-60" />
+        <div className="absolute bottom-0 right-0 w-[800px] h-[600px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[rgba(110,211,225,0.08)] via-[rgba(6,20,27,0)] to-transparent blur-3xl opacity-40" />
       </div>
 
-      {/* Content Container */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Left Content */}
+      <div className="container px-4 md:px-6 relative z-10 flex flex-col items-center text-center">
+        {/* Badge */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[rgba(110,211,225,0.2)] bg-[rgba(110,211,225,0.05)] text-xs font-medium text-[rgba(130,226,255,0.9)] mb-8"
+        >
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[rgba(110,211,225,0.8)] opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-[rgba(110,211,225,1)]"></span>
+          </span>
+          {t("eyebrow")}
+        </motion.div>
+
+        {/* Headline */}
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+          className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white max-w-4xl mb-6 leading-[1.1]"
+        >
+          {t("taglineLine1")} <br className="hidden md:block" />
+          {t("taglineLine2")}
+          <span className="inline-block relative ml-4">
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={displayText}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className={`block ${displayText === "𐱅𐰭𐰍𐰺𐰀" ? "font-serif" : "font-sans"}`}
+              >
+                <GradientText className="font-extrabold">{displayText}</GradientText>
+              </motion.span>
+            </AnimatePresence>
+          </span>
+        </motion.h1>
+
+        {/* Description */}
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+          className="text-lg md:text-xl text-[rgba(255,255,255,0.6)] max-w-2xl mb-10 leading-relaxed"
+        >
+          {t("intro")}
+        </motion.p>
+
+        {/* Buttons */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+          className="flex flex-col sm:flex-row items-center gap-4"
+        >
+          <Link href="/contact">
+            <Button
+              size="lg"
+              className="h-12 px-8 rounded-xl bg-white text-black hover:bg-gray-100 font-semibold shadow-[0_0_30px_rgba(255,255,255,0.2)] transition-all hover:scale-105 active:scale-95"
+            >
+              {t("primaryCta")}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+          <Link href="/projects">
+            <Button
+              variant="outline"
+              size="lg"
+              className="h-12 px-8 rounded-xl border-[rgba(255,255,255,0.15)] text-white hover:bg-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.3)] backdrop-blur-sm transition-all hover:scale-105 active:scale-95"
+            >
+              {t("secondaryCta")}
+            </Button>
+          </Link>
+        </motion.div>
+
+        {/* Floating Cards (Decor) */}
+        <div className="absolute top-1/2 left-0 w-full h-full pointer-events-none hidden lg:block -z-10">
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
+            initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="flex flex-col items-start text-left"
+            transition={{ duration: 0.8, delay: 0.5 }}
+            className="absolute top-20 left-[5%] p-4 rounded-2xl border border-[rgba(255,255,255,0.08)] bg-[rgba(6,20,27,0.4)] backdrop-blur-md rotate-[-6deg]"
           >
-            {/* Eyebrow Badge */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[rgba(30,184,255,0.1)] border border-[rgba(72,213,255,0.2)] backdrop-blur-sm"
-            >
-              <Sparkles className="w-4 h-4 text-[var(--color-turkish-blue-400)]" />
-              <span className="text-xs font-medium tracking-wider text-[var(--color-turkish-blue-300)] uppercase">
-                {t("eyebrow")}
-              </span>
-            </motion.div>
-
-            {/* Tagline */}
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="mt-6 text-sm md:text-base font-medium tracking-wide uppercase text-[var(--text-muted)]"
-            >
-              {t("taglineLine1")}
-              <br />
-              <span className="text-[var(--color-turkish-blue-400)]">{t("taglineLine2")}</span>
-            </motion.p>
-
-            {/* Main Heading with Typing Effect */}
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-              className="mt-4 text-4xl sm:text-5xl lg:text-6xl font-display font-bold tracking-tight text-[var(--text-primary)]"
-            >
-              <TypingText key={texts.join("|")} texts={texts} />
-            </motion.h1>
-
-            {/* Description */}
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.6 }}
-              className="mt-6 max-w-xl text-base md:text-lg text-[var(--text-secondary)] leading-relaxed"
-            >
-              {t("intro")}
-            </motion.p>
-
-            {/* CTA Buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.6 }}
-              className="mt-8 flex flex-wrap items-center gap-4"
-            >
-              <a
-                href="#projects"
-                className="group inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl bg-gradient-to-r from-[var(--color-turkish-blue-500)] to-[var(--color-turkish-blue-600)] text-white shadow-[0_8px_30px_rgba(30,184,255,0.3)] hover:shadow-[0_12px_40px_rgba(30,184,255,0.4)] hover:scale-[1.02] transition-all duration-300"
-              >
-                {t("primaryCta")}
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </a>
-              <a
-                href="#network"
-                className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl border border-[rgba(72,213,255,0.3)] text-[var(--color-turkish-blue-300)] bg-[rgba(30,184,255,0.05)] hover:bg-[rgba(30,184,255,0.1)] hover:border-[rgba(72,213,255,0.5)] backdrop-blur-sm transition-all duration-300"
-              >
-                {t("secondaryCta")}
-              </a>
-            </motion.div>
-
-            {/* Feature Pills */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.7, duration: 0.6 }}
-              className="mt-10 flex flex-wrap gap-3"
-            >
-              {[t("pillOne"), t("pillTwo"), t("pillThree")].map((pill, i) => (
-                <span
-                  key={i}
-                  className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[rgba(148,163,184,0.08)] border border-[rgba(148,163,184,0.15)] text-[var(--text-muted)]"
-                >
-                  {pill}
-                </span>
-              ))}
-            </motion.div>
-
-            {/* Scroll Indicator */}
-            <motion.a
-              href="#goals"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8, duration: 0.6 }}
-              className="mt-12 hidden lg:inline-flex items-center gap-2 text-xs font-medium tracking-wider text-[var(--text-muted)] hover:text-[var(--color-turkish-blue-300)] transition-colors"
-            >
-              <span className="w-2 h-2 rounded-full bg-[var(--color-turkish-blue-500)] shadow-[0_0_12px_rgba(30,184,255,0.6)] animate-pulse" />
-              {t("scrollCta")}
-            </motion.a>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-[rgba(110,211,225,0.1)] text-[color:var(--color-turkish-blue-400)]">
+                <Rocket className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-white">Performance</p>
+              </div>
+            </div>
           </motion.div>
 
-          {/* Right Content - Logo/Visual */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
-            className="relative flex items-center justify-center"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="absolute bottom-40 right-[5%] p-4 rounded-2xl border border-[rgba(255,255,255,0.08)] bg-[rgba(6,20,27,0.4)] backdrop-blur-md rotate-[6deg]"
           >
-            {/* Outer Ring */}
-            <div className="absolute w-[320px] h-[320px] md:w-[420px] md:h-[420px] rounded-full border border-[rgba(72,213,255,0.1)]" />
-            <div className="absolute w-[380px] h-[380px] md:w-[500px] md:h-[500px] rounded-full border border-[rgba(72,213,255,0.05)]" />
-
-            {/* Main Logo Container */}
-            <div className="relative w-[260px] h-[260px] md:w-[340px] md:h-[340px] rounded-full">
-              {/* Glow Background */}
-              <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(30,184,255,0.2)_0%,transparent_70%)]" />
-
-              {/* Glass Container */}
-              <div className="absolute inset-4 rounded-full bg-[rgba(15,31,54,0.6)] border border-[rgba(72,213,255,0.15)] backdrop-blur-xl shadow-[0_30px_60px_rgba(0,0,0,0.5),0_0_60px_rgba(30,184,255,0.15)]">
-                {/* Aura Effect */}
-                <div className="aura rounded-full" />
-
-                {/* Logo */}
-                <motion.div
-                  animate={{
-                    scale: [1, 1.03, 1],
-                  }}
-                  transition={{
-                    duration: 6,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                  className="relative flex h-full w-full items-center justify-center"
-                >
-                  <Image
-                    crossOrigin="anonymous"
-                    src={HERO_LOGO_SRC}
-                    alt={t("symbolAlt")}
-                    width={180}
-                    height={180}
-                    priority
-                    fetchPriority="high"
-                    className="drop-shadow-[0_0_40px_rgba(30,184,255,0.5)] md:w-[220px] md:h-[220px]"
-                  />
-                </motion.div>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-[rgba(168,85,247,0.1)] text-purple-400">
+                <Globe className="h-5 w-5" />
               </div>
-
-              {/* Floating Particles */}
-              <motion.div
-                animate={{ y: [-10, 10, -10] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -top-4 right-8 w-3 h-3 rounded-full bg-[var(--color-turkish-blue-400)] shadow-[0_0_20px_rgba(72,213,255,0.6)]"
-              />
-              <motion.div
-                animate={{ y: [10, -10, 10] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute bottom-8 -left-4 w-2 h-2 rounded-full bg-[var(--color-turkish-blue-500)] shadow-[0_0_15px_rgba(30,184,255,0.5)]"
-              />
-              <motion.div
-                animate={{ y: [-8, 8, -8] }}
-                transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-1/2 -right-6 w-2 h-2 rounded-full bg-[var(--color-turkish-blue-300)] shadow-[0_0_12px_rgba(131,232,255,0.5)]"
-              />
+              <div>
+                <p className="text-sm font-semibold text-white">Global</p>
+              </div>
             </div>
           </motion.div>
         </div>
+
       </div>
-
-
     </section>
   );
-}
+};
+
+export default Hero;

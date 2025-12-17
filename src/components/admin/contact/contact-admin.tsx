@@ -1,10 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
+import { Mail, Trash2, User, Phone, MapPin, Clock, Bell, Inbox } from "lucide-react";
+
 import { getContactSubmissions, deleteContactSubmission, type ContactSubmission, getContactSubscriptions, deleteContactSubscription } from "@/lib/db";
 import { useAdminToken } from "@/hooks/use-admin-token";
+import { AdminCard, AdminCardHeader, AdminBadge } from "@/components/admin/ui";
+
+const formatDate = (value?: string) => {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return new Intl.DateTimeFormat("tr-TR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+};
 
 export default function ContactAdmin() {
   const t = useTranslations("AdminContent");
@@ -51,91 +66,138 @@ export default function ContactAdmin() {
   };
 
   return (
-    <div className="rounded-3xl border border-[rgba(110,211,225,0.14)] bg-[rgba(6,18,26,0.78)]/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.35)]">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h3 className="text-lg font-semibold text-white">{t("contactTitle")}</h3>
-          <p className="text-sm text-[rgba(255,255,255,0.7)]">{t("contactDescription")}</p>
-        </div>
-        <Button variant="outline" onClick={clearAll} disabled={!items.length} className="border-[rgba(110,211,225,0.28)]">
-          {t("contactClear")}
-        </Button>
+    <div className="space-y-8">
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-4">
+        <AdminCard variant="elevated" padding="md">
+          <div className="flex items-center gap-2 text-[rgba(255,255,255,0.5)] text-xs">
+            <Inbox className="h-4 w-4" />
+            <span>Mesajlar</span>
+          </div>
+          <p className="text-2xl font-bold text-white mt-1">{items.length}</p>
+        </AdminCard>
+        <AdminCard variant="elevated" padding="md">
+          <div className="flex items-center gap-2 text-[rgba(130,226,255,0.8)] text-xs">
+            <Bell className="h-4 w-4" />
+            <span>Aboneler</span>
+          </div>
+          <p className="text-2xl font-bold text-white mt-1">{subscriptions.length}</p>
+        </AdminCard>
       </div>
 
-      {loading && <p className="mt-4 text-sm text-[rgba(255,255,255,0.75)]">{t("loading")}</p>}
-      {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
+      {/* Contact Submissions */}
+      <AdminCard variant="default" padding="md">
+        <AdminCardHeader
+          title={t("contactTitle")}
+          description={t("contactDescription")}
+          action={
+            <button
+              onClick={clearAll}
+              disabled={!items.length}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-red-500/30 text-red-400 text-xs hover:bg-red-500/10 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Temizle
+            </button>
+          }
+        />
 
-      {items.length === 0 && !loading ? (
-        <div className="mt-4 rounded-xl border border-dashed border-[rgba(110,211,225,0.2)] bg-[rgba(8,28,38,0.5)] p-8 text-center text-sm text-[rgba(255,255,255,0.75)]">
-          {t("contactEmpty")}
-        </div>
-      ) : (
-        <div className="mt-4 overflow-hidden rounded-2xl border border-[rgba(110,211,225,0.18)]">
-          <table className="min-w-full divide-y divide-[rgba(110,211,225,0.12)] bg-[rgba(6,18,26,0.8)]">
-            <thead className="bg-[rgba(8,24,32,0.9)] text-[rgba(255,255,255,0.75)]">
-              <tr>
-                <th className="px-4 py-3 text-left text-[11px] uppercase tracking-[0.18em]">{tc("name")}</th>
-                <th className="px-4 py-3 text-left text-[11px] uppercase tracking-[0.18em]">{tc("email")}</th>
-                <th className="px-4 py-3 text-left text-[11px] uppercase tracking-[0.18em]">{tc("subject")}</th>
-                <th className="px-4 py-3 text-left text-[11px] uppercase tracking-[0.18em]">{tc("phone")}</th>
-                <th className="px-4 py-3 text-left text-[11px] uppercase tracking-[0.18em]">{t("location")}</th>
-                <th className="px-4 py-3 text-left text-[11px] uppercase tracking-[0.18em]">{t("submittedAt")}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[rgba(110,211,225,0.08)] text-sm text-[rgba(255,255,255,0.82)]">
-              {items.map((item) => (
-                <tr key={item.id} className="align-top">
-                  <td className="px-4 py-3">
-                    <p className="font-semibold text-white">{item.name}</p>
-                  </td>
-                  <td className="px-4 py-3 text-[rgba(255,255,255,0.75)]">{item.email}</td>
-                  <td className="px-4 py-3">{item.subject}</td>
-                  <td className="px-4 py-3 text-[rgba(255,255,255,0.8)]">{item.phone || "—"}</td>
-                  <td className="px-4 py-3 text-[rgba(255,255,255,0.75)]">
-                    {[item.city, item.country].filter(Boolean).join(", ") || item.ipAddress || "—"}
-                  </td>
-                  <td className="px-4 py-3 text-[12px] text-[rgba(255,255,255,0.65)]">
-                    {new Date(item.createdAt).toLocaleString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {items.map((item) => (
-            <div key={`${item.id}-msg`} className="border-t border-[rgba(110,211,225,0.08)] bg-[rgba(6,16,22,0.9)] px-4 py-3 text-sm text-[rgba(255,255,255,0.85)]">
-              <p className="text-[11px] uppercase tracking-[0.16em] text-[rgba(255,255,255,0.6)]">{tc("message")}</p>
-              <p className="mt-1 whitespace-pre-wrap">{item.message}</p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="mt-10 rounded-3xl border border-[rgba(110,211,225,0.18)] bg-[rgba(6,18,26,0.78)]/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.35)]">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <div>
-            <h4 className="text-lg font-semibold text-white">{t("subscriptionsTitle")}</h4>
-            <p className="text-sm text-[rgba(255,255,255,0.7)]">{t("subscriptionsDesc")}</p>
+        {loading && (
+          <div className="text-center py-8 text-[rgba(255,255,255,0.5)]">
+            Yükleniyor...
           </div>
-        </div>
-        {subscriptions.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-[rgba(110,211,225,0.2)] bg-[rgba(8,28,38,0.5)] p-6 text-center text-sm text-[rgba(255,255,255,0.75)]">
-            {t("subscriptionsEmpty")}
+        )}
+        {error && <p className="text-sm text-red-400">{error}</p>}
+
+        {items.length === 0 && !loading ? (
+          <div className="mt-4 rounded-xl border border-dashed border-[rgba(72,213,255,0.15)] bg-[rgba(8,18,26,0.5)] p-8 text-center">
+            <Inbox className="h-10 w-10 mx-auto text-[rgba(255,255,255,0.2)] mb-3" />
+            <p className="text-sm text-[rgba(255,255,255,0.5)]">{t("contactEmpty")}</p>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-[rgba(110,211,225,0.16)]">
-            <table className="min-w-full divide-y divide-[rgba(110,211,225,0.12)] bg-[rgba(6,18,26,0.8)]">
-              <thead className="bg-[rgba(8,24,32,0.9)] text-[rgba(255,255,255,0.75)]">
+          <div className="mt-4 space-y-3">
+            {items.map((item) => (
+              <div
+                key={item.id}
+                className="rounded-xl border border-[rgba(72,213,255,0.1)] bg-[rgba(8,18,26,0.5)] p-4 hover:border-[rgba(72,213,255,0.2)] transition-all"
+              >
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[rgba(72,213,255,0.2)] to-[rgba(72,213,255,0.05)] flex items-center justify-center text-[rgba(130,226,255,0.8)]">
+                        <User className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-white">{item.name}</p>
+                        <div className="flex items-center gap-3 text-xs text-[rgba(255,255,255,0.5)]">
+                          <span className="flex items-center gap-1">
+                            <Mail className="h-3 w-3" />
+                            {item.email}
+                          </span>
+                          {item.phone && (
+                            <span className="flex items-center gap-1">
+                              <Phone className="h-3 w-3" />
+                              {item.phone}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <AdminBadge variant="info" size="sm">{item.subject}</AdminBadge>
+                  </div>
+                  <div className="text-right text-xs text-[rgba(255,255,255,0.4)]">
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {formatDate(item.createdAt)}
+                    </div>
+                    {(item.city || item.country) && (
+                      <div className="flex items-center gap-1 mt-1">
+                        <MapPin className="h-3 w-3" />
+                        {[item.city, item.country].filter(Boolean).join(", ")}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="mt-3 pt-3 border-t border-[rgba(255,255,255,0.05)]">
+                  <p className="text-xs uppercase tracking-wider text-[rgba(255,255,255,0.4)] mb-1">Mesaj</p>
+                  <p className="text-sm text-[rgba(255,255,255,0.8)] whitespace-pre-wrap">{item.message}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </AdminCard>
+
+      {/* Subscriptions */}
+      <AdminCard variant="default" padding="md">
+        <AdminCardHeader
+          title={t("subscriptionsTitle")}
+          description={t("subscriptionsDesc")}
+        />
+        {subscriptions.length === 0 ? (
+          <div className="mt-4 rounded-xl border border-dashed border-[rgba(72,213,255,0.15)] bg-[rgba(8,18,26,0.5)] p-6 text-center">
+            <Bell className="h-8 w-8 mx-auto text-[rgba(255,255,255,0.2)] mb-2" />
+            <p className="text-sm text-[rgba(255,255,255,0.5)]">{t("subscriptionsEmpty")}</p>
+          </div>
+        ) : (
+          <div className="mt-4 overflow-hidden rounded-xl border border-[rgba(72,213,255,0.1)]">
+            <table className="w-full text-sm">
+              <thead className="border-b border-[rgba(255,255,255,0.06)] bg-[rgba(0,0,0,0.2)]">
                 <tr>
-                  <th className="px-4 py-3 text-left text-[11px] uppercase tracking-[0.18em]">{tc("email")}</th>
-                  <th className="px-4 py-3 text-left text-[11px] uppercase tracking-[0.18em]">{t("submittedAt")}</th>
+                  <th className="px-4 py-3 text-left text-[11px] uppercase tracking-[0.15em] font-medium text-[rgba(255,255,255,0.45)]">
+                    E-posta
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] uppercase tracking-[0.15em] font-medium text-[rgba(255,255,255,0.45)]">
+                    Tarih
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[rgba(110,211,225,0.08)] text-sm text-[rgba(255,255,255,0.82)]">
+              <tbody className="divide-y divide-[rgba(255,255,255,0.04)]">
                 {subscriptions.map((s) => (
-                  <tr key={s.id}>
-                    <td className="px-4 py-3">{s.email}</td>
-                    <td className="px-4 py-3 text-[12px] text-[rgba(255,255,255,0.65)]">
-                      {s.createdAt ? new Date(s.createdAt).toLocaleString() : "—"}
+                  <tr key={s.id} className="hover:bg-[rgba(72,213,255,0.04)] transition-colors">
+                    <td className="px-4 py-3 text-white">{s.email}</td>
+                    <td className="px-4 py-3 text-[rgba(255,255,255,0.5)]">
+                      {formatDate(s.createdAt)}
                     </td>
                   </tr>
                 ))}
@@ -143,7 +205,7 @@ export default function ContactAdmin() {
             </table>
           </div>
         )}
-      </div>
+      </AdminCard>
     </div>
   );
 }

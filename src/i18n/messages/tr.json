@@ -32,12 +32,17 @@
     "faq": "S.S.S.",
     "forum": "Forum",
     "contact": "İletişim",
-    "docs": "API Docs"
+    "docs": "API Docs",
+    "features": "Uzmanlık",
+    "process": "Süreç"
   }, 
   "Projects": {
-    "title": "Projeler", 
+    "title": "Seçilmiş Projeler", 
+    "description": "Ölçek, performans ve etki için inşa edilmiş dijital ürünler vitrini.",
+    "viewProject": "Projeyi İncele",
     "admin": {
       "toolsTitle": "Yönetim Araçları",
+      "manage": "Projeleri Yönet",
       "toolsDescription": "Yalnızca yöneticilere görünür. Proje kartlarını panelden yönetin.",
       "backToAdmin": "Yönetim Paneline Dön",
       "newProject": "Yeni Proje Ekle",
@@ -86,7 +91,17 @@
     "submit": "Mesajı Gönder",
     "saving": "Gönderiliyor…",
     "success": "Teşekkürler, mesajını aldık.",
-    "error": "Mesaj kaydedilemedi. Lütfen tekrar deneyin."
+    "error": "Mesaj kaydedilemedi. Lütfen tekrar deneyin.",
+    "sidebar": {
+      "quickContact": "Hızlı İletişim",
+      "responseTime": "Yanıt Süresi",
+      "responseDesc": "~24 saat",
+      "responseNote": "Genellikle 24 saat içinde yanıt veriyoruz. Acil konular için Discord üzerinden ulaşabilirsiniz.",
+      "social": "Sosyal Medya",
+      "faqTitle": "Sıkça Sorulan Sorular",
+      "faqDesc": "Belki aradığınız cevap SSS bölümümüzde vardır.",
+      "faqLink": "SSS'ye Git →"
+    }
   },
   "FooterSubscribe": {
     "title": "Gelişmelerden haberdar ol",
@@ -394,5 +409,92 @@
         "passwordMismatch": "Şifreler eşleşmiyor"
       }
     }
+  },
+  "Features": {
+    "title": "Uzmanlık Alanlarımız",
+    "description": "Yaratıcı yönü teknik titizlikle harmanlayarak zamana meydan okuyan ürünler inşa ediyoruz.",
+    "items": {
+      "design": {
+        "title": "Görsel Kimlik",
+        "description": "Özünüzle rezonansa giren benzersiz görsel diller tasarlıyoruz."
+      },
+      "dev": {
+        "title": "Full-Stack Geliştirme",
+        "description": "Modern temeller üzerine kurulu sağlam, ölçeklenebilir mimariler."
+      },
+      "ai": {
+        "title": "Yapay Zeka Entegrasyonu",
+        "description": "Daha akıllı iş akışları için uygulamalara zeka dokuyoruz."
+      },
+      "uiux": {
+        "title": "UI/UX Tasarımı",
+        "description": "Kullanıcıları zahmetsizce yönlendiren sezgisel arayüzler."
+      }
+    }
+  },
+  "Process": {
+    "title": "Nasıl Çalışıyoruz",
+    "description": "Kaosa metodik bir yaklaşım; soyut fikirleri somut gerçekliğe dönüştürüyoruz.",
+    "steps": {
+      "discovery": {
+        "title": "Keşif",
+        "description": "Vizyonunuzun derinliklerine dalıyor, 'nasıl'dan önce 'neden'i anlıyoruz."
+      },
+      "design": {
+        "title": "Tasarım",
+        "description": "Fikriniz için mükemmel formu bulmak adına iteratif prototipleme."
+      },
+      "build": {
+        "title": "İnşa",
+        "description": "Hırsınızla ölçeklenen temiz, test edilmiş kodlar yazıyoruz."
+      },
+      "launch": {
+        "title": "Lansman",
+        "description": "Dünyaya sunarken izleme ve destek ile yanınızdayız."
+      }
+    }
+  },
+  "Testimonials": {
+    "title": "Ne Diyorlar?",
+    "items": {
+      "user1": {
+        "text": "Tengra soyut kavramları canlı hissettiren dijital eserlere dönüştürüyor.",
+        "author": "Selin K.",
+        "role": "Ürün Yöneticisi"
+      },
+      "user2": {
+        "text": "Animasyon ve etkileşimdeki detay seviyesi benzersiz.",
+        "author": "Mehmet Y.",
+        "role": "Kurucu"
+      },
+      "user3": {
+        "text": "Sadece bir yazılım evi değil, dünya inşasında gerçek bir yaratıcı ortak.",
+        "author": "Elena R.",
+        "role": "Kreatif Direktör"
+      }
+    }
+  },
+  "Stats": {
+    "projects": "Teslim Edilen Proje",
+    "experience": "Yıl Deneyim",
+    "clients": "Mutlu Müşteri",
+    "coffee": "Demlenen Kahve"
+  },
+  "TechStack": {
+    "title": "Gücünü Buradan Alıyor"
+  },
+  "HomePage": {
+    "codingActivity": {
+      "title": "Kodlama Aktivitesi",
+      "description": "Açık kaynak ve özel projelere tutarlı katkılar."
+    },
+    "liveVisitors": {
+      "title": "Canlı Ziyaretçiler",
+      "systemOnline": "Sistem Çevrimiçi"
+    }
+  },
+  "GithubGraph": {
+    "loading": "GitHub aktivitesi yükleniyor...",
+    "error": "GitHub aktivitesi yüklenemedi."
   }
 }

@@ -10,9 +10,9 @@ export default function ParticlesBackground() {
 
         fullScreen: { enable: true, zIndex: 0 },
         background: { color: "transparent" },
-        fpsLimit: 60,
+        fpsLimit: 30,
         particles: {
-          number: { value: 30, density: { enable: true, width: 800, height: 800 } },
+          number: { value: 20, density: { enable: true, width: 800, height: 800 } },
           color: { value: "#00A7C5" },
           opacity: { value: 0.3 },
           size: { value: { min: 0.5, max: 2.5 } },

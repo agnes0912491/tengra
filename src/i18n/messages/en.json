@@ -32,12 +32,17 @@
     "faq": "F.A.Q.",
     "forum": "Forum",
     "contact": "Contact",
-    "docs": "API Docs"
+    "docs": "API Docs",
+    "features": "Expertise",
+    "process": "Process"
   },
   "Projects": {
-    "title": "Projects", 
+    "title": "Selected Works",
+    "description": "A showcase of digital products built for scale, performance, and impact.",
+    "viewProject": "View Project",
     "admin": {
       "toolsTitle": "Admin Tools",
+       "manage": "Manage Projects",
       "toolsDescription": "Visible only to administrators. Manage project cards from the dashboard.",
       "backToAdmin": "Back to Admin",
       "newProject": "Add Project",
@@ -86,7 +91,17 @@
     "submit": "Send message",
     "saving": "Sending…",
     "success": "Thanks, we received your message.",
-    "error": "We couldn't save your message. Please try again."
+    "error": "Failed to send message. Please try again.",
+    "sidebar": {
+      "quickContact": "Quick Contact",
+      "responseTime": "Response Time",
+      "responseDesc": "~24 hours",
+      "responseNote": "We typically reply within 24 hours. For urgent matters, reach us on Discord.",
+      "social": "Social Media",
+      "faqTitle": "Frequently Asked Questions",
+      "faqDesc": "Maybe your answer is in our FAQ section.",
+      "faqLink": "Go to FAQ →"
+    }
   },
   "FooterSubscribe": {
     "title": "Stay in the loop",
@@ -394,5 +409,92 @@
         "passwordMismatch": "Passwords don't match"
       }
     }
+  },
+  "Features": {
+    "title": "Our Expertise",
+    "description": "We blend creative direction with technical rigor to build products that stand the test of time.",
+    "items": {
+      "design": {
+        "title": "Visual Identity",
+        "description": "Crafting unique visual languages that resonate with your core ethos."
+      },
+      "dev": {
+        "title": "Full-Stack Dev",
+        "description": "Robust, scalable architectures built on modern foundations."
+      },
+      "ai": {
+        "title": "AI Integration",
+        "description": "Weaving intelligence into applications for smarter workflows."
+      },
+      "uiux": {
+        "title": "UI/UX Design",
+        "description": "Intuitive interfaces that guide users effortlessly."
+      }
+    }
+  },
+  "Process": {
+    "title": "How We Work",
+    "description": "A methodical approach to chaos, turning abstract ideas into concrete reality.",
+    "steps": {
+      "discovery": {
+        "title": "Discovery",
+        "description": "We deep dive into your vision, understanding the core 'why' before the 'how'."
+      },
+      "design": {
+        "title": "Design",
+        "description": "Iterative prototyping to find the perfect form factor for your idea."
+      },
+      "build": {
+        "title": "Build",
+        "description": "Writing clean, tested code that scales with your ambition."
+      },
+      "launch": {
+        "title": "Launch",
+        "description": "Deploying to the world with monitoring and support."
+      }
+    }
+  },
+  "Testimonials": {
+    "title": "What They Say",
+    "items": {
+      "user1": {
+        "text": "Tengra transforms abstract concepts into digital artifacts that feel alive.",
+        "author": "Sarah K.",
+        "role": "Product Lead"
+      },
+      "user2": {
+        "text": "The attention to detail in animation and interaction is unmatched.",
+        "author": "Mehmet Y.",
+        "role": "Founder"
+      },
+      "user3": {
+        "text": "Not just a dev shop, but a true creative partner in world-building.",
+        "author": "Elena R.",
+        "role": "Creative Director"
+      }
+    }
+  },
+  "Stats": {
+    "projects": "Projects Delivered",
+    "experience": "Years Experience",
+    "clients": "Happy Clients",
+    "coffee": "Coffees Brewed"
+  },
+  "TechStack": {
+    "title": "Powered By"
+  },
+  "HomePage": {
+    "codingActivity": {
+      "title": "Coding Activity",
+      "description": "Consistent contributions to open source and private projects."
+    },
+    "liveVisitors": {
+      "title": "Live Visitors",
+      "systemOnline": "System Online"
+    }
+  },
+  "GithubGraph": {
+    "loading": "Loading GitHub activity...",
+    "error": "Could not load GitHub activity."
   }
 }

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
-cd /srv/tengra/frontend
+cd /srv/tengra/apps/tengra
 
 # build kilidi
 exec 9>/tmp/frontend.build.lock
-flock -n 9 || exec node node_modules/next/dist/bin/next start -p 3000 -H 127.0.0.1
+flock -n 9 || (export PORT=3000 HOSTNAME=127.0.0.1 && exec node .next/standalone/apps/tengra/server.js)
 
 export NODE_ENV=production
 export NODE_OPTIONS=--max-old-space-size=512
@@ -26,4 +26,17 @@ if [[ "$CUR" != "$LAST" || ! -f .next/BUILD_ID ]]; then
 fi
 
 # SECURITY: Bind to localhost only - Nginx/Cloudflare will proxy
-exec node node_modules/next/dist/bin/next start -p 3000 -H 127.0.0.1
+# Standalone build requires static and public folders to be copied manually
+# if they are not being served by Nginx directly from the source .next/static
+
+# Ensure the target directories exist
+mkdir -p .next/standalone/apps/tengra/.next
+mkdir -p .next/standalone/apps/tengra/public
+
+# Copy the static assets
+cp -r .next/static .next/standalone/apps/tengra/.next/static
+cp -r public/* .next/standalone/apps/tengra/public/
+
+export PORT=3000
+export HOSTNAME=127.0.0.1
+exec node .next/standalone/apps/tengra/server.js

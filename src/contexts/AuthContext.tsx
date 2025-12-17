@@ -74,11 +74,17 @@ const persistAuthPayload = (data: AuthSuccessPayload) => {
   localStorage.setItem(REFRESH_TOKEN_KEY, data.refreshToken);
   localStorage.setItem(CSRF_TOKEN_KEY, data.csrfToken);
 
+  // Determine domain for cookies to allow subdomain sharing
+  const hostname = window.location.hostname;
+  const isTengra = hostname.includes("tengra.studio");
+  const domain = isTengra ? ".tengra.studio" : undefined;
+
   const cookieOptions = {
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict" as const,
+    secure: window.location.protocol === "https:",
+    sameSite: "lax" as const, // 'lax' is better for cross-subdomain navigation than 'strict'
     expires: 7,
     path: "/",
+    domain,
   };
   Cookies.set(ADMIN_SESSION_COOKIE, data.token, cookieOptions);
   for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
@@ -87,16 +93,20 @@ const persistAuthPayload = (data: AuthSuccessPayload) => {
 };
 
 const clearStoredAuth = () => {
-  // Clear localStorage
   STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
 
-  // Clear cookies
-  Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/" });
-  for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
-    Cookies.remove(legacyName, { path: "/" });
-  }
+  const hostname = window.location.hostname;
+  const isTengra = hostname.includes("tengra.studio");
+  const domain = isTengra ? ".tengra.studio" : undefined;
 
-  // Clear sessionStorage
+  // Clear cookies with domain
+  Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/", domain });
+  for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
+    Cookies.remove(legacyName, { path: "/", domain });
+  }
+  // Also try clearing without domain just in case
+  Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/" });
+
   sessionStorage.clear();
 };
 
@@ -185,9 +195,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [handleInvalidAuth]);
 
   useEffect(() => {
-    // Check if user is logged in on mount
+    // Hybrid Auth Sync:
+    // 1. Try LocalStorage
+    // 2. Fallback to Cookie (for subdomain sharing)
+    // 3. Hydrate LocalStorage from Cookie if valid
+    let token = localStorage.getItem(AUTH_TOKEN_KEY);
+
+    if (!token) {
+      // Try to recover from cookie (Cross-Subdomain Support)
+      const sessionCookie = Cookies.get(ADMIN_SESSION_COOKIE);
+      if (sessionCookie && !isExpired(sessionCookie)) {
+        token = sessionCookie;
+        localStorage.setItem(AUTH_TOKEN_KEY, token);
+        // We don't have refresh/csrf from cookie alone, but auth token is enough to bootstrap Me call
+        // Ideally backend would provide a mechanism to fully refresh session from just the token
+      }
+    }
+
     const { clearedAuth } = purgeExpiredTokens();
-    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+
+    // Re-read token in case purge cleared it (though purge checks localStorage)
+    token = localStorage.getItem(AUTH_TOKEN_KEY);
+
     if (token && !clearedAuth && !isExpired(token)) {
       fetchCurrentUser(token);
     } else {

@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { motion, AnimatePresence } from "framer-motion";
 import { User, Shield, Settings, Camera, LogOut, Link2 } from "lucide-react";
 import { toast } from "react-toastify"; // Assuming react-toastify is setup
+import TwoFactorSettings from "@/components/settings/TwoFactorSettings";
 // Note: If existing toast is different, I will adapt. components/ui/global-toast-container exists.
 
 const tabs = [
@@ -45,24 +46,37 @@ export default function SettingsPage() {
         }
         setIsLoading(true);
         try {
-            const token = localStorage.getItem("authToken");
-            const formData = new FormData();
-            formData.append("avatar", file);
-            const response = await fetch(`${BACKEND_API_URL}/account/avatar`, {
-                method: "POST",
-                headers: { "Authorization": `Bearer ${token}` },
-                body: formData
-            });
-            const data = await response.json();
-            if (response.ok) {
-                toast.success("Profil fotoğrafı güncellendi.");
-                await refreshAuth();
-            } else {
-                toast.error(data.message || "Yükleme başarısız.");
-            }
+            // Convert file to base64 data URL
+            const reader = new FileReader();
+            reader.onload = async () => {
+                const dataUrl = reader.result as string;
+                const token = localStorage.getItem("authToken");
+                const response = await fetch(`${BACKEND_API_URL}/account/profile`, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ avatarDataUrl: dataUrl })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    toast.success("Profil fotoğrafı güncellendi.");
+                    await refreshAuth();
+                } else {
+                    toast.error(data.message || data.error || "Yükleme başarısız.");
+                }
+                setIsLoading(false);
+                if (avatarInputRef.current) avatarInputRef.current.value = "";
+            };
+            reader.onerror = () => {
+                toast.error("Dosya okunamadı.");
+                setIsLoading(false);
+                if (avatarInputRef.current) avatarInputRef.current.value = "";
+            };
+            reader.readAsDataURL(file);
         } catch {
             toast.error("Bir hata oluştu.");
-        } finally {
             setIsLoading(false);
             if (avatarInputRef.current) avatarInputRef.current.value = "";
         }
@@ -312,8 +326,8 @@ export default function SettingsPage() {
                                                 <div className="relative group">
                                                     {user.avatar ? (
                                                         <Image
-                                                            src={user.avatar}
-                                                            alt={user.displayName || user.username}
+                                                            src={user.avatar || ""}
+                                                            alt={user.displayName || user.username || "User"}
                                                             width={96}
                                                             height={96}
                                                             unoptimized
@@ -434,54 +448,8 @@ export default function SettingsPage() {
                                         </Card>
 
                                         <Card className="bg-[var(--glass-bg)] border-[var(--glass-border)]">
-                                            <CardHeader>
-                                                <div className="flex items-center justify-between">
-                                                    <div>
-                                                        <CardTitle>İki Faktörlü Doğrulama (2FA)</CardTitle>
-                                                        <CardDescription>Hesabınıza ekstra güvenlik katmanı ekleyin.</CardDescription>
-                                                    </div>
-                                                    <div className="px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-xs font-bold border border-green-500/20">
-                                                        AKTİF DEĞİL
-                                                    </div>
-                                                </div>
-                                            </CardHeader>
-                                            <CardContent>
-                                                <p className="text-sm text-[var(--text-secondary)] mb-4">
-                                                    2FA etkinleştirildiğinde, giriş yaparken şifrenize ek olarak telefonunuzdaki uygulamadan bir kod girmeniz gerekir.
-                                                </p>
-                                                {twoFactorSecret ? (
-                                                    <div className="space-y-4">
-                                                        <div className="p-4 bg-[rgba(0,0,0,0.3)] rounded-lg">
-                                                            <p className="text-xs text-[var(--text-muted)] mb-2">Gizli Anahtar:</p>
-                                                            <code className="text-sm font-mono text-white break-all">{twoFactorSecret}</code>
-                                                        </div>
-                                                        <div className="flex gap-2">
-                                                            <Input
-                                                                placeholder="6 haneli kod"
-                                                                value={twoFactorCode}
-                                                                onChange={(e) => setTwoFactorCode(e.target.value)}
-                                                                maxLength={6}
-                                                                className="max-w-[150px] bg-[rgba(0,0,0,0.2)] border-[var(--glass-border)]"
-                                                            />
-                                                            <Button
-                                                                onClick={handleVerify2FA}
-                                                                disabled={isLoading}
-                                                                className="bg-[var(--color-turkish-blue-500)] hover:bg-[var(--color-turkish-blue-600)] text-white"
-                                                            >
-                                                                {isLoading ? "..." : "Doğrula"}
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <Button
-                                                        variant="outline"
-                                                        onClick={handleSetup2FA}
-                                                        disabled={isLoading}
-                                                        className="w-full sm:w-auto border-[var(--glass-border)] hover:bg-[rgba(30,184,255,0.1)]"
-                                                    >
-                                                        {isLoading ? "Başlatılıyor..." : "2FA Kurulumu Başlat"}
-                                                    </Button>
-                                                )}
+                                            <CardContent className="pt-6">
+                                                <TwoFactorSettings token={localStorage.getItem("authToken") || ""} />
                                             </CardContent>
                                         </Card>
                                     </div>

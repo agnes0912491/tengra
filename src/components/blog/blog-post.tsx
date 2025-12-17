@@ -8,6 +8,7 @@ import DOMPurify from "isomorphic-dompurify";
 import { remark } from "remark";
 import remarkHtml from "remark-html";
 import { Calendar, Clock, Share2, ArrowLeft, ExternalLink, Eye, BookOpen } from "lucide-react";
+import LikeButton from "./LikeButton";
 
 import { getBlogById, incrementBlogView } from "@/lib/db";
 import type { Blog } from "@/types/blog";
@@ -292,6 +293,11 @@ export default function BlogPost({ postId }: BlogPostProps) {
               </div>
 
               <div className="h-px bg-[rgba(255,255,255,0.06)]" />
+
+              <h3 className="text-sm font-semibold text-white">Etkileşim</h3>
+              <div className="flex flex-wrap gap-2 mb-4">
+                <LikeButton slug={post.slug || post.id} initialLikes={post.metrics?.likes || 0} />
+              </div>
 
               <h3 className="text-sm font-semibold text-white">Paylaş</h3>
               <div className="flex flex-wrap gap-2">

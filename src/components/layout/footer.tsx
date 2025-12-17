@@ -1,205 +1,106 @@
 "use client";
 
-import * as React from "react";
-import { motion } from "framer-motion";
-import Image from "next/image";
+import React from "react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
-import { resolveCdnUrl } from "@/lib/constants";
-import { createContactSubscription } from "@/lib/db";
-import { AgentBadge } from "./footer/agent-badge";
-import { Send, Github, Twitter, Linkedin, Mail } from "lucide-react";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import { Github, Twitter, Linkedin, Mail, Heart, ArrowRight } from "lucide-react";
+import AnimatedButton from "@/components/ui/animated-button";
+import GradientText from "@/components/ui/gradient-text";
 
-export default function Footer() {
-  const tFooter = useTranslations("Footer");
-  const tSub = useTranslations("FooterSubscribe");
-  const [email, setEmail] = React.useState("");
-  const [status, setStatus] = React.useState<"idle" | "success" | "error">("idle");
-  const [submitting, setSubmitting] = React.useState(false);
-
-  const footerLinks = [
-    {
-      title: "Company",
-      links: [
-        { label: "About", href: "/#goals" },
-        { label: "Team", href: "/team" },
-        { label: "Blog", href: "/blogs" },
-        { label: "Contact", href: "/contact" },
-      ],
-    },
-    {
-      title: "Resources",
-      links: [
-        { label: "Projects", href: "/#projects" },
-        { label: "Forum", href: "https://forum.tengra.studio" },
-        { label: "FAQ", href: "/#faq" },
-      ],
-    },
-  ];
-
-  const socialLinks = [
-    { icon: Twitter, href: "https://x.com/tengra", label: "Twitter" },
-    { icon: Github, href: "https://github.com/TengraStudio", label: "GitHub" },
-    { icon: Linkedin, href: "https://linkedin.com/company/tengra", label: "LinkedIn" },
-  ];
+const Footer = () => {
+  const currentYear = new Date().getFullYear();
 
   return (
-    <motion.footer
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.8 }}
-      className="relative border-t border-[rgba(72,213,255,0.1)] bg-[rgba(2,6,23,0.9)] backdrop-blur-xl"
-    >
-      {/* Main Footer Content */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
+    <footer className="relative bg-[rgba(3,12,18,0.95)] border-t border-[rgba(255,255,255,0.05)] pt-20 pb-10 overflow-hidden">
+      {/* Background Glow */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-[rgba(0,167,197,0.15)] via-transparent to-transparent blur-3xl pointer-events-none" />
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-16">
           {/* Brand Column */}
           <div className="lg:col-span-1">
-            <Link href="/" className="inline-flex items-center gap-3 group">
-              <Image
-                crossOrigin="anonymous"
-                src={resolveCdnUrl("/uploads/tengra_without_text.png")}
-                alt="Tengra"
-                width={40}
-                height={40}
-                className="opacity-90 group-hover:opacity-100 transition-opacity"
-              />
-              <span className="font-display text-xl tracking-[0.25em] font-bold bg-gradient-to-r from-[var(--color-turkish-blue-300)] to-[var(--color-turkish-blue-500)] bg-clip-text text-transparent">
-                TENGRA
+            <Link href="/" className="inline-block mb-6">
+              <span className="flex items-center gap-2 text-2xl font-bold text-white tracking-tight">
+                <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-turkish-blue-400)] to-[var(--color-turkish-blue-600)] flex items-center justify-center text-white">
+                  T
+                </span>
+                Tengra
               </span>
             </Link>
-            <p className="mt-4 text-sm text-[var(--text-muted)] max-w-xs">
-              Building artefact-like games, AI-driven worlds, and experimental systems.
+            <p className="text-[rgba(255,255,255,0.5)] leading-relaxed mb-6 max-w-xs">
+              Crafting premium digital experiences that defy gravity. Built for performance, designed for impact.
             </p>
-
-            {/* Social Links */}
-            <div className="mt-6 flex items-center gap-3">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2.5 rounded-xl bg-[rgba(30,184,255,0.08)] border border-[rgba(72,213,255,0.15)] text-[var(--text-muted)] hover:text-[var(--color-turkish-blue-400)] hover:border-[rgba(72,213,255,0.3)] hover:bg-[rgba(30,184,255,0.12)] transition-all"
-                  aria-label={social.label}
-                >
-                  <social.icon className="w-4 h-4" />
-                </a>
-              ))}
-            </div>
-
-            {/* Agent Badge */}
-            <div className="mt-6">
-              <AgentBadge />
+            <div className="flex items-center gap-4">
+              <a href="https://github.com/tengra" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-[rgba(255,255,255,0.05)] text-[rgba(255,255,255,0.6)] hover:bg-[rgba(255,255,255,0.1)] hover:text-white transition-colors">
+                <Github className="w-5 h-5" />
+              </a>
+              <a href="https://twitter.com/tengra" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-[rgba(255,255,255,0.05)] text-[rgba(255,255,255,0.6)] hover:bg-[rgba(255,255,255,0.1)] hover:text-white transition-colors">
+                <Twitter className="w-5 h-5" />
+              </a>
+              <a href="https://linkedin.com/company/tengra" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-[rgba(255,255,255,0.05)] text-[rgba(255,255,255,0.6)] hover:bg-[rgba(255,255,255,0.1)] hover:text-white transition-colors">
+                <Linkedin className="w-5 h-5" />
+              </a>
             </div>
           </div>
 
-          {/* Link Columns */}
-          {footerLinks.map((group) => (
-            <div key={group.title}>
-              <h4 className="text-sm font-semibold text-[var(--text-primary)] uppercase tracking-wider mb-4">
-                {group.title}
-              </h4>
-              <ul className="space-y-3">
-                {group.links.map((link) => (
-                  <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-[var(--text-muted)] hover:text-[var(--color-turkish-blue-400)] transition-colors"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {/* Links Column 1 */}
+          <div>
+            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">Company</h4>
+            <ul className="space-y-4">
+              <li><Link href="/about" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">About Us</Link></li>
+              <li><Link href="/careers" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">Careers</Link></li>
+              <li><Link href="/blog" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">Blog</Link></li>
+              <li><Link href="/contact" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">Contact</Link></li>
+            </ul>
+          </div>
+
+          {/* Links Column 2 */}
+          <div>
+            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">Services</h4>
+            <ul className="space-y-4">
+              <li><Link href="/services/web-development" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">Web Development</Link></li>
+              <li><Link href="/services/mobile-apps" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">Mobile Apps</Link></li>
+              <li><Link href="/services/cloud-infrastructure" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">Cloud Infrastructure</Link></li>
+              <li><Link href="/services/design" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">UI/UX Design</Link></li>
+            </ul>
+          </div>
 
           {/* Newsletter Column */}
           <div>
-            <h4 className="text-sm font-semibold text-[var(--text-primary)] uppercase tracking-wider mb-4">
-              {tSub("title")}
-            </h4>
-            <form
-              className="space-y-3"
-              onSubmit={async (e) => {
-                e.preventDefault();
-                setStatus("idle");
-                setSubmitting(true);
-                try {
-                  const created = await createContactSubscription(email.trim());
-                  if (created) {
-                    setStatus("success");
-                    setEmail("");
-                  } else {
-                    setStatus("error");
-                  }
-                } catch (err) {
-                  console.error("Failed to save subscription", err);
-                  setStatus("error");
-                } finally {
-                  setSubmitting(false);
-                }
-              }}
-            >
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.currentTarget.value)}
-                  placeholder={tSub("placeholder")}
-                  className="w-full pl-10 pr-4 py-3 text-sm rounded-xl bg-[rgba(15,31,54,0.6)] border border-[rgba(72,213,255,0.15)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--color-turkish-blue-500)] focus:ring-2 focus:ring-[rgba(30,184,255,0.2)] focus:outline-none transition-all"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-xl bg-gradient-to-r from-[var(--color-turkish-blue-500)] to-[var(--color-turkish-blue-600)] text-white shadow-[0_4px_20px_rgba(30,184,255,0.25)] hover:shadow-[0_6px_25px_rgba(30,184,255,0.35)] disabled:opacity-60 disabled:cursor-not-allowed transition-all"
-              >
-                {submitting ? (
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <>
-                    {tSub("button")}
-                    <Send className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-              {status === "success" && (
-                <p className="text-xs text-emerald-400 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                  {tSub("success")}
-                </p>
-              )}
-              {status === "error" && (
-                <p className="text-xs text-red-400 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                  {tSub("error")}
-                </p>
-              )}
+            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">Stay Updated</h4>
+            <p className="text-[rgba(255,255,255,0.5)] text-sm mb-4">
+              Subscribe to our newsletter for the latest tech trends and agency updates.
+            </p>
+            <form className="flex flex-col gap-3">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className="bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-[rgba(255,255,255,0.3)] focus:outline-none focus:border-[var(--color-turkish-blue-400)] transition-colors"
+              />
+              <AnimatedButton variant="primary" size="sm" className="w-full justify-center">
+                Subscribe <ArrowRight className="ml-2 w-3 h-3" />
+              </AnimatedButton>
             </form>
           </div>
         </div>
-      </div>
 
-      {/* Bottom Bar */}
-      <div className="border-t border-[rgba(72,213,255,0.08)]">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-[var(--text-muted)]">
-            {tFooter("copyright", { year: 2025 })}
+        {/* Bottom Bar */}
+        <div className="pt-8 border-t border-[rgba(255,255,255,0.05)] flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-[rgba(255,255,255,0.4)]">
+            © {currentYear} Tengra Studio. All rights reserved.
           </p>
-          <div className="flex items-center gap-6 text-xs text-[var(--text-muted)]">
-            <Link href="/privacy" className="hover:text-[var(--color-turkish-blue-400)] transition-colors">
-              Privacy
-            </Link>
-            <Link href="/terms" className="hover:text-[var(--color-turkish-blue-400)] transition-colors">
-              Terms
-            </Link>
+          <div className="flex items-center gap-6">
+            <Link href="/privacy" className="text-sm text-[rgba(255,255,255,0.4)] hover:text-white transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="text-sm text-[rgba(255,255,255,0.4)] hover:text-white transition-colors">Terms of Service</Link>
           </div>
+          <p className="text-sm text-[rgba(255,255,255,0.3)] flex items-center gap-1">
+            Made with <Heart className="w-3 h-3 text-red-500 fill-red-500" /> in Istanbul
+          </p>
         </div>
       </div>
-    </motion.footer>
+    </footer>
   );
-}
+};
+
+export default Footer;

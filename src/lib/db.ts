@@ -291,6 +291,84 @@ export const getAllUsers = async (token: string): Promise<User[]> => {
   throw new Error("Kullanıcı verisi beklenmeyen formatta döndü.");
 };
 
+// Presence API types
+export type PresenceData = {
+  userId: number;
+  source: string;
+  connectedAt: string;
+  lastHeartbeat: string;
+  socketCount?: number;
+};
+
+export type UserPresenceMap = Record<number, { online: boolean; source?: string; lastHeartbeat?: string }>;
+
+/**
+ * Get presence (online status) for specific users
+ */
+export const getUsersPresence = async (token: string, userIds: number[]): Promise<UserPresenceMap> => {
+  if (!token || userIds.length === 0) {
+    return {};
+  }
+
+  try {
+    const response = await fetch(`${API_BASE}/admin/presence/check`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ userIds }),
+    });
+
+    if (!response.ok) {
+      console.error("[presence] fetch error", response.status);
+      return {};
+    }
+
+    const json = await response.json();
+    if (json.success && json.presence) {
+      return json.presence as UserPresenceMap;
+    }
+    return {};
+  } catch (err) {
+    console.error("[presence] error", err);
+    return {};
+  }
+};
+
+/**
+ * Get all online users
+ */
+export const getAllOnlineUsers = async (token: string): Promise<PresenceData[]> => {
+  if (!token) {
+    return [];
+  }
+
+  try {
+    const response = await fetch(`${API_BASE}/admin/presence`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      console.error("[presence] fetch error", response.status);
+      return [];
+    }
+
+    const json = await response.json();
+    if (json.success && json.users) {
+      return json.users as PresenceData[];
+    }
+    return [];
+  } catch (err) {
+    console.error("[presence] error", err);
+    return [];
+  }
+};
+
 export const authenticateUserWithPassword = async (
   email: string,
   password: string
@@ -412,48 +490,7 @@ export const getUserWithId = async (id: string): Promise<User | null> => {
   return (await response.json()) as User;
 };
 
-export const registerUser = async (
-  username: string,
-  email: string,
-  password: string,
-  avatarDataUrl?: string,
-  displayName?: string,
-  avatarUrl?: string
-): Promise<{ success: boolean; reason?: "timeout" | "error" }> => {
-  const payload: Record<string, string> = { username, email, password };
-  if (avatarDataUrl) payload.avatarDataUrl = avatarDataUrl;
-  if (displayName) payload.displayName = displayName;
-  if (avatarUrl) payload.avatarUrl = avatarUrl;
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 12000);
-
-  try {
-    const response = await fetch(`${API_BASE}/auth/register`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(payload),
-      signal: controller.signal,
-    });
-
-    if (!response.ok) {
-      return { success: false, reason: "error" };
-    }
-
-    const json = (await response.json().catch(() => null)) as { success?: boolean } | null;
-    return { success: json?.success === true, reason: json?.success ? undefined : "error" };
-  } catch (err) {
-    if ((err as Error).name === "AbortError") {
-      return { success: false, reason: "timeout" };
-    }
-    return { success: false, reason: "error" };
-  } finally {
-    clearTimeout(timeout);
-  }
-};
 
 export const uploadRegisterAvatar = async (file: Blob): Promise<string | null> => {
   const controller = new AbortController();
@@ -976,6 +1013,67 @@ export const recordProjectVisit = async (
 };
 
 // --- Contact submissions ---
+export async function registerUser({
+  username,
+  email,
+  password,
+  firstName,
+  lastName,
+  avatarUrl,
+  idToken, // Add idToken
+}: {
+  username: string;
+  email: string;
+  password?: string; // Make password optional if Google (though we might enforce it)
+  firstName?: string;
+  lastName?: string;
+  avatarUrl?: string;
+  idToken?: string;
+}) {
+  console.log("Registering user:", username, email);
+  
+  // Use lova-api if google flow (or always if we want to migrate)
+  // But let's keep consistency. If idToken is present, use lova-api register endpoint which we updated.
+  // The original registers against localhost:5000 (core-cpp?).
+  // As established, core-cpp auth relies on shared DB.
+  
+  let endpoint = `${API_BASE}/auth/register`;
+  
+  // If we have idToken, we MUST use lova-api because core-cpp might not support it yet?
+  // Or we just use lova-api for everything register-related now?
+  // Let's use lova-api for Google flows specifically or generic register if capable.
+  // For now, if idToken is present, point to lova-api.
+  
+  if (idToken) {
+      endpoint = "https://api.lova.tengra.studio/auth/register";
+  }
+
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      username,
+      email,
+      password,
+      firstName,
+      lastName,
+      avatarUrl,
+      idToken,
+      source: idToken ? "web_client_google" : "web_client", // Add source
+    }),
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    console.error("Registration failed:", errorData);
+    throw new Error(errorData.message || errorData.error || "Registration failed");
+  }
+
+  return res.json();
+};
+
 export const createContactSubmission = async (
   payload: { name: string; email: string; subject: string; message: string; phone?: string; ipAddress?: string; city?: string; country?: string }
 ): Promise<ContactSubmission | null> => {
@@ -1150,27 +1248,65 @@ export const uploadImage = async (
   token: string
 ): Promise<{ url?: string; dataUrl?: string; filename?: string } | null> => {
   if (!token) throw new Error("Yetkilendirme anahtarı eksik.");
-  const res = await fetch(`${UPLOAD_API_URL}/image`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ dataUrl }),
-  });
-  if (!res.ok) return null;
-  const json = (await res.json().catch(() => null)) as
-    | { success?: boolean; url?: unknown; dataUrl?: unknown; filename?: unknown }
-    | null;
-  if (!json || json.success !== true) return null;
-  const out: { url?: string; dataUrl?: string; filename?: string } = {};
-  if (typeof json.url === "string") {
-    out.url = resolveCdnUrl(json.url);
+  
+  // Convert data URL to blob (without fetch to avoid CSP issues)
+  const arr = dataUrl.split(',');
+  const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/png';
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
   }
-  if (typeof json.dataUrl === "string") out.dataUrl = json.dataUrl;
-  if (typeof json.filename === "string") out.filename = json.filename;
-  return out;
+  const blob = new Blob([u8arr], { type: mime });
+  
+  // Convert blob to File object
+  const file = new File([blob], "upload.png", { type: mime });
+  
+  // Upload to CDN
+  const { uploadPostImage } = await import("@/lib/cdn");
+  const result = await uploadPostImage(file, token);
+  
+  if (!result || !result.url) return null;
+  
+  return {
+    url: result.url,
+    dataUrl,
+    filename: result.id + ".png"
+  };
+};
+
+export const uploadProjectImage = async (
+  dataUrl: string,
+  token: string
+): Promise<{ url?: string; dataUrl?: string; filename?: string } | null> => {
+  if (!token) throw new Error("Yetkilendirme anahtarı eksik.");
+  
+  // Convert data URL to blob (without fetch to avoid CSP issues)
+  const arr = dataUrl.split(',');
+  const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/png';
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  const blob = new Blob([u8arr], { type: mime });
+  
+  // Convert blob to File object
+  const file = new File([blob], "upload.png", { type: mime });
+  
+  // Upload to CDN
+  const { uploadProjectImage } = await import("@/lib/cdn");
+  const result = await uploadProjectImage(file, token);
+  
+  if (!result || !result.url) return null;
+  
+  return {
+    url: result.url,
+    dataUrl,
+    filename: result.id + ".png"
+  };
 };
 
 const postJson = async (url: string, body: unknown) => {
@@ -1496,6 +1632,26 @@ export const updateUserRole = async (
   }
 
   return user;
+};
+
+export const updateUser = async (
+  userId: string,
+  data: { displayName?: string; email?: string; phone?: string; bio?: string },
+  token: string
+): Promise<boolean> => {
+  if (!userId || !token) throw new Error("Eksik veri.");
+
+  const response = await fetch(`${API_BASE}/admin/users/${userId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  return response.ok;
 };
 
 export const deleteUser = async (userId: string, token: string): Promise<boolean> => {
