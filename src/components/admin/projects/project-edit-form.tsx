@@ -34,6 +34,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 import {
     Dialog,
     DialogContent,
@@ -44,33 +45,33 @@ import {
 } from "@/components/ui/dialog";
 
 // Platform icons & labels
-const platformConfig: Record<string, { label: string; icon: React.ReactNode }> = {
-    windows: { label: "Windows", icon: <Monitor className="h-4 w-4" /> },
-    macos: { label: "macOS", icon: <Apple className="h-4 w-4" /> },
-    linux: { label: "Linux", icon: <Monitor className="h-4 w-4" /> },
-    ios: { label: "iOS", icon: <Smartphone className="h-4 w-4" /> },
-    android: { label: "Android", icon: <Play className="h-4 w-4" /> },
-    web: { label: "Web", icon: <Globe className="h-4 w-4" /> },
+const platformConfig: Record<string, { labelKey: string; icon: React.ReactNode }> = {
+    windows: { labelKey: "platforms.windows", icon: <Monitor className="h-4 w-4" /> },
+    macos: { labelKey: "platforms.macos", icon: <Apple className="h-4 w-4" /> },
+    linux: { labelKey: "platforms.linux", icon: <Monitor className="h-4 w-4" /> },
+    ios: { labelKey: "platforms.ios", icon: <Smartphone className="h-4 w-4" /> },
+    android: { labelKey: "platforms.android", icon: <Play className="h-4 w-4" /> },
+    web: { labelKey: "platforms.web", icon: <Globe className="h-4 w-4" /> },
 };
 
 const allPlatforms: ProjectPlatform[] = ["windows", "macos", "linux", "ios", "android", "web"];
 const allCategories = ["game", "productivity", "entertainment", "education", "utility", "social", "other"];
 
-const statusOptions: { value: ProjectStatus; label: string; color: string }[] = [
-    { value: "draft", label: "Taslak", color: "bg-gray-500/20 text-gray-400 border-gray-500/20" },
-    { value: "in_progress", label: "Geliştiriliyor", color: "bg-blue-500/20 text-blue-400 border-blue-500/20" },
-    { value: "on_hold", label: "Beklemede", color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/20" },
-    { value: "completed", label: "Tamamlandı", color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/20" },
-    { value: "archived", label: "Arşivlendi", color: "bg-red-500/20 text-red-400 border-red-500/20" },
+const statusOptions: { value: ProjectStatus; labelKey: string; color: string }[] = [
+    { value: "draft", labelKey: "status.draft", color: "bg-gray-500/20 text-gray-400 border-gray-500/20" },
+    { value: "in_progress", labelKey: "status.inProgress", color: "bg-blue-500/20 text-blue-400 border-blue-500/20" },
+    { value: "on_hold", labelKey: "status.onHold", color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/20" },
+    { value: "completed", labelKey: "status.completed", color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/20" },
+    { value: "archived", labelKey: "status.archived", color: "bg-red-500/20 text-red-400 border-red-500/20" },
 ];
 
-const typeOptions: { value: ProjectType; label: string }[] = [
-    { value: "game", label: "Oyun" },
-    { value: "website", label: "Web Sitesi" },
-    { value: "tool", label: "Araç" },
-    { value: "app", label: "Uygulama" },
-    { value: "library", label: "Kütüphane" },
-    { value: "other", label: "Diğer" },
+const typeOptions: { value: ProjectType; labelKey: string }[] = [
+    { value: "game", labelKey: "types.game" },
+    { value: "website", labelKey: "types.website" },
+    { value: "tool", labelKey: "types.tool" },
+    { value: "app", labelKey: "types.app" },
+    { value: "library", labelKey: "types.library" },
+    { value: "other", labelKey: "types.other" },
 ];
 
 type Props = {
@@ -98,30 +99,30 @@ interface EditableProject {
 
 type TabId = "general" | "media" | "features" | "links";
 
-const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
-    { id: "general", label: "Genel", icon: <Package className="h-4 w-4" /> },
-    { id: "media", label: "Medya", icon: <ImageIcon className="h-4 w-4" /> },
-    { id: "features", label: "Özellikler", icon: <Sparkles className="h-4 w-4" /> },
-    { id: "links", label: "Bağlantılar", icon: <LinkIcon className="h-4 w-4" /> },
+const tabs: { id: TabId; labelKey: string; icon: React.ReactNode }[] = [
+    { id: "general", labelKey: "tabs.general", icon: <Package className="h-4 w-4" /> },
+    { id: "media", labelKey: "tabs.media", icon: <ImageIcon className="h-4 w-4" /> },
+    { id: "features", labelKey: "tabs.features", icon: <Sparkles className="h-4 w-4" /> },
+    { id: "links", labelKey: "tabs.links", icon: <LinkIcon className="h-4 w-4" /> },
 ];
-
-const StatusBadge = ({ status }: { status: string }) => {
-    const opt = statusOptions.find(o => o.value === status) || statusOptions[0];
-    return (
-        <span className={cn("px-2.5 py-0.5 rounded-full text-xs font-medium border", opt.color)}>
-            {opt.label}
-        </span>
-    );
-};
 
 export default function ProjectEditForm({ project, isNew }: Props) {
     const router = useRouter();
+    const t = useTranslations("AdminProjects");
     const locales = routing.locales;
     const { token } = useAdminToken();
     const [activeTab, setActiveTab] = useState<TabId>("general");
     const [logoUploading, setLogoUploading] = useState(false);
     const [isPending, startTransition] = useTransition();
     const [deleteConfirm, setDeleteConfirm] = useState(false);
+    const StatusBadge = ({ status }: { status: string }) => {
+        const opt = statusOptions.find(o => o.value === status) || statusOptions[0];
+        return (
+            <span className={cn("px-2.5 py-0.5 rounded-full text-xs font-medium border", opt.color)}>
+                {t(opt.labelKey)}
+            </span>
+        );
+    };
 
     // Initial State Setup
     const parseDescription = useCallback((description?: string | object | null | React.ReactNode): Record<string, string> => {
@@ -257,7 +258,7 @@ export default function ProjectEditForm({ project, isNew }: Props) {
     // Image Upload
     const handleImageUpload = async (file: File, uploader = uploadImage): Promise<string | null> => {
         if (!token) {
-            toast.error("Yetkilendirme hatası");
+            toast.error(t("toast.authError"));
             return null;
         }
         try {
@@ -269,7 +270,7 @@ export default function ProjectEditForm({ project, isNew }: Props) {
             const result = await uploader(dataUrl, token);
             return result?.url || null;
         } catch {
-            toast.error("Resim yüklenemedi");
+            toast.error(t("toast.imageUploadFailed"));
             return null;
         }
     };
@@ -286,7 +287,7 @@ export default function ProjectEditForm({ project, isNew }: Props) {
 
     // Form Actions
     const handleSave = async () => {
-        if (!token) return toast.error("Yetkisiz işlem");
+        if (!token) return toast.error(t("toast.unauthorized"));
 
         const cleanedDescriptions: Record<string, string> = {};
         if (editData.descriptionsByLocale) {
@@ -309,23 +310,23 @@ export default function ProjectEditForm({ project, isNew }: Props) {
                 if (isNew) {
                     const created = await cpApi(payload, token);
                     if (created && 'id' in created && created.id) {
-                        toast.success("Proje oluşturuldu ✨");
+                        toast.success(t("toast.createSuccess"));
                         router.push(`/admin/dashboard/projects/${created.id}`);
                     } else {
-                        toast.error("Oluşturma başarısız");
+                        toast.error(t("toast.createFailed"));
                     }
                 } else {
                     const updated = await ep(payload, project?.id as string, token);
                     if (updated) {
-                        toast.success("Değişiklikler kaydedildi ✅");
+                        toast.success(t("toast.saveSuccess"));
                         // Re-sync local state logic if needed, but router refresh will update Props
                         router.refresh();
                     } else {
-                        toast.error("Güncelleme başarısız");
+                        toast.error(t("toast.saveFailed"));
                     }
                 }
             } catch {
-                toast.error("Bir hata oluştu");
+                toast.error(t("toast.genericError"));
             }
         });
     };
@@ -336,10 +337,10 @@ export default function ProjectEditForm({ project, isNew }: Props) {
         startTransition(async () => {
             const success = await dp(project.id as string, token);
             if (success) {
-                toast.success("Proje silindi");
+                toast.success(t("toast.deleteSuccess"));
                 router.push("/admin/dashboard/projects");
             } else {
-                toast.error("Silme işlemi başarısız");
+                toast.error(t("toast.deleteFailed"));
             }
         });
     };
@@ -365,12 +366,12 @@ export default function ProjectEditForm({ project, isNew }: Props) {
                         <div className="flex flex-col">
                             <div className="flex items-center gap-3">
                                 <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
-                                    {editData.name || "Yeni Proje"}
+                                    {editData.name || t("labels.newProject")}
                                 </h1>
                                 {editData.status && <StatusBadge status={editData.status} />}
                             </div>
                             <span className="text-xs text-slate-500 font-mono">
-                                ID: {isNew ? "NEW" : project?.id}
+                                {t("labels.id")}: {isNew ? t("labels.newId") : project?.id}
                             </span>
                         </div>
                     </div>
@@ -397,7 +398,7 @@ export default function ProjectEditForm({ project, isNew }: Props) {
                             )}>
                                 {tab.icon}
                             </span>
-                            {tab.label}
+                            {t(tab.labelKey)}
                             {activeTab === tab.id && (
                                 <ChevronRight className="h-4 w-4 ml-auto opacity-50" />
                             )}
@@ -426,12 +427,12 @@ export default function ProjectEditForm({ project, isNew }: Props) {
                                         <div className="flex gap-6 items-start">
                                             {/* Logo Upload */}
                                             <div className="shrink-0 w-32">
-                                                <label className="block text-xs font-medium text-slate-400 mb-2 ml-1">Logo</label>
+                                                <label className="block text-xs font-medium text-slate-400 mb-2 ml-1">{t("fields.logo")}</label>
                                                 {/* Dashed Border & Centered Icon */}
                                                 <div className="group relative w-32 h-32 rounded-2xl border-2 border-dashed border-white/20 bg-black/20 hover:border-[color:var(--color-turkish-blue-500)]/50 transition-all overflow-hidden flex flex-col items-center justify-center text-slate-500 hover:text-[color:var(--color-turkish-blue-400)]">
                                                     {logoPreview ? (
                                                         <>
-                                                            <Image src={logoPreview} alt="Logo" fill className="object-contain p-4" unoptimized />
+                                                            <Image src={logoPreview} alt={t("fields.logo")} fill className="object-contain p-4" unoptimized />
                                                             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity z-10">
                                                                 <Button
                                                                     size="icon"
@@ -450,7 +451,7 @@ export default function ProjectEditForm({ project, isNew }: Props) {
                                                         >
                                                             <div className="flex flex-col items-center justify-center h-full w-full gap-2 cursor-pointer p-2">
                                                                 <Upload className="h-6 w-6" />
-                                                                <span className="text-[10px] text-center font-medium">Yükle</span>
+                                                                <span className="text-[10px] text-center font-medium">{t("actions.upload")}</span>
                                                             </div>
                                                         </Dropzone>
                                                     )}
@@ -466,20 +467,20 @@ export default function ProjectEditForm({ project, isNew }: Props) {
                                             <div className="flex-1 space-y-4">
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     <div className="space-y-1.5">
-                                                        <label className="text-xs font-medium text-slate-400 ml-1">Proje Adı</label>
+                                                        <label className="text-xs font-medium text-slate-400 ml-1">{t("fields.name")}</label>
                                                         <Input
                                                             value={editData.name || ""}
                                                             onChange={e => setEditData(prev => ({ ...prev, name: e.target.value }))}
-                                                            placeholder="Proje Adı"
+                                                            placeholder={t("placeholders.name")}
                                                             className="bg-black/20 border-white/10 focus:border-[color:var(--color-turkish-blue-500)]/50 h-10 rounded-lg"
                                                         />
                                                     </div>
                                                     <div className="space-y-1.5">
-                                                        <label className="text-xs font-medium text-slate-400 ml-1">Tagline</label>
+                                                        <label className="text-xs font-medium text-slate-400 ml-1">{t("fields.tagline")}</label>
                                                         <Input
                                                             value={editData.tagline || ""}
                                                             onChange={e => setEditData(prev => ({ ...prev, tagline: e.target.value }))}
-                                                            placeholder="Kısa ve etkileyici bir slogan"
+                                                            placeholder={t("placeholders.tagline")}
                                                             className="bg-black/20 border-white/10 focus:border-[color:var(--color-turkish-blue-500)]/50 h-10 rounded-lg"
                                                         />
                                                     </div>
@@ -487,31 +488,31 @@ export default function ProjectEditForm({ project, isNew }: Props) {
 
                                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                                     <div className="space-y-1.5">
-                                                        <label className="text-xs font-medium text-slate-400 ml-1">Durum</label>
+                                                        <label className="text-xs font-medium text-slate-400 ml-1">{t("fields.status")}</label>
                                                         <select
                                                             value={editData.status || "draft"}
                                                             onChange={e => setEditData(prev => ({ ...prev, status: e.target.value as ProjectStatus }))}
                                                             className="w-full h-10 rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-white focus:outline-none focus:border-[color:var(--color-turkish-blue-500)]/50"
                                                         >
                                                             {statusOptions.map(opt => (
-                                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                                <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
                                                             ))}
                                                         </select>
                                                     </div>
                                                     <div className="space-y-1.5">
-                                                        <label className="text-xs font-medium text-slate-400 ml-1">Tür</label>
+                                                        <label className="text-xs font-medium text-slate-400 ml-1">{t("fields.type")}</label>
                                                         <select
                                                             value={editData.type || "other"}
                                                             onChange={e => setEditData(prev => ({ ...prev, type: e.target.value as ProjectType }))}
                                                             className="w-full h-10 rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-white focus:outline-none focus:border-[color:var(--color-turkish-blue-500)]/50"
                                                         >
                                                             {typeOptions.map(opt => (
-                                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                                <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
                                                             ))}
                                                         </select>
                                                     </div>
                                                     <div className="space-y-1.5 col-span-2">
-                                                        <label className="text-xs font-medium text-slate-400 ml-1">Versiyon</label>
+                                                        <label className="text-xs font-medium text-slate-400 ml-1">{t("fields.version")}</label>
                                                         <Input
                                                             value={editData.version || ""}
                                                             onChange={e => setEditData(prev => ({ ...prev, version: e.target.value }))}
@@ -535,7 +536,7 @@ export default function ProjectEditForm({ project, isNew }: Props) {
                                                     <div key={locale} className="space-y-2 group">
                                                         <label className="text-xs font-medium text-[color:var(--color-turkish-blue-400)] ml-1 flex items-center gap-2">
                                                             <span className="w-1.5 h-1.5 rounded-full bg-[color:var(--color-turkish-blue-500)]" />
-                                                            {locale.toUpperCase()} Açıklama
+                                                            {t("fields.descriptionForLocale", { locale: locale.toUpperCase() })}
                                                         </label>
                                                         <textarea
                                                             value={editData.descriptionsByLocale?.[locale] || ""}
@@ -546,7 +547,7 @@ export default function ProjectEditForm({ project, isNew }: Props) {
                                                                     [locale]: e.target.value
                                                                 }
                                                             }))}
-                                                            placeholder={`${locale.toUpperCase()} açıklamasını buraya girin...`}
+                                                            placeholder={t("placeholders.descriptionForLocale", { locale: locale.toUpperCase() })}
                                                             className="w-full h-40 rounded-xl border border-white/10 bg-black/20 p-4 text-sm text-slate-200 placeholder:text-slate-600 focus:border-[color:var(--color-turkish-blue-500)]/50 focus:outline-none focus:ring-1 focus:ring-[color:var(--color-turkish-blue-500)]/50 resize-y transition-all"
                                                         />
                                                     </div>
@@ -560,7 +561,7 @@ export default function ProjectEditForm({ project, isNew }: Props) {
                                         <div className="p-6 rounded-3xl bg-white/5 border border-white/5 backdrop-blur-xl space-y-4">
                                             <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
                                                 <LayoutGrid className="h-4 w-4 text-[color:var(--color-turkish-blue-400)]" />
-                                                Platformlar
+                                                {t("sections.platforms")}
                                             </h3>
                                             <div className="flex flex-wrap gap-2">
                                                 {allPlatforms.map(platform => (
@@ -575,7 +576,7 @@ export default function ProjectEditForm({ project, isNew }: Props) {
                                                         )}
                                                     >
                                                         {platformConfig[platform]?.icon}
-                                                        {platformConfig[platform]?.label}
+                                                        {t(platformConfig[platform]?.labelKey)}
                                                     </button>
                                                 ))}
                                             </div>
@@ -584,7 +585,7 @@ export default function ProjectEditForm({ project, isNew }: Props) {
                                         <div className="p-6 rounded-3xl bg-white/5 border border-white/5 backdrop-blur-xl space-y-4">
                                             <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
                                                 <Sparkles className="h-4 w-4 text-[color:var(--color-turkish-blue-400)]" />
-                                                Kategoriler
+                                                {t("sections.categories")}
                                             </h3>
                                             <div className="flex flex-wrap gap-2">
                                                 {allCategories.map(cat => (
@@ -598,7 +599,7 @@ export default function ProjectEditForm({ project, isNew }: Props) {
                                                                 : "bg-black/20 border-transparent text-slate-500 hover:bg-white/5"
                                                         )}
                                                     >
-                                                        #{cat}
+                                                        #{t(`categories.${cat}`)}
                                                     </button>
                                                 ))}
                                             </div>
@@ -613,12 +614,12 @@ export default function ProjectEditForm({ project, isNew }: Props) {
                                     <div className="p-6 rounded-3xl bg-white/5 border border-white/5 backdrop-blur-xl">
                                         <div className="flex items-center justify-between mb-6">
                                             <div>
-                                                <h3 className="text-lg font-semibold text-white">Ekran Görüntüleri</h3>
-                                                <p className="text-sm text-slate-500">Projeye ait görselleri yönetin</p>
+                                                <h3 className="text-lg font-semibold text-white">{t("sections.screenshots.title")}</h3>
+                                                <p className="text-sm text-slate-500">{t("sections.screenshots.subtitle")}</p>
                                             </div>
                                             <Button onClick={() => setEditData(prev => ({ ...prev, screenshots: [...(prev.screenshots || []), { url: "", caption: "", order: (prev.screenshots?.length || 0) + 1 }] }))}>
                                                 <Plus className="h-4 w-4 mr-2" />
-                                                Yeni Ekle
+                                                {t("actions.add")}
                                             </Button>
                                         </div>
 
@@ -647,7 +648,7 @@ export default function ProjectEditForm({ project, isNew }: Props) {
                                                                 newSS[idx].url = e.target.value;
                                                                 setEditData(prev => ({ ...prev, screenshots: newSS }));
                                                             }}
-                                                            placeholder="Görsel URL adresini yapıştırın"
+                                                            placeholder={t("placeholders.screenshotUrl")}
                                                             className="bg-black/20 border-white/10"
                                                         />
                                                         <Input
@@ -657,7 +658,7 @@ export default function ProjectEditForm({ project, isNew }: Props) {
                                                                 newSS[idx].caption = e.target.value;
                                                                 setEditData(prev => ({ ...prev, screenshots: newSS }));
                                                             }}
-                                                            placeholder="Görsel açıklaması (isteğe bağlı)"
+                                                            placeholder={t("placeholders.screenshotCaption")}
                                                             className="bg-black/20 border-white/10 text-xs"
                                                         />
                                                     </div>
@@ -685,12 +686,12 @@ export default function ProjectEditForm({ project, isNew }: Props) {
                                     <div className="p-6 rounded-3xl bg-white/5 border border-white/5 backdrop-blur-xl">
                                         <div className="flex items-center justify-between mb-6">
                                             <div>
-                                                <h3 className="text-lg font-semibold text-white">Öne Çıkan Özellikler</h3>
-                                                <p className="text-sm text-slate-500">Projenizi benzersiz kılan detayları listeleyin</p>
+                                                <h3 className="text-lg font-semibold text-white">{t("sections.features.title")}</h3>
+                                                <p className="text-sm text-slate-500">{t("sections.features.subtitle")}</p>
                                             </div>
                                             <Button onClick={() => setEditData(prev => ({ ...prev, features: [...(prev.features || []), { title: "", description: "", icon: "", order: (prev.features?.length || 0) + 1 }] }))}>
                                                 <Plus className="h-4 w-4 mr-2" />
-                                                Özellik Ekle
+                                                {t("actions.addFeature")}
                                             </Button>
                                         </div>
 
@@ -718,7 +719,7 @@ export default function ProjectEditForm({ project, isNew }: Props) {
                                                                     newFeat[idx].title = e.target.value;
                                                                     setEditData(prev => ({ ...prev, features: newFeat }));
                                                                 }}
-                                                                placeholder="Başlık"
+                                                                placeholder={t("placeholders.featureTitle")}
                                                                 className="bg-transparent border-none p-0 h-auto font-semibold text-white placeholder:text-slate-600 focus:ring-0"
                                                             />
                                                             <textarea
@@ -728,7 +729,7 @@ export default function ProjectEditForm({ project, isNew }: Props) {
                                                                     newFeat[idx].description = e.target.value;
                                                                     setEditData(prev => ({ ...prev, features: newFeat }));
                                                                 }}
-                                                                placeholder="Açıklama..."
+                                                                placeholder={t("placeholders.featureDescription")}
                                                                 className="w-full bg-transparent border-none p-0 text-sm text-slate-400 placeholder:text-slate-600 focus:ring-0 resize-none h-16"
                                                             />
                                                         </div>
@@ -755,13 +756,13 @@ export default function ProjectEditForm({ project, isNew }: Props) {
                             {activeTab === "links" && (
                                 <div className="space-y-6">
                                     <div className="p-6 rounded-3xl bg-white/5 border border-white/5 backdrop-blur-xl">
-                                        <h3 className="text-lg font-semibold text-white mb-6">Dış Bağlantılar</h3>
+                                        <h3 className="text-lg font-semibold text-white mb-6">{t("sections.links.title")}</h3>
                                         <div className="space-y-4 max-w-2xl">
                                             {[
-                                                { type: "website", icon: <Globe className="h-4 w-4" />, label: "Web Sitesi" },
-                                                { type: "download", icon: <Download className="h-4 w-4" />, label: "İndirme Linki" },
-                                                { type: "github", icon: <div className="h-4 w-4 i-simple-icons-github" />, label: "GitHub" },
-                                                { type: "discord", icon: <div className="h-4 w-4 i-simple-icons-discord" />, label: "Discord" },
+                                                { type: "website", icon: <Globe className="h-4 w-4" />, label: t("links.website") },
+                                                { type: "download", icon: <Download className="h-4 w-4" />, label: t("links.download") },
+                                                { type: "github", icon: <div className="h-4 w-4 i-simple-icons-github" />, label: t("links.github") },
+                                                { type: "discord", icon: <div className="h-4 w-4 i-simple-icons-discord" />, label: t("links.discord") },
                                             ].map((linkDef) => {
                                                 const currentLink = editData.links?.find(l => l.type === linkDef.type);
                                                 return (
@@ -809,20 +810,20 @@ export default function ProjectEditForm({ project, isNew }: Props) {
                         exit={{ y: 100, opacity: 0 }}
                         className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-4 p-2 pl-4 pr-2 bg-black/80 backdrop-blur-xl border border-white/10 rounded-full shadow-[0_0_50px_rgba(0,0,0,0.5)]"
                     >
-                        <span className="text-sm text-slate-400 mr-2">Değişiklikler var</span>
+                        <span className="text-sm text-slate-400 mr-2">{t("dirtyNotice")}</span>
                         <Button
                             variant="ghost"
                             onClick={() => window.location.reload()} // Simple revert by reload for now
                             className="rounded-full text-slate-300 hover:text-white"
                         >
-                            İptal
+                            {t("cancel")}
                         </Button>
                         <Button
                             onClick={handleSave}
                             disabled={isPending || !editData.name}
                             className="rounded-full bg-[color:var(--color-turkish-blue-500)] hover:bg-[color:var(--color-turkish-blue-600)] text-white shadow-[0_0_20px_rgba(0,167,197,0.3)] min-w-[140px]"
                         >
-                            {isPending ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : "Kaydet"}
+                            {isPending ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : t("actions.save")}
                         </Button>
                     </motion.div>
                 )}
@@ -831,17 +832,17 @@ export default function ProjectEditForm({ project, isNew }: Props) {
             <Dialog open={deleteConfirm} onOpenChange={setDeleteConfirm}>
                 <DialogContent className="sm:max-w-[425px] bg-[#0a0f18] border-white/10 text-white">
                     <DialogHeader>
-                        <DialogTitle>Projeyi Sil</DialogTitle>
+                        <DialogTitle>{t("dialogs.delete.title")}</DialogTitle>
                         <DialogDescription className="text-slate-400">
-                            Bu projeyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+                            {t("dialogs.delete.description")}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setDeleteConfirm(false)} className="border-white/10 text-white hover:bg-white/5 hover:text-white">
-                            İptal
+                            {t("cancel")}
                         </Button>
                         <Button variant="destructive" onClick={handleDelete} className="bg-red-500/20 text-red-500 hover:bg-red-500/30 border border-red-500/50">
-                            Sil
+                            {t("actions.delete")}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

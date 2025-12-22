@@ -6,6 +6,7 @@ import { X, User as UserIcon, Mail, Phone, AlignLeft, Loader2 } from "lucide-rea
 import { toast } from "react-toastify";
 import { updateUser } from "@/lib/db";
 import { User } from "@/lib/auth/users";
+import { useTranslations } from "next-intl";
 
 type Props = {
     user: User | null;
@@ -22,6 +23,7 @@ type FormData = {
 };
 
 export default function UserEditModal({ user, open, onClose, onSuccess }: Props) {
+    const t = useTranslations("AdminUsers");
     const [formData, setFormData] = useState<FormData>({
         displayName: "",
         email: "",
@@ -55,15 +57,15 @@ export default function UserEditModal({ user, open, onClose, onSuccess }: Props)
             const success = await updateUser(user.id, formData, token);
 
             if (success) {
-                toast.success("Kullanıcı güncellendi!");
+                toast.success(t("edit.toast.success"));
                 onSuccess();
                 onClose();
             } else {
-                toast.error("Güncelleme başarısız.");
+                toast.error(t("edit.toast.failure"));
             }
         } catch (err) {
             console.error(err);
-            toast.error("Bir hata oluştu.");
+            toast.error(t("edit.toast.genericError"));
         } finally {
             setLoading(false);
         }
@@ -100,14 +102,14 @@ export default function UserEditModal({ user, open, onClose, onSuccess }: Props)
                                     <UserIcon className="w-5 h-5 text-[var(--color-turkish-blue-400)]" />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-semibold text-[var(--text-primary)]">Kullanıcı Düzenle</h2>
+                                    <h2 className="text-xl font-semibold text-[var(--text-primary)]">{t("edit.title")}</h2>
                                     <p className="text-sm text-[var(--text-muted)]">@{user.username}</p>
                                 </div>
                             </div>
 
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">Görünen Ad</label>
+                                    <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">{t("fields.displayName")}</label>
                                     <div className="relative">
                                         <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                                         <input
@@ -120,7 +122,7 @@ export default function UserEditModal({ user, open, onClose, onSuccess }: Props)
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">Email</label>
+                                    <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">{t("fields.email")}</label>
                                     <div className="relative">
                                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                                         <input
@@ -133,21 +135,21 @@ export default function UserEditModal({ user, open, onClose, onSuccess }: Props)
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">Telefon</label>
+                                    <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">{t("fields.phone")}</label>
                                     <div className="relative">
                                         <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                                         <input
                                             type="text"
                                             value={formData.phone}
                                             onChange={(e) => handleChange("phone", e.target.value)}
-                                            placeholder="+90..."
+                                            placeholder={t("placeholders.phone")}
                                             className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[rgba(0,0,0,0.2)] border border-[rgba(72,213,255,0.12)] text-sm text-[var(--text-primary)] focus:border-[rgba(72,213,255,0.3)] focus:outline-none transition-colors"
                                         />
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">Biyografi</label>
+                                    <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">{t("fields.bio")}</label>
                                     <div className="relative">
                                         <AlignLeft className="absolute left-3 top-3 w-4 h-4 text-[var(--text-muted)]" />
                                         <textarea
@@ -165,7 +167,7 @@ export default function UserEditModal({ user, open, onClose, onSuccess }: Props)
                                     onClick={onClose}
                                     className="px-4 py-2.5 rounded-xl text-sm font-medium text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.05)] transition-colors"
                                 >
-                                    İptal
+                                    {t("actions.cancel")}
                                 </button>
                                 <button
                                     type="button"
@@ -174,7 +176,7 @@ export default function UserEditModal({ user, open, onClose, onSuccess }: Props)
                                     className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-[var(--color-turkish-blue-500)] to-[var(--color-turkish-blue-600)] text-white shadow-[0_4px_20px_rgba(30,184,255,0.25)] hover:from-[var(--color-turkish-blue-400)] hover:to-[var(--color-turkish-blue-500)] disabled:opacity-50 transition-all"
                                 >
                                     {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                                    Kaydet
+                                    {t("actions.save")}
                                 </button>
                             </div>
                         </div>

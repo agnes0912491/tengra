@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 export default function BlogCreateCta() {
+  const t = useTranslations("AdminBlogs");
   return (
     <Link
       href="/admin/dashboard/blogs"
@@ -13,7 +15,7 @@ export default function BlogCreateCta() {
         "shadow-[0_18px_45px_rgba(0,167,197,0.4)] transition hover:shadow-[0_22px_55px_rgba(0,167,197,0.5)]"
       )}
     >
-      Yeni Yazı
+      {t("createCta.label")}
     </Link>
   );
 }

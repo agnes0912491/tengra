@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "react-toastify";
 import { User as UserIcon, Shield, UserCog, Mail, MoreVertical } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import type { Role, User } from "@/lib/auth/users";
 import { updateUserRole } from "@/lib/db";
@@ -10,10 +11,10 @@ import { useAdminToken } from "@/hooks/use-admin-token";
 import { AdminCard, AdminBadge } from "@/components/admin/ui";
 import { cn } from "@/lib/utils";
 
-const ROLE_OPTIONS: { value: Role; label: string; icon: React.ReactNode }[] = [
-  { value: "admin", label: "Yönetici", icon: <Shield className="h-3.5 w-3.5" /> },
-  { value: "moderator", label: "Moderatör", icon: <UserCog className="h-3.5 w-3.5" /> },
-  { value: "user", label: "Standart", icon: <UserIcon className="h-3.5 w-3.5" /> },
+const ROLE_OPTIONS: { value: Role; labelKey: string; icon: React.ReactNode }[] = [
+  { value: "admin", labelKey: "roles.admin", icon: <Shield className="h-3.5 w-3.5" /> },
+  { value: "moderator", labelKey: "roles.moderator", icon: <UserCog className="h-3.5 w-3.5" /> },
+  { value: "user", labelKey: "roles.user", icon: <UserIcon className="h-3.5 w-3.5" /> },
 ];
 
 const normalizeRoleValue = (role: string | Role | null | undefined): Role => {
@@ -49,6 +50,7 @@ const getRoleBadgeVariant = (role: Role): "default" | "success" | "warning" | "d
 };
 
 export default function UsersTable({ initialUsers, currentUserId, currentUserRole }: Props) {
+  const t = useTranslations("AdminUsers");
   const [users, setUsers] = useState<LocalUser[]>(() =>
     initialUsers.map((user) => ({ ...user, role: normalizeRoleValue(user.role), isUpdating: false }))
   );
@@ -57,11 +59,11 @@ export default function UsersTable({ initialUsers, currentUserId, currentUserRol
 
   const handleRoleChange = (userId: string, role: Role) => {
     if (currentUserId && currentUserId === userId) {
-      toast.error("Kendi rolünüzü değiştiremezsiniz.");
+      toast.error(t("table.toast.selfRoleChange"));
       return;
     }
     if (!token) {
-      toast.error("Yetkilendirme bilgisi bulunamadı.");
+      toast.error(t("table.toast.authMissing"));
       return;
     }
 
@@ -82,7 +84,7 @@ export default function UsersTable({ initialUsers, currentUserId, currentUserRol
               : { ...user, isUpdating: false }
           )
         );
-        toast.success("Kullanıcı rolü güncellendi.");
+        toast.success(t("table.toast.roleUpdated"));
       } catch (error) {
         console.error("Failed to update user role", error);
         setUsers((current) =>
@@ -90,7 +92,7 @@ export default function UsersTable({ initialUsers, currentUserId, currentUserRol
             user.id === userId ? { ...user, role: previousRole, isUpdating: false } : user
           )
         );
-        toast.error("Rol güncellenemedi. Lütfen tekrar deneyin.");
+        toast.error(t("table.toast.roleUpdateFailed"));
       }
     });
   };
@@ -111,7 +113,7 @@ export default function UsersTable({ initialUsers, currentUserId, currentUserRol
     return (
       <AdminCard variant="bordered" className="text-center py-12">
         <UserIcon className="h-12 w-12 mx-auto mb-3 text-[rgba(255,255,255,0.3)]" />
-        <p className="text-[rgba(255,255,255,0.5)]">Kullanıcı verisi yüklenemedi.</p>
+        <p className="text-[rgba(255,255,255,0.5)]">{t("table.empty")}</p>
       </AdminCard>
     );
   }
@@ -123,28 +125,28 @@ export default function UsersTable({ initialUsers, currentUserId, currentUserRol
         <AdminCard variant="elevated" padding="md">
           <div className="flex items-center gap-2 text-[rgba(255,255,255,0.5)] text-xs">
             <UserIcon className="h-4 w-4" />
-            <span>Toplam</span>
+            <span>{t("stats.total")}</span>
           </div>
           <p className="text-2xl font-bold text-white mt-1">{stats.total}</p>
         </AdminCard>
         <AdminCard variant="elevated" padding="md">
           <div className="flex items-center gap-2 text-red-400 text-xs">
             <Shield className="h-4 w-4" />
-            <span>Yönetici</span>
+            <span>{t("roles.admin")}</span>
           </div>
           <p className="text-2xl font-bold text-white mt-1">{stats.admins}</p>
         </AdminCard>
         <AdminCard variant="elevated" padding="md">
           <div className="flex items-center gap-2 text-amber-400 text-xs">
             <UserCog className="h-4 w-4" />
-            <span>Moderatör</span>
+            <span>{t("roles.moderator")}</span>
           </div>
           <p className="text-2xl font-bold text-white mt-1">{stats.moderators}</p>
         </AdminCard>
         <AdminCard variant="elevated" padding="md">
           <div className="flex items-center gap-2 text-[rgba(255,255,255,0.5)] text-xs">
             <UserIcon className="h-4 w-4" />
-            <span>Standart</span>
+            <span>{t("roles.user")}</span>
           </div>
           <p className="text-2xl font-bold text-white mt-1">{stats.standard}</p>
         </AdminCard>
@@ -157,16 +159,16 @@ export default function UsersTable({ initialUsers, currentUserId, currentUserRol
             <thead className="border-b border-[rgba(255,255,255,0.06)] bg-[rgba(0,0,0,0.2)]">
               <tr>
                 <th className="px-4 py-3.5 text-left text-[11px] uppercase tracking-[0.15em] font-medium text-[rgba(255,255,255,0.45)]">
-                  Kullanıcı
+                  {t("table.columns.user")}
                 </th>
                 <th className="px-4 py-3.5 text-left text-[11px] uppercase tracking-[0.15em] font-medium text-[rgba(255,255,255,0.45)]">
-                  E-posta
+                  {t("table.columns.email")}
                 </th>
                 <th className="px-4 py-3.5 text-left text-[11px] uppercase tracking-[0.15em] font-medium text-[rgba(255,255,255,0.45)]">
-                  Rol
+                  {t("table.columns.role")}
                 </th>
                 <th className="px-4 py-3.5 text-right text-[11px] uppercase tracking-[0.15em] font-medium text-[rgba(255,255,255,0.45)]">
-                  İşlem
+                  {t("table.columns.action")}
                 </th>
               </tr>
             </thead>
@@ -196,7 +198,9 @@ export default function UsersTable({ initialUsers, currentUserId, currentUserRol
                   <td className="px-4 py-3.5">
                     <AdminBadge variant={getRoleBadgeVariant(user.role as Role)} size="md">
                       {ROLE_OPTIONS.find((o) => o.value === user.role)?.icon}
-                      {ROLE_OPTIONS.find((o) => o.value === user.role)?.label ?? "Bilinmiyor"}
+                      {ROLE_OPTIONS.find((o) => o.value === user.role)?.labelKey
+                        ? t(ROLE_OPTIONS.find((o) => o.value === user.role)?.labelKey as string)
+                        : t("labels.unknown")}
                     </AdminBadge>
                   </td>
                   <td className="px-4 py-3.5 text-right">
@@ -209,7 +213,7 @@ export default function UsersTable({ initialUsers, currentUserId, currentUserRol
                       >
                         {ROLE_OPTIONS.map((option) => (
                           <option key={option.value} value={option.value}>
-                            {option.label}
+                            {t(option.labelKey)}
                           </option>
                         ))}
                       </select>

@@ -265,6 +265,19 @@
     "goToAdminPanel": "Yönetim panelini aç",
     "createNewPost": "Yeni yazı oluştur",
     "by": "Yazan",
+    "tableOfContents": "İçindekiler",
+    "engagement": "Etkileşim",
+    "share": "Paylaş",
+    "copyLink": "Linki kopyala",
+    "backToBlog": "Bloga dön",
+    "minutesRead": "{minutes} dk okuma",
+    "views": "{count} görüntülenme",
+    "newBadge": "Yeni",
+    "reading": {
+      "short": "Kısa okuma",
+      "medium": "Orta okuma",
+      "long": "Uzun okuma"
+    },
     "toast": {
       "fetchError": "Blog yazıları yüklenemedi. Lütfen tekrar deneyin."
     }
@@ -496,5 +509,75 @@
   "GithubGraph": {
     "loading": "GitHub aktivitesi yükleniyor...",
     "error": "GitHub aktivitesi yüklenemedi."
+  },
+  "About": {
+    "title": "İlahi İşçilik",
+    "subtitle": "Eşiğin Ötesinde",
+    "description1": "Tengra Studio, antik mitlerin ve fütüristik kodların kesiştiği noktada doğdu. Biz sadece yazılım yapmıyoruz; tarihin ağırlığını ve yarının kıvılcımını taşıyan dijital eserler dövüyoruz.",
+    "description2": "Kolektifimiz; teknolojinin bir monolit kadar zamansız ve bir rüya kadar akışkan olması gerektiğine inanan vizyonerler, mühendisler ve tasarımcıların bir araya geldiği bir topluluktur.",
+    "vision": "Vizyonumuz",
+    "visionText": "İnsan sezgisi ile makine hassasiyeti arasındaki uçurumu kapatmak, yaratıcılığın ilahi kıvılcımıyla yankılanan deneyimler yaratmak.",
+    "mission": "Misyonumuz",
+    "missionText": "Sıkı mühendislik ve sanatsal sezgi yoluyla, dijital varoluşun bir sonraki dönemini tanımlayan ürünler sunuyoruz."
+  },
+  "Careers": {
+    "title": "Takımyıldıza Katıl",
+    "subtitle": "Geleceği Bizimle Şekillendir",
+    "description": "Her zaman mit ve makinenin kesiştiği noktada gelişen olağanüstü zihinler arıyoruz. Tengra'da sadece bir çalışan değil, işçiliğin koruyucususunuz.",
+    "culture": "Kültürümüz",
+    "cultureText": "Önce uzaktan çalışma, detay odaklılık ve mükemmellik arayışı. Özerkliğe, yaratıcı cesarete ve karmaşıklıkta güzelliği bulma yeteneğine değer veriyoruz.",
+    "openPositions": "Açık Pozisyonlar",
+    "noPositions": "Takımyıldız şu anda dengede. Ancak olağanüstü portfolyolara her zaman kapımız açık. İletişim sayfası üzerinden bize ulaşabilirsiniz.",
+    "benefits": "Koruyucu Avantajları",
+    "benefit1": "Kutsal İş-Yaşam Dengesi",
+    "benefit2": "İlahi Donanım Bütçesi",
+    "benefit3": "Yıllık Hac Ziyaretleri (Kamplar)",
+    "benefit4": "Sonsuz Öğrenme Yolu"
+  },
+  "ServicesPage": {
+    "web": {
+      "title": "Uçtan Uca Web Geliştirme",
+      "subtitle": "Dijital Monolitler",
+      "description": "Tengra Studio olarak, taş kadar sağlam ve ışık kadar hızlı web uygulamaları inşa ediyoruz. Next.js, React ve özel olarak optimize edilmiş backend altyapıları kullanarak, hırsınızla birlikte sınırsız ölçeklenen, modern ve performans odaklı platformlar yaratıyoruz. Sadece bir web sitesi değil, markanızın dijital dünyadaki kalıcı kalesini dövüyoruz.",
+      "feature1Title": "Yüksek Performanslı Mimariler",
+      "feature1Desc": "Milisaniye düzeyinde optimize edilmiş kod tabanları ile eşsiz ve akıcı kullanıcı deneyimleri sağlıyoruz.",
+      "feature2Title": "Sürükleyici Etkileşimler",
+      "feature2Desc": "Doğal ve derinlemesine ilgi çekici hissettiren hareketli tasarım ve mikro-animasyonlar.",
+      "feature3Title": "Ölçeklenebilir Ekosistemler",
+      "feature3Desc": "Gelecekteki ihtiyaçlarınıza göre büyüyen ve evrilen, modüler ve temiz kod standartları."
+    },
+    "mobile": {
+      "title": "Yenilikçi Mobil Uygulamalar",
+      "subtitle": "Cebinizdeki Eserler",
+      "description": "Kullanıcının doğal bir uzantısı gibi hissettiren, yüksek performanslı yerel ve çok platformlu mobil deneyimler tasarlıyoruz. Native hassasiyeti, erişilebilirlik ve estetik mükemmelliği bir araya getirerek, App Store ve Play Store'da öne çıkan aplikasyonlar geliştiriyoruz.",
+      "feature1Title": "Yerel Hassasiyet",
+      "feature1Desc": "Sıfır gecikmeli etkileşimler ve işletim sistemi özellikleriyle (iOS/Android) tam entegrasyon.",
+      "feature2Title": "Akışkan UI/UX Tasarımı",
+      "feature2Desc": "Her ekran boyutunda ve cihazda parlayan, kullanıcıyı yormayan uyarlanabilir arayüzler.",
+      "feature3Title": "Çevrimdışı Dayanıklılık",
+      "feature3Desc": "İnternet bağlantısı kopsa bile verimli çalışan, yerel veri depolama destekli çözümler."
+    },
+    "cloud": {
+      "title": "Bulut Altyapısı ve DevOps",
+      "subtitle": "Görünmez Güç",
+      "description": "Projelerinizin kalbini oluşturan, güvenli, otomatikleştirilmiş ve yüksek erişilebilirlikli bulut altyapıları kuruyoruz. AWS, Google Cloud ve özel sunucu çözümleriyle sistemlerinizi her zaman ayakta ve güvende tutuyoruz.",
+      "feature1Title": "Otomatik Ölçekleme",
+      "feature1Desc": "Yük arttığında kendini genişleten, maliyet dostu ve esnek altyapı sistemleri.",
+      "feature2Title": "Sarsılmaz Güvenlik",
+      "feature2Desc": "Verilerinizi ve kullanıcılarınızı koruyan çok katmanlı güvenlik protokolleri ve şifreleme.",
+      "feature3Title": "Kesintisiz Dağıtım (CI/CD)",
+      "feature3Desc": "Hataları minimize eden ve geliştirme hızını artıran modern deploy süreçleri."
+    },
+    "design": {
+      "title": "UI/UX ve Görsel Kimlik",
+      "subtitle": "Estetik ve İşlev",
+      "description": "Bir projenin sadece nasıl göründüğü değil, nasıl hissettirdiği de bizim için kritiktir. Markanızın ruhunu yansıtan, kullanıcıları büyüleyen ve dönüşümü artıran sanatsal tasarımlar yapıyoruz.",
+      "feature1Title": "Kullanıcı Odaklı Deneyim",
+      "feature1Desc": "Veriye dayalı analizlerle optimize edilmiş, sezgisel ve kolay kullanımlı ekranlar.",
+      "feature2Title": "Görsel Markalandırma",
+      "feature2Desc": "Logodan tipografiye, markanızın dijital varlığını güçlendiren özgün tasarım dilleri.",
+      "feature3Title": "İnteraktif Prototipleme",
+      "feature3Desc": "İnşa öncesi projenizi canlıymış gibi test etmenizi sağlayan yüksek sadakatli tasarımlar."
+    }
   }
 }

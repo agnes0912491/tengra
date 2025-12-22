@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, User, Mail, Lock, Shield, Loader2, Sparkles, Users } from "lucide-react";
 import { toast } from "react-toastify";
+import { useTranslations } from "next-intl";
 
 type Role = "user" | "admin" | "moderator";
 type UserSource = "tengra" | "lova" | "geofrontier" | "biodefenders";
@@ -25,17 +26,17 @@ type Props = {
     onSuccess: () => void;
 };
 
-const ROLE_OPTIONS: { value: Role; label: string }[] = [
-    { value: "user", label: "Kullanıcı" },
-    { value: "moderator", label: "Moderatör" },
-    { value: "admin", label: "Yönetici" },
+const ROLE_OPTIONS: { value: Role; labelKey: string }[] = [
+    { value: "user", labelKey: "roles.user" },
+    { value: "moderator", labelKey: "roles.moderator" },
+    { value: "admin", labelKey: "roles.admin" },
 ];
 
-const SOURCE_OPTIONS: { value: UserSource; label: string }[] = [
-    { value: "tengra", label: "Tengra" },
-    { value: "lova", label: "Lova" },
-    { value: "geofrontier", label: "GeoFrontier" },
-    { value: "biodefenders", label: "BioDefenders" },
+const SOURCE_OPTIONS: { value: UserSource; labelKey: string }[] = [
+    { value: "tengra", labelKey: "sources.tengra" },
+    { value: "lova", labelKey: "sources.lova" },
+    { value: "geofrontier", labelKey: "sources.geofrontier" },
+    { value: "biodefenders", labelKey: "sources.biodefenders" },
 ];
 
 // Turkish first/last names for mock data
@@ -69,6 +70,7 @@ function generatePassword(): string {
 }
 
 export default function UserCreateModal({ open, onClose, onSuccess }: Props) {
+    const t = useTranslations("AdminUsers");
     const [formData, setFormData] = useState<UserFormData>({
         email: "",
         username: "",
@@ -95,7 +97,7 @@ export default function UserCreateModal({ open, onClose, onSuccess }: Props) {
 
     const handleSubmit = useCallback(async () => {
         if (!formData.email || !formData.username || !formData.password) {
-            toast.error("Email, kullanıcı adı ve şifre zorunludur.");
+            toast.error(t("create.toast.missingFields"));
             return;
         }
 
@@ -107,7 +109,7 @@ export default function UserCreateModal({ open, onClose, onSuccess }: Props) {
             const user = await createAdminUser(formData, token);
 
             if (user) {
-                toast.success("Kullanıcı başarıyla oluşturuldu!");
+                toast.success(t("create.toast.success"));
                 onSuccess();
                 onClose();
                 setFormData({
@@ -119,19 +121,19 @@ export default function UserCreateModal({ open, onClose, onSuccess }: Props) {
                     source: "tengra",
                 });
             } else {
-                toast.error("Kullanıcı oluşturulamadı.");
+                toast.error(t("create.toast.failure"));
             }
         } catch (err) {
             console.error(err);
-            toast.error("Bir hata oluştu.");
+            toast.error(t("create.toast.genericError"));
         } finally {
             setLoading(false);
         }
-    }, [formData, onSuccess, onClose]);
+    }, [formData, onSuccess, onClose, t]);
 
     const handleBulkCreate = useCallback(async () => {
         if (bulkCount < 1 || bulkCount > 100) {
-            toast.error("1-100 arası kullanıcı sayısı girin.");
+            toast.error(t("create.toast.bulkRangeError"));
             return;
         }
 
@@ -152,16 +154,16 @@ export default function UserCreateModal({ open, onClose, onSuccess }: Props) {
                 await new Promise((r) => setTimeout(r, 100));
             }
 
-            toast.success(`${successCount}/${bulkCount} kullanıcı oluşturuldu!`);
+            toast.success(t("create.toast.bulkSuccess", { successCount, bulkCount }));
             onSuccess();
             onClose();
         } catch (err) {
             console.error(err);
-            toast.error("Toplu oluşturma sırasında hata oluştu.");
+            toast.error(t("create.toast.bulkError"));
         } finally {
             setBulkLoading(false);
         }
-    }, [bulkCount, onSuccess, onClose]);
+    }, [bulkCount, onSuccess, onClose, t]);
 
     return (
         <AnimatePresence>
@@ -198,8 +200,8 @@ export default function UserCreateModal({ open, onClose, onSuccess }: Props) {
                                     <User className="w-5 h-5 text-[var(--color-turkish-blue-400)]" />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-semibold text-[var(--text-primary)]">Yeni Kullanıcı</h2>
-                                    <p className="text-sm text-[var(--text-muted)]">Tekli veya toplu kullanıcı oluşturun</p>
+                                    <h2 className="text-xl font-semibold text-[var(--text-primary)]">{t("create.title")}</h2>
+                                    <p className="text-sm text-[var(--text-muted)]">{t("create.subtitle")}</p>
                                 </div>
                             </div>
 
@@ -213,7 +215,7 @@ export default function UserCreateModal({ open, onClose, onSuccess }: Props) {
                                         className="flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg bg-[rgba(30,184,255,0.1)] text-[var(--color-turkish-blue-300)] hover:bg-[rgba(30,184,255,0.15)] transition-colors"
                                     >
                                         <Sparkles className="w-3.5 h-3.5" />
-                                        Rastgele Oluştur
+                                        {t("create.quick.random")}
                                     </button>
                                     <button
                                         type="button"
@@ -221,20 +223,20 @@ export default function UserCreateModal({ open, onClose, onSuccess }: Props) {
                                         className="flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg bg-[rgba(255,255,255,0.05)] text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.08)] transition-colors"
                                     >
                                         <Lock className="w-3.5 h-3.5" />
-                                        Şifre Oluştur
+                                        {t("create.quick.password")}
                                     </button>
                                 </div>
 
                                 {/* Email */}
                                 <div>
-                                    <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">Email</label>
+                                    <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">{t("fields.email")}</label>
                                     <div className="relative">
                                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                                         <input
                                             type="email"
                                             value={formData.email}
                                             onChange={(e) => handleChange("email", e.target.value)}
-                                            placeholder="email@example.com"
+                                            placeholder={t("placeholders.email")}
                                             className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[rgba(0,0,0,0.2)] border border-[rgba(72,213,255,0.12)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[rgba(72,213,255,0.3)] focus:outline-none transition-colors"
                                         />
                                     </div>
@@ -243,22 +245,22 @@ export default function UserCreateModal({ open, onClose, onSuccess }: Props) {
                                 {/* Username & Display Name */}
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">Kullanıcı Adı</label>
+                                        <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">{t("fields.username")}</label>
                                         <input
                                             type="text"
                                             value={formData.username}
                                             onChange={(e) => handleChange("username", e.target.value)}
-                                            placeholder="username"
+                                            placeholder={t("placeholders.username")}
                                             className="w-full px-4 py-2.5 rounded-xl bg-[rgba(0,0,0,0.2)] border border-[rgba(72,213,255,0.12)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[rgba(72,213,255,0.3)] focus:outline-none transition-colors"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">Görünen Ad</label>
+                                        <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">{t("fields.displayName")}</label>
                                         <input
                                             type="text"
                                             value={formData.displayName}
                                             onChange={(e) => handleChange("displayName", e.target.value)}
-                                            placeholder="Ad Soyad"
+                                            placeholder={t("placeholders.displayName")}
                                             className="w-full px-4 py-2.5 rounded-xl bg-[rgba(0,0,0,0.2)] border border-[rgba(72,213,255,0.12)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[rgba(72,213,255,0.3)] focus:outline-none transition-colors"
                                         />
                                     </div>
@@ -266,14 +268,14 @@ export default function UserCreateModal({ open, onClose, onSuccess }: Props) {
 
                                 {/* Password */}
                                 <div>
-                                    <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">Şifre</label>
+                                    <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">{t("fields.password")}</label>
                                     <div className="relative">
                                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                                         <input
                                             type="text"
                                             value={formData.password}
                                             onChange={(e) => handleChange("password", e.target.value)}
-                                            placeholder="••••••••"
+                                            placeholder={t("placeholders.password")}
                                             className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[rgba(0,0,0,0.2)] border border-[rgba(72,213,255,0.12)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[rgba(72,213,255,0.3)] focus:outline-none transition-colors font-mono"
                                         />
                                     </div>
@@ -282,7 +284,7 @@ export default function UserCreateModal({ open, onClose, onSuccess }: Props) {
                                 {/* Role & Source */}
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">Rol</label>
+                                        <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">{t("fields.role")}</label>
                                         <div className="relative">
                                             <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                                             <select
@@ -291,20 +293,20 @@ export default function UserCreateModal({ open, onClose, onSuccess }: Props) {
                                                 className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[rgba(0,0,0,0.2)] border border-[rgba(72,213,255,0.12)] text-sm text-[var(--text-primary)] focus:border-[rgba(72,213,255,0.3)] focus:outline-none transition-colors appearance-none cursor-pointer"
                                             >
                                                 {ROLE_OPTIONS.map((opt) => (
-                                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                    <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
                                                 ))}
                                             </select>
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">Kaynak</label>
+                                        <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">{t("fields.source")}</label>
                                         <select
                                             value={formData.source}
                                             onChange={(e) => handleChange("source", e.target.value)}
                                             className="w-full px-4 py-2.5 rounded-xl bg-[rgba(0,0,0,0.2)] border border-[rgba(72,213,255,0.12)] text-sm text-[var(--text-primary)] focus:border-[rgba(72,213,255,0.3)] focus:outline-none transition-colors appearance-none cursor-pointer"
                                         >
                                             {SOURCE_OPTIONS.map((opt) => (
-                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
                                             ))}
                                         </select>
                                     </div>
@@ -317,7 +319,7 @@ export default function UserCreateModal({ open, onClose, onSuccess }: Props) {
                                 <div className="rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(72,213,255,0.08)] p-4">
                                     <div className="flex items-center gap-3 mb-3">
                                         <Users className="w-4 h-4 text-[var(--color-turkish-blue-400)]" />
-                                        <span className="text-sm font-medium text-[var(--text-secondary)]">Toplu Oluşturma</span>
+                                        <span className="text-sm font-medium text-[var(--text-secondary)]">{t("bulk.title")}</span>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <input
@@ -328,7 +330,7 @@ export default function UserCreateModal({ open, onClose, onSuccess }: Props) {
                                             onChange={(e) => setBulkCount(Math.min(100, Math.max(1, parseInt(e.target.value) || 1)))}
                                             className="w-20 px-3 py-2 rounded-lg bg-[rgba(0,0,0,0.2)] border border-[rgba(72,213,255,0.12)] text-sm text-center text-[var(--text-primary)] focus:border-[rgba(72,213,255,0.3)] focus:outline-none"
                                         />
-                                        <span className="text-xs text-[var(--text-muted)]">adet rastgele kullanıcı</span>
+                                        <span className="text-xs text-[var(--text-muted)]">{t("bulk.countLabel")}</span>
                                         <button
                                             type="button"
                                             onClick={handleBulkCreate}
@@ -336,7 +338,7 @@ export default function UserCreateModal({ open, onClose, onSuccess }: Props) {
                                             className="ml-auto flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/20 text-emerald-400 text-sm font-medium hover:bg-emerald-500/30 disabled:opacity-50 transition-colors"
                                         >
                                             {bulkLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                                            Oluştur
+                                            {t("bulk.action")}
                                         </button>
                                     </div>
                                 </div>
@@ -349,7 +351,7 @@ export default function UserCreateModal({ open, onClose, onSuccess }: Props) {
                                     onClick={onClose}
                                     className="px-4 py-2.5 rounded-xl text-sm font-medium text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.05)] transition-colors"
                                 >
-                                    İptal
+                                    {t("actions.cancel")}
                                 </button>
                                 <button
                                     type="button"
@@ -358,7 +360,7 @@ export default function UserCreateModal({ open, onClose, onSuccess }: Props) {
                                     className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-[var(--color-turkish-blue-500)] to-[var(--color-turkish-blue-600)] text-white shadow-[0_4px_20px_rgba(30,184,255,0.25)] hover:from-[var(--color-turkish-blue-400)] hover:to-[var(--color-turkish-blue-500)] disabled:opacity-50 transition-all"
                                 >
                                     {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                                    Kullanıcı Oluştur
+                                    {t("create.action")}
                                 </button>
                             </div>
                         </div>

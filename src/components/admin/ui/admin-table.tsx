@@ -3,6 +3,7 @@
 import { ReactNode, useState } from "react";
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronUp, ChevronsUpDown } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export type SortDirection = "asc" | "desc" | null;
 
@@ -34,7 +35,7 @@ export function AdminTable<T extends Record<string, unknown>>({
     columns,
     keyExtractor,
     onSort,
-    emptyMessage = "Kayıt bulunamadı.",
+    emptyMessage,
     loading = false,
     className,
     stickyHeader = false,
@@ -42,6 +43,8 @@ export function AdminTable<T extends Record<string, unknown>>({
     hoverable = true,
     compact = false,
 }: AdminTableProps<T>) {
+    const t = useTranslations("AdminCommon");
+    const resolvedEmptyMessage = emptyMessage ?? t("empty");
     const [sortState, setSortState] = useState<{ key: string; direction: SortDirection }>({
         key: "",
         direction: null,
@@ -109,22 +112,22 @@ export function AdminTable<T extends Record<string, unknown>>({
                         {loading ? (
                             <tr>
                                 <td colSpan={columns.length} className={cn(cellPadding, "text-center")}>
-                                    <div className="flex items-center justify-center gap-2 py-8 text-[rgba(255,255,255,0.5)]">
-                                        <div className="h-5 w-5 border-2 border-[rgba(72,213,255,0.3)] border-t-[rgba(72,213,255,0.8)] rounded-full animate-spin" />
-                                        Yükleniyor...
-                                    </div>
-                                </td>
-                            </tr>
-                        ) : data.length === 0 ? (
-                            <tr>
-                                <td
-                                    colSpan={columns.length}
-                                    className={cn(cellPadding, "text-center text-[rgba(255,255,255,0.45)] py-12")}
-                                >
-                                    {emptyMessage}
-                                </td>
-                            </tr>
-                        ) : (
+                                        <div className="flex items-center justify-center gap-2 py-8 text-[rgba(255,255,255,0.5)]">
+                                            <div className="h-5 w-5 border-2 border-[rgba(72,213,255,0.3)] border-t-[rgba(72,213,255,0.8)] rounded-full animate-spin" />
+                                            {t("loading")}
+                                        </div>
+                                    </td>
+                                </tr>
+                            ) : data.length === 0 ? (
+                                <tr>
+                                    <td
+                                        colSpan={columns.length}
+                                        className={cn(cellPadding, "text-center text-[rgba(255,255,255,0.45)] py-12")}
+                                    >
+                                        {resolvedEmptyMessage}
+                                    </td>
+                                </tr>
+                            ) : (
                             data.map((row, rowIndex) => (
                                 <tr
                                     key={keyExtractor(row)}
@@ -172,6 +175,8 @@ export function AdminPagination({
         (p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1
     );
 
+    const t = useTranslations("AdminCommon");
+
     return (
         <div className={cn("flex items-center justify-center gap-1 py-4", className)}>
             <button
@@ -179,7 +184,7 @@ export function AdminPagination({
                 disabled={currentPage === 1}
                 className="px-3 py-1.5 rounded-lg text-xs font-medium text-[rgba(255,255,255,0.6)] hover:bg-[rgba(255,255,255,0.05)] disabled:opacity-30 disabled:cursor-not-allowed"
             >
-                Önceki
+                {t("previous")}
             </button>
             {visiblePages.map((page, i) => {
                 const prev = visiblePages[i - 1];
@@ -208,7 +213,7 @@ export function AdminPagination({
                 disabled={currentPage === totalPages}
                 className="px-3 py-1.5 rounded-lg text-xs font-medium text-[rgba(255,255,255,0.6)] hover:bg-[rgba(255,255,255,0.05)] disabled:opacity-30 disabled:cursor-not-allowed"
             >
-                Sonraki
+                {t("next")}
             </button>
         </div>
     );

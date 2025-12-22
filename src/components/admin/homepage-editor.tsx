@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 // keep simple textarea for JSON
 
 type HomepageContent = {
@@ -10,6 +11,7 @@ type HomepageContent = {
 };
 
 export default function HomepageEditor({ initial }: { initial: HomepageContent }) {
+    const t = useTranslations("AdminHomepage");
     const [text, setText] = useState(JSON.stringify(initial, null, 2));
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -22,7 +24,7 @@ export default function HomepageEditor({ initial }: { initial: HomepageContent }
         try {
             payload = JSON.parse(text);
         } catch (e) {
-            setError("Invalid JSON: " + (e as Error).message);
+            setError(t("errors.invalidJson", { message: (e as Error).message }));
             return;
         }
 
@@ -35,9 +37,9 @@ export default function HomepageEditor({ initial }: { initial: HomepageContent }
             });
             const txt = await res.text();
             if (!res.ok) {
-                setError(`Save failed: ${res.status} ${txt}`);
+                setError(t("errors.saveFailed", { status: res.status, details: txt }));
             } else {
-                setSuccess("Saved successfully");
+                setSuccess(t("success"));
                 // notify other admin UI that content was published
                 try {
                     window.dispatchEvent(new CustomEvent("content:published", { detail: { payload } }));
@@ -58,7 +60,7 @@ export default function HomepageEditor({ initial }: { initial: HomepageContent }
     return (
         <div className="space-y-4">
             <div className="text-black">
-                <label className="block text-sm font-medium">Homepage JSON</label>
+                <label className="block text-sm font-medium">{t("label")}</label>
                 <textarea
                     rows={18}
                     value={text}
@@ -76,14 +78,14 @@ export default function HomepageEditor({ initial }: { initial: HomepageContent }
                     onClick={() => handleSave(false)}
                     disabled={saving}
                 >
-                    {saving ? "Saving..." : "Save"}
+                    {saving ? t("actions.saving") : t("actions.save")}
                 </button>
                 <button
                     className="px-4 py-2 bg-green-600 text-white rounded disabled:opacity-50"
                     onClick={() => handleSave(true)}
                     disabled={saving}
                 >
-                    {saving ? "Publishing..." : "Save & Publish"}
+                    {saving ? t("actions.publishing") : t("actions.saveAndPublish")}
                 </button>
             </div>
         </div>

@@ -28,7 +28,7 @@ export default function LocaleSwitcher() {
   };
 
   const flag = (loc: Locale) => (loc === "tr" ? "🇹🇷" : "🇬🇧");
-  const label = (loc: Locale) => (loc === "tr" ? "Türkçe" : "English");
+  const label = (loc: Locale) => (loc === "tr" ? t("tr") : t("en"));
 
   return (
     <DropdownMenu.Root>

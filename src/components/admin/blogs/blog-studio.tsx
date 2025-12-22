@@ -4,6 +4,7 @@ import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { CalendarClock, Edit3, Eye, FilePlus, Filter, Search, Trash2 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { useLocale, useTranslations } from "next-intl";
 
 import type { Blog, BlogCategory } from "@/types/blog";
 import { getAllBlogCategories } from "@/lib/db";
@@ -14,11 +15,11 @@ type BlogStudioProps = {
   initialBlogs: Blog[];
 };
 
-const formatDate = (value?: string) => {
+const formatDate = (value?: string, locale?: string) => {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return new Intl.DateTimeFormat("tr-TR", {
+  return new Intl.DateTimeFormat(locale ?? "tr-TR", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -28,6 +29,8 @@ const formatDate = (value?: string) => {
 };
 
 export default function BlogStudio({ initialBlogs }: BlogStudioProps) {
+  const locale = useLocale();
+  const t = useTranslations("AdminBlogs");
   const [blogs] = useState<Blog[]>(initialBlogs);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<Blog["status"] | "all">("all");
@@ -82,7 +85,7 @@ export default function BlogStudio({ initialBlogs }: BlogStudioProps) {
       <div className="grid gap-6 md:grid-cols-2">
         {/* Analytics Chart */}
         <AdminCard variant="default" padding="lg" className="col-span-2">
-          <h3 className="mb-6 text-lg font-semibold text-white">En Çok Okunan Yazılar</h3>
+          <h3 className="mb-6 text-lg font-semibold text-white">{t("studio.topPosts")}</h3>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
@@ -113,19 +116,19 @@ export default function BlogStudio({ initialBlogs }: BlogStudioProps) {
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
         <AdminCard variant="elevated" padding="md">
-          <p className="text-xs uppercase tracking-[0.2em] text-[rgba(255,255,255,0.5)]">Toplam</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-[rgba(255,255,255,0.5)]">{t("studio.stats.total")}</p>
           <p className="mt-2 text-2xl font-bold text-white">{stats.total}</p>
         </AdminCard>
         <AdminCard variant="elevated" padding="md">
-          <p className="text-xs uppercase tracking-[0.2em] text-[rgba(255,255,255,0.5)]">Yayında</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-[rgba(255,255,255,0.5)]">{t("status.published")}</p>
           <p className="mt-2 text-2xl font-bold text-emerald-400">{stats.published}</p>
         </AdminCard>
         <AdminCard variant="elevated" padding="md">
-          <p className="text-xs uppercase tracking-[0.2em] text-[rgba(255,255,255,0.5)]">Taslak</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-[rgba(255,255,255,0.5)]">{t("status.draft")}</p>
           <p className="mt-2 text-2xl font-bold text-amber-300">{stats.drafts}</p>
         </AdminCard>
         <AdminCard variant="elevated" padding="md">
-          <p className="text-xs uppercase tracking-[0.2em] text-[rgba(255,255,255,0.5)]">Planlı</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-[rgba(255,255,255,0.5)]">{t("status.scheduled")}</p>
           <p className="mt-2 text-2xl font-bold text-[rgba(130,226,255,0.95)]">{stats.scheduled}</p>
         </AdminCard>
       </div>
@@ -138,7 +141,7 @@ export default function BlogStudio({ initialBlogs }: BlogStudioProps) {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Başlık, özet veya içerik ara..."
+              placeholder={t("studio.searchPlaceholder")}
               className="w-full rounded-xl border border-[rgba(72,213,255,0.15)] bg-[rgba(8,18,26,0.8)] px-10 py-2.5 text-sm text-white outline-none focus:border-[rgba(72,213,255,0.3)] transition-colors"
             />
           </div>
@@ -149,17 +152,17 @@ export default function BlogStudio({ initialBlogs }: BlogStudioProps) {
               onChange={(e) => setStatusFilter(e.target.value as Blog["status"] | "all")}
               className="rounded-lg border border-[rgba(72,213,255,0.15)] bg-[rgba(8,18,26,0.8)] px-3 py-2 text-sm text-white outline-none"
             >
-              <option value="all">Tüm durumlar</option>
-              <option value="published">Yayında</option>
-              <option value="draft">Taslak</option>
-              <option value="scheduled">Planlı</option>
+              <option value="all">{t("studio.statusAll")}</option>
+              <option value="published">{t("status.published")}</option>
+              <option value="draft">{t("status.draft")}</option>
+              <option value="scheduled">{t("status.scheduled")}</option>
             </select>
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
               className="rounded-lg border border-[rgba(72,213,255,0.15)] bg-[rgba(8,18,26,0.8)] px-3 py-2 text-sm text-white outline-none"
             >
-              <option value="all">Tüm kategoriler</option>
+              <option value="all">{t("studio.categoryAll")}</option>
               {categories.map((cat) => (
                 <option key={cat.slug ?? cat.name} value={cat.name}>
                   {cat.name}
@@ -171,9 +174,9 @@ export default function BlogStudio({ initialBlogs }: BlogStudioProps) {
             href="/admin/dashboard/blogs/new"
             className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[rgba(72,213,255,0.9)] to-[rgba(0,167,197,0.9)] px-5 py-2.5 text-sm font-semibold text-black shadow-[0_4px_20px_rgba(0,167,197,0.3)] hover:brightness-110 transition-all"
           >
-            <FilePlus className="h-4 w-4" />
-            Yeni Yazı
-          </Link>
+          <FilePlus className="h-4 w-4" />
+          {t("studio.newPost")}
+        </Link>
         </div>
       </AdminCard>
 
@@ -184,16 +187,16 @@ export default function BlogStudio({ initialBlogs }: BlogStudioProps) {
             <thead className="border-b border-[rgba(255,255,255,0.06)] bg-[rgba(0,0,0,0.2)]">
               <tr>
                 <th className="px-4 py-3 text-left text-[11px] uppercase tracking-[0.15em] font-medium text-[rgba(255,255,255,0.45)]">
-                  Başlık
+                  {t("studio.table.title")}
                 </th>
                 <th className="px-4 py-3 text-left text-[11px] uppercase tracking-[0.15em] font-medium text-[rgba(255,255,255,0.45)]">
-                  Durum
+                  {t("studio.table.status")}
                 </th>
                 <th className="px-4 py-3 text-left text-[11px] uppercase tracking-[0.15em] font-medium text-[rgba(255,255,255,0.45)]">
-                  Yayın Tarihi
+                  {t("studio.table.publishDate")}
                 </th>
                 <th className="px-4 py-3 text-right text-[11px] uppercase tracking-[0.15em] font-medium text-[rgba(255,255,255,0.45)]">
-                  Aksiyonlar
+                  {t("studio.table.actions")}
                 </th>
               </tr>
             </thead>
@@ -224,21 +227,21 @@ export default function BlogStudio({ initialBlogs }: BlogStudioProps) {
                     >
                       <CalendarClock className="h-3 w-3" />
                       {blog.status === "published"
-                        ? "Yayında"
+                        ? t("status.published")
                         : blog.status === "scheduled"
-                          ? "Planlı"
-                          : "Taslak"}
+                          ? t("status.scheduled")
+                          : t("status.draft")}
                     </AdminBadge>
                   </td>
                   <td className="px-4 py-3.5 text-[rgba(255,255,255,0.6)]">
-                    {formatDate(blog.publishAt ?? blog.date)}
+                    {formatDate(blog.publishAt ?? blog.date, locale)}
                   </td>
                   <td className="px-4 py-3.5">
                     <div className="flex justify-end gap-2">
                       <Link
                         href={`/admin/dashboard/blogs/${blog.id}/edit`}
                         className="flex items-center justify-center w-8 h-8 rounded-lg border border-[rgba(255,255,255,0.15)] text-[rgba(255,255,255,0.6)] hover:bg-[rgba(255,255,255,0.05)] hover:text-white transition-all"
-                        title="Düzenle"
+                        title={t("studio.table.edit")}
                       >
                         <Edit3 className="h-4 w-4" />
                       </Link>
@@ -246,7 +249,7 @@ export default function BlogStudio({ initialBlogs }: BlogStudioProps) {
                         href={`/blogs/${blog.slug ?? blog.id}`}
                         target="_blank"
                         className="flex items-center justify-center w-8 h-8 rounded-lg border border-[rgba(72,213,255,0.2)] text-[rgba(130,226,255,0.8)] hover:bg-[rgba(72,213,255,0.1)] transition-all"
-                        title="Görüntüle"
+                        title={t("studio.table.view")}
                       >
                         <Eye className="h-4 w-4" />
                       </Link>
@@ -257,7 +260,7 @@ export default function BlogStudio({ initialBlogs }: BlogStudioProps) {
               {filtered.length === 0 && (
                 <tr>
                   <td colSpan={4} className="px-4 py-12 text-center text-[rgba(255,255,255,0.5)]">
-                    Kayıt bulunamadı.
+                    {t("studio.table.empty")}
                   </td>
                 </tr>
               )}

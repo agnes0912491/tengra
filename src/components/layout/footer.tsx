@@ -7,8 +7,10 @@ import { motion } from "framer-motion";
 import { Github, Twitter, Linkedin, Mail, Heart, ArrowRight } from "lucide-react";
 import AnimatedButton from "@/components/ui/animated-button";
 import GradientText from "@/components/ui/gradient-text";
+import { useTranslations } from "next-intl";
 
 const Footer = () => {
+  const t = useTranslations("Footer");
   const currentYear = new Date().getFullYear();
 
   return (
@@ -29,7 +31,7 @@ const Footer = () => {
               </span>
             </Link>
             <p className="text-[rgba(255,255,255,0.5)] leading-relaxed mb-6 max-w-xs">
-              Crafting premium digital experiences that defy gravity. Built for performance, designed for impact.
+              {t("brandDescription")}
             </p>
             <div className="flex items-center gap-4">
               <a href="https://github.com/tengra" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-[rgba(255,255,255,0.05)] text-[rgba(255,255,255,0.6)] hover:bg-[rgba(255,255,255,0.1)] hover:text-white transition-colors">
@@ -46,40 +48,40 @@ const Footer = () => {
 
           {/* Links Column 1 */}
           <div>
-            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">Company</h4>
+            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">{t("company.title")}</h4>
             <ul className="space-y-4">
-              <li><Link href="/about" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">About Us</Link></li>
-              <li><Link href="/careers" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">Careers</Link></li>
-              <li><Link href="/blog" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">Blog</Link></li>
-              <li><Link href="/contact" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">Contact</Link></li>
+              <li><Link href="/about" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("company.about")}</Link></li>
+              <li><Link href="/careers" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("company.careers")}</Link></li>
+              <li><Link href="/blog" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("company.blog")}</Link></li>
+              <li><Link href="/contact" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("company.contact")}</Link></li>
             </ul>
           </div>
 
           {/* Links Column 2 */}
           <div>
-            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">Services</h4>
+            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">{t("services.title")}</h4>
             <ul className="space-y-4">
-              <li><Link href="/services/web-development" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">Web Development</Link></li>
-              <li><Link href="/services/mobile-apps" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">Mobile Apps</Link></li>
-              <li><Link href="/services/cloud-infrastructure" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">Cloud Infrastructure</Link></li>
-              <li><Link href="/services/design" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">UI/UX Design</Link></li>
+              <li><Link href="/services/web-development" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("services.webDevelopment")}</Link></li>
+              <li><Link href="/services/mobile-apps" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("services.mobileApps")}</Link></li>
+              <li><Link href="/services/cloud-infrastructure" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("services.cloudInfrastructure")}</Link></li>
+              <li><Link href="/services/design" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("services.uiUxDesign")}</Link></li>
             </ul>
           </div>
 
           {/* Newsletter Column */}
           <div>
-            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">Stay Updated</h4>
+            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">{t("newsletter.title")}</h4>
             <p className="text-[rgba(255,255,255,0.5)] text-sm mb-4">
-              Subscribe to our newsletter for the latest tech trends and agency updates.
+              {t("newsletter.description")}
             </p>
             <form className="flex flex-col gap-3">
               <input
                 type="email"
-                placeholder="Enter your email"
+                placeholder={t("newsletter.placeholder")}
                 className="bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-[rgba(255,255,255,0.3)] focus:outline-none focus:border-[var(--color-turkish-blue-400)] transition-colors"
               />
               <AnimatedButton variant="primary" size="sm" className="w-full justify-center">
-                Subscribe <ArrowRight className="ml-2 w-3 h-3" />
+                {t("newsletter.button")} <ArrowRight className="ml-2 w-3 h-3" />
               </AnimatedButton>
             </form>
           </div>
@@ -88,14 +90,16 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-[rgba(255,255,255,0.05)] flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-[rgba(255,255,255,0.4)]">
-            © {currentYear} Tengra Studio. All rights reserved.
+            {t("copyright", { year: currentYear })}
           </p>
           <div className="flex items-center gap-6">
-            <Link href="/privacy" className="text-sm text-[rgba(255,255,255,0.4)] hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="/terms" className="text-sm text-[rgba(255,255,255,0.4)] hover:text-white transition-colors">Terms of Service</Link>
+            <Link href="/privacy" className="text-sm text-[rgba(255,255,255,0.4)] hover:text-white transition-colors">{t("privacy")}</Link>
+            <Link href="/terms" className="text-sm text-[rgba(255,255,255,0.4)] hover:text-white transition-colors">{t("terms")}</Link>
           </div>
           <p className="text-sm text-[rgba(255,255,255,0.3)] flex items-center gap-1">
-            Made with <Heart className="w-3 h-3 text-red-500 fill-red-500" /> in Istanbul
+            {t("madeWithPrefix")}
+            <Heart className="w-3 h-3 text-red-500 fill-red-500" />
+            {t("madeWithSuffix", { city: t("city") })}
           </p>
         </div>
       </div>

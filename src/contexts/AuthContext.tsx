@@ -53,61 +53,49 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const BACKEND_API_URL =
   process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:5000";
-const AUTH_TOKEN_KEY = "authToken";
-const REFRESH_TOKEN_KEY = "refreshToken";
-const CSRF_TOKEN_KEY = "csrfToken";
+const COOKIE_NAME = "authToken";
+const COOKIE_EXPIRES_DAYS = 30;
 
-const STORAGE_KEYS = [
-  AUTH_TOKEN_KEY,
-  REFRESH_TOKEN_KEY,
-  CSRF_TOKEN_KEY,
-  "sessionToken",
-  "user",
-  "tengra:user",
-  "tengra:auth",
-];
-
-const persistAuthPayload = (data: AuthSuccessPayload) => {
-  if (!data) return;
-
-  localStorage.setItem(AUTH_TOKEN_KEY, data.token);
-  localStorage.setItem(REFRESH_TOKEN_KEY, data.refreshToken);
-  localStorage.setItem(CSRF_TOKEN_KEY, data.csrfToken);
-
-  // Determine domain for cookies to allow subdomain sharing
+const setAuthCookie = (token: string) => {
   const hostname = window.location.hostname;
+  // Support for main domain and subdomains (e.g. tengra.studio, lova.tengra.studio)
+  // If we are on a subdomain of tengra.studio, set domain to .tengra.studio
   const isTengra = hostname.includes("tengra.studio");
   const domain = isTengra ? ".tengra.studio" : undefined;
 
-  const cookieOptions = {
+  const cookieOptions: Cookies.CookieAttributes = {
     secure: window.location.protocol === "https:",
-    sameSite: "lax" as const, // 'lax' is better for cross-subdomain navigation than 'strict'
-    expires: 7,
+    sameSite: "lax",
+    expires: COOKIE_EXPIRES_DAYS,
     path: "/",
     domain,
   };
-  Cookies.set(ADMIN_SESSION_COOKIE, data.token, cookieOptions);
+
+  Cookies.set(COOKIE_NAME, token, cookieOptions);
+
+  // Also set legacy cookies for admin panel compatibility if needed
+  Cookies.set(ADMIN_SESSION_COOKIE, token, cookieOptions);
   for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
-    Cookies.set(legacyName, data.token, cookieOptions);
+    Cookies.set(legacyName, token, cookieOptions);
   }
 };
 
-const clearStoredAuth = () => {
-  STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
-
+const clearAuthCookie = () => {
   const hostname = window.location.hostname;
   const isTengra = hostname.includes("tengra.studio");
   const domain = isTengra ? ".tengra.studio" : undefined;
 
-  // Clear cookies with domain
-  Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/", domain });
-  for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
-    Cookies.remove(legacyName, { path: "/", domain });
-  }
-  // Also try clearing without domain just in case
-  Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/" });
+  const options = { path: "/", domain };
 
-  sessionStorage.clear();
+  Cookies.remove(COOKIE_NAME, options);
+  Cookies.remove(ADMIN_SESSION_COOKIE, options);
+  for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
+    Cookies.remove(legacyName, options);
+  }
+
+  // Also try removing without domain as fallback
+  Cookies.remove(COOKIE_NAME, { path: "/" });
+  Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/" });
 };
 
 const decodeJwtExp = (token: string): number | null => {
@@ -131,24 +119,14 @@ const isExpired = (token: string | null): boolean => {
   return exp * 1000 <= Date.now();
 };
 
-const purgeExpiredTokens = (): { clearedAuth: boolean } => {
-  const authToken = localStorage.getItem(AUTH_TOKEN_KEY);
-  if (authToken && isExpired(authToken)) {
-    clearStoredAuth();
-    return { clearedAuth: true };
+const getValidToken = (): string | null => {
+  const token = Cookies.get(COOKIE_NAME);
+  if (!token) return null;
+  if (isExpired(token)) {
+    clearAuthCookie();
+    return null;
   }
-
-  const refresh = localStorage.getItem(REFRESH_TOKEN_KEY);
-  if (refresh && isExpired(refresh)) {
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
-  }
-
-  const csrf = localStorage.getItem(CSRF_TOKEN_KEY);
-  if (csrf && isExpired(csrf)) {
-    localStorage.removeItem(CSRF_TOKEN_KEY);
-  }
-
-  return { clearedAuth: false };
+  return token;
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -158,7 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const t = useTranslations("AuthContext");
   const defaultErrorMessage = t("authorization.defaultErrorMessage");
   const handleInvalidAuth = useCallback(() => {
-    clearStoredAuth();
+    clearAuthCookie();
     setUser(null);
   }, []);
 
@@ -177,15 +155,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const data = await response.json().catch(() => null);
-      const hasUser = data && typeof data === "object" && "user" in data && data.user;
-      const successFlag = data && typeof data.success === "boolean" ? data.success : true;
 
-      if (!hasUser || !successFlag) {
+      // Handle both wrapped { user: ... } and direct User object responses
+      let fetchedUser: User | null = null;
+      if (data && typeof data === "object") {
+        if ("user" in data && data.user) {
+          fetchedUser = data.user;
+        } else if ("id" in data && "email" in data) {
+          fetchedUser = data as User;
+        }
+      }
+
+      if (!fetchedUser) {
+        console.warn("[Auth] /me endpoint returned invalid data, clearing session", data);
         handleInvalidAuth();
         return;
       }
 
-      setUser((data as { user: User }).user);
+      setUser(fetchedUser);
     } catch (error) {
       console.error("Failed to fetch current user:", error);
       handleInvalidAuth();
@@ -195,58 +182,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [handleInvalidAuth]);
 
   useEffect(() => {
-    // Hybrid Auth Sync:
-    // 1. Try LocalStorage
-    // 2. Fallback to Cookie (for subdomain sharing)
-    // 3. Hydrate LocalStorage from Cookie if valid
-    let token = localStorage.getItem(AUTH_TOKEN_KEY);
+    // Cookie-only auth flow
+    const token = getValidToken();
 
-    if (!token) {
-      // Try to recover from cookie (Cross-Subdomain Support)
-      const sessionCookie = Cookies.get(ADMIN_SESSION_COOKIE);
-      if (sessionCookie && !isExpired(sessionCookie)) {
-        token = sessionCookie;
-        localStorage.setItem(AUTH_TOKEN_KEY, token);
-        // We don't have refresh/csrf from cookie alone, but auth token is enough to bootstrap Me call
-        // Ideally backend would provide a mechanism to fully refresh session from just the token
-      }
-    }
-
-    const { clearedAuth } = purgeExpiredTokens();
-
-    // Re-read token in case purge cleared it (though purge checks localStorage)
-    token = localStorage.getItem(AUTH_TOKEN_KEY);
-
-    if (token && !clearedAuth && !isExpired(token)) {
+    if (token) {
       fetchCurrentUser(token);
     } else {
-      clearStoredAuth();
       setUser(null);
       setLoading(false);
     }
 
+    // Periodic check for token expiry
     const interval = setInterval(() => {
-      const result = purgeExpiredTokens();
-      if (result.clearedAuth) {
+      const token = getValidToken(); // This clears cookie if expired
+      if (!token && user) {
         setUser(null);
         setLoading(false);
       }
-    }, 5 * 60 * 1000);
-
-    const handleStorage = () => {
-      const auth = localStorage.getItem(AUTH_TOKEN_KEY);
-      if (!auth || isExpired(auth)) {
-        clearStoredAuth();
-        setUser(null);
-      }
-    };
-    window.addEventListener("storage", handleStorage);
+    }, 60 * 1000); // Check every minute
 
     return () => {
       clearInterval(interval);
-      window.removeEventListener("storage", handleStorage);
     };
-  }, [fetchCurrentUser]);
+  }, [fetchCurrentUser, user]);
 
 
 
@@ -282,7 +240,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
       }
 
-      persistAuthPayload(data);
+      setAuthCookie(data.token);
       setUser(data.user);
 
       return { success: true };
@@ -294,7 +252,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      const token = localStorage.getItem(AUTH_TOKEN_KEY);
+      const token = getValidToken();
       if (token) {
         await fetch(`${BACKEND_API_URL}/api/auth/logout`, {
           method: "POST",
@@ -307,7 +265,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
-      clearStoredAuth();
+      clearAuthCookie();
       setUser(null);
 
       // Redirect to login
@@ -316,19 +274,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const refreshAuth = async () => {
-    const { clearedAuth } = purgeExpiredTokens();
-    const token = localStorage.getItem(AUTH_TOKEN_KEY);
-    if (token && !clearedAuth && !isExpired(token)) {
+    const token = getValidToken();
+    if (token) {
       await fetchCurrentUser(token);
     } else {
-      clearStoredAuth();
+      clearAuthCookie();
       setUser(null);
     }
   };
 
   useEffect(() => {
     if (!loading && !user) {
-      clearStoredAuth();
+      clearAuthCookie();
     }
   }, [loading, user]);
 

@@ -16,9 +16,11 @@ import {
     Globe,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLocale, useTranslations } from "next-intl";
 
 interface ServiceHealth {
     name: string;
+    kind?: "frontend" | "lovaBackend" | "mainBackend" | "database" | "cache";
     status: "online" | "offline" | "degraded";
     responseTime?: number;
     lastCheck: string;
@@ -62,13 +64,6 @@ const STATUS_ICONS = {
     degraded: AlertCircle,
 };
 
-const formatUptime = (seconds: number) => {
-    const d = Math.floor(seconds / 86400);
-    const h = Math.floor((seconds % 86400) / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    return `${d}g ${h}s ${m}d`;
-};
-
 const formatBytes = (bytes: number) => {
     if (bytes === 0) return "0 B";
     const k = 1024;
@@ -79,10 +74,23 @@ const formatBytes = (bytes: number) => {
 
 export default function HealthCheckDashboard() {
     const { token } = useAdminToken();
+    const t = useTranslations("AdminMonitoring");
+    const locale = useLocale();
     const [data, setData] = useState<HealthData | null>(null);
     const [loading, setLoading] = useState(true);
     const [autoRefresh, setAutoRefresh] = useState(true);
     const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+    const formatUptime = (seconds: number) => {
+        const d = Math.floor(seconds / 86400);
+        const h = Math.floor((seconds % 86400) / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const parts = [
+            d ? t("uptime.days", { count: d }) : null,
+            h ? t("uptime.hours", { count: h }) : null,
+            m ? t("uptime.minutes", { count: m }) : null,
+        ].filter(Boolean);
+        return parts.length ? parts.join(" ") : t("uptime.minutes", { count: 0 });
+    };
 
     const fetchHealth = useCallback(async () => {
         if (!token) return;
@@ -97,21 +105,24 @@ export default function HealthCheckDashboard() {
 
             const services: ServiceHealth[] = [
                 {
-                    name: "Frontend (Next.js)",
+                    name: t("services.frontend"),
+                    kind: "frontend",
                     status: "online",
                     responseTime: 0,
                     lastCheck: new Date().toISOString(),
                     version: process.env.NEXT_PUBLIC_VERSION || "1.0.0",
                 },
                 {
-                    name: "Lova Backend",
+                    name: t("services.lovaBackend"),
+                    kind: "lovaBackend",
                     status: apiHealth.status === "ok" ? "online" : "offline",
                     responseTime: apiHealth.responseTime,
                     lastCheck: new Date().toISOString(),
                     version: apiHealth.version,
                 },
                 {
-                    name: "Main Backend (C++)",
+                    name: t("services.mainBackend"),
+                    kind: "mainBackend",
                     status: backendHealth.status === "online" ? "online" : "offline",
                     responseTime: backendHealth.responseTimeMs,
                     lastCheck: new Date().toISOString(),
@@ -120,12 +131,14 @@ export default function HealthCheckDashboard() {
                     },
                 },
                 {
-                    name: "Database (MySQL)",
+                    name: t("services.database"),
+                    kind: "database",
                     status: apiHealth.database?.status === "connected" ? "online" : "offline",
                     lastCheck: new Date().toISOString(),
                 },
                 {
-                    name: "Cache (Redis)",
+                    name: t("services.cache"),
+                    kind: "cache",
                     status: apiHealth.redis?.status === "connected" ? "online" : "offline",
                     lastCheck: new Date().toISOString(),
                 },
@@ -142,7 +155,7 @@ export default function HealthCheckDashboard() {
         } finally {
             setLoading(false);
         }
-    }, [token]);
+    }, [token, t]);
 
     useEffect(() => {
         fetchHealth();
@@ -168,10 +181,10 @@ export default function HealthCheckDashboard() {
                 <div>
                     <h1 className="text-2xl font-bold text-white flex items-center gap-3">
                         <Activity className="h-7 w-7 text-[rgba(0,167,197,0.8)]" />
-                        Sistem Sağlık Durumu
+                        {t("title")}
                     </h1>
                     <p className="text-sm text-[rgba(255,255,255,0.5)] mt-1">
-                        Tüm servislerin durumunu gerçek zamanlı izleyin
+                        {t("subtitle")}
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -182,7 +195,7 @@ export default function HealthCheckDashboard() {
                             onChange={(e) => setAutoRefresh(e.target.checked)}
                             className="rounded border-[rgba(110,211,225,0.3)]"
                         />
-                        Otomatik Yenile (30s)
+                        {t("autoRefresh", { seconds: 30 })}
                     </label>
                     <Button
                         onClick={fetchHealth}
@@ -190,7 +203,7 @@ export default function HealthCheckDashboard() {
                         className="border-[rgba(110,211,225,0.3)] text-[rgba(110,211,225,0.8)]"
                     >
                         <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-                        Yenile
+                        {t("refresh")}
                     </Button>
                 </div>
             </div>
@@ -206,13 +219,13 @@ export default function HealthCheckDashboard() {
                         <div>
                             <h2 className="text-xl font-semibold">
                                 {overallStatus === "online"
-                                    ? "Tüm Sistemler Çalışıyor"
+                                    ? t("overall.online")
                                     : overallStatus === "offline"
-                                        ? "Bazı Sistemler Çevrimdışı"
-                                        : "Performans Düşüklüğü Tespit Edildi"}
+                                        ? t("overall.offline")
+                                        : t("overall.degraded")}
                             </h2>
                             <p className="text-sm opacity-80">
-                                Son güncelleme: {lastUpdate?.toLocaleTimeString("tr-TR") || "-"}
+                                {t("lastUpdate", { time: lastUpdate?.toLocaleTimeString(locale) || "-" })}
                             </p>
                         </div>
                     </div>
@@ -221,7 +234,7 @@ export default function HealthCheckDashboard() {
                             {data?.services.filter((s) => s.status === "online").length || 0}/
                             {data?.services.length || 0}
                         </div>
-                        <p className="text-sm opacity-80">Aktif Servis</p>
+                        <p className="text-sm opacity-80">{t("activeServices")}</p>
                     </div>
                 </div>
             </div>
@@ -238,11 +251,11 @@ export default function HealthCheckDashboard() {
                             <div className="flex items-start justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className="p-2 rounded-lg bg-[rgba(0,0,0,0.2)]">
-                                        {service.name.includes("Database") ? (
+                                        {service.kind === "database" ? (
                                             <Database className="h-5 w-5" />
-                                        ) : service.name.includes("Redis") ? (
+                                        ) : service.kind === "cache" ? (
                                             <MemoryStick className="h-5 w-5" />
-                                        ) : service.name.includes("Backend") ? (
+                                        ) : service.kind === "lovaBackend" || service.kind === "mainBackend" ? (
                                             <Server className="h-5 w-5" />
                                         ) : (
                                             <Globe className="h-5 w-5" />
@@ -263,19 +276,19 @@ export default function HealthCheckDashboard() {
                                     <div className="flex items-center justify-between text-sm">
                                         <span className="flex items-center gap-1 opacity-70">
                                             <Clock className="h-3 w-3" />
-                                            Yanıt Süresi
+                                            {t("responseTime")}
                                         </span>
                                         <span className="font-mono">{service.responseTime}ms</span>
                                     </div>
                                 )}
                                 <div className="flex items-center justify-between text-sm">
-                                    <span className="opacity-70">Durum</span>
+                                    <span className="opacity-70">{t("statusLabel")}</span>
                                     <span className="capitalize font-medium">
                                         {service.status === "online"
-                                            ? "Çevrimiçi"
+                                            ? t("status.online")
                                             : service.status === "offline"
-                                                ? "Çevrimdışı"
-                                                : "Düşük Performans"}
+                                                ? t("status.offline")
+                                                : t("status.degraded")}
                                     </span>
                                 </div>
                             </div>
@@ -289,14 +302,14 @@ export default function HealthCheckDashboard() {
                 <div className="rounded-xl border border-[rgba(110,211,225,0.15)] bg-[rgba(6,20,27,0.6)] p-6">
                     <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                         <Cpu className="h-5 w-5 text-[rgba(0,167,197,0.8)]" />
-                        Sistem Metrikleri
+                        {t("systemMetrics.title")}
                     </h3>
 
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                         {/* CPU */}
                         <div>
                             <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm text-[rgba(255,255,255,0.6)]">CPU Kullanımı</span>
+                                <span className="text-sm text-[rgba(255,255,255,0.6)]">{t("systemMetrics.cpuUsage")}</span>
                                 <span className="text-sm font-mono text-white">{data.system.cpu.usage.toFixed(1)}%</span>
                             </div>
                             <div className="h-2 bg-[rgba(255,255,255,0.1)] rounded-full overflow-hidden">
@@ -305,13 +318,13 @@ export default function HealthCheckDashboard() {
                                     style={{ width: `${data.system.cpu.usage}%` }}
                                 />
                             </div>
-                            <p className="text-xs text-[rgba(255,255,255,0.4)] mt-1">{data.system.cpu.cores} çekirdek</p>
+                            <p className="text-xs text-[rgba(255,255,255,0.4)] mt-1">{t("systemMetrics.cores", { count: data.system.cpu.cores })}</p>
                         </div>
 
                         {/* Memory */}
                         <div>
                             <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm text-[rgba(255,255,255,0.6)]">Bellek</span>
+                                <span className="text-sm text-[rgba(255,255,255,0.6)]">{t("systemMetrics.memory")}</span>
                                 <span className="text-sm font-mono text-white">{data.system.memory.percentage.toFixed(1)}%</span>
                             </div>
                             <div className="h-2 bg-[rgba(255,255,255,0.1)] rounded-full overflow-hidden">
@@ -328,7 +341,7 @@ export default function HealthCheckDashboard() {
                         {/* Disk */}
                         <div>
                             <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm text-[rgba(255,255,255,0.6)]">Disk</span>
+                                <span className="text-sm text-[rgba(255,255,255,0.6)]">{t("systemMetrics.disk")}</span>
                                 <span className="text-sm font-mono text-white">{data.system.disk.percentage.toFixed(1)}%</span>
                             </div>
                             <div className="h-2 bg-[rgba(255,255,255,0.1)] rounded-full overflow-hidden">
@@ -345,12 +358,12 @@ export default function HealthCheckDashboard() {
                         {/* Uptime */}
                         <div>
                             <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm text-[rgba(255,255,255,0.6)]">Uptime</span>
+                                <span className="text-sm text-[rgba(255,255,255,0.6)]">{t("systemMetrics.uptime")}</span>
                             </div>
                             <div className="text-2xl font-mono text-white">
                                 {formatUptime(data.system.uptime)}
                             </div>
-                            <p className="text-xs text-[rgba(255,255,255,0.4)] mt-1">Kesintisiz çalışma</p>
+                            <p className="text-xs text-[rgba(255,255,255,0.4)] mt-1">{t("systemMetrics.uptimeNote")}</p>
                         </div>
                     </div>
                 </div>
@@ -358,19 +371,19 @@ export default function HealthCheckDashboard() {
 
             {/* Status History (placeholder) */}
             <div className="rounded-xl border border-[rgba(110,211,225,0.15)] bg-[rgba(6,20,27,0.6)] p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">Son 24 Saat</h3>
+                <h3 className="text-lg font-semibold text-white mb-4">{t("history.title")}</h3>
                 <div className="flex gap-1">
                     {Array.from({ length: 24 }).map((_, i) => (
                         <div
                             key={i}
                             className="flex-1 h-8 rounded bg-green-400/20 hover:bg-green-400/40 transition-colors cursor-pointer"
-                            title={`${23 - i} saat önce: Çevrimiçi`}
+                            title={t("history.itemTitle", { hours: 23 - i, status: t("status.online") })}
                         />
                     ))}
                 </div>
                 <div className="flex justify-between text-xs text-[rgba(255,255,255,0.4)] mt-2">
-                    <span>24 saat önce</span>
-                    <span>Şimdi</span>
+                    <span>{t("history.start")}</span>
+                    <span>{t("history.now")}</span>
                 </div>
             </div>
         </div>

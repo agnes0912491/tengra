@@ -273,7 +273,7 @@ export default function RegisterForm() {
                                 const verify = async () => {
                                     try {
                                         setLoading(true);
-                                        const response = await fetch("https://api.lova.tengra.studio/auth/google-login", {
+                                        const response = await fetch("/api/auth/google-login", {
                                             method: "POST",
                                             headers: { "Content-Type": "application/json" },
                                             body: JSON.stringify({
@@ -298,7 +298,11 @@ export default function RegisterForm() {
                                         } else {
                                             // User exists, login them!
                                             if (data.token) {
-                                                localStorage.setItem("authToken", data.token);
+                                                const Cookies = (await import("js-cookie")).default;
+                                                const hostname = window.location.hostname;
+                                                const isTengra = hostname.includes("tengra.studio");
+                                                const domain = isTengra ? ".tengra.studio" : undefined;
+                                                Cookies.set("authToken", data.token, { expires: 30, path: "/", domain, sameSite: "lax", secure: window.location.protocol === "https:" });
                                                 window.location.href = "/";
                                             }
                                         }

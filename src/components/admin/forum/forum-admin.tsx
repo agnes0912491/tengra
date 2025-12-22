@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Plus, Save } from "lucide-react";
 import { toast } from "react-toastify";
+import { useTranslations } from "next-intl";
 
 type Props = {
   token: string;
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export default function ForumAdmin({ token, initialCategories }: Props) {
+  const t = useTranslations("AdminForum");
   const [categories, setCategories] = useState<ForumCategory[]>(initialCategories);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -37,7 +39,7 @@ export default function ForumAdmin({ token, initialCategories }: Props) {
       setCategories(data);
     } catch (err) {
       console.error(err);
-      toast.error("Forum kategorileri yüklenemedi.");
+      toast.error(t("toast.fetchFailed"));
     } finally {
       setLoading(false);
     }
@@ -52,10 +54,10 @@ export default function ForumAdmin({ token, initialCategories }: Props) {
     try {
       const data = await adminUpdateCategory(id, input, token);
       setCategories(data);
-      toast.success("Kategori güncellendi.");
+      toast.success(t("toast.updateSuccess"));
     } catch (err) {
       console.error(err);
-      toast.error("Kategori güncellenemedi.");
+      toast.error(t("toast.updateFailed"));
     } finally {
       setLoading(false);
     }
@@ -63,14 +65,14 @@ export default function ForumAdmin({ token, initialCategories }: Props) {
 
   const createCategory = async () => {
     if (!draft.name.trim()) {
-      toast.error("Kategori adı gerekli.");
+      toast.error(t("toast.nameRequired"));
       return;
     }
     setCreating(true);
     try {
       const data = await adminCreateCategory(draft, token);
       setCategories(data);
-      toast.success("Kategori oluşturuldu.");
+      toast.success(t("toast.createSuccess"));
       setDraft({
         name: "",
         description: "",
@@ -80,7 +82,7 @@ export default function ForumAdmin({ token, initialCategories }: Props) {
       });
     } catch (err) {
       console.error(err);
-      toast.error("Kategori oluşturulamadı.");
+      toast.error(t("toast.createFailed"));
     } finally {
       setCreating(false);
     }
@@ -89,45 +91,45 @@ export default function ForumAdmin({ token, initialCategories }: Props) {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-xl font-semibold text-[var(--text-primary)]">Forum Kategorileri</h2>
+        <h2 className="text-xl font-semibold text-[var(--text-primary)]">{t("title")}</h2>
         <Button onClick={refresh} variant="outline" disabled={loading}>
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Yenile"}
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : t("actions.refresh")}
         </Button>
       </div>
 
       <div className="rounded-2xl border border-[rgba(72,213,255,0.12)] bg-[rgba(15,31,54,0.6)] p-5 space-y-4">
         <h3 className="text-sm font-semibold text-[var(--text-secondary)] flex items-center gap-2">
-          <Plus className="w-4 h-4" /> Yeni Kategori
+          <Plus className="w-4 h-4" /> {t("create.title")}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <Input
-            placeholder="Ad"
+            placeholder={t("create.fields.name")}
             value={draft.name}
             onChange={(e) => setDraft((p) => ({ ...p, name: e.target.value }))}
           />
           <Input
-            placeholder="Slug (opsiyonel)"
+            placeholder={t("create.fields.slug")}
             value={draft.slug ?? ""}
             onChange={(e) => setDraft((p) => ({ ...p, slug: e.target.value }))}
           />
           <Input
-            placeholder="Açıklama"
+            placeholder={t("create.fields.description")}
             value={draft.description ?? ""}
             onChange={(e) => setDraft((p) => ({ ...p, description: e.target.value }))}
           />
           <Input
-            placeholder="Simge (lucide id)"
+            placeholder={t("create.fields.icon")}
             value={draft.icon ?? ""}
             onChange={(e) => setDraft((p) => ({ ...p, icon: e.target.value }))}
           />
           <Input
-            placeholder="Renk etiketi"
+            placeholder={t("create.fields.color")}
             value={draft.color ?? ""}
             onChange={(e) => setDraft((p) => ({ ...p, color: e.target.value }))}
           />
           <Input
             type="number"
-            placeholder="Sıra"
+            placeholder={t("create.fields.sortOrder")}
             value={draft.sortOrder ?? 0}
             onChange={(e) => setDraft((p) => ({ ...p, sortOrder: Number(e.target.value) }))}
           />
@@ -138,7 +140,7 @@ export default function ForumAdmin({ token, initialCategories }: Props) {
               checked={draft.isHidden ?? false}
               onChange={(e) => setDraft((p) => ({ ...p, isHidden: e.target.checked }))}
             />
-            Gizli
+            {t("create.fields.hidden")}
           </label>
           <label className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
             <input
@@ -147,12 +149,12 @@ export default function ForumAdmin({ token, initialCategories }: Props) {
               checked={draft.isLocked ?? false}
               onChange={(e) => setDraft((p) => ({ ...p, isLocked: e.target.checked }))}
             />
-            Kilitli
+            {t("create.fields.locked")}
           </label>
         </div>
         <Button onClick={createCategory} disabled={creating}>
           {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          <span className="ml-2">Kaydet</span>
+          <span className="ml-2">{t("actions.save")}</span>
         </Button>
       </div>
 
@@ -160,11 +162,11 @@ export default function ForumAdmin({ token, initialCategories }: Props) {
         <table className="min-w-full divide-y divide-[rgba(72,213,255,0.1)] text-sm">
           <thead className="bg-[rgba(255,255,255,0.02)] text-[var(--text-secondary)]">
             <tr>
-              <th className="px-4 py-3 text-left">Ad</th>
-              <th className="px-4 py-3 text-left">Slug</th>
-              <th className="px-4 py-3 text-left">Sıra</th>
-              <th className="px-4 py-3 text-left">Gizli</th>
-              <th className="px-4 py-3 text-left">Kilitli</th>
+              <th className="px-4 py-3 text-left">{t("table.name")}</th>
+              <th className="px-4 py-3 text-left">{t("table.slug")}</th>
+              <th className="px-4 py-3 text-left">{t("table.sortOrder")}</th>
+              <th className="px-4 py-3 text-left">{t("table.hidden")}</th>
+              <th className="px-4 py-3 text-left">{t("table.locked")}</th>
               <th className="px-4 py-3 text-left"></th>
             </tr>
           </thead>
@@ -216,14 +218,14 @@ export default function ForumAdmin({ token, initialCategories }: Props) {
                   />
                 </td>
                 <td className="px-4 py-3 text-right text-[var(--text-muted)] text-xs">
-                  {cat.threadCount ?? 0} konu · {cat.postCount ?? 0} mesaj
+                  {t("table.threadCount", { count: cat.threadCount ?? 0 })} · {t("table.postCount", { count: cat.postCount ?? 0 })}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
         {sorted.length === 0 && (
-          <div className="p-6 text-center text-[var(--text-muted)] text-sm">Henüz kategori yok.</div>
+          <div className="p-6 text-center text-[var(--text-muted)] text-sm">{t("empty")}</div>
         )}
       </div>
     </div>

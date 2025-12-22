@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useLocale, useTranslations } from "next-intl";
 
 interface BackupStatus {
   enabled: boolean;
@@ -41,26 +42,9 @@ function formatBytes(bytes: number): string {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 }
 
-// Format duration
-function formatDuration(ms: number): string {
-  if (ms < 1000) return `${ms}ms`;
-  if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;
-  return `${Math.floor(ms / 60000)}dk ${Math.floor((ms % 60000) / 1000)}s`;
-}
-
-// Format date
-function formatDate(timestamp: number): string {
-  return new Date(timestamp).toLocaleString("tr-TR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
 // Status badge component
 function StatusBadge({ status }: { status: string }) {
+  const t = useTranslations("AdminBackup");
   const colors = {
     success: "bg-green-500/20 text-green-400 border-green-500/30",
     failed: "bg-red-500/20 text-red-400 border-red-500/30",
@@ -74,13 +58,23 @@ function StatusBadge({ status }: { status: string }) {
         colors[status as keyof typeof colors] || colors.failed
       }`}
     >
-      {status === "success" ? "Başarılı" : status === "failed" ? "Başarısız" : status === "partial" ? "Kısmi" : status}
+      {status === "success"
+        ? t("status.success")
+        : status === "failed"
+          ? t("status.failed")
+          : status === "partial"
+            ? t("status.partial")
+            : status === "running"
+              ? t("status.running")
+              : status}
     </span>
   );
 }
 
 // Main component
 export default function BackupSchedulingDashboard() {
+  const locale = useLocale();
+  const t = useTranslations("AdminBackup");
   const [status, setStatus] = useState<BackupStatus | null>(null);
   const [history, setHistory] = useState<BackupHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -98,7 +92,7 @@ export default function BackupSchedulingDashboard() {
       ]);
 
       if (!statusRes.ok || !historyRes.ok) {
-        throw new Error("Failed to fetch backup data");
+        throw new Error(t("error.fetchFailed"));
       }
 
       const statusData = await statusRes.json();
@@ -108,13 +102,13 @@ export default function BackupSchedulingDashboard() {
       setHistory(historyData);
       setError(null);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Bilinmeyen hata");
+      setError(err instanceof Error ? err.message : t("error.unknown"));
       // Generate demo data
       generateDemoData();
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const generateDemoData = () => {
     const demoStatus: BackupStatus = {
@@ -158,12 +152,12 @@ export default function BackupSchedulingDashboard() {
         },
       });
 
-      if (!response.ok) throw new Error("Backup failed");
+      if (!response.ok) throw new Error(t("error.backupFailed"));
 
       // Refresh data
       await fetchData();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Bilinmeyen hata");
+      setError(err instanceof Error ? err.message : t("error.unknown"));
     } finally {
       setIsBackingUp(false);
     }
@@ -188,8 +182,26 @@ export default function BackupSchedulingDashboard() {
   // Parse cron schedule
   const parseCronSchedule = (cron: string): string => {
     const [minute, hour] = cron.split(" ");
-    return `Her gün saat ${hour}:${minute.padStart(2, "0")}`;
+    return t("schedule.dailyAt", { time: `${hour}:${minute.padStart(2, "0")}` });
   };
+
+  const formatDuration = (ms: number): string => {
+    if (ms < 1000) return t("duration.milliseconds", { ms });
+    if (ms < 60000) return t("duration.seconds", { seconds: (ms / 1000).toFixed(1) });
+    return t("duration.minutes", {
+      minutes: Math.floor(ms / 60000),
+      seconds: Math.floor((ms % 60000) / 1000),
+    });
+  };
+
+  const formatDate = (timestamp: number): string =>
+    new Date(timestamp).toLocaleString(locale, {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
   // Calculate stats
   const totalBackups = history.length;
@@ -202,9 +214,9 @@ export default function BackupSchedulingDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white">Yedekleme Yönetimi</h2>
+          <h2 className="text-xl font-bold text-white">{t("header.title")}</h2>
           <p className="text-sm text-[rgba(255,255,255,0.5)]">
-            Otomatik yedekleme ve geri yükleme
+            {t("header.subtitle")}
           </p>
         </div>
         <button
@@ -230,7 +242,7 @@ export default function BackupSchedulingDashboard() {
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                 />
               </svg>
-              Yedekleniyor...
+              {t("actions.backingUp")}
             </>
           ) : (
             <>
@@ -242,7 +254,7 @@ export default function BackupSchedulingDashboard() {
                   d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
                 />
               </svg>
-              Manuel Yedekle
+              {t("actions.manualBackup")}
             </>
           )}
         </button>
@@ -257,7 +269,7 @@ export default function BackupSchedulingDashboard() {
       {/* Status Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)] p-4">
-          <p className="text-sm text-[rgba(255,255,255,0.5)]">Durum</p>
+          <p className="text-sm text-[rgba(255,255,255,0.5)]">{t("stats.status")}</p>
           <div className="mt-2 flex items-center gap-2">
             <span
               className={`w-3 h-3 rounded-full ${
@@ -265,27 +277,27 @@ export default function BackupSchedulingDashboard() {
               }`}
             />
             <span className="text-lg font-semibold text-white">
-              {status.enabled ? "Aktif" : "Pasif"}
+              {status.enabled ? t("stats.active") : t("stats.inactive")}
             </span>
           </div>
         </div>
         <div className="rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)] p-4">
-          <p className="text-sm text-[rgba(255,255,255,0.5)]">Başarı Oranı</p>
+          <p className="text-sm text-[rgba(255,255,255,0.5)]">{t("stats.successRate")}</p>
           <p className="mt-2 text-lg font-semibold text-white">{successRate.toFixed(0)}%</p>
         </div>
         <div className="rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)] p-4">
-          <p className="text-sm text-[rgba(255,255,255,0.5)]">Toplam Boyut</p>
+          <p className="text-sm text-[rgba(255,255,255,0.5)]">{t("stats.totalSize")}</p>
           <p className="mt-2 text-lg font-semibold text-white">{formatBytes(totalSize)}</p>
         </div>
         <div className="rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)] p-4">
-          <p className="text-sm text-[rgba(255,255,255,0.5)]">Ort. Süre</p>
+          <p className="text-sm text-[rgba(255,255,255,0.5)]">{t("stats.avgDuration")}</p>
           <p className="mt-2 text-lg font-semibold text-white">{formatDuration(avgDuration)}</p>
         </div>
       </div>
 
       {/* Schedule Info */}
       <div className="rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)] p-4">
-        <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)] mb-4">Zamanlama</h3>
+        <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)] mb-4">{t("schedule.title")}</h3>
         <div className="grid md:grid-cols-2 gap-6">
           <div className="space-y-3">
             <div className="flex items-center gap-3">
@@ -306,25 +318,25 @@ export default function BackupSchedulingDashboard() {
               </div>
               <div>
                 <p className="text-white font-medium">{parseCronSchedule(status.schedule)}</p>
-                <p className="text-sm text-[rgba(255,255,255,0.4)]">Cron: {status.schedule}</p>
+                <p className="text-sm text-[rgba(255,255,255,0.4)]">{t("schedule.cron", { cron: status.schedule })}</p>
               </div>
             </div>
           </div>
 
           <div className="space-y-2">
-            <p className="text-sm text-[rgba(255,255,255,0.5)]">Saklama Süresi</p>
+            <p className="text-sm text-[rgba(255,255,255,0.5)]">{t("retention.title")}</p>
             <div className="flex gap-4">
               <div className="text-center">
                 <p className="text-lg font-bold text-white">{status.retention.daily}</p>
-                <p className="text-xs text-[rgba(255,255,255,0.4)]">günlük</p>
+                <p className="text-xs text-[rgba(255,255,255,0.4)]">{t("retention.daily")}</p>
               </div>
               <div className="text-center">
                 <p className="text-lg font-bold text-white">{status.retention.weekly}</p>
-                <p className="text-xs text-[rgba(255,255,255,0.4)]">haftalık</p>
+                <p className="text-xs text-[rgba(255,255,255,0.4)]">{t("retention.weekly")}</p>
               </div>
               <div className="text-center">
                 <p className="text-lg font-bold text-white">{status.retention.monthly}</p>
-                <p className="text-xs text-[rgba(255,255,255,0.4)]">aylık</p>
+                <p className="text-xs text-[rgba(255,255,255,0.4)]">{t("retention.monthly")}</p>
               </div>
             </div>
           </div>
@@ -334,7 +346,7 @@ export default function BackupSchedulingDashboard() {
       {/* Last Backup */}
       {status.lastBackup && (
         <div className="rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)] p-4">
-          <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)] mb-4">Son Yedekleme</h3>
+          <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)] mb-4">{t("lastBackup.title")}</h3>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div
@@ -369,12 +381,12 @@ export default function BackupSchedulingDashboard() {
       {/* Backup History */}
       <div className="rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)] overflow-hidden">
         <div className="p-4 border-b border-[rgba(255,255,255,0.05)]">
-          <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)]">Yedekleme Geçmişi</h3>
+          <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)]">{t("history.title")}</h3>
         </div>
         <div className="divide-y divide-[rgba(255,255,255,0.05)]">
           {history.length === 0 ? (
             <div className="p-8 text-center text-[rgba(255,255,255,0.4)]">
-              Henüz yedekleme yok
+              {t("history.empty")}
             </div>
           ) : (
             history.slice(0, 10).map((entry) => (
@@ -413,27 +425,27 @@ export default function BackupSchedulingDashboard() {
 
       {/* Info */}
       <div className="rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)] p-4">
-        <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)] mb-3">📌 Yedekleme İçeriği</h3>
+        <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)] mb-3">{t("content.title")}</h3>
         <div className="grid md:grid-cols-3 gap-4 text-sm text-[rgba(255,255,255,0.5)]">
           <div>
-            <p className="font-medium text-white mb-1">Veritabanları</p>
+            <p className="font-medium text-white mb-1">{t("content.databases.title")}</p>
             <ul className="list-disc list-inside space-y-1">
-              <li>MySQL veritabanları</li>
-              <li>Redis snapshot</li>
+              <li>{t("content.databases.item1")}</li>
+              <li>{t("content.databases.item2")}</li>
             </ul>
           </div>
           <div>
-            <p className="font-medium text-white mb-1">Dosyalar</p>
+            <p className="font-medium text-white mb-1">{t("content.files.title")}</p>
             <ul className="list-disc list-inside space-y-1">
-              <li>Kullanıcı yüklemeleri</li>
-              <li>Medya dosyaları</li>
+              <li>{t("content.files.item1")}</li>
+              <li>{t("content.files.item2")}</li>
             </ul>
           </div>
           <div>
-            <p className="font-medium text-white mb-1">Depolama</p>
+            <p className="font-medium text-white mb-1">{t("content.storage.title")}</p>
             <ul className="list-disc list-inside space-y-1">
-              <li>Yerel sunucu</li>
-              <li>AWS S3 (opsiyonel)</li>
+              <li>{t("content.storage.item1")}</li>
+              <li>{t("content.storage.item2")}</li>
             </ul>
           </div>
         </div>

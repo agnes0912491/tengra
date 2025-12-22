@@ -1,10 +1,12 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 export function AgentBadge() {
   const [online, setOnline] = React.useState(false);
-  const [name, setName] = React.useState<string>("AI Agent");
+  const t = useTranslations("Footer");
+  const [name, setName] = React.useState<string>(t("agentBadge.defaultName"));
 
   React.useEffect(() => {
     let cancelled = false;
@@ -31,7 +33,7 @@ export function AgentBadge() {
     <div className="flex items-center gap-2">
       <span className="chip">
         <span className="mr-1.5 inline-block size-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.6)]" />
-        {name} Online
+        {t("agentBadge.online", { name })}
       </span>
     </div>
   );

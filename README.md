@@ -16,14 +16,6 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-### Admin Access
-
-Forum rotası hariç tüm sayfalara erişim için yönetici oturumu zorunludur. Uygulamayı çalıştırmadan önce `.env.local` dosyanızda aşağıdaki ortam değişkenlerinin tanımlı olduğundan emin olun:
-
-- `ADMIN_EMAIL`
-- `ADMIN_PASSWORD`
-- `ADMIN_SESSION_SECRET`
-
 Bu değerler yalnızca sizin tarafınızdan bilinen güçlü kimlik bilgileri olmalıdır.
 
 ### Blog Verileri

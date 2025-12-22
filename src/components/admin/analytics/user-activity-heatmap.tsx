@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useTranslations } from "next-intl";
 
 interface HeatmapPoint {
   x: number;
@@ -210,6 +211,7 @@ export function useScrollTracking(enabled: boolean = true) {
 
 // Scroll Depth Visualization
 function ScrollDepthIndicator({ data }: { data: Array<{ depth: number; count: number }> }) {
+  const t = useTranslations("AdminAnalytics");
   const maxCount = Math.max(...data.map((d) => d.count), 1);
 
   return (
@@ -235,7 +237,7 @@ function ScrollDepthIndicator({ data }: { data: Array<{ depth: number; count: nu
               height: `${(d.count / maxCount) * 100}%`,
               opacity: 1 - d.depth / 150,
             }}
-            title={`${d.depth}%: ${d.count} kullanıcı`}
+            title={t("heatmap.scrollDepthBarTitle", { depth: d.depth, count: d.count })}
           />
         ))}
       </div>
@@ -245,6 +247,7 @@ function ScrollDepthIndicator({ data }: { data: Array<{ depth: number; count: nu
 
 // Main Heatmap Dashboard
 export default function UserActivityHeatmap() {
+  const t = useTranslations("AdminAnalytics");
   const [heatmapData, setHeatmapData] = useState<HeatmapPoint[]>([]);
   const [scrollDepthData, setScrollDepthData] = useState<Array<{ depth: number; count: number }>>([]);
   const [selectedPage, setSelectedPage] = useState<string>("/");
@@ -265,7 +268,7 @@ export default function UserActivityHeatmap() {
         },
       });
 
-      if (!response.ok) throw new Error("Failed to fetch heatmap data");
+      if (!response.ok) throw new Error(t("heatmap.fetchError"));
 
       const data = await response.json();
       setHeatmapData(data.clicks || []);
@@ -276,7 +279,7 @@ export default function UserActivityHeatmap() {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedPage]);
+  }, [selectedPage, t]);
 
   useEffect(() => {
     fetchHeatmapData();
@@ -320,9 +323,9 @@ export default function UserActivityHeatmap() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-white">Kullanıcı Aktivite Haritası</h2>
+          <h2 className="text-xl font-bold text-white">{t("heatmap.title")}</h2>
           <p className="text-sm text-[rgba(255,255,255,0.5)]">
-            Tıklama ve kaydırma davranışlarını görselleştirin
+            {t("heatmap.subtitle")}
           </p>
         </div>
 
@@ -337,7 +340,7 @@ export default function UserActivityHeatmap() {
                   : "text-[rgba(255,255,255,0.5)] hover:text-white"
               }`}
             >
-              Tıklama Haritası
+              {t("heatmap.viewModes.click")}
             </button>
             <button
               onClick={() => setViewMode("scroll")}
@@ -347,7 +350,7 @@ export default function UserActivityHeatmap() {
                   : "text-[rgba(255,255,255,0.5)] hover:text-white"
               }`}
             >
-              Kaydırma Derinliği
+              {t("heatmap.viewModes.scroll")}
             </button>
           </div>
 
@@ -390,11 +393,11 @@ export default function UserActivityHeatmap() {
       {/* Stats Summary */}
       <div className="grid grid-cols-3 gap-4">
         <div className="rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)] p-4">
-          <p className="text-sm text-[rgba(255,255,255,0.5)]">Toplam Tıklama</p>
+          <p className="text-sm text-[rgba(255,255,255,0.5)]">{t("heatmap.stats.totalClicks")}</p>
           <p className="text-2xl font-bold text-white">{heatmapData.length.toLocaleString()}</p>
         </div>
         <div className="rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)] p-4">
-          <p className="text-sm text-[rgba(255,255,255,0.5)]">Ort. Kaydırma Derinliği</p>
+          <p className="text-sm text-[rgba(255,255,255,0.5)]">{t("heatmap.stats.avgScrollDepth")}</p>
           <p className="text-2xl font-bold text-white">
             {scrollDepthData.length > 0
               ? Math.round(scrollDepthData.reduce((sum, d) => sum + d.depth * d.count, 0) / scrollDepthData.reduce((sum, d) => sum + d.count, 0))
@@ -403,8 +406,8 @@ export default function UserActivityHeatmap() {
           </p>
         </div>
         <div className="rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)] p-4">
-          <p className="text-sm text-[rgba(255,255,255,0.5)]">En Çok Tıklanan Bölge</p>
-          <p className="text-2xl font-bold text-white">Üst Navigasyon</p>
+          <p className="text-sm text-[rgba(255,255,255,0.5)]">{t("heatmap.stats.topZone")}</p>
+          <p className="text-2xl font-bold text-white">{t("heatmap.stats.topZoneValue")}</p>
         </div>
       </div>
 
@@ -447,19 +450,19 @@ export default function UserActivityHeatmap() {
 
             {/* Legend */}
             <div className="absolute bottom-4 right-4 flex items-center gap-2 px-3 py-2 rounded-lg bg-[rgba(0,0,0,0.7)] text-xs text-white">
-              <span>Az</span>
+              <span>{t("heatmap.legend.low")}</span>
               <div className="w-24 h-3 rounded bg-gradient-to-r from-blue-500 via-yellow-500 to-red-500" />
-              <span>Çok</span>
+              <span>{t("heatmap.legend.high")}</span>
             </div>
           </div>
         ) : (
           <div className="p-6">
             <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)] mb-4">
-              Sayfa Kaydırma Derinliği Dağılımı
+              {t("heatmap.scrollDepthTitle")}
             </h3>
             <ScrollDepthIndicator data={scrollDepthData} />
             <p className="mt-4 text-sm text-[rgba(255,255,255,0.5)]">
-              Kullanıcıların sayfayı ne kadar kaydırdığını gösterir. Yüksek çubuklar = daha fazla kullanıcı o derinliğe ulaştı.
+              {t("heatmap.scrollDepthDescription")}
             </p>
           </div>
         )}
@@ -467,12 +470,12 @@ export default function UserActivityHeatmap() {
 
       {/* Tips */}
       <div className="rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)] p-4">
-        <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)] mb-3">💡 İpuçları</h3>
+        <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)] mb-3">{t("heatmap.tips.title")}</h3>
         <ul className="space-y-2 text-sm text-[rgba(255,255,255,0.5)]">
-          <li>• Sıcak bölgeler (kırmızı) en çok tıklanan alanları gösterir</li>
-          <li>• Soğuk bölgeler (mavi) az ilgi gören alanları işaret eder</li>
-          <li>• CTA butonlarının sıcak bölgelerde olduğundan emin olun</li>
-          <li>• Kaydırma derinliği düşükse, önemli içerikleri yukarı taşıyın</li>
+          <li>{t("heatmap.tips.item1")}</li>
+          <li>{t("heatmap.tips.item2")}</li>
+          <li>{t("heatmap.tips.item3")}</li>
+          <li>{t("heatmap.tips.item4")}</li>
         </ul>
       </div>
     </div>

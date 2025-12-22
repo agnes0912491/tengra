@@ -135,7 +135,7 @@ const Projects = () => {
                           </h3>
 
                           <p className="text-sm text-[rgba(255,255,255,0.5)] line-clamp-3 mb-6 flex-1">
-                            {getLocalizedText(proj.description, locale) || "No description provided."}
+                            {getLocalizedText(proj.descriptionsByLocale || proj.description, locale) || "No description provided."}
                           </p>
 
                           <div className="flex items-center text-sm font-medium text-white group/link">

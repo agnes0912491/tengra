@@ -1,10 +1,14 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 type Item = { id?: string; label: string; value: number };
 
-export default function BarList({ items, emptyMessage = "Veri yok" }: { items: Item[]; emptyMessage?: string }) {
+export default function BarList({ items, emptyMessage }: { items: Item[]; emptyMessage?: string }) {
+  const t = useTranslations("AdminCommon");
+  const resolvedEmptyMessage = emptyMessage ?? t("empty");
   if (!items || items.length === 0) {
-    return <div className="text-[rgba(255,255,255,0.6)]">{emptyMessage}</div>;
+    return <div className="text-[rgba(255,255,255,0.6)]">{resolvedEmptyMessage}</div>;
   }
   const max = Math.max(1, ...items.map((i) => i.value));
   return (
@@ -24,4 +28,3 @@ export default function BarList({ items, emptyMessage = "Veri yok" }: { items: I
     </ul>
   );
 }
-

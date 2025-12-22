@@ -5,24 +5,26 @@ import type { Project } from "@/types/project";
 import { getProjectStats, type ProjectStat } from "@/lib/db";
 import Cookies from "js-cookie";
 import { ADMIN_SESSION_COOKIE_CANDIDATES } from "@/lib/auth";
+import { useLocale, useTranslations } from "next-intl";
 // glass select
 
 type Props = {
     initialProjects: Project[];
 };
 
-const formatDate = (d: string) => {
-    try {
-        const date = new Date(d);
-        return new Intl.DateTimeFormat("tr-TR", { dateStyle: "medium" }).format(date);
-    } catch {
-        return d;
-    }
-};
-
 export default function ProjectStatsViewer({ initialProjects }: Props) {
+    const t = useTranslations("AdminProjects");
+    const locale = useLocale();
     const [selectedId, setSelectedId] = useState<string>(initialProjects[0]?.id || "");
     const [stats, setStats] = useState<ProjectStat[]>([]);
+    const formatDate = (d: string) => {
+        try {
+            const date = new Date(d);
+            return new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(date);
+        } catch {
+            return d;
+        }
+    };
 
     const token = useMemo(() => {
         return ADMIN_SESSION_COOKIE_CANDIDATES.map((name) => Cookies.get(name)).find(Boolean) || "";
@@ -67,8 +69,8 @@ export default function ProjectStatsViewer({ initialProjects }: Props) {
         <div className="rounded-3xl border border-[rgba(110,211,225,0.16)] bg-[rgba(6,20,27,0.6)]/80 p-6">
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h3 className="text-base font-semibold text-[color:var(--color-turkish-blue-200)]">Proje Seçin</h3>
-                    <p className="text-xs text-[rgba(255,255,255,0.6)]">Son 30 güne ait özet metrikler</p>
+                    <h3 className="text-base font-semibold text-[color:var(--color-turkish-blue-200)]">{t("stats.selectProject")}</h3>
+                    <p className="text-xs text-[rgba(255,255,255,0.6)]">{t("stats.subtitle")}</p>
                 </div>
                 <div className="max-w-xs">
                     <select
@@ -84,7 +86,7 @@ export default function ProjectStatsViewer({ initialProjects }: Props) {
             </div>
 
             {metrics.length === 0 ? (
-                <div className="text-sm text-[rgba(255,255,255,0.7)]">Gösterilecek veri bulunamadı.</div>
+                <div className="text-sm text-[rgba(255,255,255,0.7)]">{t("stats.empty")}</div>
             ) : (
                 <div className="grid gap-4 md:grid-cols-2">
                     {metrics.map((metric) => {

@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import type { TranslationFileInfo } from "@/lib/admin/translations";
+import { useLocale, useTranslations } from "next-intl";
 
 const formatBytes = (bytes: number) => {
   if (bytes === 0) {
@@ -19,6 +20,8 @@ type Props = {
 };
 
 export default function TranslationsTable({ files }: Props) {
+  const locale = useLocale();
+  const t = useTranslations("AdminTranslations");
   const [preview, setPreview] = useState<string | null>(null);
   const [previewLocale, setPreviewLocale] = useState<string | null>(null);
 
@@ -27,7 +30,7 @@ export default function TranslationsTable({ files }: Props) {
       const res = await fetch(`/api/translations/preview?locale=${encodeURIComponent(locale)}`);
       if (!res.ok) {
         const j = await res.json().catch(() => ({}));
-        setPreview(`Error: ${j.error || res.status}`);
+        setPreview(t("preview.error", { error: j.error || res.status }));
         setPreviewLocale(locale);
         return;
       }
@@ -41,10 +44,10 @@ export default function TranslationsTable({ files }: Props) {
       }
       setPreviewLocale(locale);
     } catch {
-      setPreview("Unknown error");
+      setPreview(t("preview.unknownError"));
       setPreviewLocale(locale);
     }
-  }, []);
+  }, [t]);
 
   const hidePreview = useCallback(() => {
     setPreview(null);
@@ -54,7 +57,7 @@ export default function TranslationsTable({ files }: Props) {
   if (files.length === 0) {
     return (
       <div className="rounded-3xl border border-dashed border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.6)]/60 p-10 text-center text-sm text-[rgba(255,255,255,0.55)]">
-        Çeviri dosyaları bulunamadı.
+        {t("empty")}
       </div>
     );
   }
@@ -65,19 +68,19 @@ export default function TranslationsTable({ files }: Props) {
         <thead className="bg-[rgba(8,24,32,0.8)] text-[rgba(255,255,255,0.65)]">
           <tr>
             <th scope="col" className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.35em]">
-              Dil
+              {t("table.locale")}
             </th>
             <th scope="col" className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.35em]">
-              Dosya
+              {t("table.file")}
             </th>
             <th scope="col" className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.35em]">
-              Boyut
+              {t("table.size")}
             </th>
             <th scope="col" className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.35em]">
-              Karakter
+              {t("table.characters")}
             </th>
             <th scope="col" className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.35em]">
-              Anahtar Sayısı
+              {t("table.keys")}
             </th>
           </tr>
         </thead>
@@ -97,8 +100,8 @@ export default function TranslationsTable({ files }: Props) {
               </td>
               <td className="px-6 py-4 font-medium text-white">{file.fileName}</td>
               <td className="px-6 py-4 text-[rgba(255,255,255,0.7)]">{formatBytes(file.bytes)}</td>
-              <td className="px-6 py-4 text-[rgba(255,255,255,0.7)]">{file.characters.toLocaleString("tr-TR")}</td>
-              <td className="px-6 py-4 text-[rgba(255,255,255,0.7)]">{file.keys.toLocaleString("tr-TR")}</td>
+              <td className="px-6 py-4 text-[rgba(255,255,255,0.7)]">{file.characters.toLocaleString(locale)}</td>
+              <td className="px-6 py-4 text-[rgba(255,255,255,0.7)]">{file.keys.toLocaleString(locale)}</td>
             </tr>
           ))}
         </tbody>
@@ -108,9 +111,9 @@ export default function TranslationsTable({ files }: Props) {
           <div className="absolute inset-0 bg-black/60" onClick={hidePreview} />
           <div className="relative z-10 max-h-[80vh] w-full max-w-3xl overflow-auto rounded-2xl bg-[rgba(6,20,27,0.9)] p-6 text-sm text-[rgba(255,255,255,0.95)]">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Önizleme — {previewLocale}</h3>
+              <h3 className="text-lg font-semibold">{t("preview.title", { locale: previewLocale })}</h3>
               <button className="ml-4 rounded border px-3 py-1 text-sm" onClick={hidePreview}>
-                Kapat
+                {t("preview.close")}
               </button>
             </div>
             <pre className="mt-4 whitespace-pre overflow-auto rounded-md bg-[rgba(3,12,18,0.8)] p-4 text-xs leading-relaxed text-[rgba(223,241,246,0.95)] border border-[rgba(0,167,197,0.2)]">

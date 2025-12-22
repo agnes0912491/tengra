@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 
 interface RealtimeStats {
   activeUsers: number;
@@ -97,6 +98,7 @@ function MiniChart({ data, color = "#00A7C5" }: { data: number[]; color?: string
 // Live event feed
 function LiveEventFeed({ events }: { events: RealtimeStats["recentEvents"] }) {
   const [now, setNow] = useState(() => Date.now());
+  const t = useTranslations("AdminAnalytics");
 
   useEffect(() => {
     const updateNow = () => setNow(Date.now());
@@ -123,9 +125,9 @@ function LiveEventFeed({ events }: { events: RealtimeStats["recentEvents"] }) {
 
   const formatTime = (ts: number) => {
     const diff = now - ts;
-    if (diff < 60000) return "şimdi";
-    if (diff < 3600000) return `${Math.floor(diff / 60000)}dk önce`;
-    return `${Math.floor(diff / 3600000)}sa önce`;
+    if (diff < 60000) return t("liveFeed.now");
+    if (diff < 3600000) return t("liveFeed.minutesAgo", { minutes: Math.floor(diff / 60000) });
+    return t("liveFeed.hoursAgo", { hours: Math.floor(diff / 3600000) });
   };
 
   return (
@@ -141,7 +143,7 @@ function LiveEventFeed({ events }: { events: RealtimeStats["recentEvents"] }) {
               {event.type === "page_view" ? event.path : event.type}
             </p>
             <p className="text-xs text-[rgba(255,255,255,0.4)]">
-              {event.userId ? `User: ${event.userId.slice(0, 8)}...` : "Anonim"}
+              {event.userId ? t("liveFeed.user", { id: `${event.userId.slice(0, 8)}...` }) : t("liveFeed.anonymous")}
             </p>
           </div>
           <span className="text-xs text-[rgba(255,255,255,0.4)]">{formatTime(event.timestamp)}</span>
@@ -198,6 +200,7 @@ function DonutChart({
 
 // Main dashboard component
 export default function RealTimeAnalyticsDashboard() {
+  const t = useTranslations("AdminAnalytics");
   const [stats, setStats] = useState<RealtimeStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -213,7 +216,7 @@ export default function RealTimeAnalyticsDashboard() {
         },
       });
 
-      if (!response.ok) throw new Error("Failed to fetch stats");
+      if (!response.ok) throw new Error(t("error.fetchFailed"));
 
       const data = await response.json();
       setStats(data);
@@ -226,11 +229,11 @@ export default function RealTimeAnalyticsDashboard() {
 
       setError(null);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Bilinmeyen hata");
+      setError(err instanceof Error ? err.message : t("error.unknown"));
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchStats();
@@ -261,7 +264,7 @@ export default function RealTimeAnalyticsDashboard() {
           onClick={fetchStats}
           className="mt-4 px-4 py-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
         >
-          Tekrar Dene
+          {t("actions.retry")}
         </button>
       </div>
     );
@@ -276,8 +279,8 @@ export default function RealTimeAnalyticsDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white">Gerçek Zamanlı Analitik</h2>
-          <p className="text-sm text-[rgba(255,255,255,0.5)]">Canlı site metrikleri</p>
+          <h2 className="text-xl font-bold text-white">{t("header.title")}</h2>
+          <p className="text-sm text-[rgba(255,255,255,0.5)]">{t("header.subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -289,7 +292,7 @@ export default function RealTimeAnalyticsDashboard() {
             }`}
           >
             <span className={`w-2 h-2 rounded-full ${isLive ? "bg-green-500 animate-pulse" : "bg-gray-500"}`} />
-            {isLive ? "Canlı" : "Durduruldu"}
+            {isLive ? t("status.live") : t("status.paused")}
           </button>
           <button
             onClick={fetchStats}
@@ -305,25 +308,25 @@ export default function RealTimeAnalyticsDashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard
-          title="Aktif Kullanıcı"
+          title={t("stats.activeUsers")}
           value={stats.activeUsers}
           icon={<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>}
           color="cyan"
         />
         <StatCard
-          title="Sayfa Görüntüleme"
+          title={t("stats.pageViews")}
           value={stats.pageViews.toLocaleString()}
           icon={<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>}
           color="green"
         />
         <StatCard
-          title="İstek/dk"
+          title={t("stats.requestsPerMinute")}
           value={stats.requestsPerMinute}
           icon={<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>}
           color="yellow"
         />
         <StatCard
-          title="Hata/dk"
+          title={t("stats.errorsPerMinute")}
           value={stats.errorsPerMinute}
           icon={<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>}
           color="red"
@@ -334,13 +337,13 @@ export default function RealTimeAnalyticsDashboard() {
       <div className="grid md:grid-cols-2 gap-6">
         {/* Traffic Chart */}
         <div className="rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)] p-4">
-          <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)] mb-4">Trafik (son 10 dk)</h3>
+          <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)] mb-4">{t("charts.trafficLastTen")}</h3>
           <MiniChart data={pageViewHistory} />
         </div>
 
         {/* Device Breakdown */}
         <div className="rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)] p-4">
-          <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)] mb-4">Cihaz Dağılımı</h3>
+          <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)] mb-4">{t("charts.deviceBreakdown")}</h3>
           <DonutChart data={stats.deviceBreakdown} colors={chartColors} />
         </div>
       </div>
@@ -349,7 +352,7 @@ export default function RealTimeAnalyticsDashboard() {
       <div className="grid md:grid-cols-3 gap-6">
         {/* Top Pages */}
         <div className="rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)] p-4">
-          <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)] mb-4">En Çok Görüntülenen</h3>
+          <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)] mb-4">{t("charts.topPages")}</h3>
           <div className="space-y-2">
             {stats.topPages.slice(0, 5).map((page, i) => (
               <div key={i} className="flex items-center justify-between">
@@ -358,20 +361,20 @@ export default function RealTimeAnalyticsDashboard() {
               </div>
             ))}
             {stats.topPages.length === 0 && (
-              <p className="text-sm text-[rgba(255,255,255,0.4)]">Henüz veri yok</p>
+              <p className="text-sm text-[rgba(255,255,255,0.4)]">{t("charts.noData")}</p>
             )}
           </div>
         </div>
 
         {/* Browser Breakdown */}
         <div className="rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)] p-4">
-          <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)] mb-4">Tarayıcılar</h3>
+          <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)] mb-4">{t("charts.browserBreakdown")}</h3>
           <DonutChart data={stats.browserBreakdown} colors={chartColors} />
         </div>
 
         {/* Live Feed */}
         <div className="rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)] p-4">
-          <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)] mb-4">Canlı Etkinlik</h3>
+          <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)] mb-4">{t("charts.liveActivity")}</h3>
           <LiveEventFeed events={stats.recentEvents} />
         </div>
       </div>

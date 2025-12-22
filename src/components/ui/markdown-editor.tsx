@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from "react";
 import { Bold, Italic, List, ListOrdered, Link as LinkIcon, Image, Code, Quote, Heading1, Heading2, Eye, Edit } from "lucide-react";
 import DOMPurify from "isomorphic-dompurify";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface MarkdownEditorProps {
     value: string;
@@ -24,6 +25,7 @@ export function MarkdownEditor({
     preview: initialPreview = "edit",
     className,
 }: MarkdownEditorProps) {
+    const t = useTranslations("MarkdownEditor");
     const [mode, setMode] = useState<"edit" | "preview">(initialPreview === "preview" ? "preview" : "edit");
 
     // Insert text at cursor position or wrap selection
@@ -51,18 +53,18 @@ export function MarkdownEditor({
 
     const toolbarActions = useMemo(
         () => [
-            { icon: Bold, action: () => insertText("**", "**"), title: "Bold" },
-            { icon: Italic, action: () => insertText("*", "*"), title: "Italic" },
-            { icon: Heading1, action: () => insertText("\n# ", ""), title: "Heading 1" },
-            { icon: Heading2, action: () => insertText("\n## ", ""), title: "Heading 2" },
-            { icon: Quote, action: () => insertText("\n> ", ""), title: "Quote" },
-            { icon: Code, action: () => insertText("`", "`"), title: "Inline Code" },
-            { icon: List, action: () => insertText("\n- ", ""), title: "Bullet List" },
-            { icon: ListOrdered, action: () => insertText("\n1. ", ""), title: "Numbered List" },
-            { icon: LinkIcon, action: () => insertText("[", "](url)"), title: "Link" },
-            { icon: Image, action: () => insertText("![alt](", ")"), title: "Image" },
+            { icon: Bold, action: () => insertText("**", "**"), title: t("toolbar.bold") },
+            { icon: Italic, action: () => insertText("*", "*"), title: t("toolbar.italic") },
+            { icon: Heading1, action: () => insertText("\n# ", ""), title: t("toolbar.heading1") },
+            { icon: Heading2, action: () => insertText("\n## ", ""), title: t("toolbar.heading2") },
+            { icon: Quote, action: () => insertText("\n> ", ""), title: t("toolbar.quote") },
+            { icon: Code, action: () => insertText("`", "`"), title: t("toolbar.inlineCode") },
+            { icon: List, action: () => insertText("\n- ", ""), title: t("toolbar.bulletList") },
+            { icon: ListOrdered, action: () => insertText("\n1. ", ""), title: t("toolbar.numberedList") },
+            { icon: LinkIcon, action: () => insertText("[", "](url)"), title: t("toolbar.link") },
+            { icon: Image, action: () => insertText("![alt](", ")"), title: t("toolbar.image") },
         ],
-        [insertText]
+        [insertText, t]
     );
 
     // Simple markdown to HTML conversion using regex (no external lib)
@@ -154,7 +156,7 @@ export function MarkdownEditor({
                         "p-1.5 rounded transition-colors",
                         mode === "edit" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
                     )}
-                    title="Edit"
+                    title={t("toolbar.edit")}
                 >
                     <Edit className="w-4 h-4" />
                 </button>
@@ -165,7 +167,7 @@ export function MarkdownEditor({
                         "p-1.5 rounded transition-colors",
                         mode === "preview" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
                     )}
-                    title="Preview"
+                    title={t("toolbar.preview")}
                 >
                     <Eye className="w-4 h-4" />
                 </button>
@@ -179,7 +181,7 @@ export function MarkdownEditor({
                     onChange={(e) => onChange(e.target.value)}
                     style={{ height }}
                     className="w-full resize-none p-4 font-mono text-sm bg-transparent text-foreground outline-none placeholder:text-muted-foreground"
-                    placeholder="Write your markdown here..."
+                    placeholder={t("placeholder")}
                 />
             ) : (
                 <div

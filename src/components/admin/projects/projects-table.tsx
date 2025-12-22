@@ -17,45 +17,15 @@ import Dropzone from "@/components/ui/dropzone";
 import { routing } from "@/i18n/routing";
 import { useAdminToken } from "@/hooks/use-admin-token";
 import Image from "next/image";
-
-const formatDateTime = (value?: string | null) => {
-  if (!value) {
-    return "-";
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "-";
-  }
-
-  return new Intl.DateTimeFormat("tr-TR", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
-};
-
-const formatStatus = (status?: Project["status"]) => {
-  switch (status) {
-    case "draft":
-      return "Taslak";
-    case "in_progress":
-      return "Geliştiriliyor";
-    case "on_hold":
-      return "Beklemede";
-    case "completed":
-      return "Tamamlandı";
-    case "archived":
-      return "Arşivlendi";
-    default:
-      return "Belirsiz";
-  }
-};
+import { useLocale, useTranslations } from "next-intl";
 
 type Props = {
   projects: Project[];
 };
 
 export default function ProjectsTable({ projects }: Props) {
+  const t = useTranslations("AdminProjects");
+  const locale = useLocale();
   const [editProjectModalOpen, setEditProjectModalOpen] = useState(false);
   const [deleteProjectModalOpen, setDeleteProjectModalOpen] = useState(false);
   const [project, setProject] = useState<Project | null>(null);
@@ -67,6 +37,55 @@ export default function ProjectsTable({ projects }: Props) {
 
   const locales = routing.locales;
   const { token } = useAdminToken();
+  const formatDateTime = (value?: string | null) => {
+    if (!value) {
+      return "-";
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return "-";
+    }
+
+    return new Intl.DateTimeFormat(locale, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(date);
+  };
+  const formatStatus = (status?: Project["status"]) => {
+    switch (status) {
+      case "draft":
+        return t("status.draft");
+      case "in_progress":
+        return t("status.inProgress");
+      case "on_hold":
+        return t("status.onHold");
+      case "completed":
+        return t("status.completed");
+      case "archived":
+        return t("status.archived");
+      default:
+        return t("status.unknown");
+    }
+  };
+  const formatType = (type?: Project["type"]) => {
+    switch (type) {
+      case "game":
+        return t("types.game");
+      case "website":
+        return t("types.website");
+      case "tool":
+        return t("types.tool");
+      case "app":
+        return t("types.app");
+      case "library":
+        return t("types.library");
+      case "other":
+        return t("types.other");
+      default:
+        return t("types.other");
+    }
+  };
 
   useEffect(() => {
     setLocalProjects(projects);
@@ -75,7 +94,7 @@ export default function ProjectsTable({ projects }: Props) {
   if (projects.length === 0) {
     return (
       <div className="rounded-3xl border border-dashed border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.6)]/60 p-10 text-center text-sm text-[rgba(255,255,255,0.55)]">
-        Henüz proje verisi alınamadı. Lütfen daha sonra tekrar deneyin.
+        {t("empty")}
       </div>
     );
   }
@@ -122,30 +141,30 @@ export default function ProjectsTable({ projects }: Props) {
     projectId: string
   ) => {
     if (!token) {
-      toast.error("Yetkilendirme belirteci eksik. Lütfen tekrar giriş yapın.");
+      toast.error(t("toast.missingToken"));
       return;
     }
     startTransition(async () => {
       const updated = await ep(options, projectId, token);
       if (!updated) {
-        toast.error("Proje güncellenemedi.");
+        toast.error(t("toast.updateFailed"));
         return;
       }
       setLocalProjects((prev) => prev.map((p) => (p.id === projectId ? { ...p, ...updated } : p)));
-      toast.success("Proje başarıyla güncellendi.");
+      toast.success(t("toast.updateSuccess"));
     });
   };
 
   const deleteProject = async (projectId: string) => {
     if (!token) {
-      toast.error("Yetkilendirme belirteci eksik. Lütfen tekrar giriş yapın.");
+      toast.error(t("toast.missingToken"));
       return;
     }
 
     startTransition(async () => {
       await dp(projectId, token);
       setLocalProjects((prev) => prev.filter((p) => p.id !== projectId));
-      toast.success("Proje başarıyla silindi.");
+      toast.success(t("toast.deleteSuccess"));
     });
   };
 
@@ -154,7 +173,7 @@ export default function ProjectsTable({ projects }: Props) {
       <Dialog open={editProjectModalOpen} onOpenChange={() => setEditProjectModalOpen(false)}>
         <DialogContent className="max-w-2xl border border-[rgba(110,211,225,0.25)] bg-[rgba(6,18,26,0.9)] shadow-[0_22px_60px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
           <DialogHeader>
-            <DialogTitle>Projeyi Düzenle</DialogTitle>
+            <DialogTitle>{t("dialogs.edit.title")}</DialogTitle>
           </DialogHeader>
           <form
             onSubmit={(e) => {
@@ -191,12 +210,12 @@ export default function ProjectsTable({ projects }: Props) {
             <input type="hidden" name="projectId" value="" />
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm text-[rgba(255,255,255,0.8)]">Proje Adı</label>
+                <label className="text-sm text-[rgba(255,255,255,0.8)]">{t("fields.name")}</label>
                 <Input name="name" defaultValue={project?.name || ""} required className="border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] text-white" />
               </div>
               <div className="space-y-3">
                 <label className="text-sm text-[rgba(255,255,255,0.8)]">
-                  Açıklama (çok dilli)
+                  {t("fields.descriptionMultilang")}
                 </label>
                 {locales.map((loc) => (
                   <div key={loc} className="space-y-1">
@@ -220,7 +239,7 @@ export default function ProjectsTable({ projects }: Props) {
               </div>
               <div className="space-y-2">
                 <label className="text-sm text-[rgba(255,255,255,0.8)]">
-                  Logo / Görsel
+                  {t("fields.logo")}
                 </label>
                 <input
                   type="hidden"
@@ -235,9 +254,7 @@ export default function ProjectsTable({ projects }: Props) {
                     const file = files[0];
                     if (!file) return;
                     if (!token) {
-                      toast.error(
-                        "Görsel yüklemek için önce yeniden giriş yapın."
-                      );
+                      toast.error(t("toast.uploadAuthRequired"));
                       return;
                     }
                     setLogoUploading(true);
@@ -256,11 +273,11 @@ export default function ProjectsTable({ projects }: Props) {
                       } else if (uploaded?.dataUrl) {
                         setLogoPreview(uploaded.dataUrl);
                       } else {
-                        toast.error("Görsel yüklenemedi.");
+                        toast.error(t("toast.imageUploadFailed"));
                       }
                     } catch (err) {
                       console.error("Logo upload failed", err);
-                      toast.error("Görsel yüklenirken bir hata oluştu.");
+                      toast.error(t("toast.imageUploadError"));
                     } finally {
                       setLogoUploading(false);
                     }
@@ -268,11 +285,11 @@ export default function ProjectsTable({ projects }: Props) {
                 >
                   {logoPreview || project?.logoUrl ? (
                     <span className="text-xs text-[rgba(255,255,255,0.8)]">
-                      Yeni görsel seçmek için tıklayın veya sürükleyip bırakın.
+                      {t("fields.logoReplaceHint")}
                     </span>
                   ) : (
                     <span className="text-xs text-[rgba(255,255,255,0.6)]">
-                      PNG/JPG/WebP sürükleyip bırakın veya tıklayın
+                      {t("fields.logoHint")}
                     </span>
                   )}
                 </Dropzone>
@@ -281,41 +298,41 @@ export default function ProjectsTable({ projects }: Props) {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={logoPreview || project?.logoUrl || ""}
-                      alt="logo"
+                      alt={t("fields.logoPreview")}
                       className="h-12 w-12 rounded object-contain"
                     />
                     <p className="mt-1 text-[11px] text-[rgba(255,255,255,0.65)]">
-                      Mevcut logo önizlemesi
+                      {t("fields.logoCurrent")}
                     </p>
                   </div>
                 )}
                 {logoUploading && (
                   <p className="text-xs text-[rgba(255,255,255,0.7)]">
-                    Görsel yükleniyor…
+                    {t("fields.logoUploading")}
                   </p>
                 )}
               </div>
               <div className="space-y-2">
-                <label className="text-sm text-[rgba(255,255,255,0.8)]">Durum</label>
+                <label className="text-sm text-[rgba(255,255,255,0.8)]">{t("fields.status")}</label>
                 <select name="status" defaultValue={project?.status || "draft"} className="w-full rounded-lg border border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] p-2 text-white focus:border-[rgba(0,167,197,0.6)] focus:outline-none">
-                  <option value="draft">Taslak</option>
-                  <option value="in_progress">Geliştiriliyor</option>
-                  <option value="on_hold">Beklemede</option>
-                  <option value="completed">Tamamlandı</option>
-                  <option value="archived">Arşivlendi</option>
+                  <option value="draft">{t("status.draft")}</option>
+                  <option value="in_progress">{t("status.inProgress")}</option>
+                  <option value="on_hold">{t("status.onHold")}</option>
+                  <option value="completed">{t("status.completed")}</option>
+                  <option value="archived">{t("status.archived")}</option>
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm text-[rgba(255,255,255,0.8)]">Tür</label>
+                <label className="text-sm text-[rgba(255,255,255,0.8)]">{t("fields.type")}</label>
                 <select name="type" defaultValue={project?.type || "other"} className="w-full rounded-lg border border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] p-2 text-white focus:border-[rgba(0,167,197,0.6)] focus:outline-none">
-                  <option value="game">Oyun</option>
-                  <option value="website">Web Sitesi</option>
-                  <option value="tool">Araç</option>
-                  <option value="other">Diğer</option>
+                  <option value="game">{t("types.game")}</option>
+                  <option value="website">{t("types.website")}</option>
+                  <option value="tool">{t("types.tool")}</option>
+                  <option value="other">{t("types.other")}</option>
                 </select>
               </div>
               <Button type="submit" className="w-full">
-                Değişiklikleri Kaydet
+                {t("actions.saveChanges")}
               </Button>
             </div>
           </form>
@@ -324,15 +341,15 @@ export default function ProjectsTable({ projects }: Props) {
       <Dialog open={deleteProjectModalOpen} onOpenChange={() => setDeleteProjectModalOpen(false)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Projeyi Sil</DialogTitle>
+            <DialogTitle>{t("dialogs.delete.title")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-[rgba(255,255,255,0.8)]">
-              Bu işlemi gerçekleştirmek istediğinize emin misiniz? Bu işlem geri alınamaz.
+              {t("dialogs.delete.description")}
             </p>
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => setDeleteProjectModalOpen(false)} className="border-[rgba(0,167,197,0.3)]">
-                İptal
+                {t("cancel")}
               </Button>
               <Button
                 variant="destructive"
@@ -345,7 +362,7 @@ export default function ProjectsTable({ projects }: Props) {
                 }}
                 className="bg-[color:var(--color-red-600)] text-white hover:bg-[color:var(--color-red-500)]"
               >
-                Projeyi Sil
+                {t("actions.delete")}
               </Button>
             </div>
           </div>
@@ -356,16 +373,16 @@ export default function ProjectsTable({ projects }: Props) {
           <thead className="bg-[rgba(8,24,32,0.9)] text-[rgba(255,255,255,0.75)]">
             <tr>
               <th scope="col" className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.22em]">
-                Proje
+                {t("table.project")}
               </th>
               <th scope="col" className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.22em]">
-                Tür
+                {t("table.type")}
               </th>
               <th scope="col" className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.22em]">
-                Durum
+                {t("table.status")}
               </th>
               <th scope="col" className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.22em]">
-                Son Güncelleme
+                {t("table.lastUpdated")}
               </th>
             </tr>
           </thead>
@@ -378,7 +395,7 @@ export default function ProjectsTable({ projects }: Props) {
                       <div className="relative h-8 w-8 rounded overflow-hidden">
                         <Image
                           src={project.logoUrl}
-                          alt="logo"
+                          alt={t("fields.logoPreview")}
                           fill
                           className="object-contain"
                           sizes="32px"
@@ -396,7 +413,7 @@ export default function ProjectsTable({ projects }: Props) {
                 </td>
                 <td className="px-6 py-4">
                   <span className="inline-flex rounded-full border border-[rgba(110,211,225,0.3)] px-3 py-1 text-[10px] uppercase tracking-[0.3em] text-[color:var(--color-turkish-blue-200)]">
-                    {project.type || "other"}
+                    {formatType(project.type)}
                   </span>
                 </td>
                 <td className="px-6 py-4">

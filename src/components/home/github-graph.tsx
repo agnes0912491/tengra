@@ -4,7 +4,7 @@ import { ActivityCalendar } from "react-activity-calendar";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
-const GITHUB_USERNAME = "tengra";
+const GITHUB_USERNAME = "agnes0912491";
 
 interface ContributionDay {
     date: string;

@@ -13,6 +13,7 @@ import Cookies from "js-cookie";
 import { ADMIN_SESSION_COOKIE_CANDIDATES } from "@/lib/auth";
 import { toast } from "@/lib/react-toastify";
 import { routing } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 
 type Props = {
     open: boolean;
@@ -21,6 +22,7 @@ type Props = {
 };
 
 export default function ProjectEditModal({ open, onClose, onSave }: Props) {
+    const t = useTranslations("AdminProjects");
     const [formData, setFormData] = useState<Partial<Project>>({
         name: "",
         status: "draft",
@@ -61,13 +63,13 @@ export default function ProjectEditModal({ open, onClose, onSave }: Props) {
             <DialogContent className="max-w-2xl border border-[rgba(110,211,225,0.25)] bg-[rgba(6,18,26,0.9)] shadow-[0_22px_60px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
                 <DialogHeader>
                     <DialogTitle className="font-display text-xl uppercase tracking-[0.3em] text-[color:var(--color-turkish-blue-300)]">
-                        Yeni Proje
+                        {t("labels.newProject")}
                     </DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-2">
-                        <label className="text-sm text-[rgba(255,255,255,0.8)]">Proje Adı</label>
+                        <label className="text-sm text-[rgba(255,255,255,0.8)]">{t("fields.name")}</label>
                         <Input
                             value={formData.name || ""}
                             onChange={(e) => setFormData({ ...formData, name: e.currentTarget.value })}
@@ -78,7 +80,7 @@ export default function ProjectEditModal({ open, onClose, onSave }: Props) {
 
                     <div className="space-y-3">
                         <label className="text-sm text-[rgba(255,255,255,0.8)]">
-                            Açıklama (çok dilli)
+                            {t("fields.descriptionMultilang")}
                         </label>
                         {locales.map((loc) => (
                             <div key={loc} className="space-y-1">
@@ -102,7 +104,7 @@ export default function ProjectEditModal({ open, onClose, onSave }: Props) {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm text-[rgba(255,255,255,0.8)]">Logo/Görsel (sürükle-bırak)</label>
+                        <label className="text-sm text-[rgba(255,255,255,0.8)]">{t("fields.logoUpload")}</label>
                         <Dropzone
                             accept={{ "image/*": [".png", ".jpg", ".jpeg", ".webp", ".gif"] }}
                             onDrop={async (files) => {
@@ -123,7 +125,7 @@ export default function ProjectEditModal({ open, onClose, onSave }: Props) {
                                 try {
                                     if (!token) {
                                         console.error("Upload failed: missing auth token");
-                                        toast.error("Görsel yüklemek için önce giriş yapın.");
+                                        toast.error(t("toast.uploadAuthRequired"));
                                         return;
                                     }
                                     const uploaded = await uploadImage(dataUrl, token);
@@ -132,11 +134,11 @@ export default function ProjectEditModal({ open, onClose, onSave }: Props) {
                                     } else if (uploaded?.dataUrl) {
                                         setFormData((prev) => ({ ...prev, logoUrl: uploaded.dataUrl }));
                                     } else {
-                                        toast.error("Görsel yüklenemedi.");
+                                        toast.error(t("toast.imageUploadFailed"));
                                     }
                                 } catch (e) {
                                     console.error("Upload failed", e);
-                                    toast.error("Görsel yüklenirken bir hata oluştu.");
+                                    toast.error(t("toast.imageUploadError"));
                                 }
                             }}
                         >
@@ -144,45 +146,45 @@ export default function ProjectEditModal({ open, onClose, onSave }: Props) {
                                 <div className="flex items-center gap-3">
                                     <Image crossOrigin="anonymous"
                                         src={formData.logoUrl}
-                                        alt="logo preview"
+                                        alt={t("fields.logoPreview")}
                                         width={40}
                                         height={40}
                                         className="h-10 w-10 rounded object-contain"
                                     />
-                                    <span className="text-xs text-[rgba(255,255,255,0.7)]">Yeni görsel yüklendi</span>
+                                    <span className="text-xs text-[rgba(255,255,255,0.7)]">{t("fields.logoUploaded")}</span>
                                 </div>
                             ) : (
-                                <span className="text-xs text-[rgba(255,255,255,0.6)]">PNG/JPG/WebP sürükleyip bırakın veya tıklayın</span>
+                                <span className="text-xs text-[rgba(255,255,255,0.6)]">{t("fields.logoHint")}</span>
                             )}
                         </Dropzone>
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm text-[rgba(255,255,255,0.8)]">Durum</label>
+                        <label className="text-sm text-[rgba(255,255,255,0.8)]">{t("fields.status")}</label>
                         <select
                             value={formData.status || "draft"}
                             onChange={(e) => setFormData({ ...formData, status: e.target.value as Project["status"] })}
                             className="w-full rounded-lg border border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] p-2 text-white focus:border-[rgba(0,167,197,0.6)] focus:outline-none"
                         >
-                            <option value="draft">Taslak</option>
-                            <option value="in_progress">Geliştiriliyor</option>
-                            <option value="on_hold">Beklemede</option>
-                            <option value="completed">Tamamlandı</option>
-                            <option value="archived">Arşivlendi</option>
+                            <option value="draft">{t("status.draft")}</option>
+                            <option value="in_progress">{t("status.inProgress")}</option>
+                            <option value="on_hold">{t("status.onHold")}</option>
+                            <option value="completed">{t("status.completed")}</option>
+                            <option value="archived">{t("status.archived")}</option>
                         </select>
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm text-[rgba(255,255,255,0.8)]">Tür</label>
+                        <label className="text-sm text-[rgba(255,255,255,0.8)]">{t("fields.type")}</label>
                         <select
                             value={(formData.type as ProjectType) || "other"}
                             onChange={(e) => setFormData({ ...formData, type: e.target.value as ProjectType })}
                             className="w-full rounded-lg border border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.8)] p-2 text-white focus:border-[rgba(0,167,197,0.6)] focus:outline-none"
                         >
-                            <option value="game">Oyun</option>
-                            <option value="website">Web Sitesi</option>
-                            <option value="tool">Araç</option>
-                            <option value="other">Diğer</option>
+                            <option value="game">{t("types.game")}</option>
+                            <option value="website">{t("types.website")}</option>
+                            <option value="tool">{t("types.tool")}</option>
+                            <option value="other">{t("types.other")}</option>
                         </select>
                     </div>
 
@@ -193,13 +195,13 @@ export default function ProjectEditModal({ open, onClose, onSave }: Props) {
                             onClick={onClose}
                             className="border-[rgba(0,167,197,0.3)]"
                         >
-                            İptal
+                            {t("cancel")}
                         </Button>
                         <Button
                             type="submit"
                             className="bg-[color:var(--color-turkish-blue-500)] text-black hover:bg-[color:var(--color-turkish-blue-400)]"
                         >
-                            Kaydet
+                            {t("actions.save")}
                         </Button>
                     </div>
                 </form>

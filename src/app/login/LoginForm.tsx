@@ -78,8 +78,8 @@ export default function LoginForm() {
     const handleGoogleSuccess = async (credential: string) => {
         setLoading(true);
         try {
-            // Using lova-api for Google Verification
-            const response = await fetch("https://api.lova.tengra.studio/auth/google-login", {
+            // Using Tengra API for Google Verification (via Next.js proxy)
+            const response = await fetch("/api/auth/google-login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -115,7 +115,12 @@ export default function LoginForm() {
                 // But let's try using the token.
 
                 if (data.token) {
-                    localStorage.setItem("authToken", data.token);
+                    // Use cookie-based auth (imported from js-cookie)
+                    const Cookies = (await import("js-cookie")).default;
+                    const hostname = window.location.hostname;
+                    const isTengra = hostname.includes("tengra.studio");
+                    const domain = isTengra ? ".tengra.studio" : undefined;
+                    Cookies.set("authToken", data.token, { expires: 30, path: "/", domain, sameSite: "lax", secure: window.location.protocol === "https:" });
                     // Force a reload/refresh to pick up auth state
                     window.location.href = safeNextUrl;
                 } else {

@@ -2,6 +2,7 @@
 
 import type { CloseButtonProps } from "react-toastify";
 import { ToastContainer } from "react-toastify";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 
@@ -20,12 +21,13 @@ const variantClasses: Record<"default" | "success" | "error" | "info", string> =
 };
 
 function CloseButton({ closeToast }: CloseButtonProps) {
+  const t = useTranslations("Common");
   return (
     <button
       type="button"
       onClick={closeToast}
       className="ml-auto inline-flex h-6 w-6 items-center justify-center rounded-full border border-[rgba(255,255,255,0.25)] text-xs text-[rgba(255,255,255,0.65)] transition hover:border-[rgba(0,167,197,0.6)] hover:text-white"
-      aria-label="Dismiss notification"
+      aria-label={t("dismissNotification")}
     >
       ×
     </button>

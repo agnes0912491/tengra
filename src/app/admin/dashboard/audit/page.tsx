@@ -93,12 +93,15 @@ function getRelativeTime(dateStr: string): string {
     return formatDate(dateStr);
 }
 
+const MAX_LOGS = 250;
+const LIVE_LOG_COUNT = 20;
+
 export default function AdminAuditPage() {
     const [logs, setLogs] = useState<AuditLogEntry[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [actionFilter, setActionFilter] = useState<string>("all");
-    const [successFilter, setSuccessFilter] = useState<"all" | "success" | "failed">("all");
+    const [successFilter, setSuccessFilter] = useState<"all" | "success" | "failed">("failed");
 
     useEffect(() => {
         const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
@@ -107,20 +110,43 @@ export default function AdminAuditPage() {
             return;
         }
 
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:5000"}/admin/audit-logs`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                Accept: "application/json",
-            },
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.success && data.logs) {
-                    setLogs(data.logs);
+        let isMounted = true;
+
+        const fetchLogs = async () => {
+            try {
+                const res = await fetch(
+                    `${process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:5000"}/admin/audit-logs`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            Accept: "application/json",
+                        },
+                    }
+                );
+                const data = await res.json();
+                if (!isMounted) return;
+                if (data.success && Array.isArray(data.logs)) {
+                    const sorted = [...data.logs].sort(
+                        (a: AuditLogEntry, b: AuditLogEntry) =>
+                            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                    );
+                    setLogs(sorted.slice(0, MAX_LOGS));
                 }
-            })
-            .catch(console.error)
-            .finally(() => setLoading(false));
+            } catch (err) {
+                if (process.env.NODE_ENV !== "production") {
+                    console.error(err);
+                }
+            } finally {
+                if (isMounted) setLoading(false);
+            }
+        };
+
+        fetchLogs();
+        const id = setInterval(fetchLogs, 10000);
+        return () => {
+            isMounted = false;
+            clearInterval(id);
+        };
     }, []);
 
     const filteredLogs = useMemo(() => {
@@ -154,8 +180,13 @@ export default function AdminAuditPage() {
         return Array.from(new Set(logs.map((l) => l.action)));
     }, [logs]);
 
+    const liveLogs = useMemo(
+        () => logs.filter((l) => !l.success).slice(0, LIVE_LOG_COUNT),
+        [logs]
+    );
+
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 text-sm">
             <AdminPageHeader
                 title="Audit Logs"
                 description="Güvenlik olaylarını ve kullanıcı aktivitelerini izleyin."
@@ -167,8 +198,8 @@ export default function AdminAuditPage() {
                     <div className="flex items-center gap-3">
                         <Shield className="w-8 h-8 text-[var(--color-turkish-blue-400)]" />
                         <div>
-                            <p className="text-2xl font-bold text-[var(--text-primary)]">{stats.total}</p>
-                            <p className="text-sm text-[var(--text-muted)]">Toplam Olay</p>
+                            <p className="text-xl font-bold text-[var(--text-primary)]">{stats.total}</p>
+                            <p className="text-xs text-[var(--text-muted)]">Toplam Olay</p>
                         </div>
                     </div>
                 </div>
@@ -176,8 +207,8 @@ export default function AdminAuditPage() {
                     <div className="flex items-center gap-3">
                         <CheckCircle className="w-8 h-8 text-emerald-400" />
                         <div>
-                            <p className="text-2xl font-bold text-[var(--text-primary)]">{stats.successful}</p>
-                            <p className="text-sm text-[var(--text-muted)]">Başarılı</p>
+                            <p className="text-xl font-bold text-[var(--text-primary)]">{stats.successful}</p>
+                            <p className="text-xs text-[var(--text-muted)]">Başarılı</p>
                         </div>
                     </div>
                 </div>
@@ -185,8 +216,8 @@ export default function AdminAuditPage() {
                     <div className="flex items-center gap-3">
                         <XCircle className="w-8 h-8 text-red-400" />
                         <div>
-                            <p className="text-2xl font-bold text-[var(--text-primary)]">{stats.failed}</p>
-                            <p className="text-sm text-[var(--text-muted)]">Başarısız</p>
+                            <p className="text-xl font-bold text-[var(--text-primary)]">{stats.failed}</p>
+                            <p className="text-xs text-[var(--text-muted)]">Başarısız</p>
                         </div>
                     </div>
                 </div>
@@ -194,8 +225,8 @@ export default function AdminAuditPage() {
                     <div className="flex items-center gap-3">
                         <AlertTriangle className="w-8 h-8 text-orange-400" />
                         <div>
-                            <p className="text-2xl font-bold text-[var(--text-primary)]">{stats.loginFailed}</p>
-                            <p className="text-sm text-[var(--text-muted)]">Başarısız Giriş</p>
+                            <p className="text-xl font-bold text-[var(--text-primary)]">{stats.loginFailed}</p>
+                            <p className="text-xs text-[var(--text-muted)]">Başarısız Giriş</p>
                         </div>
                     </div>
                 </div>
@@ -241,7 +272,7 @@ export default function AdminAuditPage() {
                     >
                         <option value="all">Tüm Sonuçlar</option>
                         <option value="success">Başarılı</option>
-                        <option value="failed">Başarısız</option>
+                        <option value="failed">Başarısız (varsayılan)</option>
                     </select>
                     <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
                 </div>
@@ -281,21 +312,21 @@ export default function AdminAuditPage() {
                         >
                             <div className="flex items-start justify-between gap-4">
                                 <div className="flex items-start gap-4">
-                                    <div className={`p-2 rounded-lg ${log.success ? "bg-emerald-500/10" : "bg-red-500/10"}`}>
-                                        {log.success ? (
-                                            <CheckCircle className="w-5 h-5 text-emerald-400" />
-                                        ) : (
-                                            <XCircle className="w-5 h-5 text-red-400" />
-                                        )}
-                                    </div>
-                                    <div>
-                                        <div className="flex items-center gap-2">
-                                            <span className={`font-medium ${ACTION_COLORS[log.action] || "text-[var(--text-primary)]"}`}>
-                                                {ACTION_LABELS[log.action] || log.action}
-                                            </span>
-                                            {log.userId && (
-                                                <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(30,184,255,0.1)] text-[var(--color-turkish-blue-300)]">
-                                                    <User className="w-3 h-3 inline mr-1" />
+                                <div className={`p-2 rounded-lg ${log.success ? "bg-emerald-500/10" : "bg-red-500/10"}`}>
+                                    {log.success ? (
+                                        <CheckCircle className="w-5 h-5 text-emerald-400" />
+                                    ) : (
+                                        <XCircle className="w-5 h-5 text-red-400" />
+                                    )}
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <span className={`font-medium text-sm ${ACTION_COLORS[log.action] || "text-[var(--text-primary)]"}`}>
+                                            {ACTION_LABELS[log.action] || log.action}
+                                        </span>
+                                        {log.userId && (
+                                            <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(30,184,255,0.1)] text-[var(--color-turkish-blue-300)]">
+                                                <User className="w-3 h-3 inline mr-1" />
                                                     ID: {log.userId}
                                                 </span>
                                             )}
@@ -335,6 +366,52 @@ export default function AdminAuditPage() {
                     ))}
                 </div>
             )}
+
+            {/* Live stream (success logs hidden) */}
+            <div className="rounded-2xl border border-[rgba(72,213,255,0.12)] bg-[rgba(15,31,54,0.55)] p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h3 className="text-sm font-semibold text-[var(--text-primary)]">Anlık Log Akışı</h3>
+                        <p className="text-xs text-[var(--text-muted)]">
+                            Başarılı olaylar gizlenir; son {LIVE_LOG_COUNT} kritik kayıt gösterilir.
+                        </p>
+                    </div>
+                    <div className="text-xs text-[var(--text-muted)]">{liveLogs.length} kayıt</div>
+                </div>
+                <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+                    {liveLogs.length === 0 ? (
+                        <div className="text-xs text-[var(--text-muted)]">Görüntülenecek kritik log yok.</div>
+                    ) : (
+                        liveLogs.map((log) => (
+                            <div
+                                key={`live-${log.id}`}
+                                className="flex items-start justify-between rounded-lg bg-[rgba(255,99,132,0.06)] border border-[rgba(255,99,132,0.2)] px-3 py-2"
+                            >
+                                <div className="flex items-start gap-2">
+                                    <XCircle className="w-4 h-4 text-red-400 mt-0.5" />
+                                    <div>
+                                        <div className="flex flex-wrap items-center gap-2 text-xs">
+                                            <span className={`font-semibold ${ACTION_COLORS[log.action] || "text-[var(--text-primary)]"}`}>
+                                                {ACTION_LABELS[log.action] || log.action}
+                                            </span>
+                                            {log.userId && (
+                                                <span className="px-2 py-0.5 rounded-full bg-[rgba(30,184,255,0.1)] text-[var(--color-turkish-blue-300)]">
+                                                    ID: {log.userId}
+                                                </span>
+                                            )}
+                                            {log.ip && <span className="text-[var(--text-muted)]">{log.ip}</span>}
+                                        </div>
+                                        <div className="text-[11px] text-[var(--text-muted)]">
+                                            {getRelativeTime(log.createdAt)}
+                                        </div>
+                                    </div>
+                                </div>
+                                <span className="text-[11px] text-[var(--text-muted)] whitespace-nowrap">{formatDate(log.createdAt)}</span>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
         </div>
     );
 }

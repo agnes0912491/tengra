@@ -34,6 +34,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { AdminCard } from "@/components/admin/ui";
+import { useLocale, useTranslations } from "next-intl";
 
 // Platform icons
 const platformIcons: Record<string, React.ReactNode> = {
@@ -43,27 +44,6 @@ const platformIcons: Record<string, React.ReactNode> = {
     ios: <Smartphone className="h-4 w-4" />,
     android: <Play className="h-4 w-4" />,
     web: <Globe className="h-4 w-4" />,
-};
-
-const formatDateTime = (value?: string | null) => {
-    if (!value) return "-";
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return "-";
-    return new Intl.DateTimeFormat("tr-TR", {
-        dateStyle: "medium",
-        timeStyle: "short",
-    }).format(date);
-};
-
-const formatStatus = (status?: Project["status"]) => {
-    switch (status) {
-        case "draft": return "Taslak";
-        case "in_progress": return "Geliştiriliyor";
-        case "on_hold": return "Beklemede";
-        case "completed": return "Tamamlandı";
-        case "archived": return "Arşivlendi";
-        default: return "Belirsiz";
-    }
 };
 
 const statusColors: Record<string, string> = {
@@ -79,11 +59,52 @@ type Props = {
 };
 
 export default function ProjectsAdmin({ projects }: Props) {
+    const t = useTranslations("AdminProjects");
+    const locale = useLocale();
+    const platformLabelMap: Record<string, string> = {
+        windows: t("platforms.windows"),
+        macos: t("platforms.macos"),
+        linux: t("platforms.linux"),
+        ios: t("platforms.ios"),
+        android: t("platforms.android"),
+        web: t("platforms.web"),
+    };
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [currentProject, setCurrentProject] = useState<Project | null>(null);
     const [localProjects, setLocalProjects] = useState<Project[]>(projects);
     const [isPending, startTransition] = useTransition();
     const [searchQuery, setSearchQuery] = useState("");
+    const formatDateTime = (value?: string | null) => {
+        if (!value) return "-";
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return "-";
+        return new Intl.DateTimeFormat(locale, {
+            dateStyle: "medium",
+            timeStyle: "short",
+        }).format(date);
+    };
+    const formatStatus = (status?: Project["status"]) => {
+        switch (status) {
+            case "draft": return t("status.draft");
+            case "in_progress": return t("status.inProgress");
+            case "on_hold": return t("status.onHold");
+            case "completed": return t("status.completed");
+            case "archived": return t("status.archived");
+            default: return t("status.unknown");
+        }
+    };
+    const formatType = (type?: Project["type"]) => {
+        switch (type) {
+            case "game": return t("types.game");
+            case "website": return t("types.website");
+            case "tool": return t("types.tool");
+            case "app": return t("types.app");
+            case "library": return t("types.library");
+            case "other": return t("types.other");
+            default: return t("types.other");
+        }
+    };
+    const formatPlatform = (platform: string) => platformLabelMap[platform] ?? platform;
 
     const { token } = useAdminToken();
 
@@ -118,7 +139,7 @@ export default function ProjectsAdmin({ projects }: Props) {
 
     const handleDelete = async () => {
         if (!token || !currentProject?.id) {
-            toast.error("Yetkilendirme belirteci eksik.");
+            toast.error(t("toast.missingToken"));
             return;
         }
 
@@ -126,9 +147,9 @@ export default function ProjectsAdmin({ projects }: Props) {
             const success = await dp(currentProject.id as string, token);
             if (success) {
                 setLocalProjects((prev) => prev.filter((p) => p.id !== currentProject.id));
-                toast.success("Proje başarıyla silindi.");
+                toast.success(t("toast.deleteSuccess"));
             } else {
-                toast.error("Proje silinemedi.");
+                toast.error(t("toast.deleteFailed"));
             }
             setDeleteModalOpen(false);
         });
@@ -139,15 +160,15 @@ export default function ProjectsAdmin({ projects }: Props) {
             {/* Header Section */}
             <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
                 <div>
-                    <h1 className="text-2xl font-bold text-white">Projeler</h1>
+                    <h1 className="text-2xl font-bold text-white">{t("title")}</h1>
                     <p className="text-sm text-[rgba(255,255,255,0.5)] mt-1">
-                        Tüm projelerinizi yönetin
+                        {t("subtitle")}
                     </p>
                 </div>
                 <Link href="/admin/dashboard/projects/new">
                     <Button className="bg-gradient-to-r from-[color:var(--color-turkish-blue-500)] to-[color:var(--color-turkish-blue-600)] hover:opacity-90">
                         <Plus className="h-4 w-4 mr-2" />
-                        Yeni Proje
+                        {t("labels.newProject")}
                     </Button>
                 </Link>
             </div>
@@ -157,37 +178,37 @@ export default function ProjectsAdmin({ projects }: Props) {
                 <AdminCard variant="elevated" padding="md">
                     <div className="flex items-center gap-2 text-[rgba(255,255,255,0.5)] text-sm">
                         <Package className="h-4 w-4" />
-                        Toplam
+                        {t("stats.total")}
                     </div>
                     <p className="text-2xl font-bold text-white mt-1">{stats.total}</p>
                 </AdminCard>
                 <AdminCard variant="elevated" padding="md">
                     <div className="flex items-center gap-2 text-emerald-400 text-sm">
                         <Package className="h-4 w-4" />
-                        Tamamlanan
+                        {t("stats.completed")}
                     </div>
                     <p className="text-2xl font-bold text-white mt-1">{stats.completed}</p>
                 </AdminCard>
                 <AdminCard variant="elevated" padding="md">
                     <div className="flex items-center gap-2 text-blue-400 text-sm">
                         <Package className="h-4 w-4" />
-                        Devam Eden
+                        {t("stats.inProgress")}
                     </div>
                     <p className="text-2xl font-bold text-white mt-1">{stats.inProgress}</p>
                 </AdminCard>
                 <AdminCard variant="elevated" padding="md">
                     <div className="flex items-center gap-2 text-[rgba(255,255,255,0.5)] text-sm">
                         <Download className="h-4 w-4" />
-                        İndirme
+                        {t("stats.downloads")}
                     </div>
-                    <p className="text-2xl font-bold text-white mt-1">{stats.totalDownloads.toLocaleString()}</p>
+                    <p className="text-2xl font-bold text-white mt-1">{stats.totalDownloads.toLocaleString(locale)}</p>
                 </AdminCard>
                 <AdminCard variant="elevated" padding="md">
                     <div className="flex items-center gap-2 text-[rgba(255,255,255,0.5)] text-sm">
                         <Eye className="h-4 w-4" />
-                        Görüntülenme
+                        {t("stats.views")}
                     </div>
-                    <p className="text-2xl font-bold text-white mt-1">{stats.totalViews.toLocaleString()}</p>
+                    <p className="text-2xl font-bold text-white mt-1">{stats.totalViews.toLocaleString(locale)}</p>
                 </AdminCard>
             </div>
 
@@ -197,7 +218,7 @@ export default function ProjectsAdmin({ projects }: Props) {
                 <Input
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Proje ara..."
+                    placeholder={t("searchPlaceholder")}
                     className="pl-10 border-[rgba(110,211,225,0.2)] bg-[rgba(3,12,18,0.6)] text-white"
                 />
             </div>
@@ -261,7 +282,7 @@ export default function ProjectsAdmin({ projects }: Props) {
                                     )}
                                     {project.type && (
                                         <span className="px-2 py-0.5 rounded bg-[rgba(255,255,255,0.05)] text-[10px] text-[rgba(255,255,255,0.5)] capitalize">
-                                            {project.type}
+                                            {formatType(project.type)}
                                         </span>
                                     )}
                                 </div>
@@ -273,7 +294,7 @@ export default function ProjectsAdmin({ projects }: Props) {
                                             <div
                                                 key={platform}
                                                 className="p-1.5 rounded-lg bg-[rgba(255,255,255,0.05)] text-[rgba(255,255,255,0.6)]"
-                                                title={platform}
+                                                title={formatPlatform(platform)}
                                             >
                                                 {platformIcons[platform]}
                                             </div>
@@ -291,13 +312,13 @@ export default function ProjectsAdmin({ projects }: Props) {
                                     {project.downloadCount !== undefined && (
                                         <span className="flex items-center gap-1">
                                             <Download className="h-3 w-3" />
-                                            {project.downloadCount.toLocaleString()}
+                                            {project.downloadCount.toLocaleString(locale)}
                                         </span>
                                     )}
                                     {project.viewCount !== undefined && (
                                         <span className="flex items-center gap-1">
                                             <Eye className="h-3 w-3" />
-                                            {project.viewCount.toLocaleString()}
+                                            {project.viewCount.toLocaleString(locale)}
                                         </span>
                                     )}
                                     {project.rating !== undefined && project.rating > 0 && (
@@ -329,7 +350,7 @@ export default function ProjectsAdmin({ projects }: Props) {
                                         className="w-full text-[color:var(--color-turkish-blue-300)] hover:bg-[rgba(0,167,197,0.1)]"
                                     >
                                         <Edit className="h-4 w-4 mr-1" />
-                                        Düzenle
+                                        {t("actions.edit")}
                                     </Button>
                                 </Link>
                                 {project.links?.find(l => l.type === 'website')?.url && (
@@ -361,11 +382,11 @@ export default function ProjectsAdmin({ projects }: Props) {
             {filteredProjects.length === 0 && (
                 <div className="text-center py-16 text-[rgba(255,255,255,0.4)]">
                     <Package className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p>Proje bulunamadı</p>
+                    <p>{t("empty")}</p>
                     <Link href="/admin/dashboard/projects/new">
                         <Button variant="outline" size="sm" className="mt-4">
                             <Plus className="h-4 w-4 mr-1" />
-                            Yeni Proje Oluştur
+                            {t("actions.create")}
                         </Button>
                     </Link>
                 </div>
@@ -377,15 +398,15 @@ export default function ProjectsAdmin({ projects }: Props) {
                     <DialogHeader>
                         <DialogTitle className="text-white flex items-center gap-2">
                             <Trash2 className="h-5 w-5 text-red-400" />
-                            Projeyi Sil
+                            {t("dialogs.delete.title")}
                         </DialogTitle>
                     </DialogHeader>
                     <div className="py-4">
                         <p className="text-[rgba(255,255,255,0.7)]">
-                            <strong className="text-white">{currentProject?.name}</strong> projesini silmek istediğinizden emin misiniz?
+                            {t("dialogs.delete.description", { name: currentProject?.name ?? "" })}
                         </p>
                         <p className="text-sm text-red-400 mt-2">
-                            Bu işlem geri alınamaz.
+                            {t("dialogs.delete.warning")}
                         </p>
                     </div>
                     <div className="flex justify-end gap-3">
@@ -394,14 +415,14 @@ export default function ProjectsAdmin({ projects }: Props) {
                             onClick={() => setDeleteModalOpen(false)}
                             className="text-[rgba(255,255,255,0.7)]"
                         >
-                            İptal
+                            {t("actions.cancel")}
                         </Button>
                         <Button
                             variant="destructive"
                             onClick={handleDelete}
                             disabled={isPending}
                         >
-                            {isPending ? "Siliniyor..." : "Sil"}
+                            {isPending ? t("actions.deleting") : t("actions.delete")}
                         </Button>
                     </div>
                 </DialogContent>

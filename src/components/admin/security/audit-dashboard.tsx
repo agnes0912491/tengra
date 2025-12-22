@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { useAdminToken } from "@/hooks/use-admin-token";
 import {
     Shield,
@@ -59,8 +60,8 @@ const getActionBadge = (action: string) => {
     return badge;
 };
 
-const formatDate = (date: string) => {
-    return new Intl.DateTimeFormat("tr-TR", {
+const formatDate = (date: string, locale?: string) => {
+    return new Intl.DateTimeFormat(locale ?? "tr-TR", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
@@ -71,6 +72,8 @@ const formatDate = (date: string) => {
 };
 
 export default function SecurityAuditDashboard() {
+    const locale = useLocale();
+    const t = useTranslations("AdminSecurity");
     const { token } = useAdminToken();
     const [logs, setLogs] = useState<AuditLog[]>([]);
     const [stats, setStats] = useState<AuditStats | null>(null);
@@ -150,10 +153,10 @@ export default function SecurityAuditDashboard() {
                 <div>
                     <h1 className="text-2xl font-bold text-white flex items-center gap-3">
                         <Shield className="h-7 w-7 text-[rgba(0,167,197,0.8)]" />
-                        Güvenlik Denetim Logları
+                        {t("header.title")}
                     </h1>
                     <p className="text-sm text-[rgba(255,255,255,0.5)] mt-1">
-                        Tüm sistem aktivitelerini izleyin ve analiz edin
+                        {t("header.subtitle")}
                     </p>
                 </div>
                 <div className="flex gap-2">
@@ -163,7 +166,7 @@ export default function SecurityAuditDashboard() {
                         className="border-[rgba(110,211,225,0.3)] text-[rgba(110,211,225,0.8)] hover:bg-[rgba(110,211,225,0.1)]"
                     >
                         <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-                        Yenile
+                        {t("actions.refresh")}
                     </Button>
                     <Button
                         onClick={exportLogs}
@@ -171,7 +174,7 @@ export default function SecurityAuditDashboard() {
                         className="border-[rgba(110,211,225,0.3)] text-[rgba(110,211,225,0.8)] hover:bg-[rgba(110,211,225,0.1)]"
                     >
                         <Download className="h-4 w-4 mr-2" />
-                        Dışa Aktar
+                        {t("actions.export")}
                     </Button>
                 </div>
             </div>
@@ -180,19 +183,19 @@ export default function SecurityAuditDashboard() {
             {stats && (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="rounded-xl border border-[rgba(110,211,225,0.15)] bg-[rgba(6,20,27,0.6)] backdrop-blur-xl p-4">
-                        <div className="text-sm text-[rgba(255,255,255,0.5)]">Toplam İşlem</div>
+                        <div className="text-sm text-[rgba(255,255,255,0.5)]">{t("stats.total")}</div>
                         <div className="text-2xl font-bold text-white mt-1">{stats.total.toLocaleString()}</div>
                     </div>
                     <div className="rounded-xl border border-green-500/20 bg-[rgba(6,20,27,0.6)] backdrop-blur-xl p-4">
-                        <div className="text-sm text-green-400/70">Başarılı</div>
+                        <div className="text-sm text-green-400/70">{t("stats.success")}</div>
                         <div className="text-2xl font-bold text-green-400 mt-1">{stats.successful.toLocaleString()}</div>
                     </div>
                     <div className="rounded-xl border border-red-500/20 bg-[rgba(6,20,27,0.6)] backdrop-blur-xl p-4">
-                        <div className="text-sm text-red-400/70">Başarısız</div>
+                        <div className="text-sm text-red-400/70">{t("stats.failed")}</div>
                         <div className="text-2xl font-bold text-red-400 mt-1">{stats.failed.toLocaleString()}</div>
                     </div>
                     <div className="rounded-xl border border-[rgba(110,211,225,0.15)] bg-[rgba(6,20,27,0.6)] backdrop-blur-xl p-4">
-                        <div className="text-sm text-[rgba(255,255,255,0.5)]">Benzersiz IP</div>
+                        <div className="text-sm text-[rgba(255,255,255,0.5)]">{t("stats.uniqueIps")}</div>
                         <div className="text-2xl font-bold text-white mt-1">{stats.uniqueIPs.toLocaleString()}</div>
                     </div>
                 </div>
@@ -203,7 +206,7 @@ export default function SecurityAuditDashboard() {
                 <div className="relative flex-1 min-w-[200px]">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[rgba(255,255,255,0.3)]" />
                     <Input
-                        placeholder="IP, kullanıcı veya detay ara..."
+                        placeholder={t("filters.searchPlaceholder")}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="pl-10 bg-[rgba(6,20,27,0.6)] border-[rgba(110,211,225,0.2)] text-white"
@@ -215,9 +218,9 @@ export default function SecurityAuditDashboard() {
                     onChange={(e) => setFilter(e.target.value as "all" | "success" | "failed")}
                     className="px-3 py-2 rounded-lg bg-[rgba(6,20,27,0.6)] border border-[rgba(110,211,225,0.2)] text-white text-sm"
                 >
-                    <option value="all">Tüm Durumlar</option>
-                    <option value="success">Başarılı</option>
-                    <option value="failed">Başarısız</option>
+                    <option value="all">{t("filters.statusAll")}</option>
+                    <option value="success">{t("stats.success")}</option>
+                    <option value="failed">{t("stats.failed")}</option>
                 </select>
 
                 <select
@@ -225,7 +228,7 @@ export default function SecurityAuditDashboard() {
                     onChange={(e) => setActionFilter(e.target.value)}
                     className="px-3 py-2 rounded-lg bg-[rgba(6,20,27,0.6)] border border-[rgba(110,211,225,0.2)] text-white text-sm"
                 >
-                    <option value="all">Tüm Eylemler</option>
+                    <option value="all">{t("filters.actionAll")}</option>
                     {uniqueActions.map((action) => (
                         <option key={action} value={action}>
                             {action}
@@ -240,13 +243,13 @@ export default function SecurityAuditDashboard() {
                     <table className="w-full">
                         <thead>
                             <tr className="border-b border-[rgba(110,211,225,0.1)]">
-                                <th className="text-left px-4 py-3 text-xs uppercase tracking-wider text-[rgba(255,255,255,0.5)]">Tarih</th>
-                                <th className="text-left px-4 py-3 text-xs uppercase tracking-wider text-[rgba(255,255,255,0.5)]">Eylem</th>
-                                <th className="text-left px-4 py-3 text-xs uppercase tracking-wider text-[rgba(255,255,255,0.5)]">Kullanıcı</th>
-                                <th className="text-left px-4 py-3 text-xs uppercase tracking-wider text-[rgba(255,255,255,0.5)]">IP</th>
-                                <th className="text-left px-4 py-3 text-xs uppercase tracking-wider text-[rgba(255,255,255,0.5)]">Konum</th>
-                                <th className="text-left px-4 py-3 text-xs uppercase tracking-wider text-[rgba(255,255,255,0.5)]">Durum</th>
-                                <th className="text-left px-4 py-3 text-xs uppercase tracking-wider text-[rgba(255,255,255,0.5)]">Detay</th>
+                                <th className="text-left px-4 py-3 text-xs uppercase tracking-wider text-[rgba(255,255,255,0.5)]">{t("table.date")}</th>
+                                <th className="text-left px-4 py-3 text-xs uppercase tracking-wider text-[rgba(255,255,255,0.5)]">{t("table.action")}</th>
+                                <th className="text-left px-4 py-3 text-xs uppercase tracking-wider text-[rgba(255,255,255,0.5)]">{t("table.user")}</th>
+                                <th className="text-left px-4 py-3 text-xs uppercase tracking-wider text-[rgba(255,255,255,0.5)]">{t("table.ip")}</th>
+                                <th className="text-left px-4 py-3 text-xs uppercase tracking-wider text-[rgba(255,255,255,0.5)]">{t("table.location")}</th>
+                                <th className="text-left px-4 py-3 text-xs uppercase tracking-wider text-[rgba(255,255,255,0.5)]">{t("table.status")}</th>
+                                <th className="text-left px-4 py-3 text-xs uppercase tracking-wider text-[rgba(255,255,255,0.5)]">{t("table.details")}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[rgba(110,211,225,0.05)]">
@@ -254,13 +257,13 @@ export default function SecurityAuditDashboard() {
                                 <tr>
                                     <td colSpan={7} className="text-center py-12 text-[rgba(255,255,255,0.5)]">
                                         <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2" />
-                                        Yükleniyor...
+                                        {t("loading")}
                                     </td>
                                 </tr>
                             ) : logs.length === 0 ? (
                                 <tr>
                                     <td colSpan={7} className="text-center py-12 text-[rgba(255,255,255,0.5)]">
-                                        Kayıt bulunamadı
+                                        {t("empty")}
                                     </td>
                                 </tr>
                             ) : (
@@ -269,7 +272,7 @@ export default function SecurityAuditDashboard() {
                                     return (
                                         <tr key={log.id} className="hover:bg-[rgba(110,211,225,0.05)]">
                                             <td className="px-4 py-3 text-sm text-[rgba(255,255,255,0.7)]">
-                                                {formatDate(log.createdAt)}
+                                                {formatDate(log.createdAt, locale)}
                                             </td>
                                             <td className="px-4 py-3">
                                                 <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium border ${badge.color}`}>
@@ -290,12 +293,12 @@ export default function SecurityAuditDashboard() {
                                                 {log.success ? (
                                                     <span className="inline-flex items-center gap-1 text-green-400 text-xs">
                                                         <CheckCircle className="h-3 w-3" />
-                                                        Başarılı
+                                                        {t("stats.success")}
                                                     </span>
                                                 ) : (
                                                     <span className="inline-flex items-center gap-1 text-red-400 text-xs">
                                                         <XCircle className="h-3 w-3" />
-                                                        Başarısız
+                                                        {t("stats.failed")}
                                                     </span>
                                                 )}
                                             </td>
@@ -313,7 +316,7 @@ export default function SecurityAuditDashboard() {
                 {/* Pagination */}
                 <div className="flex items-center justify-between px-4 py-3 border-t border-[rgba(110,211,225,0.1)]">
                     <div className="text-sm text-[rgba(255,255,255,0.5)]">
-                        Sayfa {page} / {totalPages}
+                        {t("pagination", { page, total: totalPages })}
                     </div>
                     <div className="flex gap-2">
                         <Button
@@ -343,13 +346,13 @@ export default function SecurityAuditDashboard() {
                 <div className="rounded-xl border border-red-500/30 bg-red-500/10 backdrop-blur-xl p-4">
                     <div className="flex items-center gap-2 text-red-400 font-medium mb-3">
                         <AlertTriangle className="h-5 w-5" />
-                        Son Başarısız Girişimler
+                        {t("recentFailures.title")}
                     </div>
                     <div className="space-y-2">
                         {stats.recentFailures.slice(0, 5).map((log) => (
                             <div key={log.id} className="flex items-center justify-between text-sm">
                                 <span className="text-[rgba(255,255,255,0.7)]">{log.action} - {log.ip}</span>
-                                <span className="text-[rgba(255,255,255,0.5)]">{formatDate(log.createdAt)}</span>
+                                <span className="text-[rgba(255,255,255,0.5)]">{formatDate(log.createdAt, locale)}</span>
                             </div>
                         ))}
                     </div>

@@ -34,17 +34,17 @@ type HomepagePayload = { targets?: TargetsShape; faqs?: unknown };
 
 const SUPPORTED_LOCALES = routing.locales;
 
-const LOCALE_LABELS: Record<string, { label: string; flag: string }> = {
-    tr: { label: "Turkce", flag: "TR" },
-    en: { label: "English", flag: "US" },
-    de: { label: "Deutsch", flag: "DE" },
-    fr: { label: "Francais", flag: "FR" },
-    es: { label: "Espanol", flag: "ES" },
-    ru: { label: "Russkiy", flag: "RU" },
-    zh: { label: "Zhongwen", flag: "CN" },
-    ja: { label: "Nihongo", flag: "JP" },
-    ko: { label: "Hangugeo", flag: "KR" },
-    ar: { label: "Alarabiya", flag: "SA" },
+const LOCALE_LABELS: Record<string, { labelKey: string; flag: string }> = {
+    tr: { labelKey: "localeLabels.tr", flag: "TR" },
+    en: { labelKey: "localeLabels.en", flag: "US" },
+    de: { labelKey: "localeLabels.de", flag: "DE" },
+    fr: { labelKey: "localeLabels.fr", flag: "FR" },
+    es: { labelKey: "localeLabels.es", flag: "ES" },
+    ru: { labelKey: "localeLabels.ru", flag: "RU" },
+    zh: { labelKey: "localeLabels.zh", flag: "CN" },
+    ja: { labelKey: "localeLabels.ja", flag: "JP" },
+    ko: { labelKey: "localeLabels.ko", flag: "KR" },
+    ar: { labelKey: "localeLabels.ar", flag: "SA" },
 };
 
 export default function GoalsAdmin() {
@@ -153,7 +153,7 @@ export default function GoalsAdmin() {
         };
         setItems((prev) => [...prev, newGoal]);
         setExpandedIndex(items.length);
-        setSuccess("Yeni hedef eklendi");
+        setSuccess(t("goals.toast.added"));
         setTimeout(() => setSuccess(null), 3000);
     };
 
@@ -175,7 +175,7 @@ export default function GoalsAdmin() {
             }
             setRaw(payload);
             setOriginalItems(items.map((g) => ({ ...g })));
-            setSuccess("Tum hedefler kaydedildi");
+            setSuccess(t("goals.toast.savedAll"));
             setTimeout(() => setSuccess(null), 3000);
             // notify live sections
             try {
@@ -191,7 +191,7 @@ export default function GoalsAdmin() {
     const removeAt = (idx: number) => {
         setItems((prev) => reindex(prev.filter((_, i) => i !== idx)));
         setDeleteConfirm(null);
-        setSuccess("Hedef silindi");
+        setSuccess(t("goals.toast.deleted"));
         setTimeout(() => setSuccess(null), 3000);
     };
 
@@ -208,7 +208,7 @@ export default function GoalsAdmin() {
     const discardChanges = () => {
         setItems(originalItems.map((g) => ({ ...g })));
         setDiscardConfirm(false);
-        setSuccess("Degisiklikler iptal edildi");
+        setSuccess(t("goals.toast.discarded"));
         setTimeout(() => setSuccess(null), 3000);
     };
 
@@ -218,10 +218,10 @@ export default function GoalsAdmin() {
                 {/* Stats Row */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {[
-                        { label: "Toplam Hedef", value: stats.total, icon: Target, color: "from-blue-500 to-cyan-500" },
-                        { label: "Aktif", value: stats.active, icon: TrendingUp, color: "from-emerald-500 to-green-500" },
-                        { label: "Pasif", value: stats.inactive, icon: EyeOff, color: "from-gray-500 to-slate-500" },
-                        { label: "Durum", value: isDirty ? "Degisti" : "Guncel", icon: Award, color: isDirty ? "from-amber-500 to-orange-500" : "from-emerald-500 to-teal-500", isText: true },
+                        { label: t("goals.stats.total"), value: stats.total, icon: Target, color: "from-blue-500 to-cyan-500" },
+                        { label: t("goals.stats.active"), value: stats.active, icon: TrendingUp, color: "from-emerald-500 to-green-500" },
+                        { label: t("goals.stats.inactive"), value: stats.inactive, icon: EyeOff, color: "from-gray-500 to-slate-500" },
+                        { label: t("goals.stats.status"), value: isDirty ? t("goals.stats.changed") : t("goals.stats.upToDate"), icon: Award, color: isDirty ? "from-amber-500 to-orange-500" : "from-emerald-500 to-teal-500", isText: true },
                     ].map((stat, i) => (
                         <motion.div
                             key={stat.label}
@@ -264,11 +264,15 @@ export default function GoalsAdmin() {
                                         onChange={(e) => setLocale(e.target.value as typeof locale)}
                                         className="pl-10 pr-4 py-2.5 rounded-xl bg-[rgba(15,31,54,0.8)] border border-[rgba(72,213,255,0.2)] text-white text-sm appearance-none cursor-pointer hover:border-[rgba(72,213,255,0.4)] transition-colors min-w-[160px]"
                                     >
-                                        {(SUPPORTED_LOCALES as readonly string[]).map((loc) => (
-                                            <option key={loc} value={loc}>
-                                                [{LOCALE_LABELS[loc]?.flag || "??"}] {LOCALE_LABELS[loc]?.label || loc.toUpperCase()}
-                                            </option>
-                                        ))}
+                                        {(SUPPORTED_LOCALES as readonly string[]).map((loc) => {
+                                            const localeMeta = LOCALE_LABELS[loc];
+                                            const label = localeMeta?.labelKey ? t(localeMeta.labelKey) : loc.toUpperCase();
+                                            return (
+                                                <option key={loc} value={loc}>
+                                                    [{localeMeta?.flag || "??"}] {label}
+                                                </option>
+                                            );
+                                        })}
                                     </select>
                                 </div>
 
@@ -278,7 +282,7 @@ export default function GoalsAdmin() {
                                     <Input
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.currentTarget.value)}
-                                        placeholder="Hedef ara..."
+                                        placeholder={t("goals.searchPlaceholder")}
                                         className="pl-10 bg-[rgba(15,31,54,0.8)] border-[rgba(72,213,255,0.2)]"
                                     />
                                 </div>
@@ -299,7 +303,7 @@ export default function GoalsAdmin() {
                                             ) : (
                                                 <Save className="w-4 h-4 mr-1" />
                                             )}
-                                            Kaydet
+                                            {t("save")}
                                         </Button>
                                         <Button
                                             variant="outline"
@@ -308,7 +312,7 @@ export default function GoalsAdmin() {
                                             className="border-[rgba(72,213,255,0.2)] hover:bg-[rgba(72,213,255,0.1)]"
                                         >
                                             <RotateCcw className="w-4 h-4 mr-1" />
-                                            Iptal
+                                            {t("cancel")}
                                         </Button>
                                     </>
                                 )}
@@ -318,7 +322,7 @@ export default function GoalsAdmin() {
                                     className="bg-[var(--color-turkish-blue-500)] hover:bg-[var(--color-turkish-blue-600)] text-white"
                                 >
                                     <Plus className="w-4 h-4 mr-1" />
-                                    Yeni Hedef
+                                    {t("goals.actions.addNew")}
                                 </Button>
                             </div>
                         </div>
@@ -350,12 +354,12 @@ export default function GoalsAdmin() {
                             <div className="text-center py-16">
                                 <Crosshair className="w-16 h-16 mx-auto text-[var(--text-muted)] opacity-50 mb-4" />
                                 <p className="text-[var(--text-secondary)]">
-                                    {searchQuery ? "Aramanizla eslesen hedef bulunamadi" : "Henuz hedef eklenmemis"}
+                                    {searchQuery ? t("goals.empty.filtered") : t("goals.empty.default")}
                                 </p>
                                 {!searchQuery && (
                                     <Button onClick={addNew} className="mt-4" variant="outline">
                                         <Plus className="w-4 h-4 mr-1" />
-                                        Ilk Hedefi Ekle
+                                        {t("goals.actions.addFirst")}
                                     </Button>
                                 )}
                             </div>
@@ -410,7 +414,7 @@ export default function GoalsAdmin() {
                                                                     ? "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
                                                                     : "bg-gray-500/20 text-gray-400 hover:bg-gray-500/30"
                                                                 }`}
-                                                            title={item.isActive ? "Aktif" : "Pasif"}
+                                                            title={item.isActive ? t("goals.status.active") : t("goals.status.inactive")}
                                                         >
                                                             {item.isActive ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                                                         </button>
@@ -420,7 +424,7 @@ export default function GoalsAdmin() {
                                                                 setDeleteConfirm(realIndex);
                                                             }}
                                                             className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
-                                                            title="Sil"
+                                                            title={t("delete")}
                                                         >
                                                             <Trash2 className="w-4 h-4" />
                                                         </button>
@@ -441,7 +445,7 @@ export default function GoalsAdmin() {
                                                                 <div className="space-y-2">
                                                                     <label className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">
                                                                         <Target className="w-3.5 h-3.5 text-[var(--color-turkish-blue-400)]" />
-                                                                        Baslik
+                                                                        {t("title")}
                                                                     </label>
                                                                     <Input
                                                                         value={item.title}
@@ -454,7 +458,7 @@ export default function GoalsAdmin() {
                                                                 <div className="space-y-2">
                                                                     <label className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">
                                                                         <FileText className="w-3.5 h-3.5 text-[var(--color-turkish-blue-400)]" />
-                                                                        Aciklama
+                                                                        {t("body")}
                                                                     </label>
                                                                     <textarea
                                                                         value={item.body}
@@ -472,7 +476,7 @@ export default function GoalsAdmin() {
                                                                         onClick={() => setExpandedIndex(null)}
                                                                     >
                                                                         <X className="w-4 h-4 mr-1" />
-                                                                        Kapat
+                                                                        {t("goals.actions.close")}
                                                                     </Button>
                                                                 </div>
                                                             </div>
@@ -496,21 +500,21 @@ export default function GoalsAdmin() {
                     <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-md rounded-2xl bg-[rgba(15,31,54,0.95)] border border-[rgba(72,213,255,0.2)] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.5)] z-50">
                         <Dialog.Title className="text-lg font-semibold text-white flex items-center gap-2">
                             <Trash2 className="w-5 h-5 text-red-400" />
-                            Hedefi Sil
+                            {t("goals.dialogs.delete.title")}
                         </Dialog.Title>
                         <Dialog.Description className="mt-3 text-sm text-[var(--text-secondary)]">
-                            Bu hedefi silmek istediginizden emin misiniz? Bu islem geri alinamaz.
+                            {t("goals.dialogs.delete.description")}
                         </Dialog.Description>
                         <div className="mt-6 flex justify-end gap-3">
                             <Button variant="outline" onClick={() => setDeleteConfirm(null)}>
-                                Iptal
+                                {t("cancel")}
                             </Button>
                             <Button
                                 variant="destructive"
                                 onClick={() => deleteConfirm !== null && removeAt(deleteConfirm)}
                             >
                                 <Trash2 className="w-4 h-4 mr-1" />
-                                Sil
+                                {t("delete")}
                             </Button>
                         </div>
                     </Dialog.Content>
@@ -524,18 +528,18 @@ export default function GoalsAdmin() {
                     <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-md rounded-2xl bg-[rgba(15,31,54,0.95)] border border-[rgba(72,213,255,0.2)] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.5)] z-50">
                         <Dialog.Title className="text-lg font-semibold text-white flex items-center gap-2">
                             <RotateCcw className="w-5 h-5 text-amber-400" />
-                            Degisiklikleri Iptal Et
+                            {t("goals.dialogs.discard.title")}
                         </Dialog.Title>
                         <Dialog.Description className="mt-3 text-sm text-[var(--text-secondary)]">
-                            Tum degisiklikleri iptal etmek istediginizden emin misiniz?
+                            {t("goals.dialogs.discard.description")}
                         </Dialog.Description>
                         <div className="mt-6 flex justify-end gap-3">
                             <Button variant="outline" onClick={() => setDiscardConfirm(false)}>
-                                Vazgec
+                                {t("goals.dialogs.discard.cancel")}
                             </Button>
                             <Button variant="destructive" onClick={discardChanges}>
                                 <RotateCcw className="w-4 h-4 mr-1" />
-                                Iptal Et
+                                {t("goals.dialogs.discard.confirm")}
                             </Button>
                         </div>
                     </Dialog.Content>

@@ -29,64 +29,8 @@ import {
   Shield,
   PanelLeftClose,
   PanelLeft,
+  DownloadCloud,
 } from "lucide-react";
-
-const NAVIGATION_ITEMS: Readonly<NavItem[]> = [
-  {
-    href: "/admin/dashboard",
-    label: "Genel Bakış",
-    description: "Durum ve istatistikler",
-    Icon: LayoutDashboard,
-  },
-  {
-    href: "/admin/dashboard/projects",
-    label: "Projeler",
-    description: "Projeleri yönet",
-    Icon: FolderKanban,
-  },
-  {
-    href: "/admin/dashboard/blogs",
-    label: "Bloglar",
-    description: "Blog içeriklerini düzenle",
-    Icon: BookText,
-  },
-  {
-    href: "/admin/dashboard/goals",
-    label: "Hedefler",
-    description: "Hedefleri i18n ile yönet",
-    Icon: Target,
-  },
-  {
-    href: "/admin/dashboard/faq",
-    label: "S.S.S.",
-    description: "Sıkça sorulan soruları düzenle",
-    Icon: HelpCircle,
-  },
-  {
-    href: "/admin/dashboard/users",
-    label: "Kullanıcılar",
-    description: "Rolleri ve erişimi yönet",
-    Icon: Users,
-  },
-  {
-    href: "/admin/dashboard/contact",
-    label: "İletişim",
-    description: "İletişim formu kayıtları",
-    Icon: Mail,
-  },
-  {
-    href: "/admin/dashboard/forum",
-    label: "Forum",
-    description: "Kategorileri ve görünürlükleri yönet",
-    Icon: MessagesSquare,
-  },
-  {
-    href: "/admin/dashboard/audit",
-    label: "Audit Logs",
-    description: "Güvenlik olaylarını izle",
-    Icon: Shield,
-  },
-];
 
 type Props = {
   children: ReactNode;
@@ -99,7 +43,6 @@ export default function AdminShell({ children }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const t = useTranslations("AdminDashboard");
-  const tNav = useTranslations("Navigation");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
 
@@ -120,7 +63,71 @@ export default function AdminShell({ children }: Props) {
 
   const isAdmin = user?.role === "admin";
 
-  const navigation = useMemo(() => NAVIGATION_ITEMS, []);
+  const navigation = useMemo<NavItem[]>(
+    () => [
+      {
+        href: "/admin/dashboard",
+        label: t("nav.overview.label"),
+        description: t("nav.overview.description"),
+        Icon: LayoutDashboard,
+      },
+      {
+        href: "/admin/dashboard/projects",
+        label: t("nav.projects.label"),
+        description: t("nav.projects.description"),
+        Icon: FolderKanban,
+      },
+      {
+        href: "/admin/dashboard/blogs",
+        label: t("nav.blogs.label"),
+        description: t("nav.blogs.description"),
+        Icon: BookText,
+      },
+      {
+        href: "/admin/dashboard/goals",
+        label: t("nav.goals.label"),
+        description: t("nav.goals.description"),
+        Icon: Target,
+      },
+      {
+        href: "/admin/dashboard/faq",
+        label: t("nav.faq.label"),
+        description: t("nav.faq.description"),
+        Icon: HelpCircle,
+      },
+      {
+        href: "/admin/dashboard/users",
+        label: t("nav.users.label"),
+        description: t("nav.users.description"),
+        Icon: Users,
+      },
+      {
+        href: "/admin/dashboard/contact",
+        label: t("nav.contact.label"),
+        description: t("nav.contact.description"),
+        Icon: Mail,
+      },
+      {
+        href: "/admin/dashboard/forum",
+        label: t("nav.forum.label"),
+        description: t("nav.forum.description"),
+        Icon: MessagesSquare,
+      },
+      {
+        href: "/admin/dashboard/videos",
+        label: t("nav.videos.label"),
+        description: t("nav.videos.description"),
+        Icon: DownloadCloud,
+      },
+      {
+        href: "/admin/dashboard/audit",
+        label: t("nav.audit.label"),
+        description: t("nav.audit.description"),
+        Icon: Shield,
+      },
+    ],
+    [t]
+  );
 
   const handleLogout = useCallback(() => {
     logout();
@@ -190,14 +197,14 @@ export default function AdminShell({ children }: Props) {
             ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
           `}
           role="complementary"
-          aria-label="Yönetim Paneli Yan Menü"
+          aria-label={t("shell.sidebarLabel")}
         >
           {/* Collapse toggle - desktop only */}
           <button
             type="button"
             onClick={toggleCollapsed}
             className="hidden lg:flex absolute -right-3 top-20 w-6 h-6 items-center justify-center rounded-full bg-[rgba(15,31,54,0.95)] border border-[rgba(72,213,255,0.2)] text-[rgba(130,226,255,0.8)] hover:bg-[rgba(72,213,255,0.15)] transition-all z-10"
-            title={collapsed ? "Genişlet" : "Daralt"}
+            title={collapsed ? t("shell.expand") : t("shell.collapse")}
           >
             {collapsed ? <PanelLeft className="w-3.5 h-3.5" /> : <PanelLeftClose className="w-3.5 h-3.5" />}
           </button>
@@ -213,29 +220,23 @@ export default function AdminShell({ children }: Props) {
           {/* Header */}
           <header className={`relative flex items-center ${collapsed ? "justify-center" : "gap-3"}`}>
             <div className={`flex items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--color-turkish-blue-500)] to-[var(--color-turkish-blue-600)] shadow-[0_4px_20px_rgba(30,184,255,0.25)] ${collapsed ? "h-11 w-11" : "h-12 w-12"}`}>
-              <Image crossOrigin="anonymous" src={ADMIN_LOGO_SRC} alt="Tengra Logo" width={collapsed ? 24 : 28} height={collapsed ? 24 : 28} className="opacity-95" />
+              <Image crossOrigin="anonymous" src={ADMIN_LOGO_SRC} alt={t("shell.logoAlt")} width={collapsed ? 24 : 28} height={collapsed ? 24 : 28} className="opacity-95" />
             </div>
             {!collapsed && (
               <div className="leading-tight">
                 <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--color-turkish-blue-400)]">
-                  Tengra
+                  {t("shell.brand")}
                 </p>
-                <p className="text-sm font-semibold text-[var(--text-primary)]">Yönetim Paneli</p>
+                <p className="text-sm font-semibold text-[var(--text-primary)]">{t("shell.title")}</p>
               </div>
             )}
           </header>
 
           {/* Navigation */}
-          <nav className={`relative mt-8 flex flex-1 flex-col gap-1.5 overflow-y-auto ${collapsed ? "px-0" : "pr-1"} text-sm`} role="navigation" aria-label="Ana gezinme">
+          <nav className={`relative mt-8 flex flex-1 flex-col gap-1.5 overflow-y-auto ${collapsed ? "px-0" : "pr-1"} text-sm`} role="navigation" aria-label={t("shell.primaryNavLabel")}>
             {navigation.map((item) => {
-              const localized =
-                item.href === "/admin/dashboard/faq"
-                  ? { ...item, label: tNav("faq") }
-                  : item.href === "/admin/dashboard/contact"
-                    ? { ...item, label: tNav("contact") }
-                    : item;
               const isActive = pathname === item.href;
-              return <SidebarItem key={item.href} item={localized} isActive={!!isActive} collapsed={collapsed} />;
+              return <SidebarItem key={item.href} item={item} isActive={!!isActive} collapsed={collapsed} />;
             })}
           </nav>
 
@@ -244,18 +245,18 @@ export default function AdminShell({ children }: Props) {
             <Link
               href="/"
               className={`flex items-center justify-center rounded-xl text-sm font-medium text-white bg-gradient-to-r from-[var(--color-turkish-blue-500)] to-[var(--color-turkish-blue-600)] hover:from-[var(--color-turkish-blue-400)] hover:to-[var(--color-turkish-blue-500)] shadow-[0_4px_15px_rgba(30,184,255,0.2)] transition-all ${collapsed ? "w-11 h-11 p-0 mb-0" : "gap-2 px-4 py-2.5 mb-4"}`}
-              title="Ana Sayfaya Dön"
+              title={t("shell.backToHome")}
             >
               <Home className="h-4 w-4" />
-              {!collapsed && <span>Ana Sayfaya Dön</span>}
+              {!collapsed && <span>{t("shell.backToHome")}</span>}
             </Link>
 
             {!collapsed && (
               <div className="rounded-xl bg-[rgba(15,31,54,0.5)] border border-[rgba(72,213,255,0.1)] p-4">
                 <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--color-turkish-blue-400)]">
-                  Kullanıcı
+                  {t("shell.userLabel")}
                 </p>
-                <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">{user?.displayName ?? user?.username ?? "Admin"}</p>
+                <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">{user?.displayName ?? user?.username ?? t("shell.userFallback")}</p>
                 <p className="text-[11px] text-[var(--text-muted)]">{user?.email}</p>
               </div>
             )}
@@ -264,10 +265,10 @@ export default function AdminShell({ children }: Props) {
               type="button"
               onClick={handleLogout}
               className={`flex items-center justify-center rounded-xl text-sm font-medium text-white bg-[rgba(220,38,38,0.8)] hover:bg-[rgba(220,38,38,0.9)] shadow-[0_4px_15px_rgba(220,38,38,0.2)] transition-all ${collapsed ? "w-11 h-11 p-0 mt-0" : "mt-4 w-full gap-2 px-4 py-2.5"}`}
-              title="Çıkış Yap"
+              title={t("shell.logout")}
             >
               <LogOut className="h-4 w-4" />
-              {!collapsed && <span>Çıkış Yap</span>}
+              {!collapsed && <span>{t("shell.logout")}</span>}
             </button>
           </footer>
         </aside>

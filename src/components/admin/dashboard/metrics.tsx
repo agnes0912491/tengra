@@ -6,6 +6,7 @@ import StatCard from "@/components/admin/ui/stat-card";
 import ChartCard from "@/components/admin/ui/chart-card";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useAdminToken } from "@/hooks/use-admin-token";
+import { useTranslations } from "next-intl";
 
 type Visit = { date: string; count: number };
 type RangeKey = "daily" | "weekly" | "monthly";
@@ -40,17 +41,8 @@ const useFrontendUptime = () => {
 };
 
 
-const formatDuration = (seconds?: number) => {
-    if (!seconds || Number.isNaN(seconds)) return "Bilinmiyor";
-    const total = Math.floor(seconds);
-    const d = Math.floor(total / 86400);
-    const h = Math.floor((total % 86400) / 3600);
-    const m = Math.floor((total % 3600) / 60);
-    const parts = [d ? `${d}g` : null, h ? `${h}s` : null, m ? `${m}d` : null].filter(Boolean);
-    return parts.length ? parts.join(" ") : `${total}s`;
-};
-
 export default function AdminMetrics() {
+    const t = useTranslations("AdminDashboard");
     const [health, setHealth] = useState<ServerHealth>({ status: "offline" });
     const [visits, setVisits] = useState<Visit[]>([]);
     const [topBlogs, setTopBlogs] = useState<{ id: string; count: number }[]>([]);
@@ -65,6 +57,20 @@ export default function AdminMetrics() {
     const feUptime = useFrontendUptime();
 
     const { token, refresh } = useAdminToken();
+
+    const formatDuration = (seconds?: number) => {
+        if (!seconds || Number.isNaN(seconds)) return t("metrics.unknown");
+        const total = Math.floor(seconds);
+        const d = Math.floor(total / 86400);
+        const h = Math.floor((total % 86400) / 3600);
+        const m = Math.floor((total % 3600) / 60);
+        const parts = [
+            d ? t("metrics.duration.days", { days: d }) : null,
+            h ? t("metrics.duration.hours", { hours: h }) : null,
+            m ? t("metrics.duration.minutes", { minutes: m }) : null,
+        ].filter(Boolean);
+        return parts.length ? parts.join(" ") : t("metrics.duration.seconds", { seconds: total });
+    };
 
     useEffect(() => {
         let mounted = true;
@@ -84,10 +90,10 @@ export default function AdminMetrics() {
                 setTopBlogs(t);
                 setTopPages(p);
                 setTopAgents(a);
-                if (!token) setError("Yetkilendirme bulunamadı.");
+                if (!token) setError(t("metrics.authorizationMissing"));
             } catch {
                 if (!mounted) return;
-                setError("Veriler alınamadı. Oturum veya ağ bağlantısını kontrol edin.");
+                setError(t("metrics.fetchError"));
             }
         };
         load();
@@ -96,7 +102,7 @@ export default function AdminMetrics() {
             mounted = false;
             clearInterval(id);
         };
-    }, [token, reloadAt]);
+    }, [token, reloadAt, t]);
 
     const filteredVisits = useMemo(() => {
         if (!visits.length) return [];
@@ -175,9 +181,13 @@ export default function AdminMetrics() {
         <div className="flex flex-col gap-6">
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,18,26,0.75)] px-4 py-3 text-sm text-[rgba(255,255,255,0.8)]">
                 <div className="flex items-center gap-3">
-                    <span className="text-[rgba(255,255,255,0.6)]">Adblock</span>
+                    <span className="text-[rgba(255,255,255,0.6)]">{t("metrics.adblock.label")}</span>
                     <span className="rounded-full border border-[rgba(110,211,225,0.35)] bg-[rgba(8,24,32,0.8)] px-3 py-1 text-xs uppercase tracking-[0.2em]">
-                        {adblockEnabled === "unknown" ? "Bilinmiyor" : adblockEnabled === "true" ? "Açık" : "Kapalı"}
+                        {adblockEnabled === "unknown"
+                            ? t("metrics.adblock.unknown")
+                            : adblockEnabled === "true"
+                                ? t("metrics.adblock.enabled")
+                                : t("metrics.adblock.disabled")}
                     </span>
                     {error ? <span className="text-[rgba(255,150,150,0.85)]">{error}</span> : null}
                 </div>
@@ -186,34 +196,34 @@ export default function AdminMetrics() {
                     onClick={handleRefresh}
                     className="rounded-full border border-[rgba(110,211,225,0.35)] px-3 py-1 text-xs uppercase tracking-[0.25em] text-[rgba(255,255,255,0.9)] hover:border-[rgba(110,211,225,0.6)]"
                 >
-                    Yenile
+                    {t("metrics.adblock.refresh")}
                 </button>
             </div>
             {/* Sistem Sağlığı */}
-            <StatCard title="Sistem Sağlığı">
+            <StatCard title={t("metrics.systemHealth")}>
                 <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
                     <div className="rounded-xl border border-[rgba(110,211,225,0.2)] p-4">
-                        <div className="text-[rgba(255,255,255,0.6)]">Sunucu Uptime</div>
+                        <div className="text-[rgba(255,255,255,0.6)]">{t("metrics.serverUptime")}</div>
                         <div className="mt-1 text-lg text-white">{formatDuration(health.uptimeSeconds)}</div>
                     </div>
                     <div className="rounded-xl border border-[rgba(110,211,225,0.2)] p-4">
-                        <div className="text-[rgba(255,255,255,0.6)]">Frontend Uptime</div>
+                        <div className="text-[rgba(255,255,255,0.6)]">{t("metrics.frontendUptime")}</div>
                         <div className="mt-1 text-lg text-white">{formatDuration(feUptime)}</div>
                     </div>
                     <div className="rounded-xl border border-[rgba(110,211,225,0.2)] p-4">
-                        <div className="text-[rgba(255,255,255,0.6)]">CPU Yükü</div>
+                        <div className="text-[rgba(255,255,255,0.6)]">{t("metrics.cpuLoad")}</div>
                         <div className="mt-1 text-xs text-white">
                             {health.cpu
                                 ? `1m: ${health.cpu.loadAvg1.toFixed(2)} • 5m: ${health.cpu.loadAvg5.toFixed(2)} • 15m: ${health.cpu.loadAvg15.toFixed(2)}`
-                                : "Veri yok"}
+                                : t("metrics.noData")}
                         </div>
                     </div>
                     <div className="rounded-xl border border-[rgba(110,211,225,0.2)] p-4">
-                        <div className="text-[rgba(255,255,255,0.6)]">RAM Kullanımı</div>
+                        <div className="text-[rgba(255,255,255,0.6)]">{t("metrics.ramUsage")}</div>
                         <div className="mt-1 text-xs text-white">
                             {health.memory
                                 ? `${(health.memory.usedBytes / 1024 / 1024).toFixed(0)}MB / ${(health.memory.totalBytes / 1024 / 1024).toFixed(0)}MB`
-                                : "Veri yok"}
+                                : t("metrics.noData")}
                         </div>
                     </div>
                 </div>
@@ -222,12 +232,12 @@ export default function AdminMetrics() {
             {/* En Çok Görüntülenen Bloglar */}
             <div className="relative rounded-3xl p-[1px] bg-gradient-to-br from-[rgba(110,211,225,0.25)]/30 via-transparent to-transparent">
                 <div className="rounded-[calc(1.5rem-1px)] border border-[rgba(110,211,225,0.18)] bg-[rgba(6,20,27,0.65)]/80 p-6 shadow-[0_25px_70px_rgba(0,0,0,0.45)] backdrop-blur-xl">
-                    <h3 className="text-base font-semibold text-[color:var(--color-turkish-blue-200)]">En Çok Görüntülenen Bloglar</h3>
+                    <h3 className="text-base font-semibold text-[color:var(--color-turkish-blue-200)]">{t("metrics.topBlogs")}</h3>
                     <ul className="mt-4 space-y-2 text-sm">
-                        {topBlogs.length === 0 && <li className="text-[rgba(255,255,255,0.6)]">Veri yok</li>}
+                        {topBlogs.length === 0 && <li className="text-[rgba(255,255,255,0.6)]">{t("metrics.noData")}</li>}
                         {topBlogs.slice(0, 8).map((b) => (
                             <li key={b.id} className="flex items-center justify-between rounded-lg border border-[rgba(110,211,225,0.18)] bg-[rgba(8,28,38,0.6)] px-3 py-2">
-                                <span className="text-white">Blog #{b.id}</span>
+                                <span className="text-white">{t("metrics.blogId", { id: b.id })}</span>
                                 <span className="text-[rgba(255,255,255,0.75)]">{b.count}</span>
                             </li>
                         ))}
@@ -236,13 +246,13 @@ export default function AdminMetrics() {
             </div>
 
             {/* En Çok Ziyaret Edilen Sayfalar */}
-            <ChartCard title="En Çok Ziyaret Edilen Sayfalar">
+            <ChartCard title={t("metrics.topPages")}>
                 <div className="overflow-hidden rounded-2xl border border-[rgba(110,211,225,0.18)] bg-[rgba(8,24,32,0.6)]">
                     <table className="min-w-full divide-y divide-[rgba(110,211,225,0.12)] text-sm text-[rgba(255,255,255,0.82)]">
                         <thead className="bg-[rgba(8,24,32,0.9)] text-[rgba(255,255,255,0.75)]">
                             <tr>
-                                <th className="px-4 py-3 text-left text-[11px] uppercase tracking-[0.18em]">Route</th>
-                                <th className="px-4 py-3 text-right text-[11px] uppercase tracking-[0.18em]">İstek</th>
+                                <th className="px-4 py-3 text-left text-[11px] uppercase tracking-[0.18em]">{t("metrics.table.route")}</th>
+                                <th className="px-4 py-3 text-right text-[11px] uppercase tracking-[0.18em]">{t("metrics.table.requests")}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[rgba(110,211,225,0.08)]">
@@ -257,14 +267,14 @@ export default function AdminMetrics() {
                 </div>
                 <div className="mt-3 flex items-center justify-end gap-2 text-xs text-[rgba(255,255,255,0.65)]">
                     <span>
-                        Sayfa {pagePage + 1} / {Math.max(1, Math.ceil(filteredPages.length / pageSize))}
+                        {t("metrics.pagination", { page: pagePage + 1, total: Math.max(1, Math.ceil(filteredPages.length / pageSize)) })}
                     </span>
                     <button
                         onClick={() => setPagePage((p) => Math.max(0, p - 1))}
                         className="rounded-full border border-[rgba(110,211,225,0.3)] px-3 py-1 hover:border-[rgba(110,211,225,0.5)]"
                         disabled={pagePage === 0}
                     >
-                        Önceki
+                        {t("metrics.previous")}
                     </button>
                     <button
                         onClick={() => {
@@ -274,21 +284,21 @@ export default function AdminMetrics() {
                         className="rounded-full border border-[rgba(110,211,225,0.3)] px-3 py-1 hover:border-[rgba(110,211,225,0.5)]"
                         disabled={(pagePage + 1) * pageSize >= filteredPages.length}
                     >
-                        Sonraki
+                        {t("metrics.next")}
                     </button>
                 </div>
             </ChartCard>
 
             {/* Agent / Bot Dağılımı */}
-            <ChartCard title="Agent / Bot Dağılımı">
+            <ChartCard title={t("metrics.agentBreakdown")}>
                 <div className="overflow-hidden rounded-2xl border border-[rgba(110,211,225,0.18)] bg-[rgba(8,24,32,0.6)]">
                     <table className="min-w-full divide-y divide-[rgba(110,211,225,0.12)] text-sm text-[rgba(255,255,255,0.82)]">
                         <thead className="bg-[rgba(8,24,32,0.9)] text-[rgba(255,255,255,0.75)]">
                             <tr>
-                                <th className="px-4 py-3 text-left text-[11px] uppercase tracking-[0.18em]">Agent / Bot</th>
-                                <th className="px-4 py-3 text-right text-[11px] uppercase tracking-[0.18em]">Gelen</th>
-                                <th className="px-4 py-3 text-right text-[11px] uppercase tracking-[0.18em]">Kabul</th>
-                                <th className="px-4 py-3 text-right text-[11px] uppercase tracking-[0.18em]">Red</th>
+                                <th className="px-4 py-3 text-left text-[11px] uppercase tracking-[0.18em]">{t("metrics.agentTable.agent")}</th>
+                                <th className="px-4 py-3 text-right text-[11px] uppercase tracking-[0.18em]">{t("metrics.agentTable.incoming")}</th>
+                                <th className="px-4 py-3 text-right text-[11px] uppercase tracking-[0.18em]">{t("metrics.agentTable.accepted")}</th>
+                                <th className="px-4 py-3 text-right text-[11px] uppercase tracking-[0.18em]">{t("metrics.agentTable.declined")}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[rgba(110,211,225,0.08)]">
@@ -305,14 +315,14 @@ export default function AdminMetrics() {
                 </div>
                 <div className="mt-3 flex items-center justify-end gap-2 text-xs text-[rgba(255,255,255,0.65)]">
                     <span>
-                        Sayfa {agentPage + 1} / {Math.max(1, Math.ceil(topAgents.length / pageSize))}
+                        {t("metrics.pagination", { page: agentPage + 1, total: Math.max(1, Math.ceil(topAgents.length / pageSize)) })}
                     </span>
                     <button
                         onClick={() => setAgentPage((p) => Math.max(0, p - 1))}
                         className="rounded-full border border-[rgba(110,211,225,0.3)] px-3 py-1 hover:border-[rgba(110,211,225,0.5)]"
                         disabled={agentPage === 0}
                     >
-                        Önceki
+                        {t("metrics.previous")}
                     </button>
                     <button
                         onClick={() => {
@@ -322,7 +332,7 @@ export default function AdminMetrics() {
                         className="rounded-full border border-[rgba(110,211,225,0.3)] px-3 py-1 hover:border-[rgba(110,211,225,0.5)]"
                         disabled={(agentPage + 1) * pageSize >= topAgents.length}
                     >
-                        Sonraki
+                        {t("metrics.next")}
                     </button>
                 </div>
             </ChartCard>
@@ -331,7 +341,7 @@ export default function AdminMetrics() {
 
             {/* Ziyaretler */}
             <ChartCard
-                title="Ziyaretler"
+                title={t("metrics.visits.title")}
                 className="xl:col-span-2 2xl:col-span-3"
                 right={
                     <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(110,211,225,0.25)] bg-[rgba(8,24,32,0.65)] px-2 py-1 text-xs text-[rgba(255,255,255,0.75)]">
@@ -344,7 +354,7 @@ export default function AdminMetrics() {
                                     : "text-[rgba(255,255,255,0.7)] hover:text-white"
                                     }`}
                             >
-                                {key === "daily" ? "Günlük" : key === "weekly" ? "Haftalık" : "Aylık"}
+                                {key === "daily" ? t("metrics.visits.daily") : key === "weekly" ? t("metrics.visits.weekly") : t("metrics.visits.monthly")}
                             </button>
                         ))}
                     </div>
@@ -352,7 +362,7 @@ export default function AdminMetrics() {
             >
                 {visitData.length === 0 ? (
                     <div className="rounded-xl border border-dashed border-[rgba(110,211,225,0.2)] bg-[rgba(8,24,32,0.5)] p-6 text-sm text-[rgba(255,255,255,0.75)]">
-                        Trafik verisi bulunamadı.
+                        {t("metrics.visits.empty")}
                     </div>
                 ) : (
                     <div className="mt-4 h-72 w-full">
@@ -379,7 +389,7 @@ export default function AdminMetrics() {
                                         borderRadius: "12px",
                                         color: "white",
                                     }}
-                                    formatter={(value: number, _name, item) => [value, item.payload?.date || "Ziyaret"]}
+                                    formatter={(value: number, _name, item) => [value, item.payload?.date || t("metrics.visits.tooltip")]}
                                 />
                                 <Bar dataKey="count" fill="rgba(110,211,225,0.7)" radius={[6, 6, 0, 0]} />
                             </BarChart>

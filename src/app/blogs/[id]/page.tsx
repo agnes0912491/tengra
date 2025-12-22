@@ -5,10 +5,11 @@ type BlogPostPageProps = {
   params: { id: string };
 };
 
-export default function BlogPostPage({ params }: BlogPostPageProps) {
+export default async function BlogPostPage({ params }: BlogPostPageProps) {
+  const { id } = await params;
   return (
     <SiteShell>
-      <BlogPost postId={params.id} />
+      <BlogPost postId={id} />
     </SiteShell>
   );
 }

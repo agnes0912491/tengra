@@ -67,8 +67,8 @@ export default function Header() {
             {/* Logo */}
             <Link href="/" className="group flex items-center gap-3 relative z-10 text-[var(--color-turkish-blue-400)] transition-colors hover:text-[var(--color-turkish-blue-300)]">
               <Image
-                src="/tengra-logo.png"
-                alt="Tengra Logo"
+                src="https://cdn.tengra.studio/s/tengra/tengra-logo.png"
+                alt={tHeader("logoAlt")}
                 width={40}
                 height={40}
                 className="w-10 h-10 object-contain drop-shadow-[0_0_15px_rgba(30,184,255,0.4)] transition-all group-hover:drop-shadow-[0_0_25px_rgba(30,184,255,0.6)]"
@@ -112,28 +112,28 @@ export default function Header() {
                           <div className="relative w-8 h-8 rounded-full overflow-hidden border border-white/20">
                             <Image
                               src={user.avatar}
-                              alt={user.displayName || "User"}
+                              alt={user.displayName || tHeader("userAlt")}
                               fill
                               className="object-cover"
                             />
                           </div>
                         ) : (
                           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--color-turkish-blue-400)] to-purple-600 flex items-center justify-center text-xs font-bold text-white">
-                            {user.displayName?.[0] || user.username?.[0] || "U"}
+                            {user.displayName?.[0] || user.username?.[0] || tHeader("userInitial")}
                           </div>
                         )}
                         <span className="text-sm text-white font-medium pl-1 pr-2">{user.displayName || user.username}</span>
                       </div>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-56 bg-[rgba(6,20,27,0.95)] border border-[rgba(255,255,255,0.1)] backdrop-blur-xl text-white">
-                      <DropdownMenuLabel>Account</DropdownMenuLabel>
+                      <DropdownMenuLabel>{tHeader("account")}</DropdownMenuLabel>
                       <DropdownMenuSeparator className="bg-[rgba(255,255,255,0.1)]" />
                       <DropdownMenuItem className="focus:bg-[rgba(255,255,255,0.1)] cursor-pointer">
-                        <Link href="/settings" className="flex w-full items-center"><User className="mr-2 h-4 w-4" /> Profile</Link>
+                        <Link href="/settings" className="flex w-full items-center"><User className="mr-2 h-4 w-4" /> {tHeader("profile")}</Link>
                       </DropdownMenuItem>
                       {user.role === 'admin' && (
                         <DropdownMenuItem className="focus:bg-[rgba(255,255,255,0.1)] cursor-pointer text-[var(--color-turkish-blue-400)]">
-                          <Link href="/admin" className="flex w-full items-center"><Shield className="mr-2 h-4 w-4" /> Admin</Link>
+                          <Link href="/admin" className="flex w-full items-center"><Shield className="mr-2 h-4 w-4" /> {tHeader("admin")}</Link>
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuSeparator className="bg-[rgba(255,255,255,0.1)]" />
@@ -185,17 +185,17 @@ export default function Header() {
                   onClick={() => setMobileMenuOpen(false)}
                   className="text-xl font-medium text-white py-2 border-b border-[rgba(255,255,255,0.05)]"
                 >
-                  {link.labelKey === 'process' ? 'Process' : link.labelKey === 'features' ? 'Features' : tNav(link.labelKey)}
+                  {tNav(link.labelKey)}
                 </Link>
               ))}
               <div className="mt-8 flex flex-col gap-4">
                 {!isAuthenticated ? (
                   <>
-                    <Link href={LOGIN_URL} onClick={() => setMobileMenuOpen(false)} className="w-full py-3 rounded-xl border border-[rgba(255,255,255,0.1)] text-center text-white">Login</Link>
-                    <Link href={REGISTER_URL} onClick={() => setMobileMenuOpen(false)} className="w-full py-3 rounded-xl bg-white text-black text-center font-bold">Register</Link>
+                    <Link href={LOGIN_URL} onClick={() => setMobileMenuOpen(false)} className="w-full py-3 rounded-xl border border-[rgba(255,255,255,0.1)] text-center text-white">{tHeader("login")}</Link>
+                    <Link href={REGISTER_URL} onClick={() => setMobileMenuOpen(false)} className="w-full py-3 rounded-xl bg-white text-black text-center font-bold">{tHeader("register")}</Link>
                   </>
                 ) : (
-                  <button onClick={logout} className="w-full py-3 rounded-xl border border-red-500/30 text-red-400">Logout</button>
+                  <button onClick={logout} className="w-full py-3 rounded-xl border border-red-500/30 text-red-400">{tHeader("logout")}</button>
                 )}
               </div>
             </nav>

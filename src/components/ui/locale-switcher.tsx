@@ -49,13 +49,13 @@ export default function LocaleSwitcher() {
                     onClick={() => onSelectChange("en")}
                     className={`cursor-pointer ${locale === 'en' ? 'text-[var(--color-turkish-blue-400)]' : ''}`}
                 >
-                    🇺🇸 English
+                    🇺🇸 {t("en")}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                     onClick={() => onSelectChange("tr")}
                     className={`cursor-pointer ${locale === 'tr' ? 'text-[var(--color-turkish-blue-400)]' : ''}`}
                 >
-                    🇹🇷 Türkçe
+                    🇹🇷 {t("tr")}
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

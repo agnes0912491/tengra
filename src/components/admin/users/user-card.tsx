@@ -21,118 +21,21 @@ import {
 import { useState } from "react";
 import type { User, Role, UserSource } from "@/lib/auth/users";
 import { resolveCdnUrl } from "@/lib/constants";
+import { useLocale, useTranslations } from "next-intl";
 
-const ROLE_CONFIG: Record<Role, { label: string; color: string; icon: typeof Shield }> = {
-    admin: { label: "Yönetici", color: "from-purple-500 to-purple-600", icon: Shield },
-    moderator: { label: "Moderatör", color: "from-blue-500 to-blue-600", icon: UserCog },
-    user: { label: "Kullanıcı", color: "from-gray-500 to-gray-600", icon: UserIcon },
+const ROLE_CONFIG: Record<Role, { labelKey: string; color: string; icon: typeof Shield }> = {
+    admin: { labelKey: "roles.admin", color: "from-purple-500 to-purple-600", icon: Shield },
+    moderator: { labelKey: "roles.moderator", color: "from-blue-500 to-blue-600", icon: UserCog },
+    user: { labelKey: "roles.user", color: "from-gray-500 to-gray-600", icon: UserIcon },
 };
 
-const SOURCE_CONFIG: Record<UserSource, { label: string; color: string }> = {
-    tengra: { label: "Tengra", color: "bg-[rgba(30,184,255,0.15)] text-[var(--color-turkish-blue-300)]" },
-    geofrontier: { label: "GeoFrontier", color: "bg-emerald-500/15 text-emerald-400" },
-    lova: { label: "Lova", color: "bg-pink-500/15 text-pink-400" },
-    biodefenders: { label: "BioDefenders", color: "bg-amber-500/15 text-amber-400" },
-    both: { label: "Çoklu", color: "bg-indigo-500/15 text-indigo-400" }, // Added 'both' handling
+const SOURCE_CONFIG: Record<UserSource, { labelKey: string; color: string }> = {
+    tengra: { labelKey: "sources.tengra", color: "bg-[rgba(30,184,255,0.15)] text-[var(--color-turkish-blue-300)]" },
+    geofrontier: { labelKey: "sources.geofrontier", color: "bg-emerald-500/15 text-emerald-400" },
+    lova: { labelKey: "sources.lova", color: "bg-pink-500/15 text-pink-400" },
+    biodefenders: { labelKey: "sources.biodefenders", color: "bg-amber-500/15 text-amber-400" },
+    both: { labelKey: "sources.multi", color: "bg-indigo-500/15 text-indigo-400" }, // Added 'both' handling
 };
-
-function parseUserAgent(ua: string | null | undefined): { device: string; browser: string; os: string } {
-    if (!ua) return { device: "Bilinmiyor", browser: "Bilinmiyor", os: "Bilinmiyor" };
-
-    let device = "Masaüstü";
-    let browser = "Bilinmiyor";
-    let os = "Bilinmiyor";
-
-    // Device detection
-    if (/mobile/i.test(ua)) device = "Mobil";
-    else if (/tablet|ipad/i.test(ua)) device = "Tablet";
-
-    // Browser detection
-    if (/chrome/i.test(ua) && !/edge|edg/i.test(ua)) browser = "Chrome";
-    else if (/firefox/i.test(ua)) browser = "Firefox";
-    else if (/safari/i.test(ua) && !/chrome/i.test(ua)) browser = "Safari";
-    else if (/edge|edg/i.test(ua)) browser = "Edge";
-    else if (/opera|opr/i.test(ua)) browser = "Opera";
-
-    // OS detection
-    if (/windows/i.test(ua)) os = "Windows";
-    else if (/macintosh|mac os/i.test(ua)) os = "macOS";
-    else if (/linux/i.test(ua) && !/android/i.test(ua)) os = "Linux";
-    else if (/android/i.test(ua)) os = "Android";
-    else if (/iphone|ipad|ipod/i.test(ua)) os = "iOS";
-
-    return { device, browser, os };
-}
-
-function formatDate(dateStr: string | null | undefined): string {
-    if (!dateStr) return "—";
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return "—";
-    return new Intl.DateTimeFormat("tr-TR", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-    }).format(date);
-}
-
-function getRelativeTime(dateStr: string | null | undefined): string {
-    if (!dateStr) return "Hiç giriş yapmadı";
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return "Hiç giriş yapmadı";
-
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-
-    if (minutes < 1) return "Az önce";
-    if (minutes < 60) return `${minutes} dk önce`;
-    if (hours < 24) return `${hours} saat önce`;
-    if (days < 7) return `${days} gün önce`;
-    return formatDate(dateStr);
-}
-
-function isUserOnline(lastLoginAt: string | null | undefined): boolean {
-    if (!lastLoginAt) return false;
-    const date = new Date(lastLoginAt);
-    if (isNaN(date.getTime())) return false;
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    // Consider user online if last login was within 15 minutes
-    return minutes < 15;
-}
-
-function getOnlineStatus(lastLoginAt: string | null | undefined): { isOnline: boolean; statusColor: string; statusText: string } {
-    if (!lastLoginAt) {
-        return { isOnline: false, statusColor: "bg-gray-500", statusText: "Hiç giriş yapmadı" };
-    }
-    const date = new Date(lastLoginAt);
-    if (isNaN(date.getTime())) {
-        return { isOnline: false, statusColor: "bg-gray-500", statusText: "Bilinmiyor" };
-    }
-
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-
-    if (minutes < 15) {
-        return { isOnline: true, statusColor: "bg-emerald-500", statusText: "Çevrimiçi" };
-    } else if (hours < 1) {
-        return { isOnline: false, statusColor: "bg-yellow-500", statusText: `${minutes} dk önce` };
-    } else if (hours < 24) {
-        return { isOnline: false, statusColor: "bg-orange-500", statusText: `${hours} saat önce` };
-    } else if (days < 7) {
-        return { isOnline: false, statusColor: "bg-red-400", statusText: `${days} gün önce` };
-    } else {
-        return { isOnline: false, statusColor: "bg-gray-500", statusText: "Uzun süredir çevrimdışı" };
-    }
-}
 
 type UserCardProps = {
     user: User;
@@ -147,9 +50,101 @@ type UserCardProps = {
 };
 
 export default function UserCard({ user, isCurrentUser, currentUserRole, isSelected, isOnline, onSelect, onDelete, onRoleChange, onEdit }: UserCardProps) {
+    const locale = useLocale();
+    const t = useTranslations("AdminUsers");
     const [showActions, setShowActions] = useState(false);
     const roleConfig = ROLE_CONFIG[user.role];
     const sourceConfig = SOURCE_CONFIG[user.source || "tengra"];
+    const roleLabel = t(roleConfig.labelKey);
+    const sourceLabel = t(sourceConfig.labelKey);
+
+    const parseUserAgent = (ua: string | null | undefined): { device: string; browser: string; os: string } => {
+        if (!ua) return { device: t("device.unknown"), browser: t("browser.unknown"), os: t("os.unknown") };
+
+        let device = t("device.desktop");
+        let browser = t("browser.unknown");
+        let os = t("os.unknown");
+
+        // Device detection
+        if (/mobile/i.test(ua)) device = t("device.mobile");
+        else if (/tablet|ipad/i.test(ua)) device = t("device.tablet");
+
+        // Browser detection
+        if (/chrome/i.test(ua) && !/edge|edg/i.test(ua)) browser = t("browser.chrome");
+        else if (/firefox/i.test(ua)) browser = t("browser.firefox");
+        else if (/safari/i.test(ua) && !/chrome/i.test(ua)) browser = t("browser.safari");
+        else if (/edge|edg/i.test(ua)) browser = t("browser.edge");
+        else if (/opera|opr/i.test(ua)) browser = t("browser.opera");
+
+        // OS detection
+        if (/windows/i.test(ua)) os = t("os.windows");
+        else if (/macintosh|mac os/i.test(ua)) os = t("os.macos");
+        else if (/linux/i.test(ua) && !/android/i.test(ua)) os = t("os.linux");
+        else if (/android/i.test(ua)) os = t("os.android");
+        else if (/iphone|ipad|ipod/i.test(ua)) os = t("os.ios");
+
+        return { device, browser, os };
+    };
+
+    const formatDate = (dateStr: string | null | undefined): string => {
+        if (!dateStr) return t("labels.empty");
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return t("labels.empty");
+        return new Intl.DateTimeFormat(locale, {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        }).format(date);
+    };
+
+    const getRelativeTime = (dateStr: string | null | undefined): string => {
+        if (!dateStr) return t("relative.never");
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return t("relative.never");
+
+        const now = new Date();
+        const diff = now.getTime() - date.getTime();
+        const minutes = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+        const days = Math.floor(diff / 86400000);
+
+        if (minutes < 1) return t("relative.justNow");
+        if (minutes < 60) return t("relative.minutesAgo", { minutes });
+        if (hours < 24) return t("relative.hoursAgo", { hours });
+        if (days < 7) return t("relative.daysAgo", { days });
+        return formatDate(dateStr);
+    };
+
+    const getOnlineStatus = (lastLoginAt: string | null | undefined): { isOnline: boolean; statusColor: string; statusText: string } => {
+        if (!lastLoginAt) {
+            return { isOnline: false, statusColor: "bg-gray-500", statusText: t("relative.never") };
+        }
+        const date = new Date(lastLoginAt);
+        if (isNaN(date.getTime())) {
+            return { isOnline: false, statusColor: "bg-gray-500", statusText: t("labels.unknown") };
+        }
+
+        const now = new Date();
+        const diff = now.getTime() - date.getTime();
+        const minutes = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+        const days = Math.floor(diff / 86400000);
+
+        if (minutes < 15) {
+            return { isOnline: true, statusColor: "bg-emerald-500", statusText: t("online.online") };
+        } else if (hours < 1) {
+            return { isOnline: false, statusColor: "bg-yellow-500", statusText: t("online.minutesAgo", { minutes }) };
+        } else if (hours < 24) {
+            return { isOnline: false, statusColor: "bg-orange-500", statusText: t("online.hoursAgo", { hours }) };
+        } else if (days < 7) {
+            return { isOnline: false, statusColor: "bg-red-400", statusText: t("online.daysAgo", { days }) };
+        } else {
+            return { isOnline: false, statusColor: "bg-gray-500", statusText: t("online.offlineLong") };
+        }
+    };
+
     const deviceInfo = parseUserAgent(user.lastLoginDevice);
     const RoleIcon = roleConfig.icon;
 
@@ -158,7 +153,7 @@ export default function UserCard({ user, isCurrentUser, currentUserRole, isSelec
         ? {
             isOnline,
             statusColor: isOnline ? "bg-emerald-500" : "bg-gray-500",
-            statusText: isOnline ? "Çevrimiçi" : getOnlineStatus(user.lastLoginAt).statusText
+            statusText: isOnline ? t("online.online") : getOnlineStatus(user.lastLoginAt).statusText
         }
         : getOnlineStatus(user.lastLoginAt);
 
@@ -211,7 +206,7 @@ export default function UserCard({ user, isCurrentUser, currentUserRole, isSelec
                             {user.avatar ? (
                                 <Image
                                     src={resolveCdnUrl(user.avatar)}
-                                    alt={user.displayName || user.username || "User"}
+                                    alt={user.displayName || user.username || t("labels.avatarAlt")}
                                     width={56}
                                     height={56}
                                     className="w-full h-full object-cover"
@@ -238,11 +233,11 @@ export default function UserCard({ user, isCurrentUser, currentUserRole, isSelec
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                             <h3 className="text-base font-semibold text-[var(--text-primary)] truncate">
-                                {user.displayName || user.username || "İsimsiz"}
+                                {user.displayName || user.username || t("labels.unnamed")}
                             </h3>
                             {isCurrentUser && (
                                 <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-[rgba(30,184,255,0.15)] text-[var(--color-turkish-blue-300)]">
-                                    Sen
+                                    {t("labels.you")}
                                 </span>
                             )}
                         </div>
@@ -270,7 +265,7 @@ export default function UserCard({ user, isCurrentUser, currentUserRole, isSelec
                                         }}
                                         className="w-full px-4 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.05)] flex items-center gap-2"
                                     >
-                                        <Edit className="w-4 h-4" /> Düzenle
+                                        <Edit className="w-4 h-4" /> {t("actions.edit")}
                                     </button>
                                     {user.role !== "moderator" && (
                                         <button
@@ -280,7 +275,7 @@ export default function UserCard({ user, isCurrentUser, currentUserRole, isSelec
                                             }}
                                             className="w-full px-4 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.05)] flex items-center gap-2"
                                         >
-                                            <ShieldCheck className="w-4 h-4" /> Moderatör Yap
+                                            <ShieldCheck className="w-4 h-4" /> {t("actions.makeModerator")}
                                         </button>
                                     )}
                                     {user.role !== "user" && (
@@ -291,7 +286,7 @@ export default function UserCard({ user, isCurrentUser, currentUserRole, isSelec
                                             }}
                                             className="w-full px-4 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.05)] flex items-center gap-2"
                                         >
-                                            <ShieldOff className="w-4 h-4" /> Yetkiyi Kaldır
+                                            <ShieldOff className="w-4 h-4" /> {t("actions.removePrivileges")}
                                         </button>
                                     )}
                                     <hr className="my-1 border-[rgba(72,213,255,0.1)]" />
@@ -302,7 +297,7 @@ export default function UserCard({ user, isCurrentUser, currentUserRole, isSelec
                                         }}
                                         className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-[rgba(255,255,255,0.05)] flex items-center gap-2"
                                     >
-                                        <Trash2 className="w-4 h-4" /> Sil
+                                        <Trash2 className="w-4 h-4" /> {t("actions.delete")}
                                     </button>
                                 </div>
                             )}
@@ -315,18 +310,18 @@ export default function UserCard({ user, isCurrentUser, currentUserRole, isSelec
                     {/* Role badge */}
                     <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gradient-to-r ${roleConfig.color} text-white text-[11px] font-medium`}>
                         <RoleIcon className="w-3 h-3" />
-                        {roleConfig.label}
+                        {roleLabel}
                     </div>
                     {/* Premium badge */}
                     {user.subscription === "premium" && (
                         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-200 to-yellow-500 text-black text-[11px] font-bold shadow-[0_2px_10px_rgba(251,191,36,0.2)]">
                             <Crown className="w-3 h-3" />
-                            Premium
+                            {t("labels.premium")}
                         </div>
                     )}
                     {/* Source badge */}
                     <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium ${sourceConfig.color}`}>
-                        {sourceConfig.label}
+                        {sourceLabel}
                     </div>
                 </div>
             </div>
@@ -340,7 +335,7 @@ export default function UserCard({ user, isCurrentUser, currentUserRole, isSelec
                 <div className="grid grid-cols-2 gap-3">
                     <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
                         <Clock className="w-3.5 h-3.5 text-[var(--color-turkish-blue-400)]" />
-                        <span>Son Giriş:</span>
+                        <span>{t("labels.lastLogin")}</span>
                         <span className="text-[var(--text-secondary)]">{getRelativeTime(user.lastLoginAt)}</span>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
@@ -353,7 +348,7 @@ export default function UserCard({ user, isCurrentUser, currentUserRole, isSelec
                 {/* Device info */}
                 <div className="flex items-center gap-4 text-xs">
                     <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
-                        {deviceInfo.device === "Mobil" ? (
+                        {deviceInfo.device === t("device.mobile") ? (
                             <Smartphone className="w-3.5 h-3.5 text-[var(--color-turkish-blue-400)]" />
                         ) : (
                             <Monitor className="w-3.5 h-3.5 text-[var(--color-turkish-blue-400)]" />
@@ -369,7 +364,7 @@ export default function UserCard({ user, isCurrentUser, currentUserRole, isSelec
                 {/* IP Address */}
                 {user.lastLoginIp && (
                     <div className="flex items-center gap-2 text-xs">
-                        <span className="text-[var(--text-muted)]">IP:</span>
+                        <span className="text-[var(--text-muted)]">{t("labels.ip")}</span>
                         <code className="px-2 py-0.5 rounded bg-[rgba(0,0,0,0.2)] text-[var(--text-secondary)] font-mono text-[10px]">
                             {user.lastLoginIp}
                         </code>
@@ -378,7 +373,7 @@ export default function UserCard({ user, isCurrentUser, currentUserRole, isSelec
 
                 {/* Registration date */}
                 <div className="text-[11px] text-[var(--text-muted)]">
-                    Kayıt: {formatDate(user.createdAt)}
+                    {t("labels.registered")} {formatDate(user.createdAt)}
                 </div>
             </div>
         </motion.div>

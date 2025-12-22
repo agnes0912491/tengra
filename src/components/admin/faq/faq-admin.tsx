@@ -33,17 +33,17 @@ import { MarkdownEditor } from "@/components/ui/markdown-editor";
 
 const SUPPORTED_LOCALES = routing.locales;
 
-const LOCALE_LABELS: Record<string, { label: string; flag: string }> = {
-    tr: { label: "Türkçe", flag: "🇹🇷" },
-    en: { label: "English", flag: "🇺🇸" },
-    de: { label: "Deutsch", flag: "🇩🇪" },
-    fr: { label: "Français", flag: "🇫🇷" },
-    es: { label: "Español", flag: "🇪🇸" },
-    ru: { label: "Русский", flag: "🇷🇺" },
-    zh: { label: "中文", flag: "🇨🇳" },
-    ja: { label: "日本語", flag: "🇯🇵" },
-    ko: { label: "한국어", flag: "🇰🇷" },
-    ar: { label: "العربية", flag: "🇸🇦" },
+const LOCALE_LABELS: Record<string, { labelKey: string; flag: string }> = {
+    tr: { labelKey: "localeLabels.tr", flag: "🇹🇷" },
+    en: { labelKey: "localeLabels.en", flag: "🇺🇸" },
+    de: { labelKey: "localeLabels.de", flag: "🇩🇪" },
+    fr: { labelKey: "localeLabels.fr", flag: "🇫🇷" },
+    es: { labelKey: "localeLabels.es", flag: "🇪🇸" },
+    ru: { labelKey: "localeLabels.ru", flag: "🇷🇺" },
+    zh: { labelKey: "localeLabels.zh", flag: "🇨🇳" },
+    ja: { labelKey: "localeLabels.ja", flag: "🇯🇵" },
+    ko: { labelKey: "localeLabels.ko", flag: "🇰🇷" },
+    ar: { labelKey: "localeLabels.ar", flag: "🇸🇦" },
 };
 
 export default function FaqAdmin() {
@@ -122,7 +122,7 @@ export default function FaqAdmin() {
             setItems((prev) => [...prev, { ...created }]);
             setDrafts((prev) => [...prev, { ...created }]);
             setExpandedId(created.id);
-            setSuccess("Yeni soru eklendi");
+            setSuccess(t("faq.toast.added"));
             setTimeout(() => setSuccess(null), 3000);
         }
     };
@@ -139,7 +139,7 @@ export default function FaqAdmin() {
                     s.delete(id);
                     return s;
                 });
-                setSuccess("Kaydedildi");
+                setSuccess(t("faq.toast.saved"));
                 setTimeout(() => setSuccess(null), 3000);
             }
         },
@@ -158,7 +158,7 @@ export default function FaqAdmin() {
                 return s;
             });
             setDeleteConfirm(null);
-            setSuccess("Soru silindi");
+            setSuccess(t("faq.toast.deleted"));
             setTimeout(() => setSuccess(null), 3000);
         }
     };
@@ -180,7 +180,7 @@ export default function FaqAdmin() {
         await Promise.all(updates);
         setItems(drafts.map((i) => ({ ...i })));
         setOrderDirty(false);
-        setSuccess("Sıralama kaydedildi");
+        setSuccess(t("faq.toast.orderSaved"));
         setTimeout(() => setSuccess(null), 3000);
     };
 
@@ -197,7 +197,7 @@ export default function FaqAdmin() {
             await Promise.all(ops);
             setItems(drafts.map((i) => ({ ...i })));
             setDirty(new Set());
-            setSuccess("Tüm değişiklikler kaydedildi");
+            setSuccess(t("faq.toast.savedAll"));
             setTimeout(() => setSuccess(null), 3000);
         } catch (e) {
             setError(String(e));
@@ -256,10 +256,10 @@ export default function FaqAdmin() {
                 {/* Stats Row */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {[
-                        { label: "Toplam Soru", value: stats.total, icon: HelpCircle, color: "from-blue-500 to-cyan-500" },
-                        { label: "Aktif", value: stats.active, icon: Eye, color: "from-emerald-500 to-green-500" },
-                        { label: "Pasif", value: stats.inactive, icon: EyeOff, color: "from-gray-500 to-slate-500" },
-                        { label: "Değişiklik", value: stats.modified, icon: RefreshCw, color: "from-amber-500 to-orange-500" },
+                        { label: t("faq.stats.total"), value: stats.total, icon: HelpCircle, color: "from-blue-500 to-cyan-500" },
+                        { label: t("faq.stats.active"), value: stats.active, icon: Eye, color: "from-emerald-500 to-green-500" },
+                        { label: t("faq.stats.inactive"), value: stats.inactive, icon: EyeOff, color: "from-gray-500 to-slate-500" },
+                        { label: t("faq.stats.modified"), value: stats.modified, icon: RefreshCw, color: "from-amber-500 to-orange-500" },
                     ].map((stat, i) => (
                         <motion.div
                             key={stat.label}
@@ -300,11 +300,15 @@ export default function FaqAdmin() {
                                         onChange={(e) => setLocale(e.target.value as typeof locale)}
                                         className="pl-10 pr-4 py-2.5 rounded-xl bg-[rgba(15,31,54,0.8)] border border-[rgba(72,213,255,0.2)] text-white text-sm appearance-none cursor-pointer hover:border-[rgba(72,213,255,0.4)] transition-colors min-w-[160px]"
                                     >
-                                        {(SUPPORTED_LOCALES as readonly string[]).map((loc) => (
-                                            <option key={loc} value={loc}>
-                                                {LOCALE_LABELS[loc]?.flag || "🌐"} {LOCALE_LABELS[loc]?.label || loc.toUpperCase()}
-                                            </option>
-                                        ))}
+                                        {(SUPPORTED_LOCALES as readonly string[]).map((loc) => {
+                                            const localeMeta = LOCALE_LABELS[loc];
+                                            const label = localeMeta?.labelKey ? t(localeMeta.labelKey) : loc.toUpperCase();
+                                            return (
+                                                <option key={loc} value={loc}>
+                                                    {localeMeta?.flag || "🌐"} {label}
+                                                </option>
+                                            );
+                                        })}
                                     </select>
                                 </div>
 
@@ -314,7 +318,7 @@ export default function FaqAdmin() {
                                     <Input
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.currentTarget.value)}
-                                        placeholder="Soru ara..."
+                                        placeholder={t("faq.searchPlaceholder")}
                                         className="pl-10 bg-[rgba(15,31,54,0.8)] border-[rgba(72,213,255,0.2)]"
                                     />
                                 </div>
@@ -329,7 +333,7 @@ export default function FaqAdmin() {
                                         className="bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30"
                                     >
                                         <Save className="w-4 h-4 mr-1" />
-                                        Sıralamayı Kaydet
+                                        {t("faq.actions.saveOrder")}
                                     </Button>
                                 )}
                                 {dirty.size > 0 && (
@@ -345,7 +349,7 @@ export default function FaqAdmin() {
                                             ) : (
                                                 <Save className="w-4 h-4 mr-1" />
                                             )}
-                                            Tümünü Kaydet ({dirty.size})
+                                            {t("faq.actions.saveAll", { count: dirty.size })}
                                         </Button>
                                         <Button
                                             variant="outline"
@@ -354,7 +358,7 @@ export default function FaqAdmin() {
                                             className="border-[rgba(72,213,255,0.2)] hover:bg-[rgba(72,213,255,0.1)]"
                                         >
                                             <RotateCcw className="w-4 h-4 mr-1" />
-                                            İptal
+                                            {t("cancel")}
                                         </Button>
                                     </>
                                 )}
@@ -364,7 +368,7 @@ export default function FaqAdmin() {
                                     className="bg-[var(--color-turkish-blue-500)] hover:bg-[var(--color-turkish-blue-600)] text-white"
                                 >
                                     <Plus className="w-4 h-4 mr-1" />
-                                    Yeni Soru
+                                    {t("faq.actions.addNew")}
                                 </Button>
                             </div>
                         </div>
@@ -396,12 +400,12 @@ export default function FaqAdmin() {
                             <div className="text-center py-16">
                                 <FileQuestion className="w-16 h-16 mx-auto text-[var(--text-muted)] opacity-50 mb-4" />
                                 <p className="text-[var(--text-secondary)]">
-                                    {searchQuery ? "Aramanızla eşleşen soru bulunamadı" : "Henüz soru eklenmemiş"}
+                                    {searchQuery ? t("faq.empty.filtered") : t("faq.empty.default")}
                                 </p>
                                 {!searchQuery && (
                                     <Button onClick={addNew} className="mt-4" variant="outline">
                                         <Plus className="w-4 h-4 mr-1" />
-                                        İlk Soruyu Ekle
+                                        {t("faq.actions.addFirst")}
                                     </Button>
                                 )}
                             </div>
@@ -445,7 +449,7 @@ export default function FaqAdmin() {
                                                 <div className="flex items-center gap-2">
                                                     {dirty.has(item.id) && (
                                                         <span className="px-2 py-1 rounded-full text-xs bg-amber-500/20 text-amber-400">
-                                                            Düzenlendi
+                                                            {t("faq.badges.edited")}
                                                         </span>
                                                     )}
                                                     <button
@@ -457,7 +461,7 @@ export default function FaqAdmin() {
                                                             ? "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
                                                             : "bg-gray-500/20 text-gray-400 hover:bg-gray-500/30"
                                                             }`}
-                                                        title={item.isActive ? "Aktif" : "Pasif"}
+                                                        title={item.isActive ? t("faq.status.active") : t("faq.status.inactive")}
                                                     >
                                                         {item.isActive ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                                                     </button>
@@ -467,7 +471,7 @@ export default function FaqAdmin() {
                                                             setDeleteConfirm(item.id);
                                                         }}
                                                         className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
-                                                        title="Sil"
+                                                        title={t("delete")}
                                                     >
                                                         <Trash2 className="w-4 h-4" />
                                                     </button>
@@ -486,27 +490,27 @@ export default function FaqAdmin() {
                                                         <div className="px-4 pb-4 pt-2 space-y-4 border-t border-[rgba(72,213,255,0.1)]">
                                                             {/* Question Input */}
                                                             <div className="space-y-2">
-                                                                <label className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">
-                                                                    <FileQuestion className="w-3.5 h-3.5 text-[var(--color-turkish-blue-400)]" />
-                                                                    Soru
-                                                                </label>
-                                                                <Input
-                                                                    value={item.question}
-                                                                    onChange={(e) => setDraftField(item.id, "question", e.currentTarget.value)}
+                                                            <label className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">
+                                                                <FileQuestion className="w-3.5 h-3.5 text-[var(--color-turkish-blue-400)]" />
+                                                                {t("question")}
+                                                            </label>
+                                                            <Input
+                                                                value={item.question}
+                                                                onChange={(e) => setDraftField(item.id, "question", e.currentTarget.value)}
                                                                     className="bg-[rgba(15,31,54,0.8)] border-[rgba(72,213,255,0.2)]"
                                                                 />
                                                             </div>
 
                                                             {/* Answer Editor */}
                                                             <div className="space-y-2">
-                                                                <label className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">
-                                                                    <MessageSquareText className="w-3.5 h-3.5 text-[var(--color-turkish-blue-400)]" />
-                                                                    Yanıt (Markdown)
-                                                                </label>
-                                                                <div data-color-mode="dark" className="rounded-xl overflow-hidden border border-[rgba(72,213,255,0.2)]">
-                                                                    <MarkdownEditor
-                                                                        value={item.answer}
-                                                                        onChange={(v: string = "") => setDraftField(item.id, "answer", v)}
+                                                            <label className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">
+                                                                <MessageSquareText className="w-3.5 h-3.5 text-[var(--color-turkish-blue-400)]" />
+                                                                {t("faq.fields.answerMarkdown")}
+                                                            </label>
+                                                            <div data-color-mode="dark" className="rounded-xl overflow-hidden border border-[rgba(72,213,255,0.2)]">
+                                                                <MarkdownEditor
+                                                                    value={item.answer}
+                                                                    onChange={(v: string = "") => setDraftField(item.id, "answer", v)}
                                                                         height={200}
                                                                     />
                                                                 </div>
@@ -521,11 +525,11 @@ export default function FaqAdmin() {
                                                                         className="bg-[var(--color-turkish-blue-500)] hover:bg-[var(--color-turkish-blue-600)]"
                                                                     >
                                                                         <Save className="w-4 h-4 mr-1" />
-                                                                        Kaydet
+                                                                        {t("save")}
                                                                     </Button>
                                                                     <Button variant="outline" size="sm" onClick={() => resetDraft(item.id)}>
                                                                         <X className="w-4 h-4 mr-1" />
-                                                                        İptal
+                                                                        {t("cancel")}
                                                                     </Button>
                                                                 </div>
                                                             )}
@@ -549,21 +553,21 @@ export default function FaqAdmin() {
                     <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-md rounded-2xl bg-[rgba(15,31,54,0.95)] border border-[rgba(72,213,255,0.2)] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.5)] z-50">
                         <Dialog.Title className="text-lg font-semibold text-white flex items-center gap-2">
                             <Trash2 className="w-5 h-5 text-red-400" />
-                            Soruyu Sil
+                            {t("faq.dialogs.delete.title")}
                         </Dialog.Title>
                         <Dialog.Description className="mt-3 text-sm text-[var(--text-secondary)]">
-                            Bu soruyu silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+                            {t("faq.dialogs.delete.description")}
                         </Dialog.Description>
                         <div className="mt-6 flex justify-end gap-3">
                             <Button variant="outline" onClick={() => setDeleteConfirm(null)}>
-                                İptal
+                                {t("cancel")}
                             </Button>
                             <Button
                                 variant="destructive"
                                 onClick={() => deleteConfirm && removeItem(deleteConfirm)}
                             >
                                 <Trash2 className="w-4 h-4 mr-1" />
-                                Sil
+                                {t("delete")}
                             </Button>
                         </div>
                     </Dialog.Content>
@@ -577,14 +581,14 @@ export default function FaqAdmin() {
                     <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-md rounded-2xl bg-[rgba(15,31,54,0.95)] border border-[rgba(72,213,255,0.2)] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.5)] z-50">
                         <Dialog.Title className="text-lg font-semibold text-white flex items-center gap-2">
                             <RotateCcw className="w-5 h-5 text-amber-400" />
-                            Değişiklikleri İptal Et
+                            {t("faq.dialogs.discard.title")}
                         </Dialog.Title>
                         <Dialog.Description className="mt-3 text-sm text-[var(--text-secondary)]">
-                            {dirty.size} adet değişikliği iptal etmek istediğinizden emin misiniz?
+                            {t("faq.dialogs.discard.description", { count: dirty.size })}
                         </Dialog.Description>
                         <div className="mt-6 flex justify-end gap-3">
                             <Button variant="outline" onClick={() => setOpenConfirmAll(false)}>
-                                Vazgeç
+                                {t("faq.dialogs.discard.cancel")}
                             </Button>
                             <Button
                                 variant="destructive"
@@ -595,7 +599,7 @@ export default function FaqAdmin() {
                                 }}
                             >
                                 <RotateCcw className="w-4 h-4 mr-1" />
-                                İptal Et
+                                {t("faq.dialogs.discard.confirm")}
                             </Button>
                         </div>
                     </Dialog.Content>

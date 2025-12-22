@@ -3,6 +3,7 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { Sun, Moon, Monitor } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 interface ThemeToggleProps {
     variant?: "icon" | "dropdown";
@@ -11,6 +12,7 @@ interface ThemeToggleProps {
 
 export default function ThemeToggle({ variant = "icon", className = "" }: ThemeToggleProps) {
     const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme();
+    const t = useTranslations("ThemeToggle");
     const [showDropdown, setShowDropdown] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -31,8 +33,8 @@ export default function ThemeToggle({ variant = "icon", className = "" }: ThemeT
             <button
                 onClick={toggleTheme}
                 className={`p-2 rounded-lg transition-colors hover:bg-[rgba(110,211,225,0.1)] ${className}`}
-                title={resolvedTheme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-                aria-label="Toggle theme"
+                title={resolvedTheme === "dark" ? t("switchToLight") : t("switchToDark")}
+                aria-label={t("toggleTheme")}
             >
                 {resolvedTheme === "dark" ? (
                     <Sun className="h-5 w-5 text-[rgba(255,255,255,0.7)] hover:text-white" />
@@ -48,7 +50,7 @@ export default function ThemeToggle({ variant = "icon", className = "" }: ThemeT
             <button
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors hover:bg-[rgba(110,211,225,0.1)]"
-                aria-label="Theme options"
+                aria-label={t("options")}
             >
                 {resolvedTheme === "dark" ? (
                     <Moon className="h-5 w-5 text-[rgba(255,255,255,0.7)]" />
@@ -56,7 +58,7 @@ export default function ThemeToggle({ variant = "icon", className = "" }: ThemeT
                     <Sun className="h-5 w-5 text-[rgba(0,0,0,0.7)]" />
                 )}
                 <span className="text-sm">
-                    {theme === "system" ? "System" : theme === "dark" ? "Dark" : "Light"}
+                    {theme === "system" ? t("system") : theme === "dark" ? t("dark") : t("light")}
                 </span>
             </button>
 
@@ -71,7 +73,7 @@ export default function ThemeToggle({ variant = "icon", className = "" }: ThemeT
                             }`}
                     >
                         <Sun className="h-4 w-4" />
-                        Light
+                        {t("light")}
                         {theme === "light" && <span className="ml-auto text-xs">✓</span>}
                     </button>
                     <button
@@ -83,7 +85,7 @@ export default function ThemeToggle({ variant = "icon", className = "" }: ThemeT
                             }`}
                     >
                         <Moon className="h-4 w-4" />
-                        Dark
+                        {t("dark")}
                         {theme === "dark" && <span className="ml-auto text-xs">✓</span>}
                     </button>
                     <button
@@ -95,7 +97,7 @@ export default function ThemeToggle({ variant = "icon", className = "" }: ThemeT
                             }`}
                     >
                         <Monitor className="h-4 w-4" />
-                        System
+                        {t("system")}
                         {theme === "system" && <span className="ml-auto text-xs">✓</span>}
                     </button>
                 </div>

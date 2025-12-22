@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
+import { useLocale, useTranslations } from "next-intl";
 import {
     ArrowLeft,
     Save,
@@ -65,6 +66,8 @@ const AUTOSAVE_DELAY = 30000; // 30 seconds
 
 export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
     const router = useRouter();
+    const locale = useLocale();
+    const t = useTranslations("AdminBlogs");
     const [draft, setDraft] = useState<Draft>(() => {
         if (initialBlog) {
             return {
@@ -119,13 +122,13 @@ export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
 
     const handleSave = useCallback(async (isAutosave = false) => {
         if (!draft.title.trim() || !draft.content.trim()) {
-            if (!isAutosave) toast.error("Başlık ve içerik zorunludur.");
+            if (!isAutosave) toast.error(t("toast.titleContentRequired"));
             return;
         }
 
         const token = getToken();
         if (!token) {
-            toast.error("Önce giriş yapın.");
+            toast.error(t("toast.loginRequired"));
             return;
         }
 
@@ -156,7 +159,7 @@ export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
                 : await createBlog(payload, token);
 
             if (!saved) {
-                toast.error("Blog kaydedilemedi.");
+                toast.error(t("toast.saveFailed"));
                 return;
             }
 
@@ -164,24 +167,24 @@ export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
             setLastSaved(new Date());
 
             if (!isAutosave) {
-                toast.success("Blog kaydedildi.");
+                toast.success(t("toast.saveSuccess"));
                 if (mode === "create" && saved.id) {
                     router.replace(`/admin/dashboard/blogs/${saved.id}/edit`);
                 }
             }
         } catch (error) {
             console.error("Failed to save blog", error);
-            if (!isAutosave) toast.error("Kaydetme sırasında hata oluştu.");
+            if (!isAutosave) toast.error(t("toast.saveError"));
         } finally {
             setSaving(false);
         }
-    }, [draft, mode, router]);
+    }, [draft, mode, router, t]);
 
     const handleImageUpload = async (file?: File | null) => {
         if (!file) return;
         const token = getToken();
         if (!token) {
-            toast.error("Görsel yüklemek için giriş yapın.");
+            toast.error(t("toast.imageLoginRequired"));
             return;
         }
         setImageUploading(true);
@@ -192,14 +195,14 @@ export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
                 const uploaded = await uploadImage(dataUrl, token);
                 if (uploaded?.url) {
                     setDraft((prev) => ({ ...prev, image: uploaded.url }));
-                    toast.success("Kapak görseli yüklendi.");
+                    toast.success(t("toast.coverUploadSuccess"));
                 }
                 setImageUploading(false);
             };
             reader.readAsDataURL(file);
         } catch (error) {
             console.error("Upload failed", error);
-            toast.error("Kapak yüklenemedi.");
+            toast.error(t("toast.coverUploadFailed"));
             setImageUploading(false);
         }
     };
@@ -207,7 +210,7 @@ export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
     const handlePublish = async () => {
         setDraft((prev) => ({ ...prev, status: "published" }));
         await handleSave(false);
-        toast.success("Blog yayınlandı!");
+        toast.success(t("toast.publishSuccess"));
     };
 
     const previewWidths = {
@@ -227,15 +230,15 @@ export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
                             className="flex items-center gap-2 text-[rgba(255,255,255,0.6)] hover:text-white transition-colors"
                         >
                             <ArrowLeft className="h-5 w-5" />
-                            <span className="hidden sm:inline">Geri</span>
+                            <span className="hidden sm:inline">{t("editor.back")}</span>
                         </Link>
                         <div className="h-5 w-px bg-[rgba(255,255,255,0.1)]" />
                         <div>
                             <p className="text-xs text-[rgba(255,255,255,0.5)]">
-                                {mode === "create" ? "Yeni Yazı" : "Düzenleniyor"}
+                                {mode === "create" ? t("editor.modeCreate") : t("editor.modeEdit")}
                             </p>
                             <p className="text-sm font-medium text-white truncate max-w-[200px] sm:max-w-md">
-                                {draft.title || "Başlıksız"}
+                                {draft.title || t("editor.untitled")}
                             </p>
                         </div>
                     </div>
@@ -244,7 +247,7 @@ export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
                         {lastSaved && (
                             <span className="hidden sm:flex items-center gap-1.5 text-xs text-[rgba(255,255,255,0.4)]">
                                 <Clock className="h-3.5 w-3.5" />
-                                {lastSaved.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}
+                                {lastSaved.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })}
                             </span>
                         )}
 
@@ -256,7 +259,7 @@ export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
                                     ? "bg-[rgba(72,213,255,0.15)] text-[rgba(130,226,255,0.95)]"
                                     : "text-[rgba(255,255,255,0.6)] hover:bg-[rgba(255,255,255,0.05)]"
                             )}
-                            title={showPreview ? "Önizlemeyi Kapat" : "Önizleme"}
+                            title={showPreview ? t("editor.previewClose") : t("editor.previewOpen")}
                         >
                             {showPreview ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
@@ -269,7 +272,7 @@ export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
                                     ? "bg-[rgba(72,213,255,0.15)] text-[rgba(130,226,255,0.95)]"
                                     : "text-[rgba(255,255,255,0.6)] hover:bg-[rgba(255,255,255,0.05)]"
                             )}
-                            title="Ayarlar"
+                            title={t("editor.settings")}
                         >
                             <Settings2 className="h-4 w-4" />
                         </button>
@@ -280,7 +283,7 @@ export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
                             className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[rgba(255,255,255,0.15)] text-sm font-medium text-white hover:bg-[rgba(255,255,255,0.05)] disabled:opacity-50 transition-all"
                         >
                             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                            <span className="hidden sm:inline">Kaydet</span>
+                            <span className="hidden sm:inline">{t("editor.save")}</span>
                         </button>
 
                         {draft.status !== "published" && (
@@ -290,7 +293,7 @@ export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
                                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[rgba(72,213,255,0.9)] to-[rgba(0,167,197,0.9)] text-sm font-semibold text-black shadow-[0_4px_20px_rgba(0,167,197,0.3)] hover:brightness-110 disabled:opacity-50 transition-all"
                             >
                                 <Send className="h-4 w-4" />
-                                <span className="hidden sm:inline">Yayınla</span>
+                                <span className="hidden sm:inline">{t("editor.publish")}</span>
                             </button>
                         )}
                     </div>
@@ -307,7 +310,7 @@ export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
                             <div className="relative aspect-[2/1] rounded-2xl overflow-hidden group">
                                 <Image
                                     src={draft.image}
-                                    alt="Cover"
+                                    alt={t("editor.coverAlt")}
                                     fill
                                     className="object-cover"
                                     unoptimized
@@ -315,7 +318,7 @@ export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
                                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                     <label className="cursor-pointer flex items-center gap-2 px-4 py-2 rounded-xl bg-white/20 backdrop-blur-sm text-white text-sm">
                                         <Upload className="h-4 w-4" />
-                                        Değiştir
+                                        {t("editor.changeCover")}
                                         <input
                                             type="file"
                                             accept="image/*"
@@ -332,7 +335,7 @@ export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
                                 ) : (
                                     <>
                                         <Upload className="h-8 w-8 text-[rgba(130,226,255,0.6)] mb-2" />
-                                        <p className="text-sm text-[rgba(255,255,255,0.5)]">Kapak görseli ekle</p>
+                                        <p className="text-sm text-[rgba(255,255,255,0.5)]">{t("editor.addCover")}</p>
                                     </>
                                 )}
                                 <input
@@ -354,7 +357,7 @@ export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
                                     slug: prev.slug || slugify(e.target.value),
                                 }))
                             }
-                            placeholder="Başlık"
+                            placeholder={t("editor.titlePlaceholder")}
                             className="w-full bg-transparent text-3xl lg:text-4xl font-bold text-white placeholder:text-[rgba(255,255,255,0.25)] outline-none"
                         />
 
@@ -362,7 +365,7 @@ export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
                         <input
                             value={draft.subtitle ?? ""}
                             onChange={(e) => setDraft((prev) => ({ ...prev, subtitle: e.target.value }))}
-                            placeholder="Alt başlık (opsiyonel)"
+                            placeholder={t("editor.subtitlePlaceholder")}
                             className="w-full bg-transparent text-lg text-[rgba(255,255,255,0.7)] placeholder:text-[rgba(255,255,255,0.25)] outline-none"
                         />
 
@@ -371,7 +374,7 @@ export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
                             <RichEditor
                                 content={draft.content}
                                 onChange={(v) => setDraft((prev) => ({ ...prev, content: v }))}
-                                placeholder="Hikayenizi yazmaya başlayın..."
+                                placeholder={t("editor.contentPlaceholder")}
                                 userToken={getToken() ?? undefined}
                             />
                         </div>
@@ -386,7 +389,7 @@ export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
                         className="hidden lg:flex flex-col w-1/2 border-l border-[rgba(72,213,255,0.1)] bg-[rgba(12,24,36,0.5)]"
                     >
                         <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(255,255,255,0.06)]">
-                            <span className="text-sm font-medium text-[rgba(255,255,255,0.7)]">Önizleme</span>
+                            <span className="text-sm font-medium text-[rgba(255,255,255,0.7)]">{t("editor.previewLabel")}</span>
                             <div className="flex items-center gap-1">
                                 {(["desktop", "tablet", "mobile"] as const).map((device) => (
                                     <button
@@ -418,14 +421,14 @@ export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
                                         </div>
                                     )}
                                     <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                                        {draft.title || "Başlık"}
+                                        {draft.title || t("editor.previewTitlePlaceholder")}
                                     </h1>
                                     {draft.subtitle && (
                                         <p className="text-lg text-gray-600 mb-4">{draft.subtitle}</p>
                                     )}
                                     <div
                                         className="prose prose-slate max-w-none"
-                                        dangerouslySetInnerHTML={{ __html: draft.content || "<p>İçerik buraya gelecek...</p>" }}
+                                        dangerouslySetInnerHTML={{ __html: draft.content || `<p>${t("editor.previewContentPlaceholder")}</p>` }}
                                     />
                                 </article>
                             </div>
@@ -443,44 +446,44 @@ export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
                         <div className="p-4 space-y-4">
                             <h3 className="text-sm font-semibold text-white flex items-center gap-2">
                                 <FileText className="h-4 w-4" />
-                                Yazı Ayarları
+                                {t("editor.settingsTitle")}
                             </h3>
 
                             <AdminInput
-                                label="Slug"
+                                label={t("editor.slugLabel")}
                                 value={draft.slug}
                                 onChange={(e) => setDraft((prev) => ({ ...prev, slug: slugify(e.currentTarget.value) }))}
-                                placeholder="blog-slug"
+                                placeholder={t("editor.slugPlaceholder")}
                             />
 
                             <AdminSelect
-                                label="Durum"
+                                label={t("editor.statusLabel")}
                                 value={draft.status ?? "draft"}
                                 onChange={(e) => setDraft((prev) => ({ ...prev, status: e.currentTarget.value as Draft["status"] }))}
                                 options={[
-                                    { value: "draft", label: "Taslak" },
-                                    { value: "published", label: "Yayında" },
-                                    { value: "scheduled", label: "Planlı" },
+                                    { value: "draft", label: t("status.draft") },
+                                    { value: "published", label: t("status.published") },
+                                    { value: "scheduled", label: t("status.scheduled") },
                                 ]}
                             />
 
                             <AdminInput
-                                label="Yayın Tarihi"
+                                label={t("editor.publishDateLabel")}
                                 type="datetime-local"
                                 value={draft.publishAt ?? ""}
                                 onChange={(e) => setDraft((prev) => ({ ...prev, publishAt: e.currentTarget.value }))}
                             />
 
                             <AdminTextarea
-                                label="Özet"
+                                label={t("editor.excerptLabel")}
                                 value={draft.excerpt}
                                 onChange={(e) => setDraft((prev) => ({ ...prev, excerpt: e.currentTarget.value }))}
-                                placeholder="Kısa açıklama..."
+                                placeholder={t("editor.excerptPlaceholder")}
                                 rows={3}
                             />
 
                             <AdminInput
-                                label="Etiketler"
+                                label={t("editor.tagsLabel")}
                                 value={draft.tags.join(", ")}
                                 onChange={(e) =>
                                     setDraft((prev) => ({
@@ -488,13 +491,13 @@ export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
                                         tags: e.currentTarget.value.split(",").map((t) => t.trim()).filter(Boolean),
                                     }))
                                 }
-                                placeholder="ai, devops, nextjs"
-                                hint="Virgülle ayırın"
+                                placeholder={t("editor.tagsPlaceholder")}
+                                hint={t("editor.tagsHint")}
                             />
 
                             <div className="space-y-2">
                                 <label className="block text-xs font-medium text-[rgba(255,255,255,0.6)]">
-                                    Kategoriler
+                                    {t("editor.categoriesLabel")}
                                 </label>
                                 <div className="flex flex-wrap gap-2">
                                     {categories.map((cat) => {
@@ -523,27 +526,27 @@ export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
 
                             <div className="pt-4 border-t border-[rgba(255,255,255,0.06)]">
                                 <h4 className="text-xs font-semibold text-[rgba(255,255,255,0.5)] uppercase tracking-wider mb-3">
-                                    SEO
+                                    {t("editor.seoLabel")}
                                 </h4>
                                 <div className="space-y-3">
                                     <AdminInput
-                                        label="SEO Başlık"
+                                        label={t("editor.seoTitleLabel")}
                                         value={draft.seoTitle ?? ""}
                                         onChange={(e) => setDraft((prev) => ({ ...prev, seoTitle: e.currentTarget.value }))}
                                         placeholder={draft.title}
                                     />
                                     <AdminTextarea
-                                        label="SEO Açıklama"
+                                        label={t("editor.seoDescriptionLabel")}
                                         value={draft.seoDescription ?? ""}
                                         onChange={(e) => setDraft((prev) => ({ ...prev, seoDescription: e.currentTarget.value }))}
                                         placeholder={draft.excerpt}
                                         rows={2}
                                     />
                                     <AdminInput
-                                        label="Kanonik URL"
+                                        label={t("editor.canonicalLabel")}
                                         value={draft.canonicalUrl ?? ""}
                                         onChange={(e) => setDraft((prev) => ({ ...prev, canonicalUrl: e.currentTarget.value }))}
-                                        placeholder="https://tengra.studio/blogs/..."
+                                        placeholder={t("editor.canonicalPlaceholder")}
                                     />
                                 </div>
                             </div>

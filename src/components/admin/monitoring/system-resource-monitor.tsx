@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useLocale, useTranslations } from "next-intl";
 
 interface SystemMetrics {
   cpu: {
@@ -67,17 +68,6 @@ function formatBytes(bytes: number): string {
   const sizes = ["B", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
-}
-
-// Format duration
-function formatDuration(seconds: number): string {
-  const days = Math.floor(seconds / 86400);
-  const hours = Math.floor((seconds % 86400) / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-
-  if (days > 0) return `${days}g ${hours}s`;
-  if (hours > 0) return `${hours}s ${minutes}dk`;
-  return `${minutes}dk`;
 }
 
 // Circular progress component
@@ -199,12 +189,25 @@ function AlertBadge({ alert }: { alert: Alert }) {
 
 // Main component
 export default function SystemResourceMonitor() {
+  const t = useTranslations("AdminMonitoring");
+  const locale = useLocale();
   const [metrics, setMetrics] = useState<SystemMetrics | null>(null);
   const [history, setHistory] = useState<MetricHistory[]>([]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isLive, setIsLive] = useState(true);
+  const formatDuration = (seconds: number): string => {
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const parts = [
+      days ? t("duration.days", { count: days }) : null,
+      hours ? t("duration.hours", { count: hours }) : null,
+      minutes ? t("duration.minutes", { count: minutes }) : null,
+    ].filter(Boolean);
+    return parts.length ? parts.join(" ") : t("duration.minutes", { count: 0 });
+  };
 
   const fetchMetrics = useCallback(async () => {
     try {
@@ -215,7 +218,7 @@ export default function SystemResourceMonitor() {
         },
       });
 
-      if (!response.ok) throw new Error("Failed to fetch metrics");
+      if (!response.ok) throw new Error(t("errors.fetchFailed"));
 
       const data = await response.json();
       setMetrics(data.current);
@@ -223,13 +226,13 @@ export default function SystemResourceMonitor() {
       setAlerts(data.alerts || []);
       setError(null);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Bilinmeyen hata");
+      setError(err instanceof Error ? err.message : t("errors.unknown"));
       // Generate demo data on error
       generateDemoData();
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   // Generate demo data when API fails
   const generateDemoData = () => {
@@ -318,7 +321,7 @@ export default function SystemResourceMonitor() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white">Sistem Kaynakları</h2>
+          <h2 className="text-xl font-bold text-white">{t("resourceMonitor.title")}</h2>
           <p className="text-sm text-[rgba(255,255,255,0.5)]">
             {metrics.system.hostname} • {metrics.system.platform}
           </p>
@@ -333,7 +336,7 @@ export default function SystemResourceMonitor() {
             }`}
           >
             <span className={`w-2 h-2 rounded-full ${isLive ? "bg-green-500 animate-pulse" : "bg-gray-500"}`} />
-            {isLive ? "Canlı" : "Durduruldu"}
+            {isLive ? t("resourceMonitor.live") : t("resourceMonitor.paused")}
           </button>
         </div>
       </div>
@@ -356,19 +359,33 @@ export default function SystemResourceMonitor() {
       {/* Main Resource Gauges */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         <div className="flex flex-col items-center p-4 rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)]">
-          <CircularProgress value={metrics.cpu.usage} label="CPU" sublabel={`${metrics.cpu.count} çekirdek`} />
+          <CircularProgress
+            value={metrics.cpu.usage}
+            label={t("resourceMonitor.cards.cpu")}
+            sublabel={t("resourceMonitor.cards.cores", { count: metrics.cpu.count.toLocaleString(locale) })}
+          />
         </div>
         <div className="flex flex-col items-center p-4 rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)]">
-          <CircularProgress value={metrics.memory.usagePercent} label="Bellek" sublabel={formatBytes(metrics.memory.used)} color="#22C55E" />
+          <CircularProgress
+            value={metrics.memory.usagePercent}
+            label={t("resourceMonitor.cards.memory")}
+            sublabel={formatBytes(metrics.memory.used)}
+            color="#22C55E"
+          />
         </div>
         <div className="flex flex-col items-center p-4 rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)]">
-          <CircularProgress value={metrics.disk.usagePercent} label="Disk" sublabel={formatBytes(metrics.disk.used)} color="#A855F7" />
+          <CircularProgress
+            value={metrics.disk.usagePercent}
+            label={t("resourceMonitor.cards.disk")}
+            sublabel={formatBytes(metrics.disk.used)}
+            color="#A855F7"
+          />
         </div>
         <div className="flex flex-col items-center p-4 rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)]">
           <CircularProgress
             value={(metrics.network.connections / 100) * 100}
-            label="Bağlantı"
-            sublabel={`${metrics.network.connections} aktif`}
+            label={t("resourceMonitor.cards.connections")}
+            sublabel={t("resourceMonitor.cards.activeConnections", { count: metrics.network.connections.toLocaleString(locale) })}
             color="#EAB308"
           />
         </div>
@@ -378,21 +395,21 @@ export default function SystemResourceMonitor() {
       <div className="grid md:grid-cols-3 gap-4">
         <div className="rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)] p-4">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm text-[rgba(255,255,255,0.7)]">CPU Geçmişi</span>
+            <span className="text-sm text-[rgba(255,255,255,0.7)]">{t("resourceMonitor.history.cpu")}</span>
             <span className="text-xs text-[rgba(0,167,197,1)]">{Math.round(metrics.cpu.usage)}%</span>
           </div>
           <MiniLineChart data={history.map((h) => h.cpu)} color="#00A7C5" />
         </div>
         <div className="rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)] p-4">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm text-[rgba(255,255,255,0.7)]">Bellek Geçmişi</span>
+            <span className="text-sm text-[rgba(255,255,255,0.7)]">{t("resourceMonitor.history.memory")}</span>
             <span className="text-xs text-green-400">{Math.round(metrics.memory.usagePercent)}%</span>
           </div>
           <MiniLineChart data={history.map((h) => h.memory)} color="#22C55E" />
         </div>
         <div className="rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)] p-4">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm text-[rgba(255,255,255,0.7)]">Disk Geçmişi</span>
+            <span className="text-sm text-[rgba(255,255,255,0.7)]">{t("resourceMonitor.history.disk")}</span>
             <span className="text-xs text-purple-400">{Math.round(metrics.disk.usagePercent)}%</span>
           </div>
           <MiniLineChart data={history.map((h) => h.disk)} color="#A855F7" />
@@ -403,26 +420,26 @@ export default function SystemResourceMonitor() {
       <div className="grid md:grid-cols-2 gap-6">
         {/* System Info */}
         <div className="rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)] p-4">
-          <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)] mb-4">Sistem Bilgisi</h3>
+          <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)] mb-4">{t("resourceMonitor.sections.systemInfo")}</h3>
           <div className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-sm text-[rgba(255,255,255,0.5)]">İşlemci</span>
+              <span className="text-sm text-[rgba(255,255,255,0.5)]">{t("resourceMonitor.labels.processor")}</span>
               <span className="text-sm text-white">{metrics.cpu.model.slice(0, 30)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-[rgba(255,255,255,0.5)]">Toplam Bellek</span>
+              <span className="text-sm text-[rgba(255,255,255,0.5)]">{t("resourceMonitor.labels.totalMemory")}</span>
               <span className="text-sm text-white">{formatBytes(metrics.memory.total)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-[rgba(255,255,255,0.5)]">Toplam Disk</span>
+              <span className="text-sm text-[rgba(255,255,255,0.5)]">{t("resourceMonitor.labels.totalDisk")}</span>
               <span className="text-sm text-white">{formatBytes(metrics.disk.total)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-[rgba(255,255,255,0.5)]">Sistem Çalışma Süresi</span>
+              <span className="text-sm text-[rgba(255,255,255,0.5)]">{t("resourceMonitor.labels.systemUptime")}</span>
               <span className="text-sm text-white">{formatDuration(metrics.system.uptime)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-[rgba(255,255,255,0.5)]">Load Average</span>
+              <span className="text-sm text-[rgba(255,255,255,0.5)]">{t("resourceMonitor.labels.loadAverage")}</span>
               <span className="text-sm text-white">{metrics.cpu.loadAverage.map((l) => l.toFixed(2)).join(", ")}</span>
             </div>
           </div>
@@ -430,26 +447,26 @@ export default function SystemResourceMonitor() {
 
         {/* Process Info */}
         <div className="rounded-xl border border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.8)] p-4">
-          <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)] mb-4">Uygulama Durumu</h3>
+          <h3 className="text-sm font-medium text-[rgba(255,255,255,0.7)] mb-4">{t("resourceMonitor.sections.processInfo")}</h3>
           <div className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-sm text-[rgba(255,255,255,0.5)]">Process ID</span>
+              <span className="text-sm text-[rgba(255,255,255,0.5)]">{t("resourceMonitor.labels.processId")}</span>
               <span className="text-sm text-white">{metrics.process.pid}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-[rgba(255,255,255,0.5)]">Çalışma Süresi</span>
+              <span className="text-sm text-[rgba(255,255,255,0.5)]">{t("resourceMonitor.labels.processUptime")}</span>
               <span className="text-sm text-white">{formatDuration(metrics.process.uptime)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-[rgba(255,255,255,0.5)]">Heap Kullanımı</span>
+              <span className="text-sm text-[rgba(255,255,255,0.5)]">{t("resourceMonitor.labels.heapUsage")}</span>
               <span className="text-sm text-white">{formatBytes(metrics.process.memoryUsage.heapUsed)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-[rgba(255,255,255,0.5)]">RSS Bellek</span>
+              <span className="text-sm text-[rgba(255,255,255,0.5)]">{t("resourceMonitor.labels.rssMemory")}</span>
               <span className="text-sm text-white">{formatBytes(metrics.process.memoryUsage.rss)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-[rgba(255,255,255,0.5)]">Network RX/TX</span>
+              <span className="text-sm text-[rgba(255,255,255,0.5)]">{t("resourceMonitor.labels.networkRxTx")}</span>
               <span className="text-sm text-white">
                 {formatBytes(metrics.network.rx)} / {formatBytes(metrics.network.tx)}
               </span>

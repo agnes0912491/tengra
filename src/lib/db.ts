@@ -1,5 +1,5 @@
 import type { Blog, BlogCategory, BlogSEO, BlogStatus } from "@/types/blog";
-import type { Project, ProjectStatus, ProjectType, ProjectPlatform } from "@/types/project";
+import type { Project, ProjectStatus, ProjectType, ProjectPlatform, LocalizedContent } from "@/types/project";
 import { Role, User, UserSource } from "./auth/users";
 import { AuthUserPayload } from "@/types/auth";
 import { resolveCdnUrl } from "@/lib/constants";
@@ -669,6 +669,18 @@ const normalizeProject = (project: unknown): Project | null => {
   }
 
   const candidate = project as Record<string, unknown>;
+  const isRecord = (val: unknown): val is Record<string, unknown> =>
+    Boolean(val) && typeof val === "object" && !Array.isArray(val);
+  const normalizeLocaleMap = (input: unknown): Record<string, string> | undefined => {
+    if (!isRecord(input)) return undefined;
+    const cleaned: Record<string, string> = {};
+    for (const [key, value] of Object.entries(input)) {
+      if (typeof value === "string" && value.trim().length > 0) {
+        cleaned[key] = value;
+      }
+    }
+    return Object.keys(cleaned).length ? cleaned : undefined;
+  };
   const id = candidate.id ?? candidate.projectId ?? candidate.slug;
   const name = candidate.name ?? candidate.title;
 
@@ -695,7 +707,7 @@ const normalizeProject = (project: unknown): Project | null => {
   let type: ProjectType | undefined;
   if (typeof candidate.type === "string") {
     const tNorm = candidate.type.toLowerCase();
-    const allowedTypes: ProjectType[] = ["game", "website", "tool", "other"];
+    const allowedTypes: ProjectType[] = ["game", "website", "tool", "app", "library", "other"];
     if ((allowedTypes as string[]).includes(tNorm)) {
       type = tNorm as ProjectType;
     }
@@ -733,16 +745,41 @@ const normalizeProject = (project: unknown): Project | null => {
     return undefined;
   };
 
+  let descriptionsByLocale = normalizeLocaleMap(
+    (candidate as { descriptionsByLocale?: unknown }).descriptionsByLocale
+  );
+
+  let description: string | LocalizedContent | null | undefined;
+  if (typeof candidate.description === "string") {
+    const rawDesc = candidate.description;
+    try {
+      const parsed = JSON.parse(rawDesc);
+      if (isRecord(parsed)) {
+        description = parsed as LocalizedContent;
+        descriptionsByLocale = descriptionsByLocale ?? normalizeLocaleMap(parsed);
+      } else {
+        description = rawDesc;
+      }
+    } catch {
+      description = rawDesc;
+    }
+  } else if (isRecord(candidate.description)) {
+    description = candidate.description as LocalizedContent;
+    descriptionsByLocale = descriptionsByLocale ?? normalizeLocaleMap(candidate.description);
+  } else if (typeof candidate.summary === "string" && candidate.summary.trim().length > 0) {
+    description = candidate.summary;
+  }
+
+  if (!description && descriptionsByLocale) {
+    description = descriptionsByLocale;
+  }
+
   const out: Project = {
     id: String(id),
     name: String(name),
     slug: candidate.slug ? String(candidate.slug) : undefined,
-    description:
-      typeof candidate.description === "string"
-        ? candidate.description
-        : candidate.summary && typeof candidate.summary === "string"
-        ? candidate.summary
-        : undefined,
+    description,
+    descriptionsByLocale,
     logoUrl:
       getStr(candidate, "logoUrl") ??
       getStr(candidate, "logo") ??
@@ -776,6 +813,7 @@ const normalizeProject = (project: unknown): Project | null => {
   return out;
 };
 
+
 export const getAllProjects = async (
   token?: string
 ): Promise<Project[]> => {
@@ -797,14 +835,14 @@ export const getAllProjects = async (
       return [];
     }
 
-    const json = await response.json().catch(() => []);  
-    if (!Array.isArray(json)) {
-      return [];
-    }
+    const json = await response.json().catch(() => ({ projects: [] }));  
+    
+    // New API returns {projects: [...]}
+    const projectsArray = Array.isArray(json) ? json : (json.projects || []);
 
-    return json
-      .map((item) => normalizeProject(item))
-      .filter((item): item is Project => Boolean(item));
+    return projectsArray
+      .map((item: unknown) => normalizeProject(item))
+      .filter((item: Project | null): item is Project => Boolean(item));
   } catch (error) {
     console.error("Failed to fetch projects", error);
     return [];
@@ -1032,21 +1070,9 @@ export async function registerUser({
 }) {
   console.log("Registering user:", username, email);
   
-  // Use lova-api if google flow (or always if we want to migrate)
-  // But let's keep consistency. If idToken is present, use lova-api register endpoint which we updated.
-  // The original registers against localhost:5000 (core-cpp?).
-  // As established, core-cpp auth relies on shared DB.
-  
-  let endpoint = `${API_BASE}/auth/register`;
-  
-  // If we have idToken, we MUST use lova-api because core-cpp might not support it yet?
-  // Or we just use lova-api for everything register-related now?
-  // Let's use lova-api for Google flows specifically or generic register if capable.
-  // For now, if idToken is present, point to lova-api.
-  
-  if (idToken) {
-      endpoint = "https://api.lova.tengra.studio/auth/register";
-  }
+  // Use consistent API endpoint via Next.js proxy
+  // This forwards to the appropriate backend (localhost:5000)
+  const endpoint = `/api/auth/register`;
 
   const res = await fetch(endpoint, {
     method: "POST",
@@ -1486,7 +1512,27 @@ export const getVisits = async (token: string): Promise<{ date: string; count: n
 
 export const incrementBlogView = async (id: string | number): Promise<void> => {
   try {
-    await fetch(`${ANALYTICS_API_URL}/blogs/${id}/increment`, { method: "POST" });
+    const payload =
+      typeof window !== "undefined"
+        ? {
+            country: (() => {
+              const locale = navigator.language || "";
+              const parts = locale.split(/[-_]/);
+              return parts.length > 1 ? parts[1].toUpperCase() : "";
+            })(),
+            path: window.location.pathname,
+            referrer: document.referrer || "",
+            ua: navigator.userAgent || "",
+            language: navigator.language || "",
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
+            screen: `${window.screen?.width ?? 0}x${window.screen?.height ?? 0}`,
+          }
+        : {};
+    await fetch(`${ANALYTICS_API_URL}/blogs/${id}/increment`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
   } catch {}
 };
 
@@ -1808,4 +1854,100 @@ export const updateAdminUser = async (userId: string, data: Record<string, unkno
   if (!res.ok) return null;
   const json = await res.json();
   return normalizeUser(json.user);
+};
+
+export type VideoSupportCheck = {
+  supported: boolean;
+  platform?: string;
+  formats?: string[];
+  toolAvailable?: boolean;
+  message?: string;
+  error?: string;
+};
+
+export type VideoDownloadResult = {
+  success: boolean;
+  platform?: string;
+  format?: string;
+  downloadUrl?: string;
+  note?: string;
+  error?: string;
+};
+
+const normalizeStringArray = (value: unknown): string[] | undefined => {
+  if (!Array.isArray(value)) return undefined;
+  const cleaned = value.filter((v): v is string => typeof v === "string" && v.trim().length > 0);
+  return cleaned.length ? cleaned : undefined;
+};
+
+export const checkVideoSupport = async (url: string, token: string): Promise<VideoSupportCheck> => {
+  if (!url || !token) {
+    return { supported: false, message: "URL ve token gerekli", error: "missing_parameters" };
+  }
+
+  const response = await fetch(`${API_BASE}/videos/check`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ url }),
+  });
+
+  const json = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+
+  if (!response.ok) {
+    const message =
+      typeof json.error === "string"
+        ? json.error
+        : typeof json.message === "string"
+          ? json.message
+          : `Kontrol başarısız (HTTP ${response.status})`;
+    return { supported: false, message, error: message };
+  }
+
+  return {
+    supported: json.supported === true,
+    platform: typeof json.platform === "string" ? json.platform : undefined,
+    formats: normalizeStringArray(json.formats),
+    toolAvailable: json.toolAvailable !== false,
+    message: typeof json.message === "string" ? json.message : undefined,
+  };
+};
+
+export const requestVideoDownload = async (params: { url: string; format: string; token: string }): Promise<VideoDownloadResult> => {
+  const { url, format, token } = params;
+  if (!url || !format || !token) {
+    return { success: false, error: "URL, format ve token gerekli" };
+  }
+
+  const response = await fetch(`${API_BASE}/videos/download`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ url, format }),
+  });
+
+  const json = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+
+  if (!response.ok) {
+    const message =
+      typeof json.error === "string"
+        ? json.error
+        : typeof json.message === "string"
+          ? json.message
+          : `İndirme isteği reddedildi (HTTP ${response.status})`;
+    return { success: false, error: message };
+  }
+
+  return {
+    success: json.success !== false,
+    platform: typeof json.platform === "string" ? json.platform : undefined,
+    format: typeof json.format === "string" ? json.format : undefined,
+    downloadUrl: typeof json.downloadUrl === "string" ? json.downloadUrl : undefined,
+    note: typeof json.note === "string" ? json.note : undefined,
+    error: typeof json.error === "string" ? json.error : undefined,
+  };
 };

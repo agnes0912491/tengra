@@ -1,6 +1,7 @@
 import type { Blog } from "@/types/blog";
+import { useLocale, useTranslations } from "next-intl";
 
-const formatDateTime = (value?: string | null) => {
+const formatDateTime = (value?: string | null, locale?: string) => {
   if (!value) {
     return "-";
   }
@@ -10,7 +11,7 @@ const formatDateTime = (value?: string | null) => {
     return "-";
   }
 
-  return new Intl.DateTimeFormat("tr-TR", {
+  return new Intl.DateTimeFormat(locale ?? "tr-TR", {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date);
@@ -21,10 +22,12 @@ type Props = {
 };
 
 export default function BlogsTable({ blogs }: Props) {
+  const locale = useLocale();
+  const t = useTranslations("AdminBlogs");
   if (blogs.length === 0) {
     return (
       <div className="rounded-3xl border border-dashed border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.6)]/60 p-10 text-center text-sm text-[rgba(255,255,255,0.55)]">
-        Henüz blog içeriği bulunmuyor. Yeni bir yazı ile başlayın.
+        {t("table.empty")}
       </div>
     );
   }
@@ -35,13 +38,13 @@ export default function BlogsTable({ blogs }: Props) {
         <thead className="bg-[rgba(8,24,32,0.9)] text-[rgba(255,255,255,0.75)]">
           <tr>
             <th scope="col" className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.22em]">
-              Başlık
+              {t("table.title")}
             </th>
             <th scope="col" className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.22em]">
-              Yazar
+              {t("table.author")}
             </th>
             <th scope="col" className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.22em]">
-              Son Güncelleme
+              {t("table.updatedAt")}
             </th>
           </tr>
         </thead>
@@ -54,7 +57,7 @@ export default function BlogsTable({ blogs }: Props) {
               </td>
               <td className="px-6 py-4 text-[rgba(255,255,255,0.75)]">{blog.author}</td>
               <td className="px-6 py-4 text-[rgba(255,255,255,0.65)]">
-                {formatDateTime(blog.updatedAt ?? blog.date)}
+                {formatDateTime(blog.updatedAt ?? blog.date, locale)}
               </td>
             </tr>
           ))}

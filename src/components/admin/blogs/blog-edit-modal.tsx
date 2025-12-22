@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { Eye } from "lucide-react";
 import Dropzone from "@/components/ui/dropzone";
 import { toast } from "@/lib/react-toastify";
+import { useTranslations } from "next-intl";
 
 import { MarkdownEditor } from "@/components/ui/markdown-editor";
 
@@ -23,6 +24,7 @@ type Props = {
 // Fields use standard Input/textarea with glass styles
 
 export default function BlogEditModal({ open, onClose, onCreated }: Props) {
+    const t = useTranslations("AdminBlogs");
     // wizard state
     const [step, setStep] = useState<number>(0);
     const next = () => setStep((s) => Math.min(s + 1, 3));
@@ -118,14 +120,14 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
         new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = () => resolve(String(reader.result || ""));
-            reader.onerror = () => reject(new Error("Dosya okunamadı"));
+            reader.onerror = () => reject(new Error(t("editModal.fileReadError")));
             reader.readAsDataURL(file);
         });
 
     const handleContentImageUpload = async (files: File[]) => {
         if (!files.length) return;
         if (!token) {
-            toast.error("Görsel yüklemek için önce giriş yapın.");
+            toast.error(t("toast.imageLoginRequired"));
             return;
         }
 
@@ -141,7 +143,7 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
             }
 
             if (!urls.length) {
-                toast.error("Görseller yüklenemedi.");
+                toast.error(t("toast.contentImagesFailed"));
                 return;
             }
 
@@ -150,17 +152,17 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
                 const markdown = urls.map((u) => `![](${u})`).join("\n\n");
                 return `${prev}${prefix}${markdown}\n`;
             });
-            toast.success("Görseller içeriğe eklendi.");
+            toast.success(t("toast.contentImagesAdded"));
         } catch (error) {
             console.error("Content image upload failed", error);
-            toast.error("Görsel yüklenirken bir hata oluştu.");
+            toast.error(t("toast.imageUploadError"));
         }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!token) {
-            toast.error("Oturum bulunamadı. Lütfen tekrar giriş yapın.");
+            toast.error(t("toast.sessionMissing"));
             return;
         }
         setSubmitting(true);
@@ -206,15 +208,15 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
     const FeaturedImageTabs = (
         <Tabs.Root defaultValue="url" className="w-full">
             <Tabs.List className="mb-3 inline-flex rounded-lg border border-[rgba(0,167,197,0.25)] bg-[rgba(3,12,18,0.6)] p-1 text-xs">
-                <Tabs.Trigger value="url" className="rounded-md px-3 py-1 ui-selected:bg-[rgba(0,167,197,0.2)] ui-selected:text-[color:var(--color-turkish-blue-300)]">URL</Tabs.Trigger>
-                <Tabs.Trigger value="upload" className="rounded-md px-3 py-1 ui-selected:bg-[rgba(0,167,197,0.2)] ui-selected:text-[color:var(--color-turkish-blue-300)]">Yükle</Tabs.Trigger>
+                <Tabs.Trigger value="url" className="rounded-md px-3 py-1 ui-selected:bg-[rgba(0,167,197,0.2)] ui-selected:text-[color:var(--color-turkish-blue-300)]">{t("editModal.tabs.url")}</Tabs.Trigger>
+                <Tabs.Trigger value="upload" className="rounded-md px-3 py-1 ui-selected:bg-[rgba(0,167,197,0.2)] ui-selected:text-[color:var(--color-turkish-blue-300)]">{t("editModal.tabs.upload")}</Tabs.Trigger>
             </Tabs.List>
             <Tabs.Content value="url" className="outline-none">
-                <label className="text-xs text-[rgba(255,255,255,0.7)]">Görsel URL</label>
+                <label className="text-xs text-[rgba(255,255,255,0.7)]">{t("editModal.tabs.imageUrlLabel")}</label>
                 <Input
                     value={image}
                     onChange={(e) => setImage(e.currentTarget.value)}
-                    placeholder="https://..."
+                    placeholder={t("editModal.tabs.imageUrlPlaceholder")}
                     className="mt-1 border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.75)] text-white"
                 />
             </Tabs.Content>
@@ -231,11 +233,11 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
                 >
                     {uploadFile ? (
                         <p className="text-xs text-[rgba(255,255,255,0.8)]">
-                            Seçildi: {uploadFile.name}
+                            {t("editModal.fileSelected", { name: uploadFile.name })}
                         </p>
                     ) : (
                         <span className="text-xs text-[rgba(255,255,255,0.7)]">
-                            PNG/JPG/WebP sürükleyip bırakın veya tıklayın
+                            {t("editModal.dropzoneHint")}
                         </span>
                     )}
                 </Dropzone>
@@ -245,7 +247,7 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src={image || (uploadFile ? URL.createObjectURL(uploadFile) : "")}
-                        alt="Önizleme"
+                        alt={t("editModal.previewAlt")}
                         className="mx-auto max-h-40 w-auto object-contain"
                     />
                 </div>
@@ -263,7 +265,7 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
             <DialogContent className="max-w-4xl border border-[rgba(110,211,225,0.3)] bg-[rgba(5,18,24,0.96)] shadow-[0_24px_80px_rgba(0,0,0,0.75)] backdrop-blur-2xl">
                 <DialogHeader>
                     <DialogTitle className="font-display text-xl uppercase tracking-[0.3em] text-[color:var(--color-turkish-blue-300)]">
-                        Yeni Blog Yazısı
+                        {t("editModal.title")}
                     </DialogTitle>
                 </DialogHeader>
 
@@ -271,10 +273,10 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
                     {/* Stepper header */}
                     <div className="flex items-center justify-between gap-2 rounded-xl border border-[rgba(0,167,197,0.25)] bg-[rgba(3,12,18,0.65)] p-3 text-xs">
                         {[
-                            "Başlık",
-                            "Kategoriler",
-                            "İçerik",
-                            "Öne Çıkan Görsel",
+                            t("editModal.steps.title"),
+                            t("editModal.steps.categories"),
+                            t("editModal.steps.content"),
+                            t("editModal.steps.featuredImage"),
                         ].map((label, idx) => (
                             <div key={label} className="flex items-center gap-2">
                                 <div className={cn(
@@ -295,7 +297,7 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
                     {step === 0 && (
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div>
-                                <label className="text-xs text-[rgba(255,255,255,0.7)]">Başlık</label>
+                                <label className="text-xs text-[rgba(255,255,255,0.7)]">{t("editModal.fields.titleLabel")}</label>
                                 <Input value={title} onChange={(e) => setTitle(e.currentTarget.value)} required className="mt-1 border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.75)] text-white w-full" />
                             </div>
                         </div>
@@ -306,14 +308,14 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
                             <div className="flex items-center gap-2">
                                 <div className="max-w-[260px] w-full">
                                     <Input
-                                        placeholder="Yeni kategori adı"
+                                        placeholder={t("editModal.fields.newCategoryPlaceholder")}
                                         value={newCategory}
                                         onChange={(e) => setNewCategory(e.currentTarget.value)}
                                         className="border-[rgba(0,167,197,0.3)] bg-[rgba(3,12,18,0.75)] text-white"
                                     />
                                 </div>
                                 <Button type="button" onClick={handleCreateCategory} disabled={creatingCategory} className="bg-[color:var(--color-turkish-blue-500)] text-black">
-                                    {creatingCategory ? "Ekleniyor..." : "Kategori Ekle"}
+                                    {creatingCategory ? t("editModal.fields.addingCategory") : t("editModal.fields.addCategory")}
                                 </Button>
                             </div>
                             <div className="flex gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
@@ -339,14 +341,14 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
                     {step === 2 && (
                         <div className="space-y-3" data-color-mode="dark">
                             <div className="flex items-center justify-between">
-                                <label className="text-sm text-[rgba(255,255,255,0.8)]">İçerik</label>
+                                <label className="text-sm text-[rgba(255,255,255,0.8)]">{t("editModal.content.label")}</label>
                                 <div className="flex items-center gap-2">
                                     {richEditor && (
                                         <button
                                             type="button"
                                             onClick={() => setShowPreview((p) => !p)}
                                             className="rounded-md border border-[rgba(0,167,197,0.35)] p-1 text-[rgba(255,255,255,0.8)] hover:text-[color:var(--color-turkish-blue-300)]"
-                                            aria-label="Önizleme"
+                                            aria-label={t("editModal.content.previewLabel")}
                                         >
                                             <Eye size={16} />
                                         </button>
@@ -357,7 +359,7 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
                                         className="border-[rgba(0,167,197,0.35)]"
                                         onClick={() => setRichEditor((v) => !v)}
                                     >
-                                        {richEditor ? "Basit Editör" : "Gelişmiş Editör"}
+                                        {richEditor ? t("editModal.content.simpleEditor") : t("editModal.content.richEditor")}
                                     </Button>
                                 </div>
                             </div>
@@ -377,7 +379,7 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
                             </div>
                             <div className="space-y-2">
                                 <label className="text-xs text-[rgba(255,255,255,0.75)]">
-                                    İçeriğe Görsel Ekle
+                                    {t("editModal.content.addImageLabel")}
                                 </label>
                                 <Dropzone
                                     accept={{
@@ -387,9 +389,7 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
                                     onDrop={handleContentImageUpload}
                                 >
                                     <span className="text-xs text-[rgba(255,255,255,0.7)]">
-                                        Bir veya birden fazla PNG/JPG/WebP dosyasını sürükleyip
-                                        bırakın ya da tıklayarak seçin. Görseller markdown olarak
-                                        içeriğin sonuna eklenir.
+                                        {t("editModal.content.addImageHint")}
                                     </span>
                                 </Dropzone>
                             </div>
@@ -398,22 +398,22 @@ export default function BlogEditModal({ open, onClose, onCreated }: Props) {
 
                     {step === 3 && (
                         <div className="space-y-2">
-                            <label className="text-sm text-[rgba(255,255,255,0.8)]">Öne Çıkan Görsel</label>
+                            <label className="text-sm text-[rgba(255,255,255,0.8)]">{t("editModal.featuredImageLabel")}</label>
                             {FeaturedImageTabs}
                         </div>
                     )}
 
                     <div className="flex justify-between gap-3">
                         <Button type="button" variant="outline" onClick={prev} disabled={step === 0} className="border-[rgba(0,167,197,0.3)]">
-                            Geri
+                            {t("editModal.actions.back")}
                         </Button>
                         {step < 3 ? (
                             <Button type="button" onClick={next} disabled={!canNext()} className="bg-[color:var(--color-turkish-blue-500)] text-black hover:bg-[color:var(--color-turkish-blue-400)]">
-                                İleri
+                                {t("editModal.actions.next")}
                             </Button>
                         ) : (
                             <Button type="submit" disabled={submitting} className="bg-[color:var(--color-turkish-blue-500)] text-black hover:bg-[color:var(--color-turkish-blue-400)]">
-                                {submitting ? "Kaydediliyor..." : "Yayınla"}
+                                {submitting ? t("editModal.actions.saving") : t("editModal.actions.publish")}
                             </Button>
                         )}
                     </div>

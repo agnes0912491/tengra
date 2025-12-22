@@ -3,9 +3,10 @@ export type ProjectStatus =
   | "in_progress"
   | "on_hold"
   | "completed"
+  | "published"
   | "archived";
 
-export type ProjectType = "game" | "website" | "tool" | "app" | "library" | "other";
+export type ProjectType = "game" | "website" | "tool" | "app" | "mobile" | "library" | "other";
 
 export type ProjectPlatform = "windows" | "macos" | "linux" | "android" | "ios" | "web" | "steam" | "discord";
 
@@ -34,58 +35,71 @@ export type ProjectLink = {
   label?: string | null;
 };
 
+// New API Response Types
+export type LocalizedContent = {
+  en?: string;
+  tr?: string;
+  [key: string]: string | undefined;
+};
+
+export type ProjectImages = {
+  logo: string | null;
+  banner: string | null;
+  icon: string | null;
+};
+
+export type ProjectMetadata = {
+  version: string | null;
+  releaseDate: string | null;
+  platforms: string[] | null;
+  categories: string[] | null;
+  tags: string[] | null;
+};
+
+export type ProjectStats = {
+  downloads: number;
+  views: number;
+  reviews: number;
+  rating: number;
+};
+
 export type Project = {
-  id?: string;
+  id: number | string;
   name: string;
   slug?: string;
   
   // Basic info
-  tagline?: string | null; // Short catchy phrase like "Build the future"
-  description?: string | object | null;
-  descriptionsByLocale?: Record<string, string> | null;
+  type?: ProjectType;
+  status?: ProjectStatus;
+  tagline?: LocalizedContent | string | null;
+  description?: LocalizedContent | string | null;
   
-  // Visual assets
+  // New nested structures from API
+  images?: ProjectImages;
+  metadata?: ProjectMetadata;
+  stats?: ProjectStats;
+  links?: any; // JSON object
+  techStack?: any; // JSON array
+  features?: any; // JSON array
+  
+  // Legacy fields (for backwards compatibility)
+  descriptionsByLocale?: Record<string, string> | null;
   logoUrl?: string | null;
   bannerUrl?: string | null; // Hero banner image
   iconUrl?: string | null; // App icon (square)
-  
-  // Screenshots/Gallery
   screenshots?: ProjectScreenshot[];
-  
-  // Features list
-  features?: ProjectFeature[];
-  
-  // External links
-  links?: ProjectLink[];
-  
-  // Metadata
-  status?: ProjectStatus;
-  type?: ProjectType;
   version?: string | null; // e.g., "1.2.3"
   releaseDate?: string | null;
-  
-  // Platform support
   platforms?: ProjectPlatform[];
-  
-  // Categories/Tags
   categories?: string[];
   tags?: string[];
-  
-  // Stats (read-only, computed from analytics)
   downloadCount?: number;
   viewCount?: number;
   rating?: number; // 0-5
   reviewCount?: number;
-  
-  // Technical info
   minRequirements?: string | null;
-  techStack?: string[];
-  
-  // SEO
   metaTitle?: string | null;
   metaDescription?: string | null;
-  
-  // Timestamps
   lastUpdatedAt?: string | null;
   createdAt?: string | null;
 };
