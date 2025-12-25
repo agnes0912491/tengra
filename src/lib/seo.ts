@@ -119,3 +119,99 @@ export function generateSEO({ title, description, image, author, type = "article
 
   return schema;
 }
+
+/**
+ * FAQ Schema - for FAQ pages or sections
+ */
+export interface FAQItem {
+  question: string;
+  answer: string;
+}
+
+export function getFAQSchema(items: FAQItem[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer
+      }
+    }))
+  };
+}
+
+/**
+ * LocalBusiness Schema - for local SEO in Istanbul
+ */
+export function getLocalBusinessSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "@id": `${BASE_URL}/#organization`,
+    name: "Tengra Studio",
+    alternateName: "Tengra",
+    url: BASE_URL,
+    logo: `${CDN_URL}/uploads/tengra_without_text.png`,
+    image: `${CDN_URL}/uploads/tengra_without_text.png`,
+    description: "Creative tech studio building web and mobile applications with cutting-edge technology.",
+    telephone: "+90-XXX-XXX-XXXX", // Add real number when available
+    email: "hello@tengra.studio",
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Istanbul",
+      addressRegion: "Istanbul",
+      addressCountry: "TR"
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: 41.0082,
+      longitude: 28.9784
+    },
+    areaServed: [
+      { "@type": "Country", name: "Turkey" },
+      { "@type": "Country", name: "Worldwide" }
+    ],
+    priceRange: "$$",
+    openingHoursSpecification: {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      opens: "09:00",
+      closes: "18:00"
+    },
+    sameAs: [
+      "https://twitter.com/tengrastudio",
+      "https://github.com/tengrastudio",
+      "https://instagram.com/tengrastudio",
+      "https://linkedin.com/company/tengrastudio"
+    ]
+  };
+}
+
+/**
+ * Service Schema - for service pages
+ */
+export function getServiceSchema(service: {
+  name: string;
+  description: string;
+  url: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: service.name,
+    description: service.description,
+    url: service.url.startsWith("http") ? service.url : `${BASE_URL}${service.url}`,
+    provider: {
+      "@type": "Organization",
+      name: "Tengra Studio",
+      url: BASE_URL
+    },
+    areaServed: {
+      "@type": "Country",
+      name: "Worldwide"
+    }
+  };
+}

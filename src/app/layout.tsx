@@ -14,7 +14,7 @@ import AdblockDetector from "@/components/analytics/AdblockDetector";
 import AdblockNotice from "@/components/analytics/AdblockNotice";
 import Footer from "@/components/layout/footer";
 import PWAProvider from "@/components/pwa/pwa-provider";
-import { getOrganizationSchema, getWebSiteSchema, BASE_URL } from "@/lib/seo";
+import { getOrganizationSchema, getWebSiteSchema, getLocalBusinessSchema, BASE_URL } from "@/lib/seo";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
@@ -33,16 +33,30 @@ export const metadata: Metadata = {
   description:
     "Immersive digital craftsmanship fusing the sacred with technology. We build high-performance web and mobile applications with next-generation design.",
   keywords: [
+    // Brand keywords
     "Tengra Studio",
+    "Tengra",
+    "tengra.studio",
+    // English keywords
     "creative tech studio",
     "digital innovation",
     "immersive experiences",
     "design collective",
     "web development",
     "mobile app development",
+    "software company Istanbul",
+    "Turkish tech studio",
     "next.js",
     "react",
-    "flutter"
+    "flutter",
+    // Turkish keywords (SEO)
+    "yazılım geliştirme",
+    "web tasarım",
+    "mobil uygulama geliştirme",
+    "İstanbul yazılım şirketi",
+    "Türk teknoloji firması",
+    "web sitesi yapımı",
+    "uygulama geliştirme",
   ],
   authors: [{ name: "Tengra Studio", url: BASE_URL }],
   creator: "Tengra Studio",
@@ -123,6 +137,7 @@ export default async function RootLayout({
   // Get Structured Data
   const organizationSchema = getOrganizationSchema();
   const webSiteSchema = getWebSiteSchema();
+  const localBusinessSchema = getLocalBusinessSchema();
 
   return (
     <html suppressHydrationWarning lang={locale} className={`${orbitron.variable} ${inter.variable} ${notoOldTurkic.variable}`}>
@@ -130,7 +145,7 @@ export default async function RootLayout({
       <body className="font-sans bg-[color:var(--background)] text-[color:var(--foreground)] w-full min-h-screen">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify([organizationSchema, webSiteSchema]) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify([organizationSchema, webSiteSchema, localBusinessSchema]) }}
         />
         {/* Consent Mode default */}
         <Script id="consent-mode-default" strategy="beforeInteractive">
