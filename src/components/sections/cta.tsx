@@ -1,13 +1,13 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { ArrowRight } from "lucide-react";
 import AnimatedButton from "@/components/ui/animated-button";
 import GlowCard from "@/components/ui/glow-card";
 import { motion } from "framer-motion";
 
 export default function Cta() {
-    const t = useTranslations("Cta");
+    const { t } = useTranslation("Cta");
 
     return (
         <section className="py-24 px-4">

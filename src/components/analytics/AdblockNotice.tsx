@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "@tengra/language";
 
 /**
  * Renders a subtle, non-dismissible warning bar when adblock is detected.
  */
 export default function AdblockNotice() {
   const [enabled, setEnabled] = useState(false);
+  const { t } = useTranslation("AdblockNotice");
 
   useEffect(() => {
     const update = () => {
@@ -36,9 +38,9 @@ export default function AdblockNotice() {
           !
         </span>
         <div className="flex flex-col text-sm text-[rgba(255,255,255,0.82)]">
-          <span className="font-semibold tracking-[0.06em] text-white">Ad blocker detected</span>
+          <span className="font-semibold tracking-[0.06em] text-white">{t("title")}</span>
           <span className="text-[rgba(255,255,255,0.7)]">
-            Some scripts and analytics are blocked. If you want full experience, allow Tengra in your blocker.
+            {t("description")}
           </span>
         </div>
       </div>

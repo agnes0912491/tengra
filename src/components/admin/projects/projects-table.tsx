@@ -17,15 +17,15 @@ import Dropzone from "@/components/ui/dropzone";
 import { routing } from "@/i18n/routing";
 import { useAdminToken } from "@/hooks/use-admin-token";
 import Image from "next/image";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 type Props = {
   projects: Project[];
 };
 
 export default function ProjectsTable({ projects }: Props) {
-  const t = useTranslations("AdminProjects");
-  const locale = useLocale();
+  const { t } = useTranslation("AdminProjects");
+  const { language: locale } = useTranslation();
   const [editProjectModalOpen, setEditProjectModalOpen] = useState(false);
   const [deleteProjectModalOpen, setDeleteProjectModalOpen] = useState(false);
   const [project, setProject] = useState<Project | null>(null);

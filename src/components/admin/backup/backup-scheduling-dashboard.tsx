@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 interface BackupStatus {
   enabled: boolean;
@@ -44,7 +44,7 @@ function formatBytes(bytes: number): string {
 
 // Status badge component
 function StatusBadge({ status }: { status: string }) {
-  const t = useTranslations("AdminBackup");
+  const { t } = useTranslation("AdminBackup");
   const colors = {
     success: "bg-green-500/20 text-green-400 border-green-500/30",
     failed: "bg-red-500/20 text-red-400 border-red-500/30",
@@ -73,8 +73,8 @@ function StatusBadge({ status }: { status: string }) {
 
 // Main component
 export default function BackupSchedulingDashboard() {
-  const locale = useLocale();
-  const t = useTranslations("AdminBackup");
+  const { language: locale } = useTranslation();
+  const { t } = useTranslation("AdminBackup");
   const [status, setStatus] = useState<BackupStatus | null>(null);
   const [history, setHistory] = useState<BackupHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);

@@ -3,7 +3,7 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { Sun, Moon, Monitor } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 interface ThemeToggleProps {
     variant?: "icon" | "dropdown";
@@ -12,7 +12,7 @@ interface ThemeToggleProps {
 
 export default function ThemeToggle({ variant = "icon", className = "" }: ThemeToggleProps) {
     const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme();
-    const t = useTranslations("ThemeToggle");
+    const { t } = useTranslation("ThemeToggle");
     const [showDropdown, setShowDropdown] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 

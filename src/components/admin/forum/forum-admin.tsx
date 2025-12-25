@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Plus, Save } from "lucide-react";
 import { toast } from "react-toastify";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 type Props = {
   token: string;
@@ -15,7 +15,7 @@ type Props = {
 };
 
 export default function ForumAdmin({ token, initialCategories }: Props) {
-  const t = useTranslations("AdminForum");
+  const { t } = useTranslation("AdminForum");
   const [categories, setCategories] = useState<ForumCategory[]>(initialCategories);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);

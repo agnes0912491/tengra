@@ -29,8 +29,15 @@ export default function ClientUserProvider({
       let storedToken: string | null = null;
       try {
         storedToken = window.localStorage.getItem("authToken");
+        if (!storedToken) {
+          storedToken = Cookies.get("authToken") || null;
+          if (storedToken) {
+            console.log("Found authToken in cookies, syncing to localStorage");
+            window.localStorage.setItem("authToken", storedToken);
+          }
+        }
       } catch (error) {
-        console.error("Failed to read authToken from localStorage:", error);
+        console.error("Failed to read authToken from storage:", error);
       }
 
       if (!storedToken) {
@@ -69,7 +76,27 @@ export default function ClientUserProvider({
             }
           }
           if (!fetchedUser && typeof window !== "undefined") {
-            console.warn("No user found with stored token.");
+            console.warn("No user found with stored token. Clearing invalid tokens...");
+            // Clear invalid tokens from localStorage
+            window.localStorage.removeItem("authToken");
+
+            // Clear cookies with all possible domain variations (retry 3 times for each)
+            const hostname = window.location.hostname;
+            const isTengra = hostname.includes("tengra.studio");
+            const domains = isTengra ? [".tengra.studio", "tengra.studio", undefined] : [undefined];
+
+            for (let attempt = 0; attempt < 3; attempt++) {
+              for (const domain of domains) {
+                const opts = domain ? { path: "/", domain } : { path: "/" };
+                Cookies.remove("authToken", opts);
+                Cookies.remove("admin_session", opts);
+                Cookies.remove(ADMIN_SESSION_COOKIE, opts);
+                for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
+                  Cookies.remove(legacyName, opts);
+                }
+              }
+            }
+            console.log("Invalid tokens cleared.");
           }
         }
       } catch (error) {

@@ -1,12 +1,12 @@
 "use client";
 
 import SiteShell from "@/components/layout/site-shell";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { motion } from "framer-motion";
 import { Smartphone, SmartphoneIcon, ShieldCheck, WifiOff } from "lucide-react";
 
 export default function MobileAppsPage() {
-    const t = useTranslations("ServicesPage.mobile");
+    const { t } = useTranslation("ServicesPage.mobile");
 
     return (
         <SiteShell>

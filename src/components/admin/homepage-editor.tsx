@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 // keep simple textarea for JSON
 
 type HomepageContent = {
@@ -11,7 +11,7 @@ type HomepageContent = {
 };
 
 export default function HomepageEditor({ initial }: { initial: HomepageContent }) {
-    const t = useTranslations("AdminHomepage");
+    const { t } = useTranslation("AdminHomepage");
     const [text, setText] = useState(JSON.stringify(initial, null, 2));
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);

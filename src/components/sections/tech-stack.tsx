@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { motion } from "framer-motion";
 import { Shield } from "lucide-react"; // Keep Lucide icon or use SiLucide if available (keeping Shield for safety)
 // Import brand icons
@@ -33,7 +33,7 @@ const tools = [
 const marqueeTools = [...tools, ...tools, ...tools];
 
 export default function TechStack() {
-    const t = useTranslations("TechStack");
+    const { t } = useTranslation("TechStack");
 
     return (
         <section className="py-16 overflow-hidden bg-[rgba(255,255,255,0.02)] border-y border-[rgba(255,255,255,0.05)]">

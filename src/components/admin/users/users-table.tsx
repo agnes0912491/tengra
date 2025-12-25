@@ -3,7 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "react-toastify";
 import { User as UserIcon, Shield, UserCog, Mail, MoreVertical } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 import type { Role, User } from "@/lib/auth/users";
 import { updateUserRole } from "@/lib/db";
@@ -50,7 +50,7 @@ const getRoleBadgeVariant = (role: Role): "default" | "success" | "warning" | "d
 };
 
 export default function UsersTable({ initialUsers, currentUserId, currentUserRole }: Props) {
-  const t = useTranslations("AdminUsers");
+  const { t } = useTranslation("AdminUsers");
   const [users, setUsers] = useState<LocalUser[]>(() =>
     initialUsers.map((user) => ({ ...user, role: normalizeRoleValue(user.role), isUpdating: false }))
   );

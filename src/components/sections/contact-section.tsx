@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { motion } from "framer-motion";
 import { Send, Loader2 } from "lucide-react";
 import GlowCard from "@/components/ui/glow-card";
@@ -9,7 +9,7 @@ import GradientText from "@/components/ui/gradient-text";
 import AnimatedButton from "@/components/ui/animated-button";
 
 export default function ContactSection() {
-    const t = useTranslations("Contact");
+    const { t } = useTranslation("Contact");
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState(false);
@@ -76,7 +76,7 @@ export default function ContactSection() {
                                         name="name"
                                         required
                                         className="w-full px-4 py-3 rounded-xl bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] text-white focus:outline-none focus:border-[var(--color-turkish-blue-400)] transition-colors"
-                                        placeholder="John Doe"
+                                        placeholder={t("placeholders.name")}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -86,7 +86,7 @@ export default function ContactSection() {
                                         type="email"
                                         required
                                         className="w-full px-4 py-3 rounded-xl bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] text-white focus:outline-none focus:border-[var(--color-turkish-blue-400)] transition-colors"
-                                        placeholder="john@example.com"
+                                        placeholder={t("placeholders.email")}
                                     />
                                 </div>
                             </div>
@@ -97,7 +97,7 @@ export default function ContactSection() {
                                     name="subject"
                                     required
                                     className="w-full px-4 py-3 rounded-xl bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] text-white focus:outline-none focus:border-[var(--color-turkish-blue-400)] transition-colors"
-                                    placeholder="Project Inquiry"
+                                    placeholder={t("placeholders.subject")}
                                 />
                             </div>
 
@@ -108,7 +108,7 @@ export default function ContactSection() {
                                     required
                                     rows={5}
                                     className="w-full px-4 py-3 rounded-xl bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] text-white focus:outline-none focus:border-[var(--color-turkish-blue-400)] transition-colors resize-none"
-                                    placeholder="Tell us about your project..."
+                                    placeholder={t("placeholders.messageShort")}
                                 />
                             </div>
 

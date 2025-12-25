@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 type PublishEventDetail = {
     type: "blog" | "project" | string;
@@ -10,7 +10,7 @@ type PublishEventDetail = {
 };
 
 export default function PublishListener() {
-    const t = useTranslations("AdminPublish");
+    const { t } = useTranslation("AdminPublish");
     const [payload, setPayload] = useState<PublishEventDetail | null>(null);
 
     useEffect(() => {

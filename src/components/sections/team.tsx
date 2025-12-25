@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { Github, Twitter, Globe } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { resolveCdnUrl } from "@/lib/constants";
 
 const AGNES_IMAGE_SRC = resolveCdnUrl("/uploads/agnes.jpg");
@@ -33,7 +33,7 @@ const team: TeamMember[] = [
 ];
 
 export default function Team() {
-  const t = useTranslations("Team");
+  const { t } = useTranslation("Team");
 
   return (
     <section id="team" className="relative py-24 md:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
@@ -54,7 +54,7 @@ export default function Team() {
           <h2 className="section-title">{t("title")}</h2>
           <div className="divider mt-6 mb-6" />
           <p className="text-[var(--text-secondary)] max-w-2xl mx-auto">
-            Meet the talented individuals behind Tengra&apos;s vision.
+            {t("description")}
           </p>
         </motion.div>
 

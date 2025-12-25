@@ -1,16 +1,16 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { ArrowRight, Users, Globe, Handshake } from "lucide-react";
 
 export default function Network() {
-  const t = useTranslations("Network");
+  const { t } = useTranslation("Network");
 
   const features = [
-    { icon: Users, label: "Builders & designers" },
-    { icon: Globe, label: "Players & communities" },
-    { icon: Handshake, label: "Partners & collaborators" },
+    { icon: Users, label: t("features.builders") },
+    { icon: Globe, label: t("features.players") },
+    { icon: Handshake, label: t("features.partners") },
   ];
 
   return (

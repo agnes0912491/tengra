@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import type { ActiveAgent } from "@/lib/db";
 import { getActiveAgents } from "@/lib/db";
 import { useAdminToken } from "@/hooks/use-admin-token";
@@ -11,8 +11,8 @@ type Props = {
 };
 
 export default function ActiveAgents({ title }: Props) {
-  const locale = useLocale();
-  const t = useTranslations("AdminDashboard");
+  const { language: locale } = useTranslation();
+  const { t } = useTranslation("AdminDashboard");
   const [agents, setAgents] = useState<ActiveAgent[]>([]);
   const [loading, setLoading] = useState(true);
   const heading = title ?? t("activeAgents.title");

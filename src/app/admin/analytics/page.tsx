@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useTranslations } from 'next-intl';
+import { useTranslation } from "@tengra/language";
 
 interface OverviewData {
     today: number;
@@ -35,7 +35,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.tengra.studio';
 
 export default function AnalyticsDashboard() {
     const { user, token } = useAuth();
-    const t = useTranslations('Admin');
+    const { t } = useTranslation('Admin');
 
     const [overview, setOverview] = useState<OverviewData | null>(null);
     const [realtime, setRealtime] = useState<RealtimeData | null>(null);

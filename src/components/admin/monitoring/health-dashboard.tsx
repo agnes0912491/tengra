@@ -16,7 +16,7 @@ import {
     Globe,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 interface ServiceHealth {
     name: string;
@@ -74,8 +74,8 @@ const formatBytes = (bytes: number) => {
 
 export default function HealthCheckDashboard() {
     const { token } = useAdminToken();
-    const t = useTranslations("AdminMonitoring");
-    const locale = useLocale();
+    const { t } = useTranslation("AdminMonitoring");
+    const { language: locale } = useTranslation();
     const [data, setData] = useState<HealthData | null>(null);
     const [loading, setLoading] = useState(true);
     const [autoRefresh, setAutoRefresh] = useState(true);

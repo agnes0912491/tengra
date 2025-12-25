@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
@@ -11,8 +11,9 @@ import { routing, type Locale } from "@/i18n/routing";
 const localeOptions: Locale[] = [...routing.locales];
 
 export default function LocaleSwitcher() {
-  const locale = useLocale() as Locale;
-  const t = useTranslations("LocaleSwitcher");
+  const { language } = useTranslation();
+  const locale = language as Locale;
+  const { t } = useTranslation("LocaleSwitcher");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -22,9 +23,12 @@ export default function LocaleSwitcher() {
     // Persist preferred locale for future visits to '/'
     Cookies.set("NEXT_LOCALE", newLocale, { path: "/", expires: 365 });
 
-    startTransition(() => {
-      router.refresh();
-    });
+    // Also sync with @tengra/language package which reads from localStorage
+    if (typeof window !== "undefined") {
+      localStorage.setItem("language", newLocale);
+      // Full page reload to ensure LanguageProvider re-reads from localStorage
+      window.location.reload();
+    }
   };
 
   const flag = (loc: Locale) => (loc === "tr" ? "🇹🇷" : "🇬🇧");

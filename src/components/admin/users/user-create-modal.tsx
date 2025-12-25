@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, User, Mail, Lock, Shield, Loader2, Sparkles, Users } from "lucide-react";
 import { toast } from "react-toastify";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 type Role = "user" | "admin" | "moderator";
 type UserSource = "tengra" | "lova" | "geofrontier" | "biodefenders";
@@ -70,7 +70,7 @@ function generatePassword(): string {
 }
 
 export default function UserCreateModal({ open, onClose, onSuccess }: Props) {
-    const t = useTranslations("AdminUsers");
+    const { t } = useTranslation("AdminUsers");
     const [formData, setFormData] = useState<UserFormData>({
         email: "",
         username: "",

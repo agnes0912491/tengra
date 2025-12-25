@@ -11,17 +11,17 @@ import { getAllProjects } from "@/lib/db";
 import type { Project } from "@/types/project";
 import { resolveCdnUrl, getLocalizedText } from "@/lib/constants";
 import { useAuth } from "@/components/providers/auth-provider";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 const FALLBACK_IMAGE = resolveCdnUrl("/uploads/tengra_without_text.png");
 
 const Projects = () => {
-  const t = useTranslations("Projects");
+  const { t } = useTranslation("Projects");
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
-  const locale = useLocale();
+  const { language: locale } = useTranslation();
 
   useEffect(() => {
     getAllProjects()
@@ -41,6 +41,61 @@ const Projects = () => {
         .replace(/^-+|-+$/g, "")
       : `project-${id}`;
     return `https://${sub}.tengra.studio`;
+  };
+
+  const formatStatus = (status?: string | null) => {
+    switch (status) {
+      case "draft":
+        return t("status.draft");
+      case "active":
+        return t("status.active");
+      case "in_progress":
+        return t("status.inProgress");
+      case "on_hold":
+        return t("status.onHold");
+      case "completed":
+        return t("status.completed");
+      case "published":
+        return t("status.published");
+      case "archived":
+        return t("status.archived");
+      default:
+        return t("status.unknown");
+    }
+  };
+
+  const formatType = (type?: string | null) => {
+    switch (type) {
+      case "game":
+        return t("types.game");
+      case "website":
+        return t("types.website");
+      case "tool":
+        return t("types.tool");
+      case "app":
+        return t("types.app");
+      case "mobile":
+        return t("types.mobile");
+      case "library":
+        return t("types.library");
+      case "other":
+        return t("types.other");
+      default:
+        return t("types.unknown");
+    }
+  };
+
+  const getStatusClassName = (status?: string | null) => {
+    if (status === "completed") {
+      return "bg-blue-500/10 border-blue-500/20 text-blue-400";
+    }
+    if (status === "active" || status === "in_progress" || status === "published") {
+      return "bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
+    }
+    if (status === "on_hold") {
+      return "bg-amber-500/10 border-amber-500/20 text-amber-400";
+    }
+    return "bg-zinc-500/10 border-zinc-500/20 text-zinc-400";
   };
 
   return (
@@ -86,6 +141,9 @@ const Projects = () => {
               {projects.map((proj, index) => {
                 const imageUrl = resolveCdnUrl(proj.logoUrl || FALLBACK_IMAGE);
                 const projectUrl = buildProjectUrl(proj.name, proj.id);
+                const statusKey = String(proj.status || "draft");
+                const statusLabel = formatStatus(statusKey);
+                const typeLabel = formatType(proj.type);
 
                 return (
                   <motion.div
@@ -102,7 +160,7 @@ const Projects = () => {
                           <Image
                             crossOrigin="anonymous"
                             src={imageUrl}
-                            alt={proj.name || "Project"}
+                            alt={proj.name ? t("imageAlt", { name: proj.name }) : t("imageAltFallback")}
                             fill
                             className="object-cover transition-transform duration-700 group-hover:scale-105"
                           />
@@ -119,14 +177,11 @@ const Projects = () => {
                           <div className="flex items-center gap-2 mb-3">
                             {proj.type && (
                               <span className="px-2 py-1 rounded-md bg-[rgba(110,211,225,0.1)] border border-[rgba(110,211,225,0.2)] text-[10px] font-bold uppercase tracking-wider text-[color:var(--color-turkish-blue-400)]">
-                                {String(proj.type)}
+                                {typeLabel}
                               </span>
                             )}
-                            <span className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${(proj.status as string) === 'active' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
-                              (proj.status as string) === 'completed' ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' :
-                                'bg-zinc-500/10 border-zinc-500/20 text-zinc-400'
-                              }`}>
-                              {String(proj.status || 'draft')}
+                            <span className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${getStatusClassName(statusKey)}`}>
+                              {statusLabel}
                             </span>
                           </div>
 
@@ -135,7 +190,7 @@ const Projects = () => {
                           </h3>
 
                           <p className="text-sm text-[rgba(255,255,255,0.5)] line-clamp-3 mb-6 flex-1">
-                            {getLocalizedText(proj.descriptionsByLocale || proj.description, locale) || "No description provided."}
+                            {getLocalizedText(proj.descriptionsByLocale || proj.description, locale) || t("fallbackDescription")}
                           </p>
 
                           <div className="flex items-center text-sm font-medium text-white group/link">

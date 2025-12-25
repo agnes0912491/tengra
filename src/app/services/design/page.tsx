@@ -1,12 +1,12 @@
 "use client";
 
 import SiteShell from "@/components/layout/site-shell";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { motion } from "framer-motion";
 import { Palette, Sparkles, Layout } from "lucide-react";
 
 export default function DesignPage() {
-    const t = useTranslations("ServicesPage.design");
+    const { t } = useTranslation("ServicesPage.design");
 
     return (
         <SiteShell>

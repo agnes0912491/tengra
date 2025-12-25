@@ -19,6 +19,7 @@ import { authenticateUserWithPassword, getUserWithToken } from "@/lib/db";
 import { toast } from "react-toastify";
 import TwoFactorModal from "@/components/auth/TwoFactorModal";
 import { AuthUserPayload } from "@/types/auth";
+import { useTranslation } from "@tengra/language";
 
 /**
  * Auth context contract exposed to the app.
@@ -75,6 +76,7 @@ export default function AuthProvider({
   user: initialUser,
   hydrating = false,
 }: Props) {
+  const { t } = useTranslation("AuthContext");
   const [user, setUser] = useState<User | null>(initialUser ?? null);
   const [authActionLoading, setAuthActionLoading] = useState<boolean>(false);
   const [pendingTempToken, setPendingTempToken] = useState<string | null>(null);
@@ -135,7 +137,7 @@ export default function AuthProvider({
             if (!userObj) {
               // If we couldn't fetch the user, surface a helpful toast and keep the tokens
               // persisted so the user can retry or refresh the page.
-              toast.error("Doğrulama başarılı, fakat kullanıcı bilgisi alınamadı. Lütfen sayfayı yenileyin veya tekrar giriş yapın.");
+              toast.error(t("authorization.userFetchFailed"));
               return;
             }
 
@@ -161,7 +163,7 @@ export default function AuthProvider({
               }
             }
           } catch {
-            toast.error("Doğrulama sırasında bir hata oluştu. Lütfen tekrar deneyin.");
+            toast.error(t("authorization.verificationFailed"));
           } finally {
             // clear refs
             pendingResolveRef.current = null;
@@ -264,7 +266,7 @@ export default function AuthProvider({
     } finally {
       setAuthActionLoading(false);
     }
-  }, []);
+  }, [t]);
 
   /**
    * logout: clears user state and removes local cache.
@@ -274,7 +276,7 @@ export default function AuthProvider({
     const token = localStorage.getItem("authToken");
     if (token) {
       try {
-        await fetch("/api/auth/logout", {
+        await fetch("/auth/logout", {
           method: "POST",
           headers: { "Authorization": `Bearer ${token}` }
         });

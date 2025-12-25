@@ -2,12 +2,12 @@
 
 import { useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 import { useAuth } from "@/components/providers/auth-provider";
 
 export default function AdminCurrentUserCard() {
-  const t = useTranslations("AdminDashboard");
+  const { t } = useTranslation("AdminDashboard");
   const { user, logout } = useAuth();
   const router = useRouter();
 

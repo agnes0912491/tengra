@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 // Minimal Consent Mode v2 implementation for Google services (Adsense/Analytics)
 // - Shows a small banner for EEA/UK/CH users (basic detection with Accept-Language; integrate GeoIP if needed)
@@ -93,7 +93,7 @@ function ensureGtag(consent: ConsentState) {
 const GFC_ID = process.env.NEXT_PUBLIC_GFC_ID;
 
 export default function ConsentBanner() {
-  const t = useTranslations("ConsentBanner");
+  const { t } = useTranslation("ConsentBanner");
   const [consent, setConsentState] = useState<ConsentState>(() => getConsent());
   const [shouldShow, setShouldShow] = useState(false);
   const skipBanner = Boolean(GFC_ID && GFC_ID.length > 0);

@@ -34,7 +34,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import {
     Dialog,
     DialogContent,
@@ -108,7 +108,7 @@ const tabs: { id: TabId; labelKey: string; icon: React.ReactNode }[] = [
 
 export default function ProjectEditForm({ project, isNew }: Props) {
     const router = useRouter();
-    const t = useTranslations("AdminProjects");
+    const { t } = useTranslation("AdminProjects");
     const locales = routing.locales;
     const { token } = useAdminToken();
     const [activeTab, setActiveTab] = useState<TabId>("general");

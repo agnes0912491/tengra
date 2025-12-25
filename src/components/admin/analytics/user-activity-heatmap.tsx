@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 interface HeatmapPoint {
   x: number;
@@ -211,7 +211,7 @@ export function useScrollTracking(enabled: boolean = true) {
 
 // Scroll Depth Visualization
 function ScrollDepthIndicator({ data }: { data: Array<{ depth: number; count: number }> }) {
-  const t = useTranslations("AdminAnalytics");
+  const { t } = useTranslation("AdminAnalytics");
   const maxCount = Math.max(...data.map((d) => d.count), 1);
 
   return (
@@ -247,7 +247,7 @@ function ScrollDepthIndicator({ data }: { data: Array<{ depth: number; count: nu
 
 // Main Heatmap Dashboard
 export default function UserActivityHeatmap() {
-  const t = useTranslations("AdminAnalytics");
+  const { t } = useTranslation("AdminAnalytics");
   const [heatmapData, setHeatmapData] = useState<HeatmapPoint[]>([]);
   const [scrollDepthData, setScrollDepthData] = useState<Array<{ depth: number; count: number }>>([]);
   const [selectedPage, setSelectedPage] = useState<string>("/");

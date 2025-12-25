@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 export default function BlogCreateCta() {
-  const t = useTranslations("AdminBlogs");
+  const { t } = useTranslation("AdminBlogs");
   return (
     <Link
       href="/admin/dashboard/blogs"

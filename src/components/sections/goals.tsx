@@ -2,7 +2,7 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Code, Globe, Infinity, Sparkles, Zap } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { useEffect, useRef, useState } from "react";
 
 type GoalKey = "inception" | "creation" | "expansion" | "harmony" | "beyond";
@@ -22,8 +22,8 @@ const goals: GoalDefinition[] = [
 ];
 
 export default function Goals() {
-  const t = useTranslations("Goals");
-  const locale = useLocale();
+  const { t } = useTranslation("Goals");
+  const { language: locale } = useTranslation();
   const [adminGoals, setAdminGoals] = useState<Array<{ title: string; body: string }>>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -94,11 +94,11 @@ export default function Goals() {
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[rgba(30,184,255,0.1)] border border-[rgba(30,184,255,0.2)] mb-6">
             <span className="w-2 h-2 rounded-full bg-[var(--color-turkish-blue-400)] animate-pulse" />
-            <span className="text-xs font-medium text-[var(--color-turkish-blue-300)] uppercase tracking-widest">Roadmap</span>
+            <span className="text-xs font-medium text-[var(--color-turkish-blue-300)] uppercase tracking-widest">{t("eyebrow")}</span>
           </div>
           <h2 className="section-title text-4xl md:text-5xl lg:text-6xl mb-6">{t("title")}</h2>
           <p className="text-[var(--text-secondary)] text-lg max-w-2xl mx-auto">
-            Our journey from concept to reality, building the future one milestone at a time.
+            {t("description")}
           </p>
         </motion.div>
 

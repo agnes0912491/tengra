@@ -4,7 +4,7 @@ import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { CalendarClock, Edit3, Eye, FilePlus, Filter, Search, Trash2 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 import type { Blog, BlogCategory } from "@/types/blog";
 import { getAllBlogCategories } from "@/lib/db";
@@ -29,8 +29,8 @@ const formatDate = (value?: string, locale?: string) => {
 };
 
 export default function BlogStudio({ initialBlogs }: BlogStudioProps) {
-  const locale = useLocale();
-  const t = useTranslations("AdminBlogs");
+  const { language: locale } = useTranslation();
+  const { t } = useTranslation("AdminBlogs");
   const [blogs] = useState<Blog[]>(initialBlogs);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<Blog["status"] | "all">("all");

@@ -6,7 +6,7 @@ import StatCard from "@/components/admin/ui/stat-card";
 import ChartCard from "@/components/admin/ui/chart-card";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useAdminToken } from "@/hooks/use-admin-token";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 type Visit = { date: string; count: number };
 type RangeKey = "daily" | "weekly" | "monthly";
@@ -42,7 +42,7 @@ const useFrontendUptime = () => {
 
 
 export default function AdminMetrics() {
-    const t = useTranslations("AdminDashboard");
+    const { t } = useTranslation("AdminDashboard");
     const [health, setHealth] = useState<ServerHealth>({ status: "offline" });
     const [visits, setVisits] = useState<Visit[]>([]);
     const [topBlogs, setTopBlogs] = useState<{ id: string; count: number }[]>([]);
@@ -214,7 +214,11 @@ export default function AdminMetrics() {
                         <div className="text-[rgba(255,255,255,0.6)]">{t("metrics.cpuLoad")}</div>
                         <div className="mt-1 text-xs text-white">
                             {health.cpu
-                                ? `1m: ${health.cpu.loadAvg1.toFixed(2)} • 5m: ${health.cpu.loadAvg5.toFixed(2)} • 15m: ${health.cpu.loadAvg15.toFixed(2)}`
+                                ? t("metrics.cpuLoadDetails", {
+                                    one: health.cpu.loadAvg1.toFixed(2),
+                                    five: health.cpu.loadAvg5.toFixed(2),
+                                    fifteen: health.cpu.loadAvg15.toFixed(2),
+                                })
                                 : t("metrics.noData")}
                         </div>
                     </div>
@@ -222,7 +226,10 @@ export default function AdminMetrics() {
                         <div className="text-[rgba(255,255,255,0.6)]">{t("metrics.ramUsage")}</div>
                         <div className="mt-1 text-xs text-white">
                             {health.memory
-                                ? `${(health.memory.usedBytes / 1024 / 1024).toFixed(0)}MB / ${(health.memory.totalBytes / 1024 / 1024).toFixed(0)}MB`
+                                ? t("metrics.memoryUsage", {
+                                    used: (health.memory.usedBytes / 1024 / 1024).toFixed(0),
+                                    total: (health.memory.totalBytes / 1024 / 1024).toFixed(0),
+                                })
                                 : t("metrics.noData")}
                         </div>
                     </div>

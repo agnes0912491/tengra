@@ -3,7 +3,7 @@
 import type React from "react";
 import { useCallback, useMemo, useState } from "react";
 import { AudioLines, CheckCircle2, Download, Info, Link2, Loader2, ShieldAlert } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,7 +22,7 @@ const FORMAT_OPTIONS: ReadonlyArray<{ key: FormatKey; titleKey: string; hintKey:
 
 export default function VideoDownloaderPanel() {
   const { token, user } = useAuth();
-  const t = useTranslations("AdminMedia");
+  const { t } = useTranslation("AdminMedia");
   const [url, setUrl] = useState("");
   const [format, setFormat] = useState<FormatKey>("mp4");
   const [support, setSupport] = useState<VideoSupportCheck | null>(null);
@@ -130,7 +130,7 @@ export default function VideoDownloaderPanel() {
               id="video-url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://www.youtube.com/watch?v=..."
+              placeholder={t("urlPlaceholder")}
               className="flex-1"
               disabled={isBusy}
             />

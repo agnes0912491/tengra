@@ -3,7 +3,7 @@
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { XIcon } from "lucide-react"
-import { useTranslations } from "next-intl"
+import { useTranslation } from "@tengra/language";
 
 import { cn } from "@/lib/utils"
 
@@ -56,7 +56,7 @@ function DialogContent({
   showCloseButton?: boolean
   children?: React.ReactNode
 }) {
-  const t = useTranslations("Common")
+  const { t } = useTranslation("Common");
 
   return (
     <DialogPortal data-slot="dialog-portal">

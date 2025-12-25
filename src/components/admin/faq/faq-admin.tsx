@@ -27,7 +27,7 @@ import {
     EyeOff,
     RotateCcw,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 import { MarkdownEditor } from "@/components/ui/markdown-editor";
 
@@ -47,7 +47,7 @@ const LOCALE_LABELS: Record<string, { labelKey: string; flag: string }> = {
 };
 
 export default function FaqAdmin() {
-    const t = useTranslations("AdminContent");
+    const { t } = useTranslation("AdminContent");
     const [locale, setLocale] = useState<(typeof SUPPORTED_LOCALES)[number]>("tr");
     const [items, setItems] = useState<FaqItem[]>([]);
     const [drafts, setDrafts] = useState<FaqItem[]>([]);

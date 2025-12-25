@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 import BlogsClient from "./BlogsClient";
 import { getAllBlogs, getAllBlogCategories } from "@/lib/db";
@@ -11,7 +11,7 @@ import type { Blog, BlogCategory } from "@/types/blog";
 export default function BlogsPageClient() {
   const [categories, setCategories] = useState<BlogCategory[]>([]);
   const [posts, setPosts] = useState<Blog[]>([]);
-  const t = useTranslations("Blogs");
+  const { t } = useTranslation("Blogs");
 
   useEffect(() => {
     let isMounted = true;

@@ -21,7 +21,7 @@ import {
 import { useState } from "react";
 import type { User, Role, UserSource } from "@/lib/auth/users";
 import { resolveCdnUrl } from "@/lib/constants";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 const ROLE_CONFIG: Record<Role, { labelKey: string; color: string; icon: typeof Shield }> = {
     admin: { labelKey: "roles.admin", color: "from-purple-500 to-purple-600", icon: Shield },
@@ -50,8 +50,8 @@ type UserCardProps = {
 };
 
 export default function UserCard({ user, isCurrentUser, currentUserRole, isSelected, isOnline, onSelect, onDelete, onRoleChange, onEdit }: UserCardProps) {
-    const locale = useLocale();
-    const t = useTranslations("AdminUsers");
+    const { language: locale } = useTranslation();
+    const { t } = useTranslation("AdminUsers");
     const [showActions, setShowActions] = useState(false);
     const roleConfig = ROLE_CONFIG[user.role];
     const sourceConfig = SOURCE_CONFIG[user.source || "tengra"];

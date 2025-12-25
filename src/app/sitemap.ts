@@ -68,9 +68,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
+  // API Route
+  const API_BASE = process.env.NEXT_PUBLIC_BACKEND_API_URL || "https://api.tengra.studio";
+
   // Blog yazılarını ekle (ISR ile statik)
   try {
-    const API_BASE = process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:5000";
     const res = await fetch(`${API_BASE}/blogs`, { next: { revalidate: 3600 } });
     if (res.ok) {
       const json = (await res.json().catch(() => ({}))) as { posts?: Array<{ id?: string | number; createdAt?: string; updatedAt?: string }> };
@@ -89,7 +91,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Projeleri ekle (ISR ile statik)
   try {
-    const API_BASE = process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:5000";
     const res = await fetch(`${API_BASE}/projects`, { next: { revalidate: 3600 } });
     if (res.ok) {
       const json = (await res.json().catch(() => [])) as Array<{

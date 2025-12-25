@@ -7,11 +7,32 @@ import { motion } from "framer-motion";
 import { Github, Twitter, Linkedin, Mail, Heart, ArrowRight } from "lucide-react";
 import AnimatedButton from "@/components/ui/animated-button";
 import GradientText from "@/components/ui/gradient-text";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
+import { useState, useEffect } from "react";
+
+const SITE_ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || "https://tengra.studio";
 
 const Footer = () => {
-  const t = useTranslations("Footer");
+  const { t } = useTranslation("Footer");
   const currentYear = new Date().getFullYear();
+  const [isSubdomain, setIsSubdomain] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const hostname = window.location.hostname;
+      if (hostname.includes('forum.')) {
+        setIsSubdomain(true);
+      }
+    }
+  }, []);
+
+  const getHref = (href: string) => {
+    if (!isSubdomain) return href;
+    if (href.startsWith("http")) return href;
+    if (href.startsWith("#")) return `${SITE_ORIGIN}/${href}`;
+    if (href.startsWith("/")) return `${SITE_ORIGIN}${href}`;
+    return href;
+  };
 
   return (
     <footer className="relative bg-[rgba(3,12,18,0.95)] border-t border-[rgba(255,255,255,0.05)] pt-20 pb-10 overflow-hidden">
@@ -22,7 +43,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-16">
           {/* Brand Column */}
           <div className="lg:col-span-1">
-            <Link href="/" className="inline-block mb-6">
+            <Link href={getHref("/")} className="inline-block mb-6">
               <span className="flex items-center gap-2 text-2xl font-bold text-white tracking-tight">
                 <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-turkish-blue-400)] to-[var(--color-turkish-blue-600)] flex items-center justify-center text-white">
                   T
@@ -50,10 +71,10 @@ const Footer = () => {
           <div>
             <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">{t("company.title")}</h4>
             <ul className="space-y-4">
-              <li><Link href="/about" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("company.about")}</Link></li>
-              <li><Link href="/careers" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("company.careers")}</Link></li>
-              <li><Link href="/blog" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("company.blog")}</Link></li>
-              <li><Link href="/contact" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("company.contact")}</Link></li>
+              <li><Link href={getHref("/about")} className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("company.about")}</Link></li>
+              <li><Link href={getHref("/careers")} className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("company.careers")}</Link></li>
+              <li><Link href={getHref("/blog")} className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("company.blog")}</Link></li>
+              <li><Link href={getHref("/contact")} className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("company.contact")}</Link></li>
             </ul>
           </div>
 
@@ -61,10 +82,10 @@ const Footer = () => {
           <div>
             <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">{t("services.title")}</h4>
             <ul className="space-y-4">
-              <li><Link href="/services/web-development" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("services.webDevelopment")}</Link></li>
-              <li><Link href="/services/mobile-apps" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("services.mobileApps")}</Link></li>
-              <li><Link href="/services/cloud-infrastructure" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("services.cloudInfrastructure")}</Link></li>
-              <li><Link href="/services/design" className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("services.uiUxDesign")}</Link></li>
+              <li><Link href={getHref("/services/web-development")} className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("services.webDevelopment")}</Link></li>
+              <li><Link href={getHref("/services/mobile-apps")} className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("services.mobileApps")}</Link></li>
+              <li><Link href={getHref("/services/cloud-infrastructure")} className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("services.cloudInfrastructure")}</Link></li>
+              <li><Link href={getHref("/services/design")} className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("services.uiUxDesign")}</Link></li>
             </ul>
           </div>
 
@@ -93,8 +114,8 @@ const Footer = () => {
             {t("copyright", { year: currentYear })}
           </p>
           <div className="flex items-center gap-6">
-            <Link href="/privacy" className="text-sm text-[rgba(255,255,255,0.4)] hover:text-white transition-colors">{t("privacy")}</Link>
-            <Link href="/terms" className="text-sm text-[rgba(255,255,255,0.4)] hover:text-white transition-colors">{t("terms")}</Link>
+            <Link href={getHref("/privacy")} className="text-sm text-[rgba(255,255,255,0.4)] hover:text-white transition-colors">{t("privacy")}</Link>
+            <Link href={getHref("/terms")} className="text-sm text-[rgba(255,255,255,0.4)] hover:text-white transition-colors">{t("terms")}</Link>
           </div>
           <p className="text-sm text-[rgba(255,255,255,0.3)] flex items-center gap-1">
             {t("madeWithPrefix")}

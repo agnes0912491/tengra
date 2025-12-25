@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useInView } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { useRef, useEffect, useState } from "react";
 
 const Counter = ({ to, suffix = "" }: { to: number; suffix?: string }) => {
@@ -40,7 +40,7 @@ const Counter = ({ to, suffix = "" }: { to: number; suffix?: string }) => {
 };
 
 export default function Stats() {
-    const t = useTranslations("Stats");
+    const { t } = useTranslation("Stats");
 
     const stats = [
         { key: "projects", value: 42, suffix: "+" },

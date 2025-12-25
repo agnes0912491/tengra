@@ -1,12 +1,12 @@
 "use client";
 
 import SiteShell from "@/components/layout/site-shell";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { motion } from "framer-motion";
 import { Sparkles, Briefcase, Zap, GraduationCap } from "lucide-react";
 
 export default function CareersPage() {
-    const t = useTranslations("Careers");
+    const { t } = useTranslation("Careers");
 
     const icons = [Sparkles, Zap, Briefcase, GraduationCap];
 

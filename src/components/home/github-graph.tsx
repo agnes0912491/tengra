@@ -2,7 +2,8 @@
 
 import { ActivityCalendar } from "react-activity-calendar";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "@tengra/language";
 
 const GITHUB_USERNAME = "agnes0912491";
 
@@ -35,8 +36,44 @@ async function fetchGitHubContributions(username: string): Promise<ContributionD
 
 export default function GithubGraph() {
     const { theme } = useTheme();
+    const { t } = useTranslation("GithubGraph");
+    const { language: locale } = useTranslation();
     const [data, setData] = useState<ContributionDay[]>([]);
     const [loading, setLoading] = useState(true);
+    const labels = useMemo(() => {
+        const months = [
+            t("months.jan"),
+            t("months.feb"),
+            t("months.mar"),
+            t("months.apr"),
+            t("months.may"),
+            t("months.jun"),
+            t("months.jul"),
+            t("months.aug"),
+            t("months.sep"),
+            t("months.oct"),
+            t("months.nov"),
+            t("months.dec"),
+        ];
+        const weekdays = [
+            t("weekdays.sun"),
+            t("weekdays.mon"),
+            t("weekdays.tue"),
+            t("weekdays.wed"),
+            t("weekdays.thu"),
+            t("weekdays.fri"),
+            t("weekdays.sat"),
+        ];
+        return {
+            legend: {
+                less: t("legend.less"),
+                more: t("legend.more"),
+            },
+            months,
+            weekdays,
+            totalCount: t("totalCount", { count: "{{count}}", year: "{{year}}" }),
+        };
+    }, [t]);
 
     useEffect(() => {
         fetchGitHubContributions(GITHUB_USERNAME).then((contributions) => {
@@ -48,7 +85,7 @@ export default function GithubGraph() {
     if (loading) {
         return (
             <div className="w-full h-32 flex items-center justify-center text-white/30 text-sm">
-                Loading GitHub activity...
+                {t("loading")}
             </div>
         );
     }
@@ -56,7 +93,7 @@ export default function GithubGraph() {
     if (data.length === 0) {
         return (
             <div className="w-full h-32 flex items-center justify-center text-white/30 text-sm">
-                Could not load GitHub activity.
+                {t("empty")}
             </div>
         );
     }
@@ -65,31 +102,25 @@ export default function GithubGraph() {
         <div className="w-full overflow-hidden text-white/50 text-xs">
             <ActivityCalendar
                 data={data}
-                labels={{
-                    legend: {
-                        less: 'Less',
-                        more: 'More',
-                    },
-                    months: [
-                        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-                    ],
-                    totalCount: '{{count}} contributions in {{year}}',
-                    weekdays: [
-                        'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'
-                    ]
-                }}
+                labels={labels}
                 theme={{
                     light: ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'],
                     dark: ['rgba(255,255,255,0.05)', '#00384d', '#006b8f', '#00a7c5', '#48d5ff'], // Custom Tengra Colors
                 }}
                 colorScheme={theme === 'dark' ? 'dark' : 'light'}
                 showWeekdayLabels
-                renderBlock={(block, activity) => (
-                    <div title={`${activity.count} contributions on ${activity.date}`} className={block.props.className} style={block.props.style}>
+                renderBlock={(block, activity) => {
+                    const dateLabel = new Date(activity.date).toLocaleDateString(locale, {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                    });
+                    return (
+                        <div title={t("blockTitle", { count: activity.count, date: dateLabel })} className={block.props.className} style={block.props.style}>
                         {block}
-                    </div>
-                )}
+                        </div>
+                    );
+                }}
             />
             <style jsx global>{`
             .react-activity-calendar__count {

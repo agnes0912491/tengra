@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
 import { User, Shield, Settings, Camera, LogOut, Link2 } from "lucide-react";
+import { updateMe } from "@/lib/db";
+import { uploadAvatar } from "@/lib/cdn";
 import { toast } from "react-toastify"; // Assuming react-toastify is setup
 import TwoFactorSettings from "@/components/settings/TwoFactorSettings";
 // Note: If existing toast is different, I will adapt. components/ui/global-toast-container exists.
@@ -46,37 +48,21 @@ export default function SettingsPage() {
         }
         setIsLoading(true);
         try {
-            // Convert file to base64 data URL
-            const reader = new FileReader();
-            reader.onload = async () => {
-                const dataUrl = reader.result as string;
-                const token = localStorage.getItem("authToken");
-                const response = await fetch(`${BACKEND_API_URL}/account/profile`, {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ avatarDataUrl: dataUrl })
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    toast.success("Profil fotoğrafı güncellendi.");
-                    await refreshAuth();
-                } else {
-                    toast.error(data.message || data.error || "Yükleme başarısız.");
-                }
-                setIsLoading(false);
-                if (avatarInputRef.current) avatarInputRef.current.value = "";
-            };
-            reader.onerror = () => {
-                toast.error("Dosya okunamadı.");
-                setIsLoading(false);
-                if (avatarInputRef.current) avatarInputRef.current.value = "";
-            };
-            reader.readAsDataURL(file);
-        } catch {
+            const token = localStorage.getItem("authToken");
+            if (!token) throw new Error("Oturum açmanız gerekiyor.");
+
+            const result = await uploadAvatar(file, token);
+            if (result && result.url) {
+                await updateMe({ avatar: result.url }, token);
+                toast.success("Profil fotoğrafı güncellendi.");
+                await refreshAuth();
+            } else {
+                toast.error("Yükleme başarısız.");
+            }
+        } catch (error) {
+            console.error("Avatar upload error:", error);
             toast.error("Bir hata oluştu.");
+        } finally {
             setIsLoading(false);
             if (avatarInputRef.current) avatarInputRef.current.value = "";
         }
@@ -87,21 +73,15 @@ export default function SettingsPage() {
         setIsLoading(true);
         try {
             const token = localStorage.getItem("authToken");
-            const response = await fetch(`${BACKEND_API_URL}/account/profile`, {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ displayName, username, email })
-            });
-            const data = await response.json();
+            if (!token) throw new Error("Oturum açmanız gerekiyor.");
 
-            if (response.ok) {
+            const success = await updateMe({ displayName, username, email }, token);
+
+            if (success) {
                 toast.success("Profil bilgileri güncellendi.");
                 await refreshAuth();
             } else {
-                toast.error(data.message || "Profil güncellenemedi.");
+                toast.error("Profil güncellenemedi.");
             }
         } catch {
             toast.error("Profil güncellenemedi.");

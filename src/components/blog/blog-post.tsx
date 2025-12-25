@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { useRouter } from "next/navigation";
 import DOMPurify from "isomorphic-dompurify";
 import { remark } from "remark";
@@ -48,9 +48,9 @@ type BlogPostProps = {
 
 export default function BlogPost({ postId }: BlogPostProps) {
   const router = useRouter();
-  const t = useTranslations("Blogs");
-  const tCommon = useTranslations("common");
-  const locale = useLocale();
+  const { t } = useTranslation("Blogs");
+  const { t: tCommon } = useTranslation("common");
+  const { language: locale } = useTranslation();
   const [post, setPost] = useState<Blog | null>(null);
   const [loading, setLoading] = useState(true);
   const [renderHtml, setRenderHtml] = useState<string>("");

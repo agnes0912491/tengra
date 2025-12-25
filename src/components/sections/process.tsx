@@ -2,12 +2,12 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { CheckCircle2, MessageSquare, Rocket, Sparkles, Wrench } from "lucide-react";
 import GradientText from "@/components/ui/gradient-text";
 
 export default function Process() {
-    const t = useTranslations("Process");
+    const { t } = useTranslation("Process");
 
     const steps = [
         { id: 1, key: "discovery", icon: MessageSquare },

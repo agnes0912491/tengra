@@ -1,148 +1,131 @@
-// Sunucu bileşeni, "use client" yok!
 import "./globals.css";
-
-import { Metadata, Viewport } from "next";
-import { cookies, headers } from "next/headers";
+import { type Metadata } from "next";
+import { Inter, Orbitron, Noto_Sans_Old_Turkic } from "next/font/google";
+import { LanguageProvider } from "@tengra/language";
+import { loadTranslations } from "@tengra/language/server";
+import translationConfig from "@/tl.config";
+import Script from "next/script";
 import ParticlesClientWrapper from "@/components/ui/particles-client-wrapper";
 import GlobalToastContainer from "@/components/ui/global-toast-container";
-import { Inter, Orbitron } from "next/font/google";
-import localFont from "next/font/local";
-
-import Script from "next/script";
-import ConsentBanner from "@/components/consent/ConsentBanner";
 import ClientUserProvider from "./ClientUserProvider";
-import IntlProviderClient from "@/components/providers/intl-provider-client";
-import { getMessages } from "@/i18n/get-messages";
-import { resolvePreferredLocale } from "@/i18n/resolve-preferred-locale";
+import ConsentBanner from "@/components/consent/ConsentBanner";
 import AnalyticsTracker from "@/components/analytics/AnalyticsTracker";
 import AdblockDetector from "@/components/analytics/AdblockDetector";
 import AdblockNotice from "@/components/analytics/AdblockNotice";
 import Footer from "@/components/layout/footer";
 import PWAProvider from "@/components/pwa/pwa-provider";
+import { getOrganizationSchema, getWebSiteSchema, BASE_URL } from "@/lib/seo";
 
-const Icon = "uploads/tengra_without_text.png";
-
-const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const notoOldTurkic = localFont({
-  src: "../fonts/noto-sans-old-turkic-400-normal.woff2",
+const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
+const notoOldTurkic = Noto_Sans_Old_Turkic({
   weight: "400",
-  style: "normal",
-  variable: "--font-old-turkic",
+  subsets: ["old-turkic"],
+  variable: "--font-noto-old-turkic",
   display: "swap",
-  preload: true,
-  fallback: ["Noto Sans", "Segoe UI Symbol", "Arial Unicode MS", "sans-serif"],
 });
 
-const metadataBaseUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  process.env.NEXT_PUBLIC_METADATA_BASE ??
-  "http://localhost:3000";
-const siteUrl = metadataBaseUrl.replace(/\/$/, "");
-const logoUrl = `https://cdn.tengra.studio/${Icon}`;
-
-// export const dynamic = "force-dynamic";
-
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    metadataBase: new URL(metadataBaseUrl),
+export const metadata: Metadata = {
+  title: {
+    default: "Tengra Studio — Shaping myth, code, and divine precision",
+    template: "%s | Tengra Studio",
+  },
+  description:
+    "Immersive digital craftsmanship fusing the sacred with technology. We build high-performance web and mobile applications with next-generation design.",
+  keywords: [
+    "Tengra Studio",
+    "creative tech studio",
+    "digital innovation",
+    "immersive experiences",
+    "design collective",
+    "web development",
+    "mobile app development",
+    "next.js",
+    "react",
+    "flutter"
+  ],
+  authors: [{ name: "Tengra Studio", url: BASE_URL }],
+  creator: "Tengra Studio",
+  publisher: "Tengra Studio",
+  metadataBase: new URL(BASE_URL),
+  alternates: {
+    canonical: BASE_URL,
+    languages: {
+      en: `${BASE_URL}/en`,
+      tr: `${BASE_URL}/tr`,
+    },
+  },
+  openGraph: {
+    title: "Tengra Studio — Shaping myth and code",
+    description:
+      "Immersive digital craftsmanship fusing the sacred with technology. We build high-performance web and mobile applications.",
+    url: BASE_URL,
+    siteName: "Tengra Studio",
+    locale: "en_US",
+    type: "website",
+    images: [
+      {
+        url: "https://cdn.tengra.studio/uploads/tengra_without_text.png",
+        width: 1200,
+        height: 630,
+        alt: "Tengra Studio",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
     title: "Tengra Studio",
     description:
-      "Tengra Studio builds artefact-like games, AI-driven worlds, and experimental systems. Myth + Code + Play.",
-    keywords: [
-      "Tengra",
-      "Tengra Studio",
-      "game studio",
-      "indie game dev",
-      "GeoFrontier",
-      "stylized worlds",
+      "Immersive digital craftsmanship fusing the sacred with technology.",
+    images: ["https://cdn.tengra.studio/uploads/tengra_without_text.png"],
+    creator: "@tengrastudio",
+    site: "@tengrastudio",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  icons: {
+    icon: [
+      { url: "https://cdn.tengra.studio/uploads/tengra_without_text.png", sizes: "32x32" },
+      { url: "https://cdn.tengra.studio/uploads/tengra_without_text.png", sizes: "16x16" }
     ],
-    openGraph: {
-      title: "Tengra Studio",
-      description:
-        "Artefact-like games, worlds and systems forged from myth and code.",
-      url: siteUrl,
-      siteName: "Tengra Studio",
-      images: [
-        {
-          url: "https://cdn.tengra.studio/uploads/tengra_without_text.png",
-          width: 1200,
-          height: 630,
-        },
-      ],
-      locale: "en_US",
-      type: "website",
-    },
-    twitter: {
-      card: "summary_large_image",
-      images: ["https://cdn.tengra.studio/uploads/tengra_without_text.png"],
-    },
-    alternates: {
-      canonical: siteUrl,
-    },
-    icons: {
-      icon: logoUrl,
-      shortcut: logoUrl,
-      apple: logoUrl,
-    },
-    manifest: "/manifest.json",
-    appleWebApp: {
-      capable: true,
-      statusBarStyle: "black-translucent",
-      title: "Tengra",
-    },
-    other: {
-      "google-adsense-account": "ca-pub-1840126959284939",
-    },
-  };
-}
-
-export const viewport: Viewport = {
-  colorScheme: "dark light",
-  themeColor: "#06141B",
+    apple: [
+      { url: "https://cdn.tengra.studio/uploads/tengra_without_text.png", sizes: "180x180" }
+    ],
+  },
+  manifest: "/manifest.json",
+  category: "technology",
 };
 
 export default async function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
-  const cookieStore = await cookies();
-  const headersList = await headers();
-  const { locale: preferredLocale } = resolvePreferredLocale({
-    cookieLocale: cookieStore.get("NEXT_LOCALE")?.value,
-    acceptLanguage: headersList.get("accept-language"),
-  });
-  const { locale, messages } = getMessages(preferredLocale);
+}>) {
+  // Simple locale detection from cookies (fallback to 'en')
+  const { cookies: getCookies } = await import('next/headers');
+  const cookieStore = await getCookies();
+  const localeCookie = cookieStore.get('NEXT_LOCALE')?.value;
+  const locale = (localeCookie === 'tr' ? 'tr' : 'en') as 'en' | 'tr';
 
-  // Nonce'u runtime'da almaya çalışma, sadece Script'lerde kullan
+  // Load translations from JSON on server using config
+  const messages = loadTranslations(translationConfig, locale);
   const isProd = process.env.NODE_ENV === "production";
 
-  const organizationSchema = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: "Tengra",
-    url: siteUrl,
-    logo: logoUrl,
-    sameAs: [
-      "https://x.com/tengra",
-      "https://github.com/TengraStudio",
-      "https://www.linkedin.com/company/tengra",
-    ],
-  };
-
-  const webSiteSchema = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: "Tengra",
-    url: siteUrl,
-  };
+  // Get Structured Data
+  const organizationSchema = getOrganizationSchema();
+  const webSiteSchema = getWebSiteSchema();
 
   return (
-    <html suppressHydrationWarning
-      lang={locale}
-      className={`${orbitron.variable} ${inter.variable} ${notoOldTurkic.variable}`}
-    >
+    <html suppressHydrationWarning lang={locale} className={`${orbitron.variable} ${inter.variable} ${notoOldTurkic.variable}`}>
       <head />
       <body className="font-sans bg-[color:var(--background)] text-[color:var(--foreground)] w-full min-h-screen">
         <script
@@ -205,23 +188,21 @@ export default async function RootLayout({
 
         <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
 
-        <ClientUserProvider>
-          <ParticlesClientWrapper />
-          <IntlProviderClient locale={locale} messages={messages}>
+        <LanguageProvider initialLanguage={locale} initialDictionary={messages}>
+          <ClientUserProvider>
+            <ParticlesClientWrapper />
             <ConsentBanner />
-            {/* Per-page analytics tracker */}
             <AdblockDetector />
             <AdblockNotice />
             <AnalyticsTracker />
             <PWAProvider />
             <div className="flex min-h-screen flex-col">
               {children}
-              {/* @ts-expect-error React 19 type mismatch */}
               <Footer />
             </div>
-          </IntlProviderClient>
-          <GlobalToastContainer />
-        </ClientUserProvider>
+            <GlobalToastContainer />
+          </ClientUserProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

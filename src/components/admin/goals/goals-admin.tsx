@@ -26,7 +26,7 @@ import {
     Award,
 } from "lucide-react";
 import { routing } from "@/i18n/routing";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 type Goal = { title: string; body: string; order: number; isActive: boolean };
 type TargetsShape = Goal[] | Record<string, Goal[]>;
@@ -48,7 +48,7 @@ const LOCALE_LABELS: Record<string, { labelKey: string; flag: string }> = {
 };
 
 export default function GoalsAdmin() {
-    const t = useTranslations("AdminContent");
+    const { t } = useTranslation("AdminContent");
     const [locale, setLocale] = useState<(typeof SUPPORTED_LOCALES)[number]>("tr");
     const [items, setItems] = useState<Goal[]>([]);
     const [originalItems, setOriginalItems] = useState<Goal[]>([]);

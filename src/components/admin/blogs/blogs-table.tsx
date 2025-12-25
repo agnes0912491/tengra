@@ -1,5 +1,5 @@
 import type { Blog } from "@/types/blog";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 const formatDateTime = (value?: string | null, locale?: string) => {
   if (!value) {
@@ -22,8 +22,8 @@ type Props = {
 };
 
 export default function BlogsTable({ blogs }: Props) {
-  const locale = useLocale();
-  const t = useTranslations("AdminBlogs");
+  const { language: locale } = useTranslation();
+  const { t } = useTranslation("AdminBlogs");
   if (blogs.length === 0) {
     return (
       <div className="rounded-3xl border border-dashed border-[rgba(110,211,225,0.2)] bg-[rgba(6,20,27,0.6)]/60 p-10 text-center text-sm text-[rgba(255,255,255,0.55)]">

@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { verifyTempToken, resendTempToken } from "@/lib/db";
 import { toast } from "react-toastify";
 import { AuthUserPayload } from "@/types/auth";
+import { useTranslation } from "@tengra/language";
 
 type Props = {
     tempToken: string;
@@ -14,6 +15,7 @@ type Props = {
 
 export default function TwoFactorModal({ tempToken, onSuccess, expirySeconds = 300, }: Props) {
 
+    const { t } = useTranslation("Auth");
 
     const [digits, setDigits] = useState<string[]>(["", "", "", "", "", ""]);
     const [loading, setLoading] = useState(false);
@@ -72,9 +74,9 @@ export default function TwoFactorModal({ tempToken, onSuccess, expirySeconds = 3
 
     useEffect(() => {
         if (expired) {
-            setError("Verification code expired. Request a new code and try again.");
+            setError(t("twoFactor.errors.expiredRetry"));
         }
-    }, [expired]);
+    }, [expired, t]);
 
     function formatTime(s: number) {
         const mm = Math.floor(s / 60)
@@ -146,7 +148,7 @@ export default function TwoFactorModal({ tempToken, onSuccess, expirySeconds = 3
         e?.preventDefault();
         const code = digits.join("");
         if (code.length !== 6) {
-            setError("Please enter a 6-digit code");
+            setError(t("twoFactor.errors.invalidLength"));
             return;
         }
 
@@ -165,18 +167,18 @@ export default function TwoFactorModal({ tempToken, onSuccess, expirySeconds = 3
             const err = payload?.error ?? payload?.message ?? "Verification failed";
 
             // Map common server-side error codes/messages to friendly texts
-            let friendly = "Verification failed. Please try again.";
+            let friendly = t("twoFactor.errors.verificationFailed");
             if (err) {
                 const eLower = err.toLowerCase();
                 if (eLower.includes("expired") || eLower.includes("time")) {
-                    friendly = "Verification code expired. Request a new code.";
+                    friendly = t("twoFactor.errors.expired");
                     setExpired(true);
                 } else if (eLower.includes("invalid") || eLower.includes("incorrect")) {
-                    friendly = "Invalid verification code. Please try again.";
+                    friendly = t("twoFactor.errors.invalid");
                 } else if (eLower.includes("too many") || eLower.includes("attempt")) {
-                    friendly = "Too many attempts. Please request a new code or try later.";
+                    friendly = t("twoFactor.errors.tooMany");
                 } else if (err === "unexpected_response") {
-                    friendly = "Server returned an unexpected response. Try again later.";
+                    friendly = t("twoFactor.errors.unexpectedResponse");
                 } else {
                     friendly = err;
                 }
@@ -188,7 +190,7 @@ export default function TwoFactorModal({ tempToken, onSuccess, expirySeconds = 3
             inputsRef.current[0]?.focus();
         } catch (err) {
             console.error("2FA verification failed:", err);
-            setError("Verification failed. Please try again.");
+            setError(t("twoFactor.errors.verificationFailed"));
             setDigits(["", "", "", "", "", ""]);
         } finally {
             setLoading(false);
@@ -215,17 +217,17 @@ export default function TwoFactorModal({ tempToken, onSuccess, expirySeconds = 3
                 setError(null);
                 inputsRef.current[0]?.focus();
                 // show success toast and start cooldown (30s)
-                toast.success("Verification code resent", { autoClose: 3000 });
+                toast.success(t("twoFactor.toast.resent"), { autoClose: 3000 });
                 setResendCooldown(30);
                 return;
             }
 
             // If server returned success:false, show message
-            const err = payload?.error ?? payload?.message ?? "Failed to resend code";
-            setError(typeof err === "string" ? err : "Failed to resend code");
+            const err = payload?.error ?? payload?.message ?? t("twoFactor.errors.resendFailed");
+            setError(typeof err === "string" ? err : t("twoFactor.errors.resendFailed"));
         } catch (err) {
             console.error("Failed to resend 2FA code:", err);
-            setError("Failed to resend code. Try again later.");
+            setError(t("twoFactor.errors.resendFailedRetry"));
         } finally {
             setLoading(false);
         }
@@ -235,10 +237,12 @@ export default function TwoFactorModal({ tempToken, onSuccess, expirySeconds = 3
         <>
             <div aria-hidden={false} role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.8)]">
                 <div className="w-full max-w-md rounded-3xl border border-[rgba(110,211,225,0.18)] bg-[rgba(6,20,27,0.9)]/90 p-6 shadow-[0_25px_70px_rgba(0,0,0,0.45)] backdrop-blur-xl text-white">
-                    <h2 className="font-display text-lg uppercase tracking-[0.3em] text-[color:var(--color-turkish-blue-300)] mb-2">Doğrulama Kodu</h2>
-                    <p className="text-sm text-[rgba(255,255,255,0.75)] mb-2">E-postanıza gönderilen 6 haneli kodu giriniz.</p>
+                    <h2 className="font-display text-lg uppercase tracking-[0.3em] text-[color:var(--color-turkish-blue-300)] mb-2">{t("twoFactor.title")}</h2>
+                    <p className="text-sm text-[rgba(255,255,255,0.75)] mb-2">{t("twoFactor.description")}</p>
 
-                    <div className="mb-4 text-sm text-[rgba(255,255,255,0.6)]">Kodun süresi: <span className="font-mono">{formatTime(remaining)}</span></div>
+                    <div className="mb-4 text-sm text-[rgba(255,255,255,0.6)]">
+                        {t("twoFactor.expiresIn", { time: formatTime(remaining) })}
+                    </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="flex items-center justify-center gap-2" onPaste={(e) => {
@@ -271,19 +275,21 @@ export default function TwoFactorModal({ tempToken, onSuccess, expirySeconds = 3
                                 disabled={loading || resendCooldown > 0}
                                 className="rounded-full border border-[rgba(110,211,225,0.35)] bg-[rgba(8,28,38,0.65)] px-4 py-2 text-xs uppercase tracking-[0.35em] text-[rgba(255,255,255,0.85)] disabled:opacity-60"
                             >
-                                {resendCooldown > 0 ? `Tekrar Gönder (${resendCooldown})` : "Tekrar Gönder"}
+                                {resendCooldown > 0
+                                    ? t("twoFactor.resendWithCooldown", { seconds: resendCooldown })
+                                    : t("twoFactor.resend")}
                             </button>
                             <button
                                 type="submit"
                                 disabled={loading || expired}
                                 className="rounded-full bg-[color:var(--color-turkish-blue-500)] px-5 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-black disabled:opacity-60"
                             >
-                                {loading ? "Doğrulanıyor…" : "Doğrula"}
+                                {loading ? t("twoFactor.verifying") : t("twoFactor.verify")}
                             </button>
                         </div>
                     </form>
 
-                    <p className="text-xs text-[rgba(255,255,255,0.5)] mt-4">Doğrulama beklenirken bu pencere kapatılamaz.</p>
+                    <p className="text-xs text-[rgba(255,255,255,0.5)] mt-4">{t("twoFactor.lockedNote")}</p>
                 </div>
             </div>
         </>

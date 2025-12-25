@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import {
     ArrowLeft,
     Save,
@@ -66,8 +66,8 @@ const AUTOSAVE_DELAY = 30000; // 30 seconds
 
 export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
     const router = useRouter();
-    const locale = useLocale();
-    const t = useTranslations("AdminBlogs");
+    const { language: locale } = useTranslation();
+    const { t } = useTranslation("AdminBlogs");
     const [draft, setDraft] = useState<Draft>(() => {
         if (initialBlog) {
             return {

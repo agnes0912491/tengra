@@ -1,11 +1,11 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 type Item = { id?: string; label: string; value: number };
 
 export default function BarList({ items, emptyMessage }: { items: Item[]; emptyMessage?: string }) {
-  const t = useTranslations("AdminCommon");
+  const { t } = useTranslation("AdminCommon");
   const resolvedEmptyMessage = emptyMessage ?? t("empty");
   if (!items || items.length === 0) {
     return <div className="text-[rgba(255,255,255,0.6)]">{resolvedEmptyMessage}</div>;

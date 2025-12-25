@@ -1,20 +1,14 @@
 import AdminPageHeader from "@/components/admin/admin-page-header";
 import ContactAdmin from "@/components/admin/contact/contact-admin";
-import { cookies, headers } from "next/headers";
 import { resolvePreferredLocale } from "@/i18n/resolve-preferred-locale";
 import { getMessages } from "@/i18n/get-messages";
 
-export default function AdminContactPage() {
-  const cookieStore = cookies();
-  const headersList = headers();
-  const { locale } = resolvePreferredLocale({
-    cookieLocale: cookieStore.get("NEXT_LOCALE")?.value,
-    acceptLanguage: headersList.get("accept-language"),
-  });
-  const { messages } = getMessages(locale);
-  const title = (messages as { Navigation?: Record<string, string> })?.Navigation?.contact ?? "İletişim";
+export default async function AdminContactPage() {
+  const locale = await resolvePreferredLocale();
+  const messages = await getMessages(locale);
+  const title = (messages as any)?.Navigation?.contact ?? "İletişim";
   const description =
-    (messages as { AdminContent?: { contactDescription?: string } })?.AdminContent?.contactDescription ??
+    (messages as any)?.AdminContent?.contactDescription ??
     "İletişim formu kayıtlarını görüntüleyin.";
 
   return (

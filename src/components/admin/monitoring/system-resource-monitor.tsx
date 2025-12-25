@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 interface SystemMetrics {
   cpu: {
@@ -189,8 +189,8 @@ function AlertBadge({ alert }: { alert: Alert }) {
 
 // Main component
 export default function SystemResourceMonitor() {
-  const t = useTranslations("AdminMonitoring");
-  const locale = useLocale();
+  const { t } = useTranslation("AdminMonitoring");
+  const { language: locale } = useTranslation();
   const [metrics, setMetrics] = useState<SystemMetrics | null>(null);
   const [history, setHistory] = useState<MetricHistory[]>([]);
   const [alerts, setAlerts] = useState<Alert[]>([]);

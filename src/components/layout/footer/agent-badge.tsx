@@ -1,11 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 export function AgentBadge() {
   const [online, setOnline] = React.useState(false);
-  const t = useTranslations("Footer");
+  const { t } = useTranslation("Footer");
   const [name, setName] = React.useState<string>(t("agentBadge.defaultName"));
 
   React.useEffect(() => {

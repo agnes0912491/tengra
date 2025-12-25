@@ -1,11 +1,11 @@
 "use client";
 
 import SiteShell from "@/components/layout/site-shell";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { motion } from "framer-motion";
 
 export default function AboutPage() {
-  const t = useTranslations("About");
+  const { t } = useTranslation("About");
 
   return (
     <SiteShell>

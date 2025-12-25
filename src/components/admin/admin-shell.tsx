@@ -4,7 +4,7 @@ import { ReactNode, useMemo, useCallback, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { toast } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
 import ProtectedRoute from "@/components/auth/protected-route";
@@ -42,7 +42,7 @@ export default function AdminShell({ children }: Props) {
   const { user, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const t = useTranslations("AdminDashboard");
+  const { t } = useTranslation("AdminDashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
 

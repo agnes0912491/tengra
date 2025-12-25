@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { Eye } from "lucide-react";
 import Dropzone from "@/components/ui/dropzone";
 import { toast } from "@/lib/react-toastify";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 import { MarkdownEditor } from "@/components/ui/markdown-editor";
 
@@ -24,7 +24,7 @@ type Props = {
 // Fields use standard Input/textarea with glass styles
 
 export default function BlogEditModal({ open, onClose, onCreated }: Props) {
-    const t = useTranslations("AdminBlogs");
+    const { t } = useTranslation("AdminBlogs");
     // wizard state
     const [step, setStep] = useState<number>(0);
     const next = () => setStep((s) => Math.min(s + 1, 3));

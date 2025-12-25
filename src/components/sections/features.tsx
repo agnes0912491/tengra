@@ -1,14 +1,14 @@
 "use client";
 
 import React from "react";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { motion } from "framer-motion";
 import { Code2, Globe, Palette, Sparkles } from "lucide-react";
 import GlowCard from "@/components/ui/glow-card";
 import GradientText from "@/components/ui/gradient-text";
 
 const Features = () => {
-    const t = useTranslations("Features");
+    const { t } = useTranslation("Features");
 
     const items = [
         {

@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import type { TranslationFileInfo } from "@/lib/admin/translations";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 const formatBytes = (bytes: number) => {
   if (bytes === 0) {
@@ -20,8 +20,8 @@ type Props = {
 };
 
 export default function TranslationsTable({ files }: Props) {
-  const locale = useLocale();
-  const t = useTranslations("AdminTranslations");
+  const { language: locale } = useTranslation();
+  const { t } = useTranslation("AdminTranslations");
   const [preview, setPreview] = useState<string | null>(null);
   const [previewLocale, setPreviewLocale] = useState<string | null>(null);
 

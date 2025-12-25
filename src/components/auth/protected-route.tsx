@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Role } from "@/lib/auth/users";
 import { useAuth } from "@/components/providers/auth-provider";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 type Props = {
   children: React.ReactNode;
@@ -21,7 +21,7 @@ export default function ProtectedRoute({
   // IMPORTANT: This is only a UX convenience. Server-side APIs must still validate
   // the Authorization header and enforce RBAC.
   const { user, isAuthenticated, loading } = useAuth();
-  const t = useTranslations("ProtectedRoute");
+  const { t } = useTranslation("ProtectedRoute");
   const router = useRouter();
 
   useEffect(() => {

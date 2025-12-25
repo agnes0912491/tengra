@@ -16,7 +16,7 @@ interface RichEditorProps {
 export default function RichEditor({
     content,
     onChange,
-    placeholder = "Start writing your story...",
+    placeholder,
     userToken,
     className
 }: RichEditorProps) {
@@ -69,4 +69,3 @@ export default function RichEditor({
 // If `content` prop is HTML string, passing it to `defaultValue` might not work if it expects JSON.
 // However, most Tiptap wrappers handle HTML strings in `content`.
 // Let's stick to the previous implementation plan but adding a safety check.
-

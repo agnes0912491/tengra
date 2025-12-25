@@ -13,7 +13,7 @@ import Cookies from "js-cookie";
 import { ADMIN_SESSION_COOKIE_CANDIDATES } from "@/lib/auth";
 import { toast } from "@/lib/react-toastify";
 import { routing } from "@/i18n/routing";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 type Props = {
     open: boolean;
@@ -22,7 +22,7 @@ type Props = {
 };
 
 export default function ProjectEditModal({ open, onClose, onSave }: Props) {
-    const t = useTranslations("AdminProjects");
+    const { t } = useTranslation("AdminProjects");
     const [formData, setFormData] = useState<Partial<Project>>({
         name: "",
         status: "draft",

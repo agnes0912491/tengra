@@ -1,12 +1,12 @@
 "use client";
 
 import SiteShell from "@/components/layout/site-shell";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { motion } from "framer-motion";
 import { Cloud, Server, Shield } from "lucide-react";
 
 export default function CloudInfrastructurePage() {
-    const t = useTranslations("ServicesPage.cloud");
+    const { t } = useTranslation("ServicesPage.cloud");
 
     return (
         <SiteShell>

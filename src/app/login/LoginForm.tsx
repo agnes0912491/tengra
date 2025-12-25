@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -21,7 +21,7 @@ export default function LoginForm() {
             ? nextUrlParam
             : "/";
     const { login, user, isAuthenticated } = useAuth();
-    const t = useTranslations("Auth");
+    const { t } = useTranslation("Auth");
 
     const [credentials, setCredentials] = useState({ email: "", password: "" });
     const [loading, setLoading] = useState(false);
@@ -79,7 +79,7 @@ export default function LoginForm() {
         setLoading(true);
         try {
             // Using Tengra API for Google Verification (via Next.js proxy)
-            const response = await fetch("/api/auth/google-login", {
+            const response = await fetch("/api/google-auth", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -106,9 +106,9 @@ export default function LoginForm() {
 
                 router.push(`/register?${params.toString()}`);
             } else {
-                // Existing User - We have a token from lova-api, BUT web-client expects login against localhost:5000 (core-cpp) usually
+                // Existing User - We have a token from lova-api, BUT tengra expects login against localhost:5000 (core-cpp) usually
                 // However, creating a session via lova-api (which writes to shared DB) should validly log us in?
-                // web-client auth-provider uses `localStorage.setItem("authToken", token)`
+                // tengra auth-provider uses `localStorage.setItem("authToken", token)`
                 // The token returned by lova-api is valid for the ecosystem if they share secrets.
                 // Assuming they share secrets or DB-session mechanism.
                 // If not, we might need to "login" again.
@@ -120,10 +120,23 @@ export default function LoginForm() {
                     const hostname = window.location.hostname;
                     const isTengra = hostname.includes("tengra.studio");
                     const domain = isTengra ? ".tengra.studio" : undefined;
-                    Cookies.set("authToken", data.token, { expires: 30, path: "/", domain, sameSite: "lax", secure: window.location.protocol === "https:" });
+
+                    // Set both authToken and admin_session for compatibility
+                    const options = { expires: 30, path: "/", domain, sameSite: "lax" as const, secure: window.location.protocol === "https:" };
+                    console.log("[LoginForm] Setting cookies with options:", options);
+                    Cookies.set("authToken", data.token, options);
+                    Cookies.set("admin_session", data.token, options);
+                    console.log("[LoginForm] Cookie set. Token starts with:", data.token.substring(0, 10));
+
+                    // ALSO persist to localStorage because ClientUserProvider reads from there
+                    localStorage.setItem("authToken", data.token);
+                    console.log("[LoginForm] Token saved to localStorage.");
+
                     // Force a reload/refresh to pick up auth state
+                    console.log("[LoginForm] Reloading page...");
                     window.location.href = safeNextUrl;
                 } else {
+                    console.error("[LoginForm] Login successful but no token returned", data);
                     toast.error("Giriş başarılı fakat token alınamadı.");
                 }
             }

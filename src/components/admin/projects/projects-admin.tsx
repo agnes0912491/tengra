@@ -34,7 +34,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { AdminCard } from "@/components/admin/ui";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 // Platform icons
 const platformIcons: Record<string, React.ReactNode> = {
@@ -59,8 +59,8 @@ type Props = {
 };
 
 export default function ProjectsAdmin({ projects }: Props) {
-    const t = useTranslations("AdminProjects");
-    const locale = useLocale();
+    const { t } = useTranslation("AdminProjects");
+    const { language: locale } = useTranslation();
     const platformLabelMap: Record<string, string> = {
         windows: t("platforms.windows"),
         macos: t("platforms.macos"),

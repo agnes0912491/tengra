@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 // import { Input } from "@/components/ui/input";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 const STORAGE_KEY = "tengra:design-settings";
 
@@ -25,7 +25,7 @@ const DEFAULTS: DesignSettings = {
 };
 
 export default function DesignControls() {
-    const t = useTranslations("AdminDesign");
+    const { t } = useTranslation("AdminDesign");
     const [settings, setSettings] = useState<DesignSettings>(DEFAULTS);
     const [saving, setSaving] = useState(false);
 

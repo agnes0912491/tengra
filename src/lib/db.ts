@@ -379,7 +379,7 @@ export const authenticateUserWithPassword = async (
       "Content-Type": "application/json",
       Accept: "application/json",
     },
-    body: JSON.stringify({ username: email, password }),
+    body: JSON.stringify({ email, password }),
   });
 
   if (!response.ok) {
@@ -452,7 +452,7 @@ export const verifyAdminOtp = async (
   const body: Record<string, unknown> = { twoFactorCode: otpCode };
   if (otpToken) body.otpToken = otpToken;
   if (temporaryToken) body.tempToken = temporaryToken;
-  if (email) body.username = email;
+  if (email) body.email = email;
 
   const response = await fetch(`${API_BASE}/auth/login`, {
     method: "POST",
@@ -1689,6 +1689,25 @@ export const updateUser = async (
 
   const response = await fetch(`${API_BASE}/admin/users/${userId}`, {
     method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  return response.ok;
+};
+
+export const updateMe = async (
+  data: { displayName?: string; email?: string; username?: string; avatar?: string; bio?: string },
+  token: string
+): Promise<boolean> => {
+  if (!token) throw new Error("Token eksik.");
+
+  const response = await fetch(`${API_BASE}/users/me`, {
+    method: "PUT",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",

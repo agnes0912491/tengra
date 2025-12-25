@@ -1,11 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { Quote } from "lucide-react";
 
 export default function Testimonials() {
-    const t = useTranslations("Testimonials");
+    const { t } = useTranslation("Testimonials");
 
     const testimonials = [
         { key: "user1", delay: 0 },

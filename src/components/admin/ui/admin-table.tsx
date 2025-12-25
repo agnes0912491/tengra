@@ -3,7 +3,7 @@
 import { ReactNode, useState } from "react";
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronUp, ChevronsUpDown } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 export type SortDirection = "asc" | "desc" | null;
 
@@ -43,7 +43,7 @@ export function AdminTable<T extends Record<string, unknown>>({
     hoverable = true,
     compact = false,
 }: AdminTableProps<T>) {
-    const t = useTranslations("AdminCommon");
+    const { t } = useTranslation("AdminCommon");
     const resolvedEmptyMessage = emptyMessage ?? t("empty");
     const [sortState, setSortState] = useState<{ key: string; direction: SortDirection }>({
         key: "",
@@ -175,7 +175,7 @@ export function AdminPagination({
         (p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1
     );
 
-    const t = useTranslations("AdminCommon");
+    const { t } = useTranslation("AdminCommon");
 
     return (
         <div className={cn("flex items-center justify-center gap-1 py-4", className)}>

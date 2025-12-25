@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { Calendar, Clock, Tag, User, Eye, ArrowRight, Search, SlidersHorizontal, Flame, Settings } from "lucide-react";
 
 import { useAuth } from "@/components/providers/auth-provider";
@@ -156,7 +156,7 @@ export default function BlogsClient({ posts, categories }: Props) {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [tagFilter, setTagFilter] = useState<string | null>(null);
   const [sort, setSort] = useState<"newest" | "popular" | "short">("newest");
-  const t = useTranslations("Blogs");
+  const { t } = useTranslation("Blogs");
   const siteOrigin = process.env.NEXT_PUBLIC_SITE_URL ?? "https://tengra.studio";
 
   const isAdmin = user?.role === "admin";
@@ -375,6 +375,11 @@ export default function BlogsClient({ posts, categories }: Props) {
               <div className="relative flex-1 min-w-[220px]">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[rgba(255,255,255,0.45)]" />
                 <input
+                  id="blog-search"
+                  name="search"
+                  type="search"
+                  autoComplete="off"
+                  aria-label="Blog ara"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Başlık, konu veya anahtar kelime ara..."
@@ -384,6 +389,9 @@ export default function BlogsClient({ posts, categories }: Props) {
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="h-4 w-4 text-[rgba(255,255,255,0.6)]" />
                 <select
+                  id="blog-category-filter"
+                  name="category"
+                  aria-label="Kategori filtresi"
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
                   className="rounded-lg border border-[rgba(72,213,255,0.2)] bg-[rgba(12,26,36,0.8)] px-3 py-2 text-sm text-white outline-none"
@@ -396,6 +404,9 @@ export default function BlogsClient({ posts, categories }: Props) {
                   ))}
                 </select>
                 <select
+                  id="blog-sort"
+                  name="sort"
+                  aria-label="Sıralama"
                   value={sort}
                   onChange={(e) => setSort(e.target.value as typeof sort)}
                   className="rounded-lg border border-[rgba(72,213,255,0.2)] bg-[rgba(12,26,36,0.8)] px-3 py-2 text-sm text-white outline-none"

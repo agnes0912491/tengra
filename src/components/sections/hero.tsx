@@ -4,23 +4,25 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Rocket, Globe } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import GradientText from "@/components/ui/gradient-text";
 import { Button } from "@/components/ui/button";
 
 import LiveGlobe from "@/components/home/live-globe";
 
 const Hero = () => {
-  const t = useTranslations("Hero");
-  const [displayText, setDisplayText] = useState("TENGRA");
-  const words = ["𐱅𐰭𐰍𐰺𐰀", "TENGRA"]; // Old Turkic "Tengra" and Latin "TENGRA"
+  const { t } = useTranslation("Hero");
+  const wordOne = t("typingWordOne");
+  const wordTwo = t("typingWordTwo");
+  const [displayText, setDisplayText] = useState(wordTwo);
 
   useEffect(() => {
+    setDisplayText(wordTwo);
     const interval = setInterval(() => {
-      setDisplayText(current => current === "TENGRA" ? "𐱅𐰭𐰍𐰺𐰀" : "TENGRA");
+      setDisplayText(current => current === wordTwo ? wordOne : wordTwo);
     }, 3000);
     return () => clearInterval(interval);
-  }, []);
+  }, [wordOne, wordTwo]);
 
   return (
     <section className="relative w-full min-h-[90vh] flex flex-col items-center justify-center pt-24 pb-16 overflow-hidden">
@@ -65,7 +67,7 @@ const Hero = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
-                className={`block ${displayText === "𐱅𐰭𐰍𐰺𐰀" ? "font-serif" : "font-sans"}`}
+                className={`block ${displayText === wordOne ? "font-serif" : "font-sans"}`}
               >
                 <GradientText className="font-extrabold">{displayText}</GradientText>
               </motion.span>
@@ -123,7 +125,7 @@ const Hero = () => {
                 <Rocket className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-white">Performance</p>
+                <p className="text-sm font-semibold text-white">{t("floatingCards.performance")}</p>
               </div>
             </div>
           </motion.div>
@@ -139,7 +141,7 @@ const Hero = () => {
                 <Globe className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-white">Global</p>
+                <p className="text-sm font-semibold text-white">{t("floatingCards.global")}</p>
               </div>
             </div>
           </motion.div>

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { createContactSubmission } from "@/lib/db";
 import {
   Send,
@@ -23,7 +23,7 @@ import { FaDiscord, FaGithub, FaTwitter, FaLinkedin } from "react-icons/fa";
 import Link from "next/link";
 
 export default function ContactForm() {
-  const t = useTranslations("Contact");
+  const { t } = useTranslation("Contact");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
@@ -116,7 +116,7 @@ export default function ContactForm() {
                   <div className="p-2 rounded-lg bg-[rgba(30,184,255,0.1)]">
                     <MapPin className="w-4 h-4 text-[var(--color-turkish-blue-400)]" />
                   </div>
-                  Türkiye 🇹🇷
+                  {t("sidebar.location")}
                 </div>
 
                 <div className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
@@ -167,7 +167,7 @@ export default function ContactForm() {
                   className="flex items-center gap-2 p-3 rounded-xl bg-[rgba(88,101,242,0.1)] border border-[rgba(88,101,242,0.2)] hover:bg-[rgba(88,101,242,0.2)] transition-all group"
                 >
                   <FaDiscord className="w-5 h-5 text-[#5865F2]" />
-                  <span className="text-sm text-[var(--text-secondary)] group-hover:text-white transition-colors">Discord</span>
+                  <span className="text-sm text-[var(--text-secondary)] group-hover:text-white transition-colors">{t("social.discord")}</span>
                 </a>
                 <a
                   href="https://github.com/TengraStudio"
@@ -176,7 +176,7 @@ export default function ContactForm() {
                   className="flex items-center gap-2 p-3 rounded-xl bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] transition-all group"
                 >
                   <FaGithub className="w-5 h-5 text-white" />
-                  <span className="text-sm text-[var(--text-secondary)] group-hover:text-white transition-colors">GitHub</span>
+                  <span className="text-sm text-[var(--text-secondary)] group-hover:text-white transition-colors">{t("social.github")}</span>
                 </a>
                 <a
                   href="https://x.com/tengra"
@@ -185,7 +185,7 @@ export default function ContactForm() {
                   className="flex items-center gap-2 p-3 rounded-xl bg-[rgba(29,161,242,0.1)] border border-[rgba(29,161,242,0.2)] hover:bg-[rgba(29,161,242,0.2)] transition-all group"
                 >
                   <FaTwitter className="w-5 h-5 text-[#1DA1F2]" />
-                  <span className="text-sm text-[var(--text-secondary)] group-hover:text-white transition-colors">X</span>
+                  <span className="text-sm text-[var(--text-secondary)] group-hover:text-white transition-colors">{t("social.x")}</span>
                 </a>
                 <a
                   href="https://linkedin.com/company/tengra"
@@ -194,7 +194,7 @@ export default function ContactForm() {
                   className="flex items-center gap-2 p-3 rounded-xl bg-[rgba(0,119,181,0.1)] border border-[rgba(0,119,181,0.2)] hover:bg-[rgba(0,119,181,0.2)] transition-all group"
                 >
                   <FaLinkedin className="w-5 h-5 text-[#0077B5]" />
-                  <span className="text-sm text-[var(--text-secondary)] group-hover:text-white transition-colors">LinkedIn</span>
+                  <span className="text-sm text-[var(--text-secondary)] group-hover:text-white transition-colors">{t("social.linkedin")}</span>
                 </a>
               </div>
             </div>
@@ -268,7 +268,7 @@ export default function ContactForm() {
                     value={name}
                     onChange={(e) => setName(e.currentTarget.value)}
                     required
-                    placeholder="John Doe"
+                    placeholder={t("placeholders.name")}
                   />
                 </div>
 
@@ -283,7 +283,7 @@ export default function ContactForm() {
                     value={email}
                     onChange={(e) => setEmail(e.currentTarget.value)}
                     required
-                    placeholder="john@example.com"
+                    placeholder={t("placeholders.email")}
                   />
                 </div>
               </div>
@@ -298,7 +298,7 @@ export default function ContactForm() {
                   value={subject}
                   onChange={(e) => setSubject(e.currentTarget.value)}
                   required
-                  placeholder="How can we help?"
+                  placeholder={t("placeholders.subject")}
                 />
               </div>
 
@@ -311,7 +311,7 @@ export default function ContactForm() {
                 <Input
                   value={phone}
                   onChange={(e) => setPhone(e.currentTarget.value)}
-                  placeholder="+1 (555) 000-0000"
+                  placeholder={t("placeholders.phone")}
                 />
               </div>
 
@@ -326,7 +326,7 @@ export default function ContactForm() {
                   onChange={(e) => setMessage(e.currentTarget.value)}
                   required
                   rows={6}
-                  placeholder="Tell us more about your project or inquiry..."
+                  placeholder={t("placeholders.message")}
                   className="w-full px-4 py-3 rounded-xl text-base md:text-sm bg-[rgba(15,31,54,0.6)] border border-[rgba(72,213,255,0.15)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] backdrop-blur-sm transition-all duration-200 focus:border-[var(--color-turkish-blue-500)] focus:ring-2 focus:ring-[rgba(30,184,255,0.2)] focus:outline-none resize-none"
                 />
               </div>

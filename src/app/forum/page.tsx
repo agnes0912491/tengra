@@ -2,19 +2,15 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { Search, Loader2 } from "lucide-react";
 import SiteShell from "@/components/layout/site-shell";
-import { useAuth } from "@/components/providers/auth-provider";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/components/providers/auth-provider";
 import { fetchForumCategories, fetchOnlineUsers } from "@/lib/forum";
 import { getCategoryMeta, ForumCategoryMeta } from "@/lib/forum-meta";
 import { ForumCategory } from "@/types/forum";
-import {
-    MessageCircle,
-    Users,
-    Search,
-    Loader2,
-    Hash
-} from "lucide-react";
+import { Hash, MessageCircle, Users } from "lucide-react";
+import { useTranslation } from "@tengra/language";
 
 const SITE_ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || "https://tengra.studio";
 const LOGIN_URL = `${SITE_ORIGIN}/login`;
@@ -24,15 +20,19 @@ type Section = {
     categories: Array<{ category: ForumCategory; meta: ForumCategoryMeta }>;
 };
 
-const formatDate = (value?: string | null) => {
+const formatDate = (value?: string | null, locale: string = "tr-TR") => {
     if (!value) return "";
     const parsed = new Date(value);
     if (Number.isNaN(parsed.getTime())) return value;
-    return parsed.toLocaleString("tr-TR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+    return parsed.toLocaleString(locale, { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
 };
 
 export default function ForumPage() {
     const { isAuthenticated } = useAuth();
+    const { t } = useTranslation("Forum");
+    const { t: tRoot } = useTranslation();
+    const { language: locale } = useTranslation();
+
     const [categories, setCategories] = useState<ForumCategory[]>([]);
     const [onlineUsers, setOnlineUsers] = useState<{ name: string; role?: string }[]>([]);
     const [onlineLoading, setOnlineLoading] = useState(true);
@@ -49,7 +49,7 @@ export default function ForumPage() {
             })
             .catch(() => {
                 if (!active) return;
-                setError("Forum kategorileri yüklenemedi.");
+                setError(t("loadingError"));
             })
             .finally(() => {
                 if (active) setLoading(false);
@@ -57,30 +57,38 @@ export default function ForumPage() {
         return () => {
             active = false;
         };
-    }, []);
+    }, [t]);
 
     const sections = useMemo<Section[]>(() => {
         const grouped: Record<string, Section["categories"]> = {};
         categories.forEach((cat) => {
             const meta = getCategoryMeta(cat.slug);
-            const key = meta.section || "Topluluk";
+            const key = meta.section ? tRoot(meta.section) : t("sections.community");
             if (!grouped[key]) grouped[key] = [];
             grouped[key].push({ category: cat, meta });
         });
-        const order = ["Tengra Studio", "Projeler & Geliştirme", "Destek & Topluluk", "Topluluk"];
+
+        // Define localized order
+        const sectionOrder = [
+            t("sections.tengraStudio"),
+            t("sections.projects"),
+            t("sections.support"),
+            t("sections.community")
+        ];
+
         const built: Section[] = [];
-        order.forEach((title) => {
+        sectionOrder.forEach((title) => {
             if (grouped[title] && grouped[title].length > 0) {
                 built.push({ title, categories: grouped[title] });
             }
         });
         Object.keys(grouped).forEach((title) => {
-            if (!order.includes(title)) {
+            if (!sectionOrder.includes(title)) {
                 built.push({ title, categories: grouped[title] });
             }
         });
         return built;
-    }, [categories]);
+    }, [categories, t, tRoot]);
 
     useEffect(() => {
         let active = true;
@@ -109,9 +117,9 @@ export default function ForumPage() {
     const totalTopics = categories.reduce((sum, c) => sum + (c.threadCount ?? 0), 0);
     const totalPosts = categories.reduce((sum, c) => sum + (c.postCount ?? 0), 0);
     const sidebarStats = [
-        { label: "Konular", value: totalTopics.toLocaleString("tr-TR"), icon: Hash },
-        { label: "Mesajlar", value: totalPosts.toLocaleString("tr-TR"), icon: MessageCircle },
-        { label: "Kategoriler", value: categories.length.toString(), icon: Users },
+        { label: t("stats.topics"), value: totalTopics.toLocaleString(locale), icon: Hash },
+        { label: t("stats.posts"), value: totalPosts.toLocaleString(locale), icon: MessageCircle },
+        { label: t("stats.categories"), value: categories.length.toString(), icon: Users },
     ];
 
     return (
@@ -121,28 +129,32 @@ export default function ForumPage() {
                     {/* Breadcrumb / Title Bar */}
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                         <div>
-                            <h1 className="text-2xl font-bold text-white mb-1">Forumlar</h1>
-                            <p className="text-sm text-gray-400">Tengra topluluğuna hoş geldiniz.</p>
+                            <h1 className="text-2xl font-bold text-white mb-1">{t("title")}</h1>
+                            <p className="text-sm text-gray-400">{t("subtitle")}</p>
                         </div>
                         <div className="flex gap-3">
                             <div className="relative">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                                 <input
-                                    type="text"
-                                    placeholder="Ara..."
+                                    id="forum-search"
+                                    name="search"
+                                    type="search"
+                                    autoComplete="off"
+                                    aria-label={t("search")}
+                                    placeholder={t("search")}
                                     className="pl-9 pr-4 py-2 rounded-lg bg-[#141b25] border border-[#1f2937] text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#1eb8ff] transition-colors w-full md:w-64"
                                 />
                             </div>
                             {isAuthenticated ? (
                                 <Link href="/forum/new">
                                     <Button size="default" className="bg-[#1eb8ff] hover:bg-[#0097d4] text-white">
-                                        Konu Aç
+                                        {t("createTopic")}
                                     </Button>
                                 </Link>
                             ) : (
                                 <Link href={LOGIN_URL}>
                                     <Button variant="outline" size="default">
-                                        Giriş Yap
+                                        {t("loginToPost")}
                                     </Button>
                                 </Link>
                             )}
@@ -162,7 +174,7 @@ export default function ForumPage() {
                                 </div>
                             ) : sections.length === 0 ? (
                                 <div className="rounded-xl border border-[#1f2937] bg-[#111821] p-8 text-center text-gray-400">
-                                    Henüz kategori eklenmemiş.
+                                    {t("noCategories")}
                                 </div>
                             ) : (
                                 sections.map((section) => (
@@ -179,9 +191,9 @@ export default function ForumPage() {
                                                 const posts = category.postCount ?? 0;
                                                 const lastThread = category.lastThread;
                                                 const lastAuthor = lastThread?.author?.displayName || lastThread?.author?.username || "";
-                                                const lastDate = formatDate(lastThread?.updatedAt ?? category.lastActivityAt ?? lastThread?.lastReplyAt);
+                                                const lastDate = formatDate(lastThread?.updatedAt ?? category.lastActivityAt ?? lastThread?.lastReplyAt, locale);
                                                 const lastLink = lastThread?.id ? `/forum/t/${lastThread.id}` : "#";
-                                                const description = category.description || meta.description || "";
+                                                const description = category.description || (meta.description ? tRoot(meta.description) : "");
 
                                                 return (
                                                     <div key={category.id} className="group flex flex-col md:flex-row items-center gap-4 p-4 hover:bg-[#161e2a]/50 transition-colors">
@@ -204,11 +216,11 @@ export default function ForumPage() {
                                                         <div className="hidden md:flex gap-6 text-xs text-gray-500 min-w-[120px] justify-end">
                                                             <div className="text-right">
                                                                 <span className="block text-gray-300 font-medium">{topics}</span>
-                                                                <span>Konu</span>
+                                                                <span>{t("stats.topics")}</span>
                                                             </div>
                                                             <div className="text-right">
                                                                 <span className="block text-gray-300 font-medium">{posts}</span>
-                                                                <span>Mesaj</span>
+                                                                <span>{t("stats.posts")}</span>
                                                             </div>
                                                         </div>
                                                         <div className="hidden md:block w-64 pl-4 border-l border-[#1f2937/50]">
@@ -224,7 +236,7 @@ export default function ForumPage() {
                                                                             {lastThread.title}
                                                                         </Link>
                                                                         <div className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
-                                                                            <span>{lastDate || "Az önce"}</span>
+                                                                            <span>{lastDate || t("time.justNow")}</span>
                                                                             {lastAuthor ? (
                                                                                 <>
                                                                                     <span>•</span>
@@ -235,7 +247,7 @@ export default function ForumPage() {
                                                                     </div>
                                                                 </div>
                                                             ) : (
-                                                                <span className="text-xs text-gray-600">Henüz mesaj yok</span>
+                                                                <span className="text-xs text-gray-600">{t("noMessages")}</span>
                                                             )}
                                                         </div>
                                                     </div>
@@ -252,13 +264,13 @@ export default function ForumPage() {
                             {/* User Info / Login CTA */}
                             {!isAuthenticated ? (
                                 <div className="rounded-xl border border-[#1f2937] bg-[#111821] p-5 text-center">
-                                    <h3 className="text-white font-semibold mb-2">Tengra&apos;ya Katıl</h3>
+                                    <h3 className="text-white font-semibold mb-2">{t("sidebar.joinTitle")}</h3>
                                     <p className="text-xs text-gray-400 mb-4">
-                                        Tam özelliklere erişmek ve tartışmalara katılmak için giriş yapın.
+                                        {t("sidebar.joinDesc")}
                                     </p>
                                     <Link href="/register" className="block w-full">
                                         <Button className="w-full bg-[#1eb8ff] hover:bg-[#0097d4]">
-                                            Kayıt Ol
+                                            {t("sidebar.register")}
                                         </Button>
                                     </Link>
                                 </div>
@@ -267,7 +279,7 @@ export default function ForumPage() {
                             {/* Online Users */}
                             <div className="rounded-xl border border-[#1f2937] bg-[#111821] overflow-hidden">
                                 <div className="bg-[#161e2a] px-4 py-3 border-b border-[#1f2937] flex items-center justify-between">
-                                    <h3 className="text-xs font-bold text-gray-300 uppercase">Çevrimiçi Üyeler</h3>
+                                    <h3 className="text-xs font-bold text-gray-300 uppercase">{t("sidebar.onlineTitle")}</h3>
                                     <span className="flex h-2 w-2">
                                         <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-green-400 opacity-75"></span>
                                         <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
@@ -277,10 +289,10 @@ export default function ForumPage() {
                                     {onlineLoading ? (
                                         <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
                                             <Loader2 className="w-4 h-4 animate-spin" />
-                                            Kullanıcılar yükleniyor...
+                                            {t("sidebar.loadingUsers")}
                                         </div>
                                     ) : onlineUsers.length === 0 ? (
-                                        <span className="text-xs text-gray-500">Şu anda çevrimiçi kullanıcı görünmüyor.</span>
+                                        <span className="text-xs text-gray-500">{t("sidebar.noOnlineUsers")}</span>
                                     ) : (
                                         <div className="flex flex-wrap gap-1.5">
                                             {onlineUsers.map((u, i) => (
@@ -299,7 +311,7 @@ export default function ForumPage() {
                             {/* Forum Statistics */}
                             <div className="rounded-xl border border-[#1f2937] bg-[#111821] overflow-hidden">
                                 <div className="bg-[#161e2a] px-4 py-3 border-b border-[#1f2937]">
-                                    <h3 className="text-xs font-bold text-gray-300 uppercase">İstatistikler</h3>
+                                    <h3 className="text-xs font-bold text-gray-300 uppercase">{t("sidebar.statsTitle")}</h3>
                                 </div>
                                 <div className="p-4 space-y-4">
                                     {sidebarStats.map((stat, i) => (

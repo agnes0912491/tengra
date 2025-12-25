@@ -2,7 +2,7 @@
 
 import type { CloseButtonProps } from "react-toastify";
 import { ToastContainer } from "react-toastify";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 import { cn } from "@/lib/utils";
 
@@ -21,7 +21,7 @@ const variantClasses: Record<"default" | "success" | "error" | "info", string> =
 };
 
 function CloseButton({ closeToast }: CloseButtonProps) {
-  const t = useTranslations("Common");
+  const { t } = useTranslation("Common");
   return (
     <button
       type="button"

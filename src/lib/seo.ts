@@ -1,55 +1,121 @@
-import type { Metadata } from "next";
+/**
+ * SEO Utilities for Tengra and related apps
+ */
 
-interface SEOConfig {
+export const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://tengra.studio";
+export const CDN_URL = "https://cdn.tengra.studio";
+
+/**
+ * Organization Schema for Tengra Studio
+ */
+export function getOrganizationSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Tengra Studio",
+    url: BASE_URL,
+    logo: `${CDN_URL}/uploads/tengra_without_text.png`,
+    description: "Digital product studio building the next generation of web and mobile applications.",
+    sameAs: [
+      "https://twitter.com/tengrastudio",
+      "https://github.com/tengrastudio",
+      "https://instagram.com/tengrastudio",
+      "https://linkedin.com/company/tengrastudio"
+    ],
+    contactPoint: {
+      "@type": "ContactPoint",
+      email: "hello@tengra.studio",
+      contactType: "customer service",
+      availableLanguage: ["en", "tr"]
+    },
+    address: {
+      "@type": "PostalAddress",
+      addressCountry: "TR"
+    }
+  };
+}
+
+/**
+ * WebSite Schema
+ */
+export function getWebSiteSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Tengra Studio",
+    url: BASE_URL,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${BASE_URL}/search?q={search_term_string}`
+      },
+      "query-input": "required name=search_term_string"
+    }
+  };
+}
+
+/**
+ * BreadcrumbList Schema
+ */
+export function getBreadcrumbSchema(items: { name: string; url: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: item.url.startsWith("http") ? item.url : `${BASE_URL}${item.url}`
+    }))
+  };
+}
+
+/**
+ * Generic SEO Generator
+ */
+export interface SEOProps {
   title: string;
   description?: string;
   image?: string;
   author?: string;
-  type?: "website" | "article" | "profile";
+  type?: "article" | "website";
   url?: string;
-  keywords?: string[];
   createdAt?: string;
 }
 
-const SITE_NAME = "TENGRA";
-const BASE_URL = "https://tengra.studio";
-
-export function generateSEO({
-  title,
-  description = "Forging the Divine and the Technological. TENGRA unites art, science, and technology into one vision.",
-  image = `${BASE_URL}/og-image.png`,
-  author = "TENGRA Studio",
-  type = "website",
-  url = BASE_URL,
-  keywords = ["TENGRA", "Game Studio", "Futuristic Design", "Tengri", "Software", "AI", "Encryption", "Games"],
-  createdAt,
-}: SEOConfig): Metadata {
-  const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
-
-  return {
-    title: fullTitle,
-    description,
-    keywords,
-    openGraph: {
-      title: fullTitle,
-      description,
-      url,
-      siteName: SITE_NAME,
-      images: [{ url: image, width: 1200, height: 630 }],
-      locale: "en_US",
-      type,
+export function generateSEO({ title, description, image, author, type = "article", url, createdAt }: SEOProps) {
+  const schema: any = {
+    "@context": "https://schema.org",
+    "@type": type === "article" ? "Article" : "WebPage",
+    headline: title,
+    description: description,
+    image: image ? (image.startsWith("http") ? image : `${CDN_URL}/${image}`) : undefined,
+    author: author ? {
+      "@type": "Person",
+      name: author
+    } : {
+      "@type": "Organization",
+      name: "Tengra Studio"
     },
-    twitter: {
-      card: "summary_large_image",
-      site: "@tengra",
-      title: fullTitle,
-      description,
-      images: [image],
+    publisher: {
+      "@type": "Organization",
+      name: "Tengra Studio",
+      logo: {
+        "@type": "ImageObject",
+        url: `${CDN_URL}/uploads/tengra_without_text.png`
+      }
     },
-    authors: [{ name: author }],
-    other: {
-      ...(createdAt && { "article:published_time": createdAt }),
-      "article:author": author,
-    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": url || BASE_URL
+    }
   };
+
+  if (createdAt) {
+    schema.datePublished = createdAt;
+    schema.dateModified = createdAt; // Should ideally be updatedAt
+  }
+
+  return schema;
 }

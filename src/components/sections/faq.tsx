@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getFaqs, type FaqItem } from "@/lib/db";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { ChevronDown, HelpCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function FaqSection() {
-  const locale = useLocale();
-  const tNav = useTranslations("Navigation");
+  const { language: locale } = useTranslation();
+  const { t: tNav } = useTranslation("Navigation");
+  const { t } = useTranslation("Faq");
   const [items, setItems] = useState<FaqItem[]>([]);
   const [openId, setOpenId] = useState<string | null>(null);
 
@@ -45,7 +46,7 @@ export default function FaqSection() {
           <h2 className="section-title">{tNav("faq")}</h2>
           <div className="divider mt-6 mb-6" />
           <p className="text-[var(--text-secondary)]">
-            Find answers to commonly asked questions about Tengra.
+            {t("description")}
           </p>
         </motion.div>
 

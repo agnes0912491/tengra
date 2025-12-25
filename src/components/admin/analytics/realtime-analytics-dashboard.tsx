@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 interface RealtimeStats {
   activeUsers: number;
@@ -98,7 +98,7 @@ function MiniChart({ data, color = "#00A7C5" }: { data: number[]; color?: string
 // Live event feed
 function LiveEventFeed({ events }: { events: RealtimeStats["recentEvents"] }) {
   const [now, setNow] = useState(() => Date.now());
-  const t = useTranslations("AdminAnalytics");
+  const { t } = useTranslation("AdminAnalytics");
 
   useEffect(() => {
     const updateNow = () => setNow(Date.now());
@@ -123,6 +123,22 @@ function LiveEventFeed({ events }: { events: RealtimeStats["recentEvents"] }) {
     }
   };
 
+  const getEventLabel = (type: string, path?: string) => {
+    if (type === "page_view") return path ?? t("liveFeed.events.pageView");
+    switch (type) {
+      case "login":
+        return t("liveFeed.events.login");
+      case "signup":
+        return t("liveFeed.events.signup");
+      case "purchase":
+        return t("liveFeed.events.purchase");
+      case "error":
+        return t("liveFeed.events.error");
+      default:
+        return t("liveFeed.events.unknown", { type });
+    }
+  };
+
   const formatTime = (ts: number) => {
     const diff = now - ts;
     if (diff < 60000) return t("liveFeed.now");
@@ -140,7 +156,7 @@ function LiveEventFeed({ events }: { events: RealtimeStats["recentEvents"] }) {
           <span className="text-lg">{getEventIcon(event.type)}</span>
           <div className="flex-1 min-w-0">
             <p className="text-sm text-white truncate">
-              {event.type === "page_view" ? event.path : event.type}
+              {getEventLabel(event.type, event.path)}
             </p>
             <p className="text-xs text-[rgba(255,255,255,0.4)]">
               {event.userId ? t("liveFeed.user", { id: `${event.userId.slice(0, 8)}...` }) : t("liveFeed.anonymous")}
@@ -200,7 +216,7 @@ function DonutChart({
 
 // Main dashboard component
 export default function RealTimeAnalyticsDashboard() {
-  const t = useTranslations("AdminAnalytics");
+  const { t } = useTranslation("AdminAnalytics");
   const [stats, setStats] = useState<RealtimeStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

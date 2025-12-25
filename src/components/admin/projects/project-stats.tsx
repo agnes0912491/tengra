@@ -5,7 +5,7 @@ import type { Project } from "@/types/project";
 import { getProjectStats, type ProjectStat } from "@/lib/db";
 import Cookies from "js-cookie";
 import { ADMIN_SESSION_COOKIE_CANDIDATES } from "@/lib/auth";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 // glass select
 
 type Props = {
@@ -13,8 +13,8 @@ type Props = {
 };
 
 export default function ProjectStatsViewer({ initialProjects }: Props) {
-    const t = useTranslations("AdminProjects");
-    const locale = useLocale();
+    const { t } = useTranslation("AdminProjects");
+    const { language: locale } = useTranslation();
     const [selectedId, setSelectedId] = useState<string>(initialProjects[0]?.id || "");
     const [stats, setStats] = useState<ProjectStat[]>([]);
     const formatDate = (d: string) => {

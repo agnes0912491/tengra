@@ -4,7 +4,7 @@ import { useState, useMemo, useCallback } from "react";
 import { Bold, Italic, List, ListOrdered, Link as LinkIcon, Image, Code, Quote, Heading1, Heading2, Eye, Edit } from "lucide-react";
 import DOMPurify from "isomorphic-dompurify";
 import { cn } from "@/lib/utils";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 interface MarkdownEditorProps {
     value: string;
@@ -25,7 +25,7 @@ export function MarkdownEditor({
     preview: initialPreview = "edit",
     className,
 }: MarkdownEditorProps) {
-    const t = useTranslations("MarkdownEditor");
+    const { t } = useTranslation("MarkdownEditor");
     const [mode, setMode] = useState<"edit" | "preview">(initialPreview === "preview" ? "preview" : "edit");
 
     // Insert text at cursor position or wrap selection

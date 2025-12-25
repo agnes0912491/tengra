@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { useAdminToken } from "@/hooks/use-admin-token";
 import {
     Shield,
@@ -72,8 +72,8 @@ const formatDate = (date: string, locale?: string) => {
 };
 
 export default function SecurityAuditDashboard() {
-    const locale = useLocale();
-    const t = useTranslations("AdminSecurity");
+    const { language: locale } = useTranslation();
+    const { t } = useTranslation("AdminSecurity");
     const { token } = useAdminToken();
     const [logs, setLogs] = useState<AuditLog[]>([]);
     const [stats, setStats] = useState<AuditStats | null>(null);

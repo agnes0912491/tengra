@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Menu, X, ChevronRight, ExternalLink, User, Settings, LogOut, Shield } from "lucide-react";
@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import AnimatedButton from "@/components/ui/animated-button";
-import LocaleSwitcher from "@/components/ui/locale-switcher";
+import LocaleSwitcher from "@/components/layout/locale-switcher";
 
 /* ... existing links constant ... */
 const SITE_ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || "https://tengra.studio";
@@ -39,18 +39,36 @@ const headerLinks = [
 export default function Header() {
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
-  const tHeader = useTranslations("Header");
-  const tNav = useTranslations("Navigation");
+  const { t: tHeader } = useTranslation("Header");
+  const { t: tNav } = useTranslation("Navigation");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isSubdomain, setIsSubdomain] = useState(false);
 
   useEffect(() => {
+    // Check if we are on a subdomain
+    if (typeof window !== "undefined") {
+      const hostname = window.location.hostname;
+      if (hostname.includes('forum.')) {
+        setIsSubdomain(true);
+      }
+    }
+
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Helper to get correct href based on subdomain
+  const getHref = (href: string) => {
+    if (!isSubdomain) return href;
+    if (href.startsWith("http")) return href;
+    if (href.startsWith("#")) return `${SITE_ORIGIN}/${href}`;
+    if (href.startsWith("/")) return `${SITE_ORIGIN}${href}`;
+    return href;
+  };
 
   if (pathname?.startsWith("/admin")) return null;
 
@@ -65,7 +83,7 @@ export default function Header() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-20 items-center justify-between">
             {/* Logo */}
-            <Link href="/" className="group flex items-center gap-3 relative z-10 text-[var(--color-turkish-blue-400)] transition-colors hover:text-[var(--color-turkish-blue-300)]">
+            <Link href={getHref("/")} className="group flex items-center gap-3 relative z-10 text-[var(--color-turkish-blue-400)] transition-colors hover:text-[var(--color-turkish-blue-300)]">
               <Image
                 src="https://cdn.tengra.studio/s/tengra/tengra-logo.png"
                 alt={tHeader("logoAlt")}
@@ -82,10 +100,11 @@ export default function Header() {
             <nav className="hidden lg:flex items-center gap-1 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.05)] rounded-full px-2 py-1.5 backdrop-blur-md">
               {headerLinks.map((link) => {
                 const isActive = link.href === "/" ? pathname === "/" : pathname?.startsWith(link.href) && link.href !== "/";
+                const href = getHref(link.href);
                 return (
                   <Link
                     key={link.labelKey}
-                    href={link.href}
+                    href={href}
                     className={`relative px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ${isActive ? "text-white" : "text-[rgba(255,255,255,0.6)] hover:text-white"
                       }`}
                   >
@@ -129,11 +148,11 @@ export default function Header() {
                       <DropdownMenuLabel>{tHeader("account")}</DropdownMenuLabel>
                       <DropdownMenuSeparator className="bg-[rgba(255,255,255,0.1)]" />
                       <DropdownMenuItem className="focus:bg-[rgba(255,255,255,0.1)] cursor-pointer">
-                        <Link href="/settings" className="flex w-full items-center"><User className="mr-2 h-4 w-4" /> {tHeader("profile")}</Link>
+                        <Link href={getHref("/settings")} className="flex w-full items-center"><User className="mr-2 h-4 w-4" /> {tHeader("profile")}</Link>
                       </DropdownMenuItem>
                       {user.role === 'admin' && (
                         <DropdownMenuItem className="focus:bg-[rgba(255,255,255,0.1)] cursor-pointer text-[var(--color-turkish-blue-400)]">
-                          <Link href="/admin" className="flex w-full items-center"><Shield className="mr-2 h-4 w-4" /> {tHeader("admin")}</Link>
+                          <Link href={getHref("/admin")} className="flex w-full items-center"><Shield className="mr-2 h-4 w-4" /> {tHeader("admin")}</Link>
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuSeparator className="bg-[rgba(255,255,255,0.1)]" />
@@ -181,7 +200,7 @@ export default function Header() {
               {headerLinks.map(link => (
                 <Link
                   key={link.labelKey}
-                  href={link.href}
+                  href={getHref(link.href)}
                   onClick={() => setMobileMenuOpen(false)}
                   className="text-xl font-medium text-white py-2 border-b border-[rgba(255,255,255,0.05)]"
                 >

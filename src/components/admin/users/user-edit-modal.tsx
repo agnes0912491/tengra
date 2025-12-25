@@ -6,7 +6,7 @@ import { X, User as UserIcon, Mail, Phone, AlignLeft, Loader2 } from "lucide-rea
 import { toast } from "react-toastify";
 import { updateUser } from "@/lib/db";
 import { User } from "@/lib/auth/users";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 type Props = {
     user: User | null;
@@ -23,7 +23,7 @@ type FormData = {
 };
 
 export default function UserEditModal({ user, open, onClose, onSuccess }: Props) {
-    const t = useTranslations("AdminUsers");
+    const { t } = useTranslation("AdminUsers");
     const [formData, setFormData] = useState<FormData>({
         displayName: "",
         email: "",

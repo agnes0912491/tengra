@@ -14,7 +14,7 @@ import {
   ADMIN_SESSION_COOKIE,
   LEGACY_ADMIN_SESSION_COOKIES,
 } from "@/lib/auth";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 import { LovaUserAttributes as User } from "@tengra/types";
 
@@ -133,7 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const t = useTranslations("AuthContext");
+  const { t } = useTranslation("AuthContext");
   const defaultErrorMessage = t("authorization.defaultErrorMessage");
   const handleInvalidAuth = useCallback(() => {
     clearAuthCookie();
@@ -142,7 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchCurrentUser = useCallback(async (token: string) => {
     try {
-      const response = await fetch(`${BACKEND_API_URL}/api/auth/me`, {
+      const response = await fetch(`${BACKEND_API_URL}/auth/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -184,10 +184,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Cookie-only auth flow
     const token = getValidToken();
+    console.log("[AuthContext] useEffect triggered. Token found:", !!token);
 
     if (token) {
+      console.log("[AuthContext] Token valid, fetching current user...");
       fetchCurrentUser(token);
     } else {
+      console.log("[AuthContext] No valid token found, clearing user.");
       setUser(null);
       setLoading(false);
     }
@@ -210,10 +213,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (
     username: string,
-    password: string
+    password: string,
+    retryCount = 0
   ): Promise<LoginResult> => {
+    const MAX_RETRIES = 2;
+
     try {
-      const response = await fetch(`${BACKEND_API_URL}/api/auth/login`, {
+      const response = await fetch(`${BACKEND_API_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -222,12 +228,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (!response.ok) {
+        // Check if it's a network error worth retrying
+        if (response.status >= 500 && retryCount < MAX_RETRIES) {
+          console.warn(`Server error (${response.status}), retrying... (${retryCount + 1}/${MAX_RETRIES})`);
+          await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1))); // Exponential backoff
+          return login(username, password, retryCount + 1);
+        }
+
         return {
           success: false,
           message:
             response.status === 401
               ? t("authorization.invalidCredentials")
-              : defaultErrorMessage,
+              : response.status >= 500
+                ? t("authorization.serverError") || "Server error, please try again"
+                : defaultErrorMessage,
         };
       }
 
@@ -246,7 +261,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { success: true };
     } catch (error) {
       console.error("Login error:", error);
-      return { success: false, message: defaultErrorMessage };
+
+      // Retry on network errors
+      if (retryCount < MAX_RETRIES && error instanceof TypeError) {
+        console.warn(`Network error, retrying... (${retryCount + 1}/${MAX_RETRIES})`);
+        await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
+        return login(username, password, retryCount + 1);
+      }
+
+      return {
+        success: false,
+        message: t("authorization.networkError") || "Network error, please check your connection"
+      };
     }
   };
 
@@ -254,7 +280,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const token = getValidToken();
       if (token) {
-        await fetch(`${BACKEND_API_URL}/api/auth/logout`, {
+        await fetch(`${BACKEND_API_URL}/auth/logout`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,

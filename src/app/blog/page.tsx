@@ -1,12 +1,12 @@
 "use client";
 
 import SiteShell from "@/components/layout/site-shell";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { motion } from "framer-motion";
 import { BookOpen, PenTool, Rss } from "lucide-react";
 
 export default function BlogPage() {
-    const t = useTranslations("BlogPage");
+    const { t } = useTranslation("BlogPage");
 
     return (
         <SiteShell>

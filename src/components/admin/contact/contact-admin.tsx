@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 import { Mail, Trash2, User, Phone, MapPin, Clock, Bell, Inbox } from "lucide-react";
 
 import { getContactSubmissions, deleteContactSubmission, type ContactSubmission, getContactSubscriptions, deleteContactSubscription } from "@/lib/db";
@@ -22,9 +22,9 @@ const formatDate = (value?: string, locale?: string) => {
 };
 
 export default function ContactAdmin() {
-  const locale = useLocale();
-  const t = useTranslations("AdminContent");
-  const tc = useTranslations("Contact");
+  const { language: locale } = useTranslation();
+  const { t } = useTranslation("AdminContent");
+
   const [items, setItems] = useState<ContactSubmission[]>([]);
   const [subscriptions, setSubscriptions] = useState<Array<{ id: string | number; email: string; createdAt?: string }>>([]);
   const [loading, setLoading] = useState(false);

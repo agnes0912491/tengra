@@ -19,13 +19,13 @@ import {
     Laptop
 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "@tengra/language";
 
 export function CommandMenu() {
     const router = useRouter();
     const [open, setOpen] = React.useState(false);
     const { setTheme } = useTheme();
-    const t = useTranslations("CommandMenu");
+    const { t } = useTranslation("CommandMenu");
 
     React.useEffect(() => {
         const down = (e: KeyboardEvent) => {

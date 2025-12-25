@@ -14,7 +14,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Forward to backend API (core-api or lova-backend Google auth endpoint)
+
+    // Forward to backend API (core-api Google auth endpoint)
     const response = await fetch(`${BACKEND_API_URL}/auth/google`, {
       method: "POST",
       headers: {
