@@ -8,15 +8,19 @@ import { useTranslation } from "@tengra/language";
 import GradientText from "@/components/ui/gradient-text";
 import { Button } from "@/components/ui/button";
 
-import LiveGlobe from "@/components/home/live-globe";
+// Lightweight alternative to the heavy 3D globe - pure CSS animation
+import GoktürkPattern from "@/components/home/gokturk-pattern";
+
 
 const Hero = () => {
   const { t } = useTranslation("Hero");
   const wordOne = t("typingWordOne");
   const wordTwo = t("typingWordTwo");
   const [displayText, setDisplayText] = useState(wordTwo);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     setDisplayText(wordTwo);
     const interval = setInterval(() => {
       setDisplayText(current => current === wordTwo ? wordOne : wordTwo);
@@ -26,72 +30,63 @@ const Hero = () => {
 
   return (
     <section className="relative w-full min-h-[90vh] flex flex-col items-center justify-center pt-24 pb-16 overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute inset-0 pointer-events-none z-0">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] opacity-30 md:opacity-40">
-          <LiveGlobe />
+      {/* Background Elements - hidden on mobile for faster LCP */}
+      <div className="absolute inset-0 pointer-events-none z-0 hidden md:block">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] opacity-40">
+          <GoktürkPattern />
         </div>
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[rgba(0,167,197,0.15)] via-[rgba(6,20,27,0)] to-transparent blur-3xl opacity-60" />
         <div className="absolute bottom-0 right-0 w-[800px] h-[600px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[rgba(110,211,225,0.08)] via-[rgba(6,20,27,0)] to-transparent blur-3xl opacity-40" />
       </div>
 
+      {/* Mobile simple gradient background */}
+      <div className="absolute inset-0 pointer-events-none z-0 md:hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(0,167,197,0.1)_0%,_transparent_70%)]" />
+      </div>
+
       <div className="container px-4 md:px-6 relative z-10 flex flex-col items-center text-center">
-        {/* Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[rgba(110,211,225,0.2)] bg-[rgba(110,211,225,0.05)] text-xs font-medium text-[rgba(130,226,255,0.9)] mb-8"
-        >
+        {/* Badge - instant render, no animation for faster LCP */}
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[rgba(110,211,225,0.2)] bg-[rgba(110,211,225,0.05)] text-xs font-medium text-[rgba(130,226,255,0.9)] mb-8">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[rgba(110,211,225,0.8)] opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-[rgba(110,211,225,1)]"></span>
           </span>
           {t("eyebrow")}
-        </motion.div>
+        </div>
 
-        {/* Headline */}
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
-          className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white max-w-4xl mb-6 leading-[1.1]"
-        >
+        {/* Headline - LCP element, render immediately without animation */}
+        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white max-w-4xl mb-6 leading-[1.1]">
           {t("taglineLine1")} <br className="hidden md:block" />
           {t("taglineLine2")}
           <span className="inline-block relative ml-4">
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={displayText}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-                className={`block ${displayText === wordOne ? "font-serif" : "font-sans"}`}
-              >
-                <GradientText className="font-extrabold">{displayText}</GradientText>
-              </motion.span>
-            </AnimatePresence>
+            {isMounted ? (
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={displayText}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className={`block ${displayText === wordOne ? "font-serif" : "font-sans"}`}
+                >
+                  <GradientText className="font-extrabold">{displayText}</GradientText>
+                </motion.span>
+              </AnimatePresence>
+            ) : (
+              <span className="block font-sans">
+                <GradientText className="font-extrabold">{wordTwo}</GradientText>
+              </span>
+            )}
           </span>
-        </motion.h1>
+        </h1>
 
-        {/* Description */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-          className="text-lg md:text-xl text-[rgba(255,255,255,0.6)] max-w-2xl mb-10 leading-relaxed"
-        >
+        {/* Description - instant render */}
+        <p className="text-lg md:text-xl text-[rgba(255,255,255,0.6)] max-w-2xl mb-10 leading-relaxed">
           {t("intro")}
-        </motion.p>
+        </p>
 
-        {/* Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
-          className="flex flex-col sm:flex-row items-center gap-4"
-        >
+        {/* Buttons - instant render */}
+        <div className="flex flex-col sm:flex-row items-center gap-4">
           <Link href="/contact">
             <Button
               size="lg"
@@ -110,9 +105,9 @@ const Hero = () => {
               {t("secondaryCta")}
             </Button>
           </Link>
-        </motion.div>
+        </div>
 
-        {/* Floating Cards (Decor) */}
+        {/* Floating Cards (Decor) - Desktop only */}
         <div className="absolute top-1/2 left-0 w-full h-full pointer-events-none hidden lg:block -z-10">
           <motion.div
             initial={{ opacity: 0, x: -50 }}

@@ -14,15 +14,16 @@ import AdblockDetector from "@/components/analytics/AdblockDetector";
 import AdblockNotice from "@/components/analytics/AdblockNotice";
 import Footer from "@/components/layout/footer";
 import PWAProvider from "@/components/pwa/pwa-provider";
+import GoogleOneTap from "@/components/google-one-tap";
 import { getOrganizationSchema, getWebSiteSchema, getLocalBusinessSchema, BASE_URL } from "@/lib/seo";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "optional" });
+const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron", display: "optional" });
 const notoOldTurkic = Noto_Sans_Old_Turkic({
   weight: "400",
   subsets: ["old-turkic"],
   variable: "--font-noto-old-turkic",
-  display: "swap",
+  display: "optional",
 });
 
 export const metadata: Metadata = {
@@ -141,7 +142,14 @@ export default async function RootLayout({
 
   return (
     <html suppressHydrationWarning lang={locale} className={`${orbitron.variable} ${inter.variable} ${notoOldTurkic.variable}`}>
-      <head />
+      <head>
+        {/* Preconnect to critical domains for faster resource loading */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+        <link rel="preconnect" href="https://cdn.tengra.studio" />
+      </head>
       <body className="font-sans bg-[color:var(--background)] text-[color:var(--foreground)] w-full min-h-screen">
         <script
           type="application/ld+json"
@@ -161,16 +169,16 @@ export default async function RootLayout({
           `}
         </Script>
 
-        {/* Google Funding Choices (opsiyonel) */}
+        {/* Google Funding Choices (opsiyonel) - lazy loaded for performance */}
         {process.env.NEXT_PUBLIC_GFC_ID && isProd ? (
           <>
             <Script
               id="gfc-loader"
               async
               src={`https://fundingchoicesmessages.google.com/i/${process.env.NEXT_PUBLIC_GFC_ID}?ers=1`}
-              strategy="afterInteractive"
+              strategy="lazyOnload"
             />
-            <Script id="gfc-present" strategy="afterInteractive">
+            <Script id="gfc-present" strategy="lazyOnload">
               {`(function() { 
                 function signalGooglefcPresent() {
                   if (!window.frames['googlefcPresent']) {
@@ -192,16 +200,17 @@ export default async function RootLayout({
           </>
         ) : null}
 
-        {/* Cloudflare Insights (opsiyonel) */}
-        {isProd && (
+        {/* Cloudflare Insights (opsiyonel) - disabled for PageSpeed score (CORS errors) */}
+        {/* {isProd && (
           <Script
-            src="https://static.cloudflareinsights.com/beacon.min.js"
-            strategy="afterInteractive"
-            data-cf-beacon='{"token": "KfJh_-de2bWWjAP7HKTmShXmoWBIb4ODqtral_fv"}'
-          />
-        )}
+             src="https://static.cloudflareinsights.com/beacon.min.js"
+             strategy="lazyOnload"
+             data-cf-beacon='{"token": "KfJh_-de2bWWjAP7HKTmShXmoWBIb4ODqtral_fv"}'
+           />
+        )} */}
 
-        <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
+        {/* Deferred Google Identity Services */}
+        <GoogleOneTap />
 
         <LanguageProvider initialLanguage={locale} initialDictionary={messages}>
           <ClientUserProvider>

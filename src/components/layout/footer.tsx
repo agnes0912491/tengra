@@ -55,32 +55,32 @@ const Footer = () => {
               {t("brandDescription")}
             </p>
             <div className="flex items-center gap-4">
-              <a href="https://github.com/tengra" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-[rgba(255,255,255,0.05)] text-[rgba(255,255,255,0.6)] hover:bg-[rgba(255,255,255,0.1)] hover:text-white transition-colors">
-                <Github className="w-5 h-5" />
+              <a href="https://github.com/tengra" target="_blank" rel="noopener noreferrer" aria-label="GitHub" className="p-2 rounded-lg bg-[rgba(255,255,255,0.05)] text-[rgba(255,255,255,0.6)] hover:bg-[rgba(255,255,255,0.1)] hover:text-white transition-colors">
+                <Github className="w-5 h-5" aria-hidden="true" />
               </a>
-              <a href="https://twitter.com/tengra" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-[rgba(255,255,255,0.05)] text-[rgba(255,255,255,0.6)] hover:bg-[rgba(255,255,255,0.1)] hover:text-white transition-colors">
-                <Twitter className="w-5 h-5" />
+              <a href="https://twitter.com/tengra" target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="p-2 rounded-lg bg-[rgba(255,255,255,0.05)] text-[rgba(255,255,255,0.6)] hover:bg-[rgba(255,255,255,0.1)] hover:text-white transition-colors">
+                <Twitter className="w-5 h-5" aria-hidden="true" />
               </a>
-              <a href="https://linkedin.com/company/tengra" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-[rgba(255,255,255,0.05)] text-[rgba(255,255,255,0.6)] hover:bg-[rgba(255,255,255,0.1)] hover:text-white transition-colors">
-                <Linkedin className="w-5 h-5" />
+              <a href="https://linkedin.com/company/tengra" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="p-2 rounded-lg bg-[rgba(255,255,255,0.05)] text-[rgba(255,255,255,0.6)] hover:bg-[rgba(255,255,255,0.1)] hover:text-white transition-colors">
+                <Linkedin className="w-5 h-5" aria-hidden="true" />
               </a>
             </div>
           </div>
 
           {/* Links Column 1 */}
           <div>
-            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">{t("company.title")}</h4>
+            <div className="text-sm font-semibold text-white uppercase tracking-wider mb-6" role="heading" aria-level={2}>{t("company.title")}</div>
             <ul className="space-y-4">
               <li><Link href={getHref("/about")} className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("company.about")}</Link></li>
               <li><Link href={getHref("/careers")} className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("company.careers")}</Link></li>
-              <li><Link href={getHref("/blog")} className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("company.blog")}</Link></li>
+              <li><Link href={getHref("/blogs")} className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("company.blog")}</Link></li>
               <li><Link href={getHref("/contact")} className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("company.contact")}</Link></li>
             </ul>
           </div>
 
           {/* Links Column 2 */}
           <div>
-            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">{t("services.title")}</h4>
+            <div className="text-sm font-semibold text-white uppercase tracking-wider mb-6" role="heading" aria-level={2}>{t("services.title")}</div>
             <ul className="space-y-4">
               <li><Link href={getHref("/services/web-development")} className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("services.webDevelopment")}</Link></li>
               <li><Link href={getHref("/services/mobile-apps")} className="text-[rgba(255,255,255,0.5)] hover:text-[var(--color-turkish-blue-400)] transition-colors">{t("services.mobileApps")}</Link></li>
@@ -91,7 +91,7 @@ const Footer = () => {
 
           {/* Newsletter Column */}
           <div>
-            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">{t("newsletter.title")}</h4>
+            <div className="text-sm font-semibold text-white uppercase tracking-wider mb-6" role="heading" aria-level={2}>{t("newsletter.title")}</div>
             <p className="text-[rgba(255,255,255,0.5)] text-sm mb-4">
               {t("newsletter.description")}
             </p>

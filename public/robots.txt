@@ -1,0 +1,15 @@
+# Tengra Studio
+# https://tengra.studio
+
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://tengra.studio/sitemap.xml
+Sitemap: https://velora.tengra.studio/sitemap.xml
+Sitemap: https://lova.tengra.studio/sitemap.xml
+Sitemap: https://nova.tengra.studio/sitemap.xml
+
+# Disallow admin and API
+Disallow: /admin/
+Disallow: /api/

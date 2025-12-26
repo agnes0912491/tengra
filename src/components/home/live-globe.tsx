@@ -80,14 +80,14 @@ export default function LiveGlobe() {
         const allMarkers = [...staticMarkers, ...dynamicMarkers];
 
         const globe = createGlobe(canvasRef.current!, {
-            devicePixelRatio: 2,
+            devicePixelRatio: 1, // Reduced from 2 to decrease GPU load
             width: width * 2,
             height: width * 2,
             phi: 0,
             theta: 0.3,
             dark: 1,
             diffuse: 1.2,
-            mapSamples: 16000,
+            mapSamples: 8000, // Reduced from 16000 to decrease CPU load
             mapBrightness: 6,
             baseColor: [0.3, 0.3, 0.3],
             markerColor: [0.28, 0.83, 1], // Turkish Blue

@@ -184,8 +184,10 @@ export default function Header() {
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="lg:hidden p-2 text-white"
+                aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+                aria-expanded={mobileMenuOpen}
               >
-                {mobileMenuOpen ? <X /> : <Menu />}
+                {mobileMenuOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
               </button>
             </div>
           </div>

@@ -4,6 +4,8 @@ const nextConfig: NextConfig = {
   // output: "standalone",
   experimental: {
     serverSourceMaps: false,
+    optimizeCss: true, // Inline critical CSS to reduce render-blocking resources
+    optimizePackageImports: ["lucide-react", "framer-motion", "@tengra/language"],
   },
   productionBrowserSourceMaps: false,
   typescript: {
@@ -36,35 +38,8 @@ const nextConfig: NextConfig = {
   },
   htmlLimitedBots: /.*/,
   poweredByHeader: false,
-  async headers() {
-    return [
-      {
-        source: "/:path*",
-        headers: [
-          {
-            key: "X-Frame-Options",
-            value: "DENY",
-          },
-          {
-            key: "X-Content-Type-Options",
-            value: "nosniff",
-          },
-          {
-            key: "Referrer-Policy",
-            value: "origin-when-cross-origin",
-          },
-          {
-            key: "Strict-Transport-Security",
-            value: "max-age=63072000; includeSubDomains; preload",
-          },
-          {
-            key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=(), browsing-topics=()",
-          },
-        ],
-      },
-    ];
-  },
+  // Security headers are now handled by Nginx for better performance and consolidation
+  // See /srv/tengra/packages/config/assets/nginx.conf
 };
 
 export default nextConfig;
