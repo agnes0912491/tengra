@@ -4,10 +4,11 @@ import { Role, User, UserSource } from "./auth/users";
 import { AuthUserPayload } from "@/types/auth";
 import { resolveCdnUrl } from "@/lib/constants";
 import { slugify } from "@/lib/utils";
+import { api } from "./api";
 
 // Base API URL for the backend. Use environment variable in production.
 const API_BASE =
-  process.env.NEXT_PUBLIC_BACKEND_API_URL || 
+  process.env.NEXT_PUBLIC_BACKEND_API_URL ||
   (typeof window === "undefined" ? "http://127.0.0.1:5000" : "http://localhost:5000");
 // All public content endpoints are served under /api on the backend Router.
 const BLOGS_API_URL = `${API_BASE}/blogs`;
@@ -74,8 +75,7 @@ export const getAllBlogCategories = async (): Promise<BlogCategory[]> => {
   if (!response.ok) {
     const text = await response.text().catch(() => "");
     throw new Error(
-      `Failed to fetch blog categories: HTTP ${response.status}${
-        text ? ` - ${text}` : ""
+      `Failed to fetch blog categories: HTTP ${response.status}${text ? ` - ${text}` : ""
       }`
     );
   }
@@ -201,8 +201,7 @@ export const getAllBlogs = async (): Promise<Blog[]> => {
   if (!response.ok) {
     const text = await response.text().catch(() => "");
     throw new Error(
-      `Failed to fetch blogs: HTTP ${response.status}${
-        text ? ` - ${text}` : ""
+      `Failed to fetch blogs: HTTP ${response.status}${text ? ` - ${text}` : ""
       }`
     );
   }
@@ -237,8 +236,7 @@ export const getBlogById = async (id: string): Promise<Blog | null> => {
   if (!response.ok) {
     const text = await response.text().catch(() => "");
     throw new Error(
-      `Failed to fetch blog ${id}: HTTP ${response.status}${
-        text ? ` - ${text}` : ""
+      `Failed to fetch blog ${id}: HTTP ${response.status}${text ? ` - ${text}` : ""
       }`
     );
   }
@@ -255,7 +253,7 @@ export const getAllUsers = async (token: string): Promise<User[]> => {
     throw new Error("Token sağlanmadı.");
   }
 
-  const response = await fetch(`${API_BASE}/admin/users`, {
+  const response = await api.get("/admin/users", {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
@@ -311,14 +309,11 @@ export const getUsersPresence = async (token: string, userIds: number[]): Promis
   }
 
   try {
-    const response = await fetch(`${API_BASE}/admin/presence/check`, {
-      method: "POST",
+    const response = await api.post("/admin/presence/check", { userIds }, {
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
         Accept: "application/json",
       },
-      body: JSON.stringify({ userIds }),
     });
 
     if (!response.ok) {
@@ -346,7 +341,7 @@ export const getAllOnlineUsers = async (token: string): Promise<PresenceData[]> 
   }
 
   try {
-    const response = await fetch(`${API_BASE}/admin/presence`, {
+    const response = await api.get("/admin/presence", {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
@@ -398,23 +393,23 @@ export const verifyTempToken = async (
   tempToken: string,
   twoFactorCode: string
 ): Promise<AuthUserPayload | null> => {
-    // Always parse the JSON payload so the UI can display specific error messages
-    const response = await fetch(`${API_BASE}/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({ tempToken, twoFactorCode }),
-    });
+  // Always parse the JSON payload so the UI can display specific error messages
+  const response = await fetch(`${API_BASE}/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ tempToken, twoFactorCode }),
+  });
 
-    try {
-      const payload: AuthUserPayload = await response.json();
-      return payload;
-    } catch {
-      // If the response isn't JSON for some reason, return a generic failure
-      return { success: false, error: "unexpected_response" } as AuthUserPayload;
-    }
+  try {
+    const payload: AuthUserPayload = await response.json();
+    return payload;
+  } catch {
+    // If the response isn't JSON for some reason, return a generic failure
+    return { success: false, error: "unexpected_response" } as AuthUserPayload;
+  }
 };
 
 export const resendTempToken = async (tempToken: string): Promise<AuthUserPayload | null> => {
@@ -561,7 +556,7 @@ const normalizeUser = (raw: RawUser | null | undefined): User | null => {
   if (id === undefined || id === null || !email) {
     return null;
   }
- 
+
   const role = (raw.role ?? "user").toString().toLowerCase();
 
   // Normalize optional metadata
@@ -581,7 +576,7 @@ const normalizeUser = (raw: RawUser | null | undefined): User | null => {
     raw.lastLoginCity ?? (raw as { last_login_city?: string | null }).last_login_city ?? null;
 
   return {
-    id: String(id), 
+    id: String(id),
     email,
     role: role === "admin" ? "admin" : role === "moderator" ? "moderator" : "user",
     username: raw.username ?? undefined,
@@ -603,12 +598,11 @@ export const getUserWithToken = async (token: string): Promise<User | null> => {
     throw new Error("Token sağlanmadı.");
   }
 
-  const response = await fetch(`${API_BASE}/auth/me`, {
+  const response = await api.get("/auth/me", {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
     },
-    method: "GET",
   });
 
   if (!response.ok) {
@@ -803,8 +797,8 @@ const normalizeProject = (project: unknown): Project | null => {
       typeof candidate.updatedAt === "string"
         ? candidate.updatedAt
         : typeof candidate.lastUpdatedAt === "string"
-        ? candidate.lastUpdatedAt
-        : undefined,
+          ? candidate.lastUpdatedAt
+          : undefined,
     createdAt:
       typeof candidate.createdAt === "string"
         ? candidate.createdAt
@@ -829,14 +823,14 @@ export const getAllProjects = async (
     const response = await fetch(PROJECTS_API_URL, {
       cache: "no-store",
       headers,
-    }); 
- 
+    });
+
     if (!response.ok) {
       return [];
     }
 
-    const json = await response.json().catch(() => ({ projects: [] }));  
-    
+    const json = await response.json().catch(() => ({ projects: [] }));
+
     // New API returns {projects: [...]}
     const projectsArray = Array.isArray(json) ? json : (json.projects || []);
 
@@ -899,7 +893,7 @@ export const getProjectById = async (
         headers,
         cache: "no-store",
       }
-    ); 
+    );
     if (!response.ok) {
       return null;
     }
@@ -960,7 +954,7 @@ export const editProject = async (
   return normalizeProject(project);
 };
 
-export const deleteProject = async(projectId: string, token: string): Promise<boolean> => {
+export const deleteProject = async (projectId: string, token: string): Promise<boolean> => {
   if (!token) {
     throw new Error("Yetkilendirme anahtarı eksik.");
   }
@@ -1069,7 +1063,7 @@ export async function registerUser({
   idToken?: string;
 }) {
   console.log("Registering user:", username, email);
-  
+
   // Use consistent API endpoint via Next.js proxy
   // This forwards to the appropriate backend (localhost:5000)
   const endpoint = `/api/auth/register`;
@@ -1274,7 +1268,7 @@ export const uploadImage = async (
   token: string
 ): Promise<{ url?: string; dataUrl?: string; filename?: string } | null> => {
   if (!token) throw new Error("Yetkilendirme anahtarı eksik.");
-  
+
   // Convert data URL to blob (without fetch to avoid CSP issues)
   const arr = dataUrl.split(',');
   const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/png';
@@ -1285,16 +1279,16 @@ export const uploadImage = async (
     u8arr[n] = bstr.charCodeAt(n);
   }
   const blob = new Blob([u8arr], { type: mime });
-  
+
   // Convert blob to File object
   const file = new File([blob], "upload.png", { type: mime });
-  
+
   // Upload to CDN
   const { uploadPostImage } = await import("@/lib/cdn");
   const result = await uploadPostImage(file, token);
-  
+
   if (!result || !result.url) return null;
-  
+
   return {
     url: result.url,
     dataUrl,
@@ -1307,7 +1301,7 @@ export const uploadProjectImage = async (
   token: string
 ): Promise<{ url?: string; dataUrl?: string; filename?: string } | null> => {
   if (!token) throw new Error("Yetkilendirme anahtarı eksik.");
-  
+
   // Convert data URL to blob (without fetch to avoid CSP issues)
   const arr = dataUrl.split(',');
   const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/png';
@@ -1318,16 +1312,16 @@ export const uploadProjectImage = async (
     u8arr[n] = bstr.charCodeAt(n);
   }
   const blob = new Blob([u8arr], { type: mime });
-  
+
   // Convert blob to File object
   const file = new File([blob], "upload.png", { type: mime });
-  
+
   // Upload to CDN
   const { uploadProjectImage } = await import("@/lib/cdn");
   const result = await uploadProjectImage(file, token);
-  
+
   if (!result || !result.url) return null;
-  
+
   return {
     url: result.url,
     dataUrl,
@@ -1441,7 +1435,7 @@ export const getServerHealth = async (
     const response = await fetch(`${API_BASE}/health`, {
       cache: "no-store",
       headers,
-    }); 
+    });
     if (!response.ok) {
       return { status: "offline" };
     }
@@ -1471,20 +1465,20 @@ export const getServerHealth = async (
       uptimeSeconds,
       memory:
         json.memory &&
-        typeof json.memory.totalBytes === "number" &&
-        typeof json.memory.usedBytes === "number"
+          typeof json.memory.totalBytes === "number" &&
+          typeof json.memory.usedBytes === "number"
           ? { totalBytes: json.memory.totalBytes, usedBytes: json.memory.usedBytes }
           : undefined,
       cpu:
         json.cpu &&
-        typeof json.cpu.loadAvg1 === "number" &&
-        typeof json.cpu.loadAvg5 === "number" &&
-        typeof json.cpu.loadAvg15 === "number"
+          typeof json.cpu.loadAvg1 === "number" &&
+          typeof json.cpu.loadAvg5 === "number" &&
+          typeof json.cpu.loadAvg15 === "number"
           ? {
-              loadAvg1: json.cpu.loadAvg1,
-              loadAvg5: json.cpu.loadAvg5,
-              loadAvg15: json.cpu.loadAvg15,
-            }
+            loadAvg1: json.cpu.loadAvg1,
+            loadAvg5: json.cpu.loadAvg5,
+            loadAvg15: json.cpu.loadAvg15,
+          }
           : undefined,
     };
   } catch (error) {
@@ -1497,7 +1491,7 @@ export const getServerHealth = async (
 export const incrementSiteVisit = async (): Promise<void> => {
   try {
     await fetch(`${ANALYTICS_API_URL}/visits/increment`, { method: "POST" });
-  } catch {}
+  } catch { }
 };
 
 export const getVisits = async (token: string): Promise<{ date: string; count: number }[]> => {
@@ -1515,25 +1509,25 @@ export const incrementBlogView = async (id: string | number): Promise<void> => {
     const payload =
       typeof window !== "undefined"
         ? {
-            country: (() => {
-              const locale = navigator.language || "";
-              const parts = locale.split(/[-_]/);
-              return parts.length > 1 ? parts[1].toUpperCase() : "";
-            })(),
-            path: window.location.pathname,
-            referrer: document.referrer || "",
-            ua: navigator.userAgent || "",
-            language: navigator.language || "",
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
-            screen: `${window.screen?.width ?? 0}x${window.screen?.height ?? 0}`,
-          }
+          country: (() => {
+            const locale = navigator.language || "";
+            const parts = locale.split(/[-_]/);
+            return parts.length > 1 ? parts[1].toUpperCase() : "";
+          })(),
+          path: window.location.pathname,
+          referrer: document.referrer || "",
+          ua: navigator.userAgent || "",
+          language: navigator.language || "",
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
+          screen: `${window.screen?.width ?? 0}x${window.screen?.height ?? 0}`,
+        }
         : {};
     await fetch(`${ANALYTICS_API_URL}/blogs/${id}/increment`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-  } catch {}
+  } catch { }
 };
 
 export const getTopBlogViews = async (token: string): Promise<{ id: string; count: number }[]> => {
@@ -1569,7 +1563,7 @@ export const incrementPageView = async (path: string, ua?: string, country?: str
         body: JSON.stringify({}),
       }),
     ]);
-  } catch {}
+  } catch { }
 };
 
 export const getTopPages = async (
@@ -1664,8 +1658,7 @@ export const updateUserRole = async (
   if (!response.ok) {
     const text = await response.text().catch(() => "");
     throw new Error(
-      `Kullanıcı rolü güncellenemedi: HTTP ${response.status}${
-        text ? ` - ${text}` : ""
+      `Kullanıcı rolü güncellenemedi: HTTP ${response.status}${text ? ` - ${text}` : ""
       }`
     );
   }

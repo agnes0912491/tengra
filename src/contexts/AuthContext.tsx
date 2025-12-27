@@ -15,6 +15,7 @@ import {
   LEGACY_ADMIN_SESSION_COOKIES,
 } from "@/lib/auth";
 import { useTranslation } from "@tengra/language";
+import { api } from "@/lib/api";
 
 import { LovaUserAttributes as User } from "@tengra/types";
 
@@ -142,7 +143,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchCurrentUser = useCallback(async (token: string) => {
     try {
-      const response = await fetch(`${BACKEND_API_URL}/auth/me`, {
+      const response = await api.get("/auth/me", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -219,13 +220,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const MAX_RETRIES = 2;
 
     try {
-      const response = await fetch(`${BACKEND_API_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
-      });
+      const response = await api.post("/auth/login", { username, password });
 
       if (!response.ok) {
         // Check if it's a network error worth retrying
@@ -280,11 +275,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const token = getValidToken();
       if (token) {
-        await fetch(`${BACKEND_API_URL}/auth/logout`, {
-          method: "POST",
+        await api.post("/auth/logout", null, {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
           },
         });
       }

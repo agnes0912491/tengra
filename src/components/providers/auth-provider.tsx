@@ -297,17 +297,39 @@ export default function AuthProvider({
       "tengra:user",
       "tengra:auth",
     ];
-    authKeys.forEach(key => localStorage.removeItem(key));
+    authKeys.forEach(key => {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem(key);
+      }
+    });
 
     // Clear cookies
     Cookies.remove(ADMIN_SESSION_COOKIE, { path: "/" });
+    Cookies.remove("authToken", { path: "/" }); // Ensure main auth cookie is also cleared
     for (const legacyName of LEGACY_ADMIN_SESSION_COOKIES) {
       Cookies.remove(legacyName, { path: "/" });
     }
 
     // Clear any session storage as well
-    sessionStorage.clear();
+    if (typeof window !== "undefined") {
+      sessionStorage.clear();
+    }
   }, []);
+
+  /**
+   * Listen for global auth failure events from api.ts
+   */
+  useEffect(() => {
+    const handleAuthFailure = () => {
+      console.warn("[AuthProvider] Global auth failure detected, logging out...");
+      logout();
+      toast.error(t("authorization.sessionExpired") || "Session expired, please login again.");
+    };
+
+    window.addEventListener("tengra-auth-failure", handleAuthFailure);
+    return () => window.removeEventListener("tengra-auth-failure", handleAuthFailure);
+  }, [logout, t]);
+
 
   const refreshAuth = useCallback(async () => {
     const token = localStorage.getItem("authToken");
