@@ -35,6 +35,7 @@ async function getAdminTokenFromCookie(cookieHeader: string | null): Promise<str
 }
 
 export async function GET(req: Request) {
+  console.info("[admin:homepage]", { method: "GET", path: new URL(req.url).pathname });
   const cookieHeader = req.headers.get("cookie");
   const token = await getAdminTokenFromCookie(cookieHeader);
   if (!token) {
@@ -55,6 +56,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  console.info("[admin:homepage]", { method: "POST", path: new URL(req.url).pathname });
   const cookieHeader = req.headers.get("cookie");
   const token = await getAdminTokenFromCookie(cookieHeader);
   if (!token) {
@@ -62,6 +64,10 @@ export async function POST(req: Request) {
   }
 
   try {
+    const contentType = req.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      return NextResponse.json({ error: "Content-Type must be application/json" }, { status: 415 });
+    }
     const body = await req.json();
     const res = await fetch(`${BACKEND_API_URL}/api/homepage`, {
       method: "POST",

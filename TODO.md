@@ -1,102 +1,1106 @@
 # TODO
 
-- [ ] Document configuration keys used in `.github/workflows/ci.yml`.
-- [ ] Update and verify usage docs in `API_DOCS.md`.
-- [ ] Add examples and edge cases to `FAQ.md`.
-- [ ] Update and verify usage docs in `README.md`.
-- [ ] Add schema validation for `components.json`.
-- [ ] Review `envConfig.ts` for dead code and remove if unused.
-- [ ] Add tests or coverage notes for `eslint.config.mjs`.
-- [ ] Review `next-env.d.ts` for dead code and remove if unused.
-- [ ] Add tests or coverage notes for `next.config.ts`.
-- [ ] Audit defaults and environment overrides in `package.json`.
-- [ ] Review `postcss.config.mjs` for dead code and remove if unused.
-- [ ] Document configuration keys used in `public/manifest.json`.
-- [ ] Add tests or coverage notes for `public/sw.js`.
-- [ ] Review `public/tengra-analytics.js` for dead code and remove if unused.
-- [ ] Add input validation and safe defaults in `run_frontend.sh`.
-- [ ] Add metadata/SEO for `src/app/ClientUserProvider.tsx`.
-- [ ] Add skeleton loading UI for `src/app/about/layout.tsx`.
-- [ ] Add error boundary for `src/app/about/page.tsx`.
-- [ ] Add analytics events for `src/app/admin/analytics/page.tsx`.
-- [ ] Verify responsive layout for `src/app/admin/dashboard/audit/page.tsx`.
-- [ ] Add metadata/SEO for `src/app/admin/dashboard/blogs/[id]/edit/page.tsx`.
-- [ ] Add skeleton loading UI for `src/app/admin/dashboard/blogs/new/page.tsx`.
-- [ ] Add error boundary for `src/app/admin/dashboard/blogs/page.tsx`.
-- [ ] Add analytics events for `src/app/admin/dashboard/contact/page.tsx`.
-- [ ] Verify responsive layout for `src/app/admin/dashboard/design/page.tsx`.
-- [ ] Add metadata/SEO for `src/app/admin/dashboard/faq/page.tsx`.
-- [ ] Add skeleton loading UI for `src/app/admin/dashboard/forum/page.tsx`.
-- [ ] Add error boundary for `src/app/admin/dashboard/goals/page.tsx`.
-- [ ] Add analytics events for `src/app/admin/dashboard/homepage/page.tsx`.
-- [ ] Verify responsive layout for `src/app/admin/dashboard/layout.tsx`.
-- [ ] Add metadata/SEO for `src/app/admin/dashboard/page.tsx`.
-- [ ] Add skeleton loading UI for `src/app/admin/dashboard/projects/[id]/page.tsx`.
-- [ ] Add error boundary for `src/app/admin/dashboard/projects/page.tsx`.
-- [ ] Add analytics events for `src/app/admin/dashboard/projects/stats/page.tsx`.
-- [ ] Verify responsive layout for `src/app/admin/dashboard/users/page.tsx`.
-- [ ] Add metadata/SEO for `src/app/admin/dashboard/videos/page.tsx`.
-- [ ] Add skeleton loading UI for `src/app/admin/layout.tsx`.
-- [ ] Add error boundary for `src/app/admin/login/page.tsx`.
-- [ ] Add analytics events for `src/app/admin/notifications/page.tsx`.
-- [ ] Verify responsive layout for `src/app/admin/page.tsx`.
-- [ ] Add metadata/SEO for `src/app/admin/system/page.tsx`.
-- [ ] Add skeleton loading UI for `src/app/admin/users/page.tsx`.
-- [ ] Add request validation and error mapping for `src/app/api/admin/blogs/categories/route.ts`.
-- [ ] Add auth/permission checks for `src/app/api/admin/homepage/route.ts`.
-- [ ] Add rate limiting and abuse protection for `src/app/api/analytics/track/route.ts`.
-- [ ] Add integration tests for `src/app/api/google-auth/route.ts`.
-- [ ] Add structured logging and correlation IDs for `src/app/api/hello/route.ts`.
-- [ ] Add response caching where safe in `src/app/api/homepage/route.ts`.
-- [ ] Add request validation and error mapping for `src/app/api/messages/[locale]/route.ts`.
-- [ ] Add auth/permission checks for `src/app/api/og/route.tsx`.
-- [ ] Add rate limiting and abuse protection for `src/app/api/translations/preview/route.ts`.
-- [ ] Add error boundary for `src/app/blog/page.tsx`.
-- [ ] Add analytics events for `src/app/blogs/BlogsClient.tsx`.
-- [ ] Verify responsive layout for `src/app/blogs/[id]/page.tsx`.
-- [ ] Add metadata/SEO for `src/app/blogs/blogs-page-client.tsx`.
-- [ ] Add skeleton loading UI for `src/app/blogs/page.tsx`.
-- [ ] Add error boundary for `src/app/careers/page.tsx`.
-- [ ] Add analytics events for `src/app/contact/page.tsx`.
-- [ ] Verify responsive layout for `src/app/docs/page.tsx`.
-- [ ] Add metadata/SEO for `src/app/forgot-password/page.tsx`.
-- [ ] Add skeleton loading UI for `src/app/forum/c/[slug]/page.tsx`.
-- [ ] Add error boundary for `src/app/forum/new/page.tsx`.
-- [ ] Add analytics events for `src/app/forum/page.tsx`.
-- [ ] Verify responsive layout for `src/app/forum/t/[id]/page.tsx`.
-- [ ] Audit responsive breakpoints in `src/app/globals.css`.
-- [ ] Add metadata/SEO for `src/app/kvkk/page.tsx`.
-- [ ] Add skeleton loading UI for `src/app/layout.tsx`.
-- [ ] Add error boundary for `src/app/login/LoginForm.tsx`.
-- [ ] Add analytics events for `src/app/login/page.tsx`.
-- [ ] Verify responsive layout for `src/app/not-found.tsx`.
-- [ ] Add metadata/SEO for `src/app/offline/page.tsx`.
-- [ ] Add skeleton loading UI for `src/app/page.tsx`.
-- [ ] Add error boundary for `src/app/privacy/page.tsx`.
-- [ ] Add analytics events for `src/app/projects/page.tsx`.
-- [ ] Verify responsive layout for `src/app/register/RegisterForm.tsx`.
-- [ ] Add metadata/SEO for `src/app/register/page.tsx`.
-- [ ] Add skeleton loading UI for `src/app/reset-password/page.tsx`.
-- [ ] Add tests or coverage notes for `src/app/robots.ts`.
-- [ ] Add error boundary for `src/app/services/cloud-infrastructure/layout.tsx`.
-- [ ] Add analytics events for `src/app/services/cloud-infrastructure/page.tsx`.
-- [ ] Verify responsive layout for `src/app/services/design/layout.tsx`.
-- [ ] Add metadata/SEO for `src/app/services/design/page.tsx`.
-- [ ] Add skeleton loading UI for `src/app/services/mobile-apps/layout.tsx`.
-- [ ] Add error boundary for `src/app/services/mobile-apps/page.tsx`.
-- [ ] Add analytics events for `src/app/services/web-development/layout.tsx`.
-- [ ] Verify responsive layout for `src/app/services/web-development/page.tsx`.
-- [ ] Add metadata/SEO for `src/app/settings/page.tsx`.
-- [ ] Review `src/app/sitemap.ts` for dead code and remove if unused.
-- [ ] Add skeleton loading UI for `src/app/team/page.tsx`.
-- [ ] Add error boundary for `src/app/terms/page.tsx`.
+- [x] Document configuration keys for `.github/workflows/ci.yml`.
+- [x] Update usage instructions for `API_DOCS.md`.
+- [x] Update usage instructions for `FAQ.md`.
+- [x] Update usage instructions for `README.md`.
+- [x] Document configuration keys for `components.json`.
+- [x] Review for dead code for `envConfig.ts`.
+- [x] Review for dead code for `eslint.config.mjs`.
+- [x] Review for dead code for `next-env.d.ts`.
+- [x] Review for dead code for `next.config.ts`.
+- [x] Document configuration keys for `package.json`.
+- [x] Review for dead code for `postcss.config.mjs`.
+- [x] Document configuration keys for `public/manifest.json`.
+- [x] Review for dead code for `public/sw.js`.
+- [x] Review for dead code for `public/tengra-analytics.js`.
+- [x] Add input validation for `run_frontend.sh`.
+- [x] Add metadata/SEO for `src/app/ClientUserProvider.tsx`.
+- [x] Add metadata/SEO for `src/app/about/layout.tsx`.
+- [x] Add metadata/SEO for `src/app/about/page.tsx`.
+- [x] Add metadata/SEO for `src/app/admin/analytics/page.tsx`.
+- [x] Add metadata/SEO for `src/app/admin/dashboard/audit/page.tsx`.
+- [x] Add metadata/SEO for `src/app/admin/dashboard/blogs/[id]/edit/page.tsx`.
+- [x] Add metadata/SEO for `src/app/admin/dashboard/blogs/new/page.tsx`.
+- [x] Add metadata/SEO for `src/app/admin/dashboard/blogs/page.tsx`.
+- [x] Add metadata/SEO for `src/app/admin/dashboard/contact/page.tsx`.
+- [x] Add metadata/SEO for `src/app/admin/dashboard/design/page.tsx`.
+- [x] Add metadata/SEO for `src/app/admin/dashboard/faq/page.tsx`.
+- [x] Add metadata/SEO for `src/app/admin/dashboard/forum/page.tsx`.
+- [x] Add metadata/SEO for `src/app/admin/dashboard/goals/page.tsx`.
+- [x] Add metadata/SEO for `src/app/admin/dashboard/homepage/page.tsx`.
+- [x] Add metadata/SEO for `src/app/admin/dashboard/layout.tsx`.
+- [x] Add metadata/SEO for `src/app/admin/dashboard/page.tsx`.
+- [x] Add metadata/SEO for `src/app/admin/dashboard/projects/[id]/page.tsx`.
+- [x] Add metadata/SEO for `src/app/admin/dashboard/projects/page.tsx`.
+- [x] Add metadata/SEO for `src/app/admin/dashboard/projects/stats/page.tsx`.
+- [x] Add metadata/SEO for `src/app/admin/dashboard/users/page.tsx`.
+- [x] Add metadata/SEO for `src/app/admin/dashboard/videos/page.tsx`.
+- [x] Add metadata/SEO for `src/app/admin/layout.tsx`.
+- [x] Add metadata/SEO for `src/app/admin/login/page.tsx`.
+- [x] Add metadata/SEO for `src/app/admin/notifications/page.tsx`.
+- [x] Add metadata/SEO for `src/app/admin/page.tsx`.
+- [x] Add metadata/SEO for `src/app/admin/system/page.tsx`.
+- [x] Add metadata/SEO for `src/app/admin/users/page.tsx`.
+- [x] Add request validation for `src/app/api/admin/blogs/categories/route.ts`.
+- [x] Add request validation for `src/app/api/admin/homepage/route.ts`.
+- [x] Add request validation for `src/app/api/analytics/track/route.ts`.
+- [x] Add request validation for `src/app/api/google-auth/route.ts`.
+- [x] Add request validation for `src/app/api/hello/route.ts`.
+- [x] Add request validation for `src/app/api/homepage/route.ts`.
+- [x] Add request validation for `src/app/api/messages/[locale]/route.ts`.
+- [x] Add request validation for `src/app/api/og/route.tsx`.
+- [x] Add request validation for `src/app/api/translations/preview/route.ts`.
+- [x] Add metadata/SEO for `src/app/blog/page.tsx`.
+- [x] Add metadata/SEO for `src/app/blogs/BlogsClient.tsx`.
+- [x] Add metadata/SEO for `src/app/blogs/[id]/page.tsx`.
+- [x] Add metadata/SEO for `src/app/blogs/blogs-page-client.tsx`.
+- [x] Add metadata/SEO for `src/app/blogs/page.tsx`.
+- [x] Add metadata/SEO for `src/app/careers/page.tsx`.
+- [x] Add metadata/SEO for `src/app/contact/page.tsx`.
+- [x] Add metadata/SEO for `src/app/docs/page.tsx`.
+- [x] Add metadata/SEO for `src/app/forgot-password/page.tsx`.
+- [x] Add metadata/SEO for `src/app/forum/c/[slug]/page.tsx`.
+- [x] Add metadata/SEO for `src/app/forum/new/page.tsx`.
+- [x] Add metadata/SEO for `src/app/forum/page.tsx`.
+- [x] Add metadata/SEO for `src/app/forum/t/[id]/page.tsx`.
+- [x] Audit responsive breakpoints for `src/app/globals.css`.
+- [x] Add metadata/SEO for `src/app/kvkk/page.tsx`.
+- [x] Add metadata/SEO for `src/app/layout.tsx`.
+- [x] Add metadata/SEO for `src/app/login/LoginForm.tsx`.
+- [x] Add metadata/SEO for `src/app/login/page.tsx`.
+- [x] Add metadata/SEO for `src/app/not-found.tsx`.
+- [x] Add metadata/SEO for `src/app/offline/page.tsx`.
+- [x] Add metadata/SEO for `src/app/page.tsx`.
+- [x] Add metadata/SEO for `src/app/privacy/page.tsx`.
+- [x] Add metadata/SEO for `src/app/projects/page.tsx`.
+- [x] Add metadata/SEO for `src/app/register/RegisterForm.tsx`.
+- [x] Add metadata/SEO for `src/app/register/page.tsx`.
+- [x] Add metadata/SEO for `src/app/reset-password/page.tsx`.
+- [x] Review for dead code for `src/app/robots.ts`.
+- [x] Add metadata/SEO for `src/app/services/cloud-infrastructure/layout.tsx`.
+- [x] Add metadata/SEO for `src/app/services/cloud-infrastructure/page.tsx`.
+- [x] Add metadata/SEO for `src/app/services/design/layout.tsx`.
+- [x] Add metadata/SEO for `src/app/services/design/page.tsx`.
+- [x] Add metadata/SEO for `src/app/services/mobile-apps/layout.tsx`.
+- [x] Add metadata/SEO for `src/app/services/mobile-apps/page.tsx`.
+- [x] Add metadata/SEO for `src/app/services/web-development/layout.tsx`.
+- [x] Add metadata/SEO for `src/app/services/web-development/page.tsx`.
+- [x] Add metadata/SEO for `src/app/settings/page.tsx`.
+- [x] Review for dead code for `src/app/sitemap.ts`.
+- [x] Add metadata/SEO for `src/app/team/page.tsx`.
+- [x] Add metadata/SEO for `src/app/terms/page.tsx`.
 - [ ] Add unit tests for `src/components/admin/admin-current-user-card.tsx`.
-- [ ] Audit accessibility and aria labels in `src/components/admin/admin-current-user-name.tsx`.
-- [ ] Add loading/empty/error states in `src/components/admin/admin-page-header.tsx`.
-- [ ] Memoize expensive renders in `src/components/admin/admin-shell.tsx`.
-- [ ] Add keyboard navigation support in `src/components/admin/admin-stat-card.tsx`.
+- [ ] Add unit tests for `src/components/admin/admin-current-user-name.tsx`.
+- [ ] Add unit tests for `src/components/admin/admin-page-header.tsx`.
+- [ ] Add unit tests for `src/components/admin/admin-shell.tsx`.
+- [ ] Add unit tests for `src/components/admin/admin-stat-card.tsx`.
 - [ ] Add unit tests for `src/components/admin/analytics/realtime-analytics-dashboard.tsx`.
-- [ ] Audit accessibility and aria labels in `src/components/admin/analytics/user-activity-heatmap.tsx`.
-- [ ] Add loading/empty/error states in `src/components/admin/backup/backup-scheduling-dashboard.tsx`.
-- [ ] Memoize expensive renders in `src/components/admin/blogs/blog-create-cta.tsx`.
-- [ ] Add keyboard navigation support in `src/components/admin/blogs/blog-edit-modal.tsx`.
+- [ ] Add unit tests for `src/components/admin/analytics/user-activity-heatmap.tsx`.
+- [ ] Add unit tests for `src/components/admin/backup/backup-scheduling-dashboard.tsx`.
+- [ ] Add unit tests for `src/components/admin/blogs/blog-create-cta.tsx`.
+- [ ] Add unit tests for `src/components/admin/blogs/blog-edit-modal.tsx`.
+
+
+## Generated TODOs (Batch 1000)
+
+- [ ] Add unit tests for `src/tl.config.ts`.
+- [ ] Add edge case coverage for `src/tl.config.ts`.
+- [ ] Add input validation for `src/tl.config.ts`.
+- [ ] Review error handling for `src/tl.config.ts`.
+- [ ] Document behavior and defaults for `src/tl.config.ts`.
+- [ ] Review performance hot paths in `src/tl.config.ts`.
+- [ ] Add logging hooks for `src/tl.config.ts`.
+- [ ] Add unit tests for `src/middleware.ts`.
+- [ ] Add edge case coverage for `src/middleware.ts`.
+- [ ] Add input validation for `src/middleware.ts`.
+- [ ] Review error handling for `src/middleware.ts`.
+- [ ] Document behavior and defaults for `src/middleware.ts`.
+- [ ] Review performance hot paths in `src/middleware.ts`.
+- [ ] Add logging hooks for `src/middleware.ts`.
+- [ ] Add unit tests for `src/i18n/get-messages.ts`.
+- [ ] Add edge case coverage for `src/i18n/get-messages.ts`.
+- [ ] Add input validation for `src/i18n/get-messages.ts`.
+- [ ] Review error handling for `src/i18n/get-messages.ts`.
+- [ ] Document behavior and defaults for `src/i18n/get-messages.ts`.
+- [ ] Review performance hot paths in `src/i18n/get-messages.ts`.
+- [ ] Add logging hooks for `src/i18n/get-messages.ts`.
+- [ ] Add unit tests for `src/i18n/resolve-preferred-locale.ts`.
+- [ ] Add edge case coverage for `src/i18n/resolve-preferred-locale.ts`.
+- [ ] Add input validation for `src/i18n/resolve-preferred-locale.ts`.
+- [ ] Review error handling for `src/i18n/resolve-preferred-locale.ts`.
+- [ ] Document behavior and defaults for `src/i18n/resolve-preferred-locale.ts`.
+- [ ] Review performance hot paths in `src/i18n/resolve-preferred-locale.ts`.
+- [ ] Add logging hooks for `src/i18n/resolve-preferred-locale.ts`.
+- [ ] Add unit tests for `src/i18n/routing.ts`.
+- [ ] Add edge case coverage for `src/i18n/routing.ts`.
+- [ ] Add input validation for `src/i18n/routing.ts`.
+- [ ] Review error handling for `src/i18n/routing.ts`.
+- [ ] Document behavior and defaults for `src/i18n/routing.ts`.
+- [ ] Review performance hot paths in `src/i18n/routing.ts`.
+- [ ] Add logging hooks for `src/i18n/routing.ts`.
+- [ ] Add unit tests for `src/app/sitemap.ts`.
+- [ ] Add edge case coverage for `src/app/sitemap.ts`.
+- [ ] Add input validation for `src/app/sitemap.ts`.
+- [ ] Review error handling for `src/app/sitemap.ts`.
+- [ ] Document behavior and defaults for `src/app/sitemap.ts`.
+- [ ] Review performance hot paths in `src/app/sitemap.ts`.
+- [ ] Add logging hooks for `src/app/sitemap.ts`.
+- [ ] Add unit tests for `src/app/layout.tsx`.
+- [ ] Audit accessibility for `src/app/layout.tsx`.
+- [ ] Add loading state handling for `src/app/layout.tsx`.
+- [ ] Review responsive layout for `src/app/layout.tsx`.
+- [ ] Add empty state messaging for `src/app/layout.tsx`.
+- [ ] Add error boundary coverage for `src/app/layout.tsx`.
+- [ ] Verify focus styles for `src/app/layout.tsx`.
+- [ ] Add unit tests for `src/app/ClientUserProvider.tsx`.
+- [ ] Audit accessibility for `src/app/ClientUserProvider.tsx`.
+- [ ] Add loading state handling for `src/app/ClientUserProvider.tsx`.
+- [ ] Review responsive layout for `src/app/ClientUserProvider.tsx`.
+- [ ] Add empty state messaging for `src/app/ClientUserProvider.tsx`.
+- [ ] Add error boundary coverage for `src/app/ClientUserProvider.tsx`.
+- [ ] Verify focus styles for `src/app/ClientUserProvider.tsx`.
+- [ ] Add unit tests for `src/app/page.tsx`.
+- [ ] Audit accessibility for `src/app/page.tsx`.
+- [ ] Add loading state handling for `src/app/page.tsx`.
+- [ ] Review responsive layout for `src/app/page.tsx`.
+- [ ] Add empty state messaging for `src/app/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/page.tsx`.
+- [ ] Verify focus styles for `src/app/page.tsx`.
+- [ ] Add unit tests for `src/app/not-found.tsx`.
+- [ ] Audit accessibility for `src/app/not-found.tsx`.
+- [ ] Add loading state handling for `src/app/not-found.tsx`.
+- [ ] Review responsive layout for `src/app/not-found.tsx`.
+- [ ] Add empty state messaging for `src/app/not-found.tsx`.
+- [ ] Add error boundary coverage for `src/app/not-found.tsx`.
+- [ ] Verify focus styles for `src/app/not-found.tsx`.
+- [ ] Add unit tests for `src/app/robots.ts`.
+- [ ] Add edge case coverage for `src/app/robots.ts`.
+- [ ] Add input validation for `src/app/robots.ts`.
+- [ ] Review error handling for `src/app/robots.ts`.
+- [ ] Document behavior and defaults for `src/app/robots.ts`.
+- [ ] Review performance hot paths in `src/app/robots.ts`.
+- [ ] Add logging hooks for `src/app/robots.ts`.
+- [ ] Add unit tests for `src/data/api-docs.tsx`.
+- [ ] Add edge case coverage for `src/data/api-docs.tsx`.
+- [ ] Add input validation for `src/data/api-docs.tsx`.
+- [ ] Review error handling for `src/data/api-docs.tsx`.
+- [ ] Document behavior and defaults for `src/data/api-docs.tsx`.
+- [ ] Review performance hot paths in `src/data/api-docs.tsx`.
+- [ ] Add logging hooks for `src/data/api-docs.tsx`.
+- [ ] Add unit tests for `src/lib/constants.ts`.
+- [ ] Add edge case coverage for `src/lib/constants.ts`.
+- [ ] Add input validation for `src/lib/constants.ts`.
+- [ ] Review error handling for `src/lib/constants.ts`.
+- [ ] Document behavior and defaults for `src/lib/constants.ts`.
+- [ ] Review performance hot paths in `src/lib/constants.ts`.
+- [ ] Add logging hooks for `src/lib/constants.ts`.
+- [ ] Add unit tests for `src/lib/fonts.ts`.
+- [ ] Add edge case coverage for `src/lib/fonts.ts`.
+- [ ] Add input validation for `src/lib/fonts.ts`.
+- [ ] Review error handling for `src/lib/fonts.ts`.
+- [ ] Document behavior and defaults for `src/lib/fonts.ts`.
+- [ ] Review performance hot paths in `src/lib/fonts.ts`.
+- [ ] Add logging hooks for `src/lib/fonts.ts`.
+- [ ] Add unit tests for `src/lib/forum-meta.ts`.
+- [ ] Add edge case coverage for `src/lib/forum-meta.ts`.
+- [ ] Add input validation for `src/lib/forum-meta.ts`.
+- [ ] Review error handling for `src/lib/forum-meta.ts`.
+- [ ] Document behavior and defaults for `src/lib/forum-meta.ts`.
+- [ ] Review performance hot paths in `src/lib/forum-meta.ts`.
+- [ ] Add logging hooks for `src/lib/forum-meta.ts`.
+- [ ] Add unit tests for `src/lib/sanitize.ts`.
+- [ ] Add edge case coverage for `src/lib/sanitize.ts`.
+- [ ] Add input validation for `src/lib/sanitize.ts`.
+- [ ] Review error handling for `src/lib/sanitize.ts`.
+- [ ] Document behavior and defaults for `src/lib/sanitize.ts`.
+- [ ] Review performance hot paths in `src/lib/sanitize.ts`.
+- [ ] Add logging hooks for `src/lib/sanitize.ts`.
+- [ ] Add unit tests for `src/lib/auth.ts`.
+- [ ] Add edge case coverage for `src/lib/auth.ts`.
+- [ ] Add input validation for `src/lib/auth.ts`.
+- [ ] Review error handling for `src/lib/auth.ts`.
+- [ ] Document behavior and defaults for `src/lib/auth.ts`.
+- [ ] Review performance hot paths in `src/lib/auth.ts`.
+- [ ] Add logging hooks for `src/lib/auth.ts`.
+- [ ] Add unit tests for `src/lib/theme.ts`.
+- [ ] Add edge case coverage for `src/lib/theme.ts`.
+- [ ] Add input validation for `src/lib/theme.ts`.
+- [ ] Review error handling for `src/lib/theme.ts`.
+- [ ] Document behavior and defaults for `src/lib/theme.ts`.
+- [ ] Review performance hot paths in `src/lib/theme.ts`.
+- [ ] Add logging hooks for `src/lib/theme.ts`.
+- [ ] Add unit tests for `src/lib/types.ts`.
+- [ ] Add edge case coverage for `src/lib/types.ts`.
+- [ ] Add input validation for `src/lib/types.ts`.
+- [ ] Review error handling for `src/lib/types.ts`.
+- [ ] Document behavior and defaults for `src/lib/types.ts`.
+- [ ] Review performance hot paths in `src/lib/types.ts`.
+- [ ] Add logging hooks for `src/lib/types.ts`.
+- [ ] Add unit tests for `src/lib/api.ts`.
+- [ ] Add edge case coverage for `src/lib/api.ts`.
+- [ ] Add input validation for `src/lib/api.ts`.
+- [ ] Review error handling for `src/lib/api.ts`.
+- [ ] Document behavior and defaults for `src/lib/api.ts`.
+- [ ] Review performance hot paths in `src/lib/api.ts`.
+- [ ] Add logging hooks for `src/lib/api.ts`.
+- [ ] Add unit tests for `src/lib/cdn.ts`.
+- [ ] Add edge case coverage for `src/lib/cdn.ts`.
+- [ ] Add input validation for `src/lib/cdn.ts`.
+- [ ] Review error handling for `src/lib/cdn.ts`.
+- [ ] Document behavior and defaults for `src/lib/cdn.ts`.
+- [ ] Review performance hot paths in `src/lib/cdn.ts`.
+- [ ] Add logging hooks for `src/lib/cdn.ts`.
+- [ ] Add unit tests for `src/lib/utils.ts`.
+- [ ] Add edge case coverage for `src/lib/utils.ts`.
+- [ ] Add input validation for `src/lib/utils.ts`.
+- [ ] Review error handling for `src/lib/utils.ts`.
+- [ ] Document behavior and defaults for `src/lib/utils.ts`.
+- [ ] Review performance hot paths in `src/lib/utils.ts`.
+- [ ] Add logging hooks for `src/lib/utils.ts`.
+- [ ] Add unit tests for `src/lib/page-metadata.ts`.
+- [ ] Add edge case coverage for `src/lib/page-metadata.ts`.
+- [ ] Add input validation for `src/lib/page-metadata.ts`.
+- [ ] Review error handling for `src/lib/page-metadata.ts`.
+- [ ] Document behavior and defaults for `src/lib/page-metadata.ts`.
+- [ ] Review performance hot paths in `src/lib/page-metadata.ts`.
+- [ ] Add logging hooks for `src/lib/page-metadata.ts`.
+- [ ] Add unit tests for `src/lib/jsonld.ts`.
+- [ ] Add edge case coverage for `src/lib/jsonld.ts`.
+- [ ] Add input validation for `src/lib/jsonld.ts`.
+- [ ] Review error handling for `src/lib/jsonld.ts`.
+- [ ] Document behavior and defaults for `src/lib/jsonld.ts`.
+- [ ] Review performance hot paths in `src/lib/jsonld.ts`.
+- [ ] Add logging hooks for `src/lib/jsonld.ts`.
+- [ ] Add unit tests for `src/lib/forum.ts`.
+- [ ] Add edge case coverage for `src/lib/forum.ts`.
+- [ ] Add input validation for `src/lib/forum.ts`.
+- [ ] Review error handling for `src/lib/forum.ts`.
+- [ ] Document behavior and defaults for `src/lib/forum.ts`.
+- [ ] Review performance hot paths in `src/lib/forum.ts`.
+- [ ] Add logging hooks for `src/lib/forum.ts`.
+- [ ] Add unit tests for `src/lib/seo.ts`.
+- [ ] Add edge case coverage for `src/lib/seo.ts`.
+- [ ] Add input validation for `src/lib/seo.ts`.
+- [ ] Review error handling for `src/lib/seo.ts`.
+- [ ] Document behavior and defaults for `src/lib/seo.ts`.
+- [ ] Review performance hot paths in `src/lib/seo.ts`.
+- [ ] Add logging hooks for `src/lib/seo.ts`.
+- [ ] Add unit tests for `src/lib/db.ts`.
+- [ ] Add edge case coverage for `src/lib/db.ts`.
+- [ ] Add input validation for `src/lib/db.ts`.
+- [ ] Review error handling for `src/lib/db.ts`.
+- [ ] Document behavior and defaults for `src/lib/db.ts`.
+- [ ] Review performance hot paths in `src/lib/db.ts`.
+- [ ] Add logging hooks for `src/lib/db.ts`.
+- [ ] Add unit tests for `src/components/google-one-tap.tsx`.
+- [ ] Audit accessibility for `src/components/google-one-tap.tsx`.
+- [ ] Add loading state handling for `src/components/google-one-tap.tsx`.
+- [ ] Review responsive layout for `src/components/google-one-tap.tsx`.
+- [ ] Add empty state messaging for `src/components/google-one-tap.tsx`.
+- [ ] Add error boundary coverage for `src/components/google-one-tap.tsx`.
+- [ ] Verify focus styles for `src/components/google-one-tap.tsx`.
+- [ ] Add unit tests for `src/types/auth.ts`.
+- [ ] Add edge case coverage for `src/types/auth.ts`.
+- [ ] Add input validation for `src/types/auth.ts`.
+- [ ] Review error handling for `src/types/auth.ts`.
+- [ ] Document behavior and defaults for `src/types/auth.ts`.
+- [ ] Review performance hot paths in `src/types/auth.ts`.
+- [ ] Add logging hooks for `src/types/auth.ts`.
+- [ ] Add unit tests for `src/types/isomorphic-dompurify.d.ts`.
+- [ ] Add edge case coverage for `src/types/isomorphic-dompurify.d.ts`.
+- [ ] Add input validation for `src/types/isomorphic-dompurify.d.ts`.
+- [ ] Review error handling for `src/types/isomorphic-dompurify.d.ts`.
+- [ ] Document behavior and defaults for `src/types/isomorphic-dompurify.d.ts`.
+- [ ] Review performance hot paths in `src/types/isomorphic-dompurify.d.ts`.
+- [ ] Add logging hooks for `src/types/isomorphic-dompurify.d.ts`.
+- [ ] Add unit tests for `src/types/project.ts`.
+- [ ] Add edge case coverage for `src/types/project.ts`.
+- [ ] Add input validation for `src/types/project.ts`.
+- [ ] Review error handling for `src/types/project.ts`.
+- [ ] Document behavior and defaults for `src/types/project.ts`.
+- [ ] Review performance hot paths in `src/types/project.ts`.
+- [ ] Add logging hooks for `src/types/project.ts`.
+- [ ] Add unit tests for `src/types/blog.ts`.
+- [ ] Add edge case coverage for `src/types/blog.ts`.
+- [ ] Add input validation for `src/types/blog.ts`.
+- [ ] Review error handling for `src/types/blog.ts`.
+- [ ] Document behavior and defaults for `src/types/blog.ts`.
+- [ ] Review performance hot paths in `src/types/blog.ts`.
+- [ ] Add logging hooks for `src/types/blog.ts`.
+- [ ] Add unit tests for `src/types/forum.ts`.
+- [ ] Add edge case coverage for `src/types/forum.ts`.
+- [ ] Add input validation for `src/types/forum.ts`.
+- [ ] Review error handling for `src/types/forum.ts`.
+- [ ] Document behavior and defaults for `src/types/forum.ts`.
+- [ ] Review performance hot paths in `src/types/forum.ts`.
+- [ ] Add logging hooks for `src/types/forum.ts`.
+- [ ] Add unit tests for `src/contexts/AuthContext.tsx`.
+- [ ] Add edge case coverage for `src/contexts/AuthContext.tsx`.
+- [ ] Add input validation for `src/contexts/AuthContext.tsx`.
+- [ ] Review error handling for `src/contexts/AuthContext.tsx`.
+- [ ] Document behavior and defaults for `src/contexts/AuthContext.tsx`.
+- [ ] Review performance hot paths in `src/contexts/AuthContext.tsx`.
+- [ ] Add logging hooks for `src/contexts/AuthContext.tsx`.
+- [ ] Add unit tests for `src/contexts/ThemeContext.tsx`.
+- [ ] Add edge case coverage for `src/contexts/ThemeContext.tsx`.
+- [ ] Add input validation for `src/contexts/ThemeContext.tsx`.
+- [ ] Review error handling for `src/contexts/ThemeContext.tsx`.
+- [ ] Document behavior and defaults for `src/contexts/ThemeContext.tsx`.
+- [ ] Review performance hot paths in `src/contexts/ThemeContext.tsx`.
+- [ ] Add logging hooks for `src/contexts/ThemeContext.tsx`.
+- [ ] Add unit tests for `src/hooks/use-pwa.tsx`.
+- [ ] Add edge case coverage for `src/hooks/use-pwa.tsx`.
+- [ ] Add input validation for `src/hooks/use-pwa.tsx`.
+- [ ] Review error handling for `src/hooks/use-pwa.tsx`.
+- [ ] Document behavior and defaults for `src/hooks/use-pwa.tsx`.
+- [ ] Review performance hot paths in `src/hooks/use-pwa.tsx`.
+- [ ] Add logging hooks for `src/hooks/use-pwa.tsx`.
+- [ ] Add unit tests for `src/hooks/use-push-notifications.tsx`.
+- [ ] Add edge case coverage for `src/hooks/use-push-notifications.tsx`.
+- [ ] Add input validation for `src/hooks/use-push-notifications.tsx`.
+- [ ] Review error handling for `src/hooks/use-push-notifications.tsx`.
+- [ ] Document behavior and defaults for `src/hooks/use-push-notifications.tsx`.
+- [ ] Review performance hot paths in `src/hooks/use-push-notifications.tsx`.
+- [ ] Add logging hooks for `src/hooks/use-push-notifications.tsx`.
+- [ ] Add unit tests for `src/hooks/useRegisterForm.ts`.
+- [ ] Add edge case coverage for `src/hooks/useRegisterForm.ts`.
+- [ ] Add input validation for `src/hooks/useRegisterForm.ts`.
+- [ ] Review error handling for `src/hooks/useRegisterForm.ts`.
+- [ ] Document behavior and defaults for `src/hooks/useRegisterForm.ts`.
+- [ ] Review performance hot paths in `src/hooks/useRegisterForm.ts`.
+- [ ] Add logging hooks for `src/hooks/useRegisterForm.ts`.
+- [ ] Add unit tests for `src/hooks/use-admin-token.ts`.
+- [ ] Add edge case coverage for `src/hooks/use-admin-token.ts`.
+- [ ] Add input validation for `src/hooks/use-admin-token.ts`.
+- [ ] Review error handling for `src/hooks/use-admin-token.ts`.
+- [ ] Document behavior and defaults for `src/hooks/use-admin-token.ts`.
+- [ ] Review performance hot paths in `src/hooks/use-admin-token.ts`.
+- [ ] Add logging hooks for `src/hooks/use-admin-token.ts`.
+- [ ] Add unit tests for `src/hooks/use-presence.ts`.
+- [ ] Add edge case coverage for `src/hooks/use-presence.ts`.
+- [ ] Add input validation for `src/hooks/use-presence.ts`.
+- [ ] Review error handling for `src/hooks/use-presence.ts`.
+- [ ] Document behavior and defaults for `src/hooks/use-presence.ts`.
+- [ ] Review performance hot paths in `src/hooks/use-presence.ts`.
+- [ ] Add logging hooks for `src/hooks/use-presence.ts`.
+- [ ] Add unit tests for `src/hooks/useWebSocket.ts`.
+- [ ] Add edge case coverage for `src/hooks/useWebSocket.ts`.
+- [ ] Add input validation for `src/hooks/useWebSocket.ts`.
+- [ ] Review error handling for `src/hooks/useWebSocket.ts`.
+- [ ] Document behavior and defaults for `src/hooks/useWebSocket.ts`.
+- [ ] Review performance hot paths in `src/hooks/useWebSocket.ts`.
+- [ ] Add logging hooks for `src/hooks/useWebSocket.ts`.
+- [ ] Add unit tests for `src/hooks/useAuth.tsx`.
+- [ ] Add edge case coverage for `src/hooks/useAuth.tsx`.
+- [ ] Add input validation for `src/hooks/useAuth.tsx`.
+- [ ] Review error handling for `src/hooks/useAuth.tsx`.
+- [ ] Document behavior and defaults for `src/hooks/useAuth.tsx`.
+- [ ] Review performance hot paths in `src/hooks/useAuth.tsx`.
+- [ ] Add logging hooks for `src/hooks/useAuth.tsx`.
+- [ ] Add unit tests for `src/app/careers/layout.tsx`.
+- [ ] Audit accessibility for `src/app/careers/layout.tsx`.
+- [ ] Add loading state handling for `src/app/careers/layout.tsx`.
+- [ ] Review responsive layout for `src/app/careers/layout.tsx`.
+- [ ] Add empty state messaging for `src/app/careers/layout.tsx`.
+- [ ] Add error boundary coverage for `src/app/careers/layout.tsx`.
+- [ ] Verify focus styles for `src/app/careers/layout.tsx`.
+- [ ] Add unit tests for `src/app/careers/page.tsx`.
+- [ ] Audit accessibility for `src/app/careers/page.tsx`.
+- [ ] Add loading state handling for `src/app/careers/page.tsx`.
+- [ ] Review responsive layout for `src/app/careers/page.tsx`.
+- [ ] Add empty state messaging for `src/app/careers/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/careers/page.tsx`.
+- [ ] Verify focus styles for `src/app/careers/page.tsx`.
+- [ ] Add unit tests for `src/app/forgot-password/layout.tsx`.
+- [ ] Audit accessibility for `src/app/forgot-password/layout.tsx`.
+- [ ] Add loading state handling for `src/app/forgot-password/layout.tsx`.
+- [ ] Review responsive layout for `src/app/forgot-password/layout.tsx`.
+- [ ] Add empty state messaging for `src/app/forgot-password/layout.tsx`.
+- [ ] Add error boundary coverage for `src/app/forgot-password/layout.tsx`.
+- [ ] Verify focus styles for `src/app/forgot-password/layout.tsx`.
+- [ ] Add unit tests for `src/app/forgot-password/page.tsx`.
+- [ ] Audit accessibility for `src/app/forgot-password/page.tsx`.
+- [ ] Add loading state handling for `src/app/forgot-password/page.tsx`.
+- [ ] Review responsive layout for `src/app/forgot-password/page.tsx`.
+- [ ] Add empty state messaging for `src/app/forgot-password/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/forgot-password/page.tsx`.
+- [ ] Verify focus styles for `src/app/forgot-password/page.tsx`.
+- [ ] Add unit tests for `src/app/blog/layout.tsx`.
+- [ ] Audit accessibility for `src/app/blog/layout.tsx`.
+- [ ] Add loading state handling for `src/app/blog/layout.tsx`.
+- [ ] Review responsive layout for `src/app/blog/layout.tsx`.
+- [ ] Add empty state messaging for `src/app/blog/layout.tsx`.
+- [ ] Add error boundary coverage for `src/app/blog/layout.tsx`.
+- [ ] Verify focus styles for `src/app/blog/layout.tsx`.
+- [ ] Add unit tests for `src/app/blog/page.tsx`.
+- [ ] Audit accessibility for `src/app/blog/page.tsx`.
+- [ ] Add loading state handling for `src/app/blog/page.tsx`.
+- [ ] Review responsive layout for `src/app/blog/page.tsx`.
+- [ ] Add empty state messaging for `src/app/blog/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/blog/page.tsx`.
+- [ ] Verify focus styles for `src/app/blog/page.tsx`.
+- [ ] Add unit tests for `src/app/register/RegisterForm.tsx`.
+- [ ] Audit accessibility for `src/app/register/RegisterForm.tsx`.
+- [ ] Add loading state handling for `src/app/register/RegisterForm.tsx`.
+- [ ] Review responsive layout for `src/app/register/RegisterForm.tsx`.
+- [ ] Add empty state messaging for `src/app/register/RegisterForm.tsx`.
+- [ ] Add error boundary coverage for `src/app/register/RegisterForm.tsx`.
+- [ ] Verify focus styles for `src/app/register/RegisterForm.tsx`.
+- [ ] Add unit tests for `src/app/register/page.tsx`.
+- [ ] Audit accessibility for `src/app/register/page.tsx`.
+- [ ] Add loading state handling for `src/app/register/page.tsx`.
+- [ ] Review responsive layout for `src/app/register/page.tsx`.
+- [ ] Add empty state messaging for `src/app/register/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/register/page.tsx`.
+- [ ] Verify focus styles for `src/app/register/page.tsx`.
+- [ ] Add unit tests for `src/app/reset-password/layout.tsx`.
+- [ ] Audit accessibility for `src/app/reset-password/layout.tsx`.
+- [ ] Add loading state handling for `src/app/reset-password/layout.tsx`.
+- [ ] Review responsive layout for `src/app/reset-password/layout.tsx`.
+- [ ] Add empty state messaging for `src/app/reset-password/layout.tsx`.
+- [ ] Add error boundary coverage for `src/app/reset-password/layout.tsx`.
+- [ ] Verify focus styles for `src/app/reset-password/layout.tsx`.
+- [ ] Add unit tests for `src/app/reset-password/page.tsx`.
+- [ ] Audit accessibility for `src/app/reset-password/page.tsx`.
+- [ ] Add loading state handling for `src/app/reset-password/page.tsx`.
+- [ ] Review responsive layout for `src/app/reset-password/page.tsx`.
+- [ ] Add empty state messaging for `src/app/reset-password/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/reset-password/page.tsx`.
+- [ ] Verify focus styles for `src/app/reset-password/page.tsx`.
+- [ ] Add unit tests for `src/app/login/LoginForm.tsx`.
+- [ ] Audit accessibility for `src/app/login/LoginForm.tsx`.
+- [ ] Add loading state handling for `src/app/login/LoginForm.tsx`.
+- [ ] Review responsive layout for `src/app/login/LoginForm.tsx`.
+- [ ] Add empty state messaging for `src/app/login/LoginForm.tsx`.
+- [ ] Add error boundary coverage for `src/app/login/LoginForm.tsx`.
+- [ ] Verify focus styles for `src/app/login/LoginForm.tsx`.
+- [ ] Add unit tests for `src/app/login/page.tsx`.
+- [ ] Audit accessibility for `src/app/login/page.tsx`.
+- [ ] Add loading state handling for `src/app/login/page.tsx`.
+- [ ] Review responsive layout for `src/app/login/page.tsx`.
+- [ ] Add empty state messaging for `src/app/login/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/login/page.tsx`.
+- [ ] Verify focus styles for `src/app/login/page.tsx`.
+- [ ] Add unit tests for `src/app/projects/layout.tsx`.
+- [ ] Audit accessibility for `src/app/projects/layout.tsx`.
+- [ ] Add loading state handling for `src/app/projects/layout.tsx`.
+- [ ] Review responsive layout for `src/app/projects/layout.tsx`.
+- [ ] Add empty state messaging for `src/app/projects/layout.tsx`.
+- [ ] Add error boundary coverage for `src/app/projects/layout.tsx`.
+- [ ] Verify focus styles for `src/app/projects/layout.tsx`.
+- [ ] Add unit tests for `src/app/projects/page.tsx`.
+- [ ] Audit accessibility for `src/app/projects/page.tsx`.
+- [ ] Add loading state handling for `src/app/projects/page.tsx`.
+- [ ] Review responsive layout for `src/app/projects/page.tsx`.
+- [ ] Add empty state messaging for `src/app/projects/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/projects/page.tsx`.
+- [ ] Verify focus styles for `src/app/projects/page.tsx`.
+- [ ] Add unit tests for `src/app/forum/layout.tsx`.
+- [ ] Audit accessibility for `src/app/forum/layout.tsx`.
+- [ ] Add loading state handling for `src/app/forum/layout.tsx`.
+- [ ] Review responsive layout for `src/app/forum/layout.tsx`.
+- [ ] Add empty state messaging for `src/app/forum/layout.tsx`.
+- [ ] Add error boundary coverage for `src/app/forum/layout.tsx`.
+- [ ] Verify focus styles for `src/app/forum/layout.tsx`.
+- [ ] Add unit tests for `src/app/forum/page.tsx`.
+- [ ] Audit accessibility for `src/app/forum/page.tsx`.
+- [ ] Add loading state handling for `src/app/forum/page.tsx`.
+- [ ] Review responsive layout for `src/app/forum/page.tsx`.
+- [ ] Add empty state messaging for `src/app/forum/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/forum/page.tsx`.
+- [ ] Verify focus styles for `src/app/forum/page.tsx`.
+- [ ] Add unit tests for `src/app/offline/layout.tsx`.
+- [ ] Audit accessibility for `src/app/offline/layout.tsx`.
+- [ ] Add loading state handling for `src/app/offline/layout.tsx`.
+- [ ] Review responsive layout for `src/app/offline/layout.tsx`.
+- [ ] Add empty state messaging for `src/app/offline/layout.tsx`.
+- [ ] Add error boundary coverage for `src/app/offline/layout.tsx`.
+- [ ] Verify focus styles for `src/app/offline/layout.tsx`.
+- [ ] Add unit tests for `src/app/offline/page.tsx`.
+- [ ] Audit accessibility for `src/app/offline/page.tsx`.
+- [ ] Add loading state handling for `src/app/offline/page.tsx`.
+- [ ] Review responsive layout for `src/app/offline/page.tsx`.
+- [ ] Add empty state messaging for `src/app/offline/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/offline/page.tsx`.
+- [ ] Verify focus styles for `src/app/offline/page.tsx`.
+- [ ] Add unit tests for `src/app/kvkk/page.tsx`.
+- [ ] Audit accessibility for `src/app/kvkk/page.tsx`.
+- [ ] Add loading state handling for `src/app/kvkk/page.tsx`.
+- [ ] Review responsive layout for `src/app/kvkk/page.tsx`.
+- [ ] Add empty state messaging for `src/app/kvkk/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/kvkk/page.tsx`.
+- [ ] Verify focus styles for `src/app/kvkk/page.tsx`.
+- [ ] Add unit tests for `src/app/contact/page.tsx`.
+- [ ] Audit accessibility for `src/app/contact/page.tsx`.
+- [ ] Add loading state handling for `src/app/contact/page.tsx`.
+- [ ] Review responsive layout for `src/app/contact/page.tsx`.
+- [ ] Add empty state messaging for `src/app/contact/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/contact/page.tsx`.
+- [ ] Verify focus styles for `src/app/contact/page.tsx`.
+- [ ] Add unit tests for `src/app/privacy/page.tsx`.
+- [ ] Audit accessibility for `src/app/privacy/page.tsx`.
+- [ ] Add loading state handling for `src/app/privacy/page.tsx`.
+- [ ] Review responsive layout for `src/app/privacy/page.tsx`.
+- [ ] Add empty state messaging for `src/app/privacy/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/privacy/page.tsx`.
+- [ ] Verify focus styles for `src/app/privacy/page.tsx`.
+- [ ] Add unit tests for `src/app/settings/layout.tsx`.
+- [ ] Audit accessibility for `src/app/settings/layout.tsx`.
+- [ ] Add loading state handling for `src/app/settings/layout.tsx`.
+- [ ] Review responsive layout for `src/app/settings/layout.tsx`.
+- [ ] Add empty state messaging for `src/app/settings/layout.tsx`.
+- [ ] Add error boundary coverage for `src/app/settings/layout.tsx`.
+- [ ] Verify focus styles for `src/app/settings/layout.tsx`.
+- [ ] Add unit tests for `src/app/settings/page.tsx`.
+- [ ] Audit accessibility for `src/app/settings/page.tsx`.
+- [ ] Add loading state handling for `src/app/settings/page.tsx`.
+- [ ] Review responsive layout for `src/app/settings/page.tsx`.
+- [ ] Add empty state messaging for `src/app/settings/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/settings/page.tsx`.
+- [ ] Verify focus styles for `src/app/settings/page.tsx`.
+- [ ] Add unit tests for `src/app/terms/page.tsx`.
+- [ ] Audit accessibility for `src/app/terms/page.tsx`.
+- [ ] Add loading state handling for `src/app/terms/page.tsx`.
+- [ ] Review responsive layout for `src/app/terms/page.tsx`.
+- [ ] Add empty state messaging for `src/app/terms/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/terms/page.tsx`.
+- [ ] Verify focus styles for `src/app/terms/page.tsx`.
+- [ ] Add unit tests for `src/app/team/page.tsx`.
+- [ ] Audit accessibility for `src/app/team/page.tsx`.
+- [ ] Add loading state handling for `src/app/team/page.tsx`.
+- [ ] Review responsive layout for `src/app/team/page.tsx`.
+- [ ] Add empty state messaging for `src/app/team/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/team/page.tsx`.
+- [ ] Verify focus styles for `src/app/team/page.tsx`.
+- [ ] Add unit tests for `src/app/admin/layout.tsx`.
+- [ ] Audit accessibility for `src/app/admin/layout.tsx`.
+- [ ] Add loading state handling for `src/app/admin/layout.tsx`.
+- [ ] Review responsive layout for `src/app/admin/layout.tsx`.
+- [ ] Add empty state messaging for `src/app/admin/layout.tsx`.
+- [ ] Add error boundary coverage for `src/app/admin/layout.tsx`.
+- [ ] Verify focus styles for `src/app/admin/layout.tsx`.
+- [ ] Add unit tests for `src/app/admin/page.tsx`.
+- [ ] Audit accessibility for `src/app/admin/page.tsx`.
+- [ ] Add loading state handling for `src/app/admin/page.tsx`.
+- [ ] Review responsive layout for `src/app/admin/page.tsx`.
+- [ ] Add empty state messaging for `src/app/admin/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/admin/page.tsx`.
+- [ ] Verify focus styles for `src/app/admin/page.tsx`.
+- [ ] Add unit tests for `src/app/docs/layout.tsx`.
+- [ ] Audit accessibility for `src/app/docs/layout.tsx`.
+- [ ] Add loading state handling for `src/app/docs/layout.tsx`.
+- [ ] Review responsive layout for `src/app/docs/layout.tsx`.
+- [ ] Add empty state messaging for `src/app/docs/layout.tsx`.
+- [ ] Add error boundary coverage for `src/app/docs/layout.tsx`.
+- [ ] Verify focus styles for `src/app/docs/layout.tsx`.
+- [ ] Add unit tests for `src/app/docs/page.tsx`.
+- [ ] Audit accessibility for `src/app/docs/page.tsx`.
+- [ ] Add loading state handling for `src/app/docs/page.tsx`.
+- [ ] Review responsive layout for `src/app/docs/page.tsx`.
+- [ ] Add empty state messaging for `src/app/docs/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/docs/page.tsx`.
+- [ ] Verify focus styles for `src/app/docs/page.tsx`.
+- [ ] Add unit tests for `src/app/about/layout.tsx`.
+- [ ] Audit accessibility for `src/app/about/layout.tsx`.
+- [ ] Add loading state handling for `src/app/about/layout.tsx`.
+- [ ] Review responsive layout for `src/app/about/layout.tsx`.
+- [ ] Add empty state messaging for `src/app/about/layout.tsx`.
+- [ ] Add error boundary coverage for `src/app/about/layout.tsx`.
+- [ ] Verify focus styles for `src/app/about/layout.tsx`.
+- [ ] Add unit tests for `src/app/about/page.tsx`.
+- [ ] Audit accessibility for `src/app/about/page.tsx`.
+- [ ] Add loading state handling for `src/app/about/page.tsx`.
+- [ ] Review responsive layout for `src/app/about/page.tsx`.
+- [ ] Add empty state messaging for `src/app/about/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/about/page.tsx`.
+- [ ] Verify focus styles for `src/app/about/page.tsx`.
+- [ ] Add unit tests for `src/app/blogs/blogs-page-client.tsx`.
+- [ ] Audit accessibility for `src/app/blogs/blogs-page-client.tsx`.
+- [ ] Add loading state handling for `src/app/blogs/blogs-page-client.tsx`.
+- [ ] Review responsive layout for `src/app/blogs/blogs-page-client.tsx`.
+- [ ] Add empty state messaging for `src/app/blogs/blogs-page-client.tsx`.
+- [ ] Add error boundary coverage for `src/app/blogs/blogs-page-client.tsx`.
+- [ ] Verify focus styles for `src/app/blogs/blogs-page-client.tsx`.
+- [ ] Add unit tests for `src/app/blogs/page.tsx`.
+- [ ] Audit accessibility for `src/app/blogs/page.tsx`.
+- [ ] Add loading state handling for `src/app/blogs/page.tsx`.
+- [ ] Review responsive layout for `src/app/blogs/page.tsx`.
+- [ ] Add empty state messaging for `src/app/blogs/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/blogs/page.tsx`.
+- [ ] Verify focus styles for `src/app/blogs/page.tsx`.
+- [ ] Add unit tests for `src/app/blogs/BlogsClient.tsx`.
+- [ ] Audit accessibility for `src/app/blogs/BlogsClient.tsx`.
+- [ ] Add loading state handling for `src/app/blogs/BlogsClient.tsx`.
+- [ ] Review responsive layout for `src/app/blogs/BlogsClient.tsx`.
+- [ ] Add empty state messaging for `src/app/blogs/BlogsClient.tsx`.
+- [ ] Add error boundary coverage for `src/app/blogs/BlogsClient.tsx`.
+- [ ] Verify focus styles for `src/app/blogs/BlogsClient.tsx`.
+- [ ] Add unit tests for `src/app/api/google-auth/route.ts`.
+- [ ] Add edge case coverage for `src/app/api/google-auth/route.ts`.
+- [ ] Add input validation for `src/app/api/google-auth/route.ts`.
+- [ ] Review error handling for `src/app/api/google-auth/route.ts`.
+- [ ] Document behavior and defaults for `src/app/api/google-auth/route.ts`.
+- [ ] Review performance hot paths in `src/app/api/google-auth/route.ts`.
+- [ ] Add logging hooks for `src/app/api/google-auth/route.ts`.
+- [ ] Add unit tests for `src/app/api/og/route.tsx`.
+- [ ] Audit accessibility for `src/app/api/og/route.tsx`.
+- [ ] Add loading state handling for `src/app/api/og/route.tsx`.
+- [ ] Review responsive layout for `src/app/api/og/route.tsx`.
+- [ ] Add empty state messaging for `src/app/api/og/route.tsx`.
+- [ ] Add error boundary coverage for `src/app/api/og/route.tsx`.
+- [ ] Verify focus styles for `src/app/api/og/route.tsx`.
+- [ ] Add unit tests for `src/app/api/homepage/route.ts`.
+- [ ] Add edge case coverage for `src/app/api/homepage/route.ts`.
+- [ ] Add input validation for `src/app/api/homepage/route.ts`.
+- [ ] Review error handling for `src/app/api/homepage/route.ts`.
+- [ ] Document behavior and defaults for `src/app/api/homepage/route.ts`.
+- [ ] Review performance hot paths in `src/app/api/homepage/route.ts`.
+- [ ] Add logging hooks for `src/app/api/homepage/route.ts`.
+- [ ] Add unit tests for `src/app/api/hello/route.ts`.
+- [ ] Add edge case coverage for `src/app/api/hello/route.ts`.
+- [ ] Add input validation for `src/app/api/hello/route.ts`.
+- [ ] Review error handling for `src/app/api/hello/route.ts`.
+- [ ] Document behavior and defaults for `src/app/api/hello/route.ts`.
+- [ ] Review performance hot paths in `src/app/api/hello/route.ts`.
+- [ ] Add logging hooks for `src/app/api/hello/route.ts`.
+- [ ] Add unit tests for `src/app/api/translations/preview/route.ts`.
+- [ ] Add edge case coverage for `src/app/api/translations/preview/route.ts`.
+- [ ] Add input validation for `src/app/api/translations/preview/route.ts`.
+- [ ] Review error handling for `src/app/api/translations/preview/route.ts`.
+- [ ] Document behavior and defaults for `src/app/api/translations/preview/route.ts`.
+- [ ] Review performance hot paths in `src/app/api/translations/preview/route.ts`.
+- [ ] Add logging hooks for `src/app/api/translations/preview/route.ts`.
+- [ ] Add unit tests for `src/app/api/analytics/track/route.ts`.
+- [ ] Add edge case coverage for `src/app/api/analytics/track/route.ts`.
+- [ ] Add input validation for `src/app/api/analytics/track/route.ts`.
+- [ ] Review error handling for `src/app/api/analytics/track/route.ts`.
+- [ ] Document behavior and defaults for `src/app/api/analytics/track/route.ts`.
+- [ ] Review performance hot paths in `src/app/api/analytics/track/route.ts`.
+- [ ] Add logging hooks for `src/app/api/analytics/track/route.ts`.
+- [ ] Add unit tests for `src/app/api/messages/[locale]/route.ts`.
+- [ ] Add edge case coverage for `src/app/api/messages/[locale]/route.ts`.
+- [ ] Add input validation for `src/app/api/messages/[locale]/route.ts`.
+- [ ] Review error handling for `src/app/api/messages/[locale]/route.ts`.
+- [ ] Document behavior and defaults for `src/app/api/messages/[locale]/route.ts`.
+- [ ] Review performance hot paths in `src/app/api/messages/[locale]/route.ts`.
+- [ ] Add logging hooks for `src/app/api/messages/[locale]/route.ts`.
+- [ ] Add unit tests for `src/app/api/admin/homepage/route.ts`.
+- [ ] Add edge case coverage for `src/app/api/admin/homepage/route.ts`.
+- [ ] Add input validation for `src/app/api/admin/homepage/route.ts`.
+- [ ] Review error handling for `src/app/api/admin/homepage/route.ts`.
+- [ ] Document behavior and defaults for `src/app/api/admin/homepage/route.ts`.
+- [ ] Review performance hot paths in `src/app/api/admin/homepage/route.ts`.
+- [ ] Add logging hooks for `src/app/api/admin/homepage/route.ts`.
+- [ ] Add unit tests for `src/app/api/admin/blogs/categories/route.ts`.
+- [ ] Add edge case coverage for `src/app/api/admin/blogs/categories/route.ts`.
+- [ ] Add input validation for `src/app/api/admin/blogs/categories/route.ts`.
+- [ ] Review error handling for `src/app/api/admin/blogs/categories/route.ts`.
+- [ ] Document behavior and defaults for `src/app/api/admin/blogs/categories/route.ts`.
+- [ ] Review performance hot paths in `src/app/api/admin/blogs/categories/route.ts`.
+- [ ] Add logging hooks for `src/app/api/admin/blogs/categories/route.ts`.
+- [ ] Add unit tests for `src/app/forum/new/page.tsx`.
+- [ ] Audit accessibility for `src/app/forum/new/page.tsx`.
+- [ ] Add loading state handling for `src/app/forum/new/page.tsx`.
+- [ ] Review responsive layout for `src/app/forum/new/page.tsx`.
+- [ ] Add empty state messaging for `src/app/forum/new/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/forum/new/page.tsx`.
+- [ ] Verify focus styles for `src/app/forum/new/page.tsx`.
+- [ ] Add unit tests for `src/app/forum/c/[slug]/page.tsx`.
+- [ ] Audit accessibility for `src/app/forum/c/[slug]/page.tsx`.
+- [ ] Add loading state handling for `src/app/forum/c/[slug]/page.tsx`.
+- [ ] Review responsive layout for `src/app/forum/c/[slug]/page.tsx`.
+- [ ] Add empty state messaging for `src/app/forum/c/[slug]/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/forum/c/[slug]/page.tsx`.
+- [ ] Verify focus styles for `src/app/forum/c/[slug]/page.tsx`.
+- [ ] Add unit tests for `src/app/forum/t/[id]/page.tsx`.
+- [ ] Audit accessibility for `src/app/forum/t/[id]/page.tsx`.
+- [ ] Add loading state handling for `src/app/forum/t/[id]/page.tsx`.
+- [ ] Review responsive layout for `src/app/forum/t/[id]/page.tsx`.
+- [ ] Add empty state messaging for `src/app/forum/t/[id]/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/forum/t/[id]/page.tsx`.
+- [ ] Verify focus styles for `src/app/forum/t/[id]/page.tsx`.
+- [ ] Add unit tests for `src/app/services/design/layout.tsx`.
+- [ ] Audit accessibility for `src/app/services/design/layout.tsx`.
+- [ ] Add loading state handling for `src/app/services/design/layout.tsx`.
+- [ ] Review responsive layout for `src/app/services/design/layout.tsx`.
+- [ ] Add empty state messaging for `src/app/services/design/layout.tsx`.
+- [ ] Add error boundary coverage for `src/app/services/design/layout.tsx`.
+- [ ] Verify focus styles for `src/app/services/design/layout.tsx`.
+- [ ] Add unit tests for `src/app/services/design/page.tsx`.
+- [ ] Audit accessibility for `src/app/services/design/page.tsx`.
+- [ ] Add loading state handling for `src/app/services/design/page.tsx`.
+- [ ] Review responsive layout for `src/app/services/design/page.tsx`.
+- [ ] Add empty state messaging for `src/app/services/design/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/services/design/page.tsx`.
+- [ ] Verify focus styles for `src/app/services/design/page.tsx`.
+- [ ] Add unit tests for `src/app/services/web-development/layout.tsx`.
+- [ ] Audit accessibility for `src/app/services/web-development/layout.tsx`.
+- [ ] Add loading state handling for `src/app/services/web-development/layout.tsx`.
+- [ ] Review responsive layout for `src/app/services/web-development/layout.tsx`.
+- [ ] Add empty state messaging for `src/app/services/web-development/layout.tsx`.
+- [ ] Add error boundary coverage for `src/app/services/web-development/layout.tsx`.
+- [ ] Verify focus styles for `src/app/services/web-development/layout.tsx`.
+- [ ] Add unit tests for `src/app/services/web-development/page.tsx`.
+- [ ] Audit accessibility for `src/app/services/web-development/page.tsx`.
+- [ ] Add loading state handling for `src/app/services/web-development/page.tsx`.
+- [ ] Review responsive layout for `src/app/services/web-development/page.tsx`.
+- [ ] Add empty state messaging for `src/app/services/web-development/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/services/web-development/page.tsx`.
+- [ ] Verify focus styles for `src/app/services/web-development/page.tsx`.
+- [ ] Add unit tests for `src/app/services/mobile-apps/layout.tsx`.
+- [ ] Audit accessibility for `src/app/services/mobile-apps/layout.tsx`.
+- [ ] Add loading state handling for `src/app/services/mobile-apps/layout.tsx`.
+- [ ] Review responsive layout for `src/app/services/mobile-apps/layout.tsx`.
+- [ ] Add empty state messaging for `src/app/services/mobile-apps/layout.tsx`.
+- [ ] Add error boundary coverage for `src/app/services/mobile-apps/layout.tsx`.
+- [ ] Verify focus styles for `src/app/services/mobile-apps/layout.tsx`.
+- [ ] Add unit tests for `src/app/services/mobile-apps/page.tsx`.
+- [ ] Audit accessibility for `src/app/services/mobile-apps/page.tsx`.
+- [ ] Add loading state handling for `src/app/services/mobile-apps/page.tsx`.
+- [ ] Review responsive layout for `src/app/services/mobile-apps/page.tsx`.
+- [ ] Add empty state messaging for `src/app/services/mobile-apps/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/services/mobile-apps/page.tsx`.
+- [ ] Verify focus styles for `src/app/services/mobile-apps/page.tsx`.
+- [ ] Add unit tests for `src/app/services/cloud-infrastructure/layout.tsx`.
+- [ ] Audit accessibility for `src/app/services/cloud-infrastructure/layout.tsx`.
+- [ ] Add loading state handling for `src/app/services/cloud-infrastructure/layout.tsx`.
+- [ ] Review responsive layout for `src/app/services/cloud-infrastructure/layout.tsx`.
+- [ ] Add empty state messaging for `src/app/services/cloud-infrastructure/layout.tsx`.
+- [ ] Add error boundary coverage for `src/app/services/cloud-infrastructure/layout.tsx`.
+- [ ] Verify focus styles for `src/app/services/cloud-infrastructure/layout.tsx`.
+- [ ] Add unit tests for `src/app/services/cloud-infrastructure/page.tsx`.
+- [ ] Audit accessibility for `src/app/services/cloud-infrastructure/page.tsx`.
+- [ ] Add loading state handling for `src/app/services/cloud-infrastructure/page.tsx`.
+- [ ] Review responsive layout for `src/app/services/cloud-infrastructure/page.tsx`.
+- [ ] Add empty state messaging for `src/app/services/cloud-infrastructure/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/services/cloud-infrastructure/page.tsx`.
+- [ ] Verify focus styles for `src/app/services/cloud-infrastructure/page.tsx`.
+- [ ] Add unit tests for `src/app/admin/login/page.tsx`.
+- [ ] Audit accessibility for `src/app/admin/login/page.tsx`.
+- [ ] Add loading state handling for `src/app/admin/login/page.tsx`.
+- [ ] Review responsive layout for `src/app/admin/login/page.tsx`.
+- [ ] Add empty state messaging for `src/app/admin/login/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/admin/login/page.tsx`.
+- [ ] Verify focus styles for `src/app/admin/login/page.tsx`.
+- [ ] Add unit tests for `src/app/admin/dashboard/layout.tsx`.
+- [ ] Audit accessibility for `src/app/admin/dashboard/layout.tsx`.
+- [ ] Add loading state handling for `src/app/admin/dashboard/layout.tsx`.
+- [ ] Review responsive layout for `src/app/admin/dashboard/layout.tsx`.
+- [ ] Add empty state messaging for `src/app/admin/dashboard/layout.tsx`.
+- [ ] Add error boundary coverage for `src/app/admin/dashboard/layout.tsx`.
+- [ ] Verify focus styles for `src/app/admin/dashboard/layout.tsx`.
+- [ ] Add unit tests for `src/app/admin/dashboard/page.tsx`.
+- [ ] Audit accessibility for `src/app/admin/dashboard/page.tsx`.
+- [ ] Add loading state handling for `src/app/admin/dashboard/page.tsx`.
+- [ ] Review responsive layout for `src/app/admin/dashboard/page.tsx`.
+- [ ] Add empty state messaging for `src/app/admin/dashboard/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/admin/dashboard/page.tsx`.
+- [ ] Verify focus styles for `src/app/admin/dashboard/page.tsx`.
+- [ ] Add unit tests for `src/app/admin/system/page.tsx`.
+- [ ] Audit accessibility for `src/app/admin/system/page.tsx`.
+- [ ] Add loading state handling for `src/app/admin/system/page.tsx`.
+- [ ] Review responsive layout for `src/app/admin/system/page.tsx`.
+- [ ] Add empty state messaging for `src/app/admin/system/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/admin/system/page.tsx`.
+- [ ] Verify focus styles for `src/app/admin/system/page.tsx`.
+- [ ] Add unit tests for `src/app/admin/notifications/page.tsx`.
+- [ ] Audit accessibility for `src/app/admin/notifications/page.tsx`.
+- [ ] Add loading state handling for `src/app/admin/notifications/page.tsx`.
+- [ ] Review responsive layout for `src/app/admin/notifications/page.tsx`.
+- [ ] Add empty state messaging for `src/app/admin/notifications/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/admin/notifications/page.tsx`.
+- [ ] Verify focus styles for `src/app/admin/notifications/page.tsx`.
+- [ ] Add unit tests for `src/app/admin/analytics/page.tsx`.
+- [ ] Audit accessibility for `src/app/admin/analytics/page.tsx`.
+- [ ] Add loading state handling for `src/app/admin/analytics/page.tsx`.
+- [ ] Review responsive layout for `src/app/admin/analytics/page.tsx`.
+- [ ] Add empty state messaging for `src/app/admin/analytics/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/admin/analytics/page.tsx`.
+- [ ] Verify focus styles for `src/app/admin/analytics/page.tsx`.
+- [ ] Add unit tests for `src/app/admin/users/page.tsx`.
+- [ ] Audit accessibility for `src/app/admin/users/page.tsx`.
+- [ ] Add loading state handling for `src/app/admin/users/page.tsx`.
+- [ ] Review responsive layout for `src/app/admin/users/page.tsx`.
+- [ ] Add empty state messaging for `src/app/admin/users/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/admin/users/page.tsx`.
+- [ ] Verify focus styles for `src/app/admin/users/page.tsx`.
+- [ ] Add unit tests for `src/app/admin/dashboard/faq/page.tsx`.
+- [ ] Audit accessibility for `src/app/admin/dashboard/faq/page.tsx`.
+- [ ] Add loading state handling for `src/app/admin/dashboard/faq/page.tsx`.
+- [ ] Review responsive layout for `src/app/admin/dashboard/faq/page.tsx`.
+- [ ] Add empty state messaging for `src/app/admin/dashboard/faq/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/admin/dashboard/faq/page.tsx`.
+- [ ] Verify focus styles for `src/app/admin/dashboard/faq/page.tsx`.
+- [ ] Add unit tests for `src/app/admin/dashboard/design/page.tsx`.
+- [ ] Audit accessibility for `src/app/admin/dashboard/design/page.tsx`.
+- [ ] Add loading state handling for `src/app/admin/dashboard/design/page.tsx`.
+- [ ] Review responsive layout for `src/app/admin/dashboard/design/page.tsx`.
+- [ ] Add empty state messaging for `src/app/admin/dashboard/design/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/admin/dashboard/design/page.tsx`.
+- [ ] Verify focus styles for `src/app/admin/dashboard/design/page.tsx`.
+- [ ] Add unit tests for `src/app/admin/dashboard/projects/page.tsx`.
+- [ ] Audit accessibility for `src/app/admin/dashboard/projects/page.tsx`.
+- [ ] Add loading state handling for `src/app/admin/dashboard/projects/page.tsx`.
+- [ ] Review responsive layout for `src/app/admin/dashboard/projects/page.tsx`.
+- [ ] Add empty state messaging for `src/app/admin/dashboard/projects/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/admin/dashboard/projects/page.tsx`.
+- [ ] Verify focus styles for `src/app/admin/dashboard/projects/page.tsx`.
+- [ ] Add unit tests for `src/app/admin/dashboard/forum/page.tsx`.
+- [ ] Audit accessibility for `src/app/admin/dashboard/forum/page.tsx`.
+- [ ] Add loading state handling for `src/app/admin/dashboard/forum/page.tsx`.
+- [ ] Review responsive layout for `src/app/admin/dashboard/forum/page.tsx`.
+- [ ] Add empty state messaging for `src/app/admin/dashboard/forum/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/admin/dashboard/forum/page.tsx`.
+- [ ] Verify focus styles for `src/app/admin/dashboard/forum/page.tsx`.
+- [ ] Add unit tests for `src/app/admin/dashboard/contact/page.tsx`.
+- [ ] Audit accessibility for `src/app/admin/dashboard/contact/page.tsx`.
+- [ ] Add loading state handling for `src/app/admin/dashboard/contact/page.tsx`.
+- [ ] Review responsive layout for `src/app/admin/dashboard/contact/page.tsx`.
+- [ ] Add empty state messaging for `src/app/admin/dashboard/contact/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/admin/dashboard/contact/page.tsx`.
+- [ ] Verify focus styles for `src/app/admin/dashboard/contact/page.tsx`.
+- [ ] Add unit tests for `src/app/admin/dashboard/audit/page.tsx`.
+- [ ] Audit accessibility for `src/app/admin/dashboard/audit/page.tsx`.
+- [ ] Add loading state handling for `src/app/admin/dashboard/audit/page.tsx`.
+- [ ] Review responsive layout for `src/app/admin/dashboard/audit/page.tsx`.
+- [ ] Add empty state messaging for `src/app/admin/dashboard/audit/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/admin/dashboard/audit/page.tsx`.
+- [ ] Verify focus styles for `src/app/admin/dashboard/audit/page.tsx`.
+- [ ] Add unit tests for `src/app/admin/dashboard/users/page.tsx`.
+- [ ] Audit accessibility for `src/app/admin/dashboard/users/page.tsx`.
+- [ ] Add loading state handling for `src/app/admin/dashboard/users/page.tsx`.
+- [ ] Review responsive layout for `src/app/admin/dashboard/users/page.tsx`.
+- [ ] Add empty state messaging for `src/app/admin/dashboard/users/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/admin/dashboard/users/page.tsx`.
+- [ ] Verify focus styles for `src/app/admin/dashboard/users/page.tsx`.
+- [ ] Add unit tests for `src/app/admin/dashboard/homepage/page.tsx`.
+- [ ] Audit accessibility for `src/app/admin/dashboard/homepage/page.tsx`.
+- [ ] Add loading state handling for `src/app/admin/dashboard/homepage/page.tsx`.
+- [ ] Review responsive layout for `src/app/admin/dashboard/homepage/page.tsx`.
+- [ ] Add empty state messaging for `src/app/admin/dashboard/homepage/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/admin/dashboard/homepage/page.tsx`.
+- [ ] Verify focus styles for `src/app/admin/dashboard/homepage/page.tsx`.
+- [ ] Add unit tests for `src/app/admin/dashboard/goals/page.tsx`.
+- [ ] Audit accessibility for `src/app/admin/dashboard/goals/page.tsx`.
+- [ ] Add loading state handling for `src/app/admin/dashboard/goals/page.tsx`.
+- [ ] Review responsive layout for `src/app/admin/dashboard/goals/page.tsx`.
+- [ ] Add empty state messaging for `src/app/admin/dashboard/goals/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/admin/dashboard/goals/page.tsx`.
+- [ ] Verify focus styles for `src/app/admin/dashboard/goals/page.tsx`.
+- [ ] Add unit tests for `src/app/admin/dashboard/blogs/page.tsx`.
+- [ ] Audit accessibility for `src/app/admin/dashboard/blogs/page.tsx`.
+- [ ] Add loading state handling for `src/app/admin/dashboard/blogs/page.tsx`.
+- [ ] Review responsive layout for `src/app/admin/dashboard/blogs/page.tsx`.
+- [ ] Add empty state messaging for `src/app/admin/dashboard/blogs/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/admin/dashboard/blogs/page.tsx`.
+- [ ] Verify focus styles for `src/app/admin/dashboard/blogs/page.tsx`.
+- [ ] Add unit tests for `src/app/admin/dashboard/videos/page.tsx`.
+- [ ] Audit accessibility for `src/app/admin/dashboard/videos/page.tsx`.
+- [ ] Add loading state handling for `src/app/admin/dashboard/videos/page.tsx`.
+- [ ] Review responsive layout for `src/app/admin/dashboard/videos/page.tsx`.
+- [ ] Add empty state messaging for `src/app/admin/dashboard/videos/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/admin/dashboard/videos/page.tsx`.
+- [ ] Verify focus styles for `src/app/admin/dashboard/videos/page.tsx`.
+- [ ] Add unit tests for `src/app/admin/dashboard/projects/stats/page.tsx`.
+- [ ] Audit accessibility for `src/app/admin/dashboard/projects/stats/page.tsx`.
+- [ ] Add loading state handling for `src/app/admin/dashboard/projects/stats/page.tsx`.
+- [ ] Review responsive layout for `src/app/admin/dashboard/projects/stats/page.tsx`.
+- [ ] Add empty state messaging for `src/app/admin/dashboard/projects/stats/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/admin/dashboard/projects/stats/page.tsx`.
+- [ ] Verify focus styles for `src/app/admin/dashboard/projects/stats/page.tsx`.
+- [ ] Add unit tests for `src/app/admin/dashboard/projects/[id]/page.tsx`.
+- [ ] Audit accessibility for `src/app/admin/dashboard/projects/[id]/page.tsx`.
+- [ ] Add loading state handling for `src/app/admin/dashboard/projects/[id]/page.tsx`.
+- [ ] Review responsive layout for `src/app/admin/dashboard/projects/[id]/page.tsx`.
+- [ ] Add empty state messaging for `src/app/admin/dashboard/projects/[id]/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/admin/dashboard/projects/[id]/page.tsx`.
+- [ ] Verify focus styles for `src/app/admin/dashboard/projects/[id]/page.tsx`.
+- [ ] Add unit tests for `src/app/admin/dashboard/blogs/new/page.tsx`.
+- [ ] Audit accessibility for `src/app/admin/dashboard/blogs/new/page.tsx`.
+- [ ] Add loading state handling for `src/app/admin/dashboard/blogs/new/page.tsx`.
+- [ ] Review responsive layout for `src/app/admin/dashboard/blogs/new/page.tsx`.
+- [ ] Add empty state messaging for `src/app/admin/dashboard/blogs/new/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/admin/dashboard/blogs/new/page.tsx`.
+- [ ] Verify focus styles for `src/app/admin/dashboard/blogs/new/page.tsx`.
+- [ ] Add unit tests for `src/app/admin/dashboard/blogs/[id]/edit/page.tsx`.
+- [ ] Audit accessibility for `src/app/admin/dashboard/blogs/[id]/edit/page.tsx`.
+- [ ] Add loading state handling for `src/app/admin/dashboard/blogs/[id]/edit/page.tsx`.
+- [ ] Review responsive layout for `src/app/admin/dashboard/blogs/[id]/edit/page.tsx`.
+- [ ] Add empty state messaging for `src/app/admin/dashboard/blogs/[id]/edit/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/admin/dashboard/blogs/[id]/edit/page.tsx`.
+- [ ] Verify focus styles for `src/app/admin/dashboard/blogs/[id]/edit/page.tsx`.
+- [ ] Add unit tests for `src/app/blogs/[id]/page.tsx`.
+- [ ] Audit accessibility for `src/app/blogs/[id]/page.tsx`.
+- [ ] Add loading state handling for `src/app/blogs/[id]/page.tsx`.
+- [ ] Review responsive layout for `src/app/blogs/[id]/page.tsx`.
+- [ ] Add empty state messaging for `src/app/blogs/[id]/page.tsx`.
+- [ ] Add error boundary coverage for `src/app/blogs/[id]/page.tsx`.
+- [ ] Verify focus styles for `src/app/blogs/[id]/page.tsx`.
+- [ ] Add unit tests for `src/lib/auth/users.ts`.
+- [ ] Add edge case coverage for `src/lib/auth/users.ts`.
+- [ ] Add input validation for `src/lib/auth/users.ts`.
+- [ ] Review error handling for `src/lib/auth/users.ts`.
+- [ ] Document behavior and defaults for `src/lib/auth/users.ts`.
+- [ ] Review performance hot paths in `src/lib/auth/users.ts`.
+- [ ] Add logging hooks for `src/lib/auth/users.ts`.
+- [ ] Add unit tests for `src/lib/react-toastify/index.tsx`.
+- [ ] Add edge case coverage for `src/lib/react-toastify/index.tsx`.
+- [ ] Add input validation for `src/lib/react-toastify/index.tsx`.
+- [ ] Review error handling for `src/lib/react-toastify/index.tsx`.
+- [ ] Document behavior and defaults for `src/lib/react-toastify/index.tsx`.
+- [ ] Review performance hot paths in `src/lib/react-toastify/index.tsx`.
+- [ ] Add logging hooks for `src/lib/react-toastify/index.tsx`.
+- [ ] Add unit tests for `src/lib/admin/translations.ts`.
+- [ ] Add edge case coverage for `src/lib/admin/translations.ts`.
+- [ ] Add input validation for `src/lib/admin/translations.ts`.
+- [ ] Review error handling for `src/lib/admin/translations.ts`.
+- [ ] Document behavior and defaults for `src/lib/admin/translations.ts`.
+- [ ] Review performance hot paths in `src/lib/admin/translations.ts`.
+- [ ] Add logging hooks for `src/lib/admin/translations.ts`.
+- [ ] Add unit tests for `src/components/auth/TermsText.tsx`.
+- [ ] Audit accessibility for `src/components/auth/TermsText.tsx`.
+- [ ] Add loading state handling for `src/components/auth/TermsText.tsx`.
+- [ ] Review responsive layout for `src/components/auth/TermsText.tsx`.
+- [ ] Add empty state messaging for `src/components/auth/TermsText.tsx`.
+- [ ] Add error boundary coverage for `src/components/auth/TermsText.tsx`.
+- [ ] Verify focus styles for `src/components/auth/TermsText.tsx`.
+- [ ] Add unit tests for `src/components/auth/AvatarUpload.tsx`.
+- [ ] Audit accessibility for `src/components/auth/AvatarUpload.tsx`.
+- [ ] Add loading state handling for `src/components/auth/AvatarUpload.tsx`.
+- [ ] Review responsive layout for `src/components/auth/AvatarUpload.tsx`.
+- [ ] Add empty state messaging for `src/components/auth/AvatarUpload.tsx`.
+- [ ] Add error boundary coverage for `src/components/auth/AvatarUpload.tsx`.
+- [ ] Verify focus styles for `src/components/auth/AvatarUpload.tsx`.
+- [ ] Add unit tests for `src/components/auth/PasswordStrength.tsx`.
+- [ ] Audit accessibility for `src/components/auth/PasswordStrength.tsx`.
+- [ ] Add loading state handling for `src/components/auth/PasswordStrength.tsx`.
+- [ ] Review responsive layout for `src/components/auth/PasswordStrength.tsx`.
+- [ ] Add empty state messaging for `src/components/auth/PasswordStrength.tsx`.
+- [ ] Add error boundary coverage for `src/components/auth/PasswordStrength.tsx`.
+- [ ] Verify focus styles for `src/components/auth/PasswordStrength.tsx`.
+- [ ] Add unit tests for `src/components/auth/PasswordInput.tsx`.
+- [ ] Audit accessibility for `src/components/auth/PasswordInput.tsx`.
+- [ ] Add loading state handling for `src/components/auth/PasswordInput.tsx`.
+- [ ] Review responsive layout for `src/components/auth/PasswordInput.tsx`.
+- [ ] Add empty state messaging for `src/components/auth/PasswordInput.tsx`.
+- [ ] Add error boundary coverage for `src/components/auth/PasswordInput.tsx`.
+- [ ] Verify focus styles for `src/components/auth/PasswordInput.tsx`.
+- [ ] Add unit tests for `src/components/auth/google-button.tsx`.
+- [ ] Audit accessibility for `src/components/auth/google-button.tsx`.
+- [ ] Add loading state handling for `src/components/auth/google-button.tsx`.
+- [ ] Review responsive layout for `src/components/auth/google-button.tsx`.
+- [ ] Add empty state messaging for `src/components/auth/google-button.tsx`.
+- [ ] Add error boundary coverage for `src/components/auth/google-button.tsx`.
+- [ ] Verify focus styles for `src/components/auth/google-button.tsx`.
+- [ ] Add unit tests for `src/components/auth/TwoFactorModal.tsx`.
+- [ ] Audit accessibility for `src/components/auth/TwoFactorModal.tsx`.
+- [ ] Add loading state handling for `src/components/auth/TwoFactorModal.tsx`.
+- [ ] Review responsive layout for `src/components/auth/TwoFactorModal.tsx`.
+- [ ] Add empty state messaging for `src/components/auth/TwoFactorModal.tsx`.
+- [ ] Add error boundary coverage for `src/components/auth/TwoFactorModal.tsx`.
+- [ ] Verify focus styles for `src/components/auth/TwoFactorModal.tsx`.
+- [ ] Add unit tests for `src/components/auth/protected-route.tsx`.
+- [ ] Audit accessibility for `src/components/auth/protected-route.tsx`.
+- [ ] Add loading state handling for `src/components/auth/protected-route.tsx`.
+- [ ] Review responsive layout for `src/components/auth/protected-route.tsx`.
+- [ ] Add empty state messaging for `src/components/auth/protected-route.tsx`.
+- [ ] Add error boundary coverage for `src/components/auth/protected-route.tsx`.
+- [ ] Verify focus styles for `src/components/auth/protected-route.tsx`.
+- [ ] Add unit tests for `src/components/blog/LikeButton.tsx`.
+- [ ] Audit accessibility for `src/components/blog/LikeButton.tsx`.
+- [ ] Add loading state handling for `src/components/blog/LikeButton.tsx`.
+- [ ] Review responsive layout for `src/components/blog/LikeButton.tsx`.
+- [ ] Add empty state messaging for `src/components/blog/LikeButton.tsx`.
+- [ ] Add error boundary coverage for `src/components/blog/LikeButton.tsx`.
+- [ ] Verify focus styles for `src/components/blog/LikeButton.tsx`.
+- [ ] Add unit tests for `src/components/blog/blog-post.tsx`.
+- [ ] Audit accessibility for `src/components/blog/blog-post.tsx`.
+- [ ] Add loading state handling for `src/components/blog/blog-post.tsx`.
+- [ ] Review responsive layout for `src/components/blog/blog-post.tsx`.
+- [ ] Add empty state messaging for `src/components/blog/blog-post.tsx`.
+- [ ] Add error boundary coverage for `src/components/blog/blog-post.tsx`.
+- [ ] Verify focus styles for `src/components/blog/blog-post.tsx`.
+- [ ] Add unit tests for `src/components/layout/header.tsx`.
+- [ ] Audit accessibility for `src/components/layout/header.tsx`.
+- [ ] Add loading state handling for `src/components/layout/header.tsx`.
+- [ ] Review responsive layout for `src/components/layout/header.tsx`.
+- [ ] Add empty state messaging for `src/components/layout/header.tsx`.
+- [ ] Add error boundary coverage for `src/components/layout/header.tsx`.
+- [ ] Verify focus styles for `src/components/layout/header.tsx`.
+- [ ] Add unit tests for `src/components/layout/site-shell.tsx`.
+- [ ] Audit accessibility for `src/components/layout/site-shell.tsx`.
+- [ ] Add loading state handling for `src/components/layout/site-shell.tsx`.
+- [ ] Review responsive layout for `src/components/layout/site-shell.tsx`.
+- [ ] Add empty state messaging for `src/components/layout/site-shell.tsx`.
+- [ ] Add error boundary coverage for `src/components/layout/site-shell.tsx`.
+- [ ] Verify focus styles for `src/components/layout/site-shell.tsx`.
+- [ ] Add unit tests for `src/components/layout/footer.tsx`.
+- [ ] Audit accessibility for `src/components/layout/footer.tsx`.
+- [ ] Add loading state handling for `src/components/layout/footer.tsx`.
+- [ ] Review responsive layout for `src/components/layout/footer.tsx`.
+- [ ] Add empty state messaging for `src/components/layout/footer.tsx`.
+- [ ] Add error boundary coverage for `src/components/layout/footer.tsx`.
+- [ ] Verify focus styles for `src/components/layout/footer.tsx`.
+- [ ] Add unit tests for `src/components/layout/locale-switcher.tsx`.
+- [ ] Audit accessibility for `src/components/layout/locale-switcher.tsx`.
+- [ ] Add loading state handling for `src/components/layout/locale-switcher.tsx`.
+- [ ] Review responsive layout for `src/components/layout/locale-switcher.tsx`.
+- [ ] Add empty state messaging for `src/components/layout/locale-switcher.tsx`.
+- [ ] Add error boundary coverage for `src/components/layout/locale-switcher.tsx`.
+- [ ] Verify focus styles for `src/components/layout/locale-switcher.tsx`.
+- [ ] Add unit tests for `src/components/ui/particles-background.tsx`.
+- [ ] Audit accessibility for `src/components/ui/particles-background.tsx`.
+- [ ] Add loading state handling for `src/components/ui/particles-background.tsx`.
+- [ ] Review responsive layout for `src/components/ui/particles-background.tsx`.
+- [ ] Add empty state messaging for `src/components/ui/particles-background.tsx`.
+- [ ] Add error boundary coverage for `src/components/ui/particles-background.tsx`.
+- [ ] Verify focus styles for `src/components/ui/particles-background.tsx`.
+- [ ] Add unit tests for `src/components/ui/global-toast-container.tsx`.
+- [ ] Audit accessibility for `src/components/ui/global-toast-container.tsx`.
+- [ ] Add loading state handling for `src/components/ui/global-toast-container.tsx`.
+- [ ] Review responsive layout for `src/components/ui/global-toast-container.tsx`.
+- [ ] Add empty state messaging for `src/components/ui/global-toast-container.tsx`.
+- [ ] Add error boundary coverage for `src/components/ui/global-toast-container.tsx`.
+- [ ] Verify focus styles for `src/components/ui/global-toast-container.tsx`.
+- [ ] Add unit tests for `src/components/ui/card.tsx`.
+- [ ] Audit accessibility for `src/components/ui/card.tsx`.
+- [ ] Add loading state handling for `src/components/ui/card.tsx`.
+- [ ] Review responsive layout for `src/components/ui/card.tsx`.
+- [ ] Add empty state messaging for `src/components/ui/card.tsx`.
+- [ ] Add error boundary coverage for `src/components/ui/card.tsx`.
+- [ ] Verify focus styles for `src/components/ui/card.tsx`.
+- [ ] Add unit tests for `src/components/ui/navigation-menu.tsx`.
+- [ ] Audit accessibility for `src/components/ui/navigation-menu.tsx`.
+- [ ] Add loading state handling for `src/components/ui/navigation-menu.tsx`.
+- [ ] Review responsive layout for `src/components/ui/navigation-menu.tsx`.
+- [ ] Add empty state messaging for `src/components/ui/navigation-menu.tsx`.
+- [ ] Add error boundary coverage for `src/components/ui/navigation-menu.tsx`.
+- [ ] Verify focus styles for `src/components/ui/navigation-menu.tsx`.
+- [ ] Add unit tests for `src/components/ui/particles-client-wrapper.tsx`.
+- [ ] Audit accessibility for `src/components/ui/particles-client-wrapper.tsx`.
+- [ ] Add loading state handling for `src/components/ui/particles-client-wrapper.tsx`.
+- [ ] Review responsive layout for `src/components/ui/particles-client-wrapper.tsx`.
+- [ ] Add empty state messaging for `src/components/ui/particles-client-wrapper.tsx`.
+- [ ] Add error boundary coverage for `src/components/ui/particles-client-wrapper.tsx`.
+- [ ] Verify focus styles for `src/components/ui/particles-client-wrapper.tsx`.
+- [ ] Add unit tests for `src/components/ui/theme-toggle.tsx`.
+- [ ] Audit accessibility for `src/components/ui/theme-toggle.tsx`.
+- [ ] Add loading state handling for `src/components/ui/theme-toggle.tsx`.
+- [ ] Review responsive layout for `src/components/ui/theme-toggle.tsx`.
+- [ ] Add empty state messaging for `src/components/ui/theme-toggle.tsx`.
+- [ ] Add error boundary coverage for `src/components/ui/theme-toggle.tsx`.
+- [ ] Verify focus styles for `src/components/ui/theme-toggle.tsx`.
+- [ ] Add unit tests for `src/components/ui/animated-button.tsx`.
+- [ ] Audit accessibility for `src/components/ui/animated-button.tsx`.
+- [ ] Add loading state handling for `src/components/ui/animated-button.tsx`.
+- [ ] Review responsive layout for `src/components/ui/animated-button.tsx`.
+- [ ] Add empty state messaging for `src/components/ui/animated-button.tsx`.
+- [ ] Add error boundary coverage for `src/components/ui/animated-button.tsx`.
+- [ ] Verify focus styles for `src/components/ui/animated-button.tsx`.
+- [ ] Add unit tests for `src/components/ui/gradient-text.tsx`.
+- [ ] Audit accessibility for `src/components/ui/gradient-text.tsx`.
+- [ ] Add loading state handling for `src/components/ui/gradient-text.tsx`.
+- [ ] Review responsive layout for `src/components/ui/gradient-text.tsx`.
+- [ ] Add empty state messaging for `src/components/ui/gradient-text.tsx`.
+- [ ] Add error boundary coverage for `src/components/ui/gradient-text.tsx`.

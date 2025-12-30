@@ -4,10 +4,15 @@ const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:500
 
 export async function POST(request: NextRequest) {
   try {
+    console.info("[google-auth]", { method: request.method, path: request.nextUrl.pathname });
+    const contentType = request.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      return NextResponse.json({ error: "Content-Type must be application/json" }, { status: 415 });
+    }
     const body = await request.json();
     const { idToken, source } = body;
 
-    if (!idToken) {
+    if (!idToken || typeof idToken !== "string" || idToken.length < 10) {
       return NextResponse.json(
         { error: "Missing idToken" },
         { status: 400 }

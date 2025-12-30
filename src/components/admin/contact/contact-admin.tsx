@@ -9,9 +9,9 @@ import { useAdminToken } from "@/hooks/use-admin-token";
 import { AdminCard, AdminCardHeader, AdminBadge } from "@/components/admin/ui";
 
 const formatDate = (value?: string, locale?: string) => {
-  if (!value) return "—";
+  if (!value) return "";
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "—";
+  if (Number.isNaN(date.getTime())) return "";
   return new Intl.DateTimeFormat(locale ?? "tr-TR", {
     day: "2-digit",
     month: "short",

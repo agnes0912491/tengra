@@ -1,5 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
+
+if [[ $# -ne 0 ]]; then
+  echo "Usage: $0" >&2
+  exit 2
+fi
+
+if [[ ! -d /srv/tengra/apps/tengra ]]; then
+  echo "Missing app directory: /srv/tengra/apps/tengra" >&2
+  exit 1
+fi
+
+for cmd in node npm flock; do
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    echo "Missing required command: $cmd" >&2
+    exit 1
+  fi
+done
+
 cd /srv/tengra/apps/tengra
 
 # build kilidi

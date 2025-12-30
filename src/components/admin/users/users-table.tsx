@@ -186,7 +186,7 @@ export default function UsersTable({ initialUsers, currentUserId, currentUserRol
                       <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[rgba(72,213,255,0.2)] to-[rgba(72,213,255,0.05)] flex items-center justify-center text-[rgba(130,226,255,0.8)]">
                         <UserIcon className="h-4 w-4" />
                       </div>
-                      <p className="font-medium text-white">{user.displayName ?? user.username ?? "—"}</p>
+                      <p className="font-medium text-white">{user.displayName ?? user.username ?? ""}</p>
                     </div>
                   </td>
                   <td className="px-4 py-3.5">
@@ -218,7 +218,7 @@ export default function UsersTable({ initialUsers, currentUserId, currentUserRol
                         ))}
                       </select>
                     ) : (
-                      <span className="text-xs text-[rgba(255,255,255,0.3)]">—</span>
+                      <span className="text-xs text-[rgba(255,255,255,0.3)]"></span>
                     )}
                   </td>
                 </tr>

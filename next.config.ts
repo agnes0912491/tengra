@@ -39,7 +39,7 @@ const nextConfig: NextConfig = {
   htmlLimitedBots: /.*/,
   poweredByHeader: false,
   // Security headers are now handled by Nginx for better performance and consolidation
-  // See /srv/tengra/packages/config/assets/nginx.conf
+  // See /srv/tengra/nginx/nginx.conf (compat stub at packages/config/assets/nginx.conf)
 };
 
 export default nextConfig;

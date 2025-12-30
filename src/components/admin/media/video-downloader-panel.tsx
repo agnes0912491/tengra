@@ -158,7 +158,7 @@ export default function VideoDownloaderPanel() {
           </div>
           {authMissing ? (
             <p className="text-xs text-amber-200/80">
-              {t("authRequired", { name: user?.displayName || "—" })}
+              {t("authRequired", { name: user?.displayName || "" })}
             </p>
           ) : null}
         </div>

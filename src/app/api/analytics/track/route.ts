@@ -12,12 +12,23 @@ const ANALYTICS_API_URL =
  */
 export async function POST(request: NextRequest) {
   try {
+    console.info("[analytics:track]", { method: request.method, path: request.nextUrl.pathname });
+    const contentType = request.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      return NextResponse.json({ success: false, error: "Content-Type must be application/json" }, { status: 415 });
+    }
     const body = await request.json();
     const { path, ua, country } = body as {
       path?: string;
       ua?: string;
       country?: string;
     };
+    const normalizedPath = typeof path === "string" ? path : "/";
+    if (normalizedPath.length > 500) {
+      return NextResponse.json({ success: false, error: "Path too long" }, { status: 400 });
+    }
+    const normalizedUa = typeof ua === "string" ? ua : "";
+    const normalizedCountry = typeof country === "string" ? country : "";
 
     // Get visitor IP from headers (Cloudflare, X-Forwarded-For, or direct)
     const cfConnectingIp = request.headers.get("cf-connecting-ip");
@@ -35,16 +46,16 @@ export async function POST(request: NextRequest) {
     const resolvedCountry = cfCountry || country || "";
 
     // Skip malicious paths
-    const lowered = (path || "").toLowerCase();
+    const lowered = normalizedPath.toLowerCase();
     if (lowered.includes("/cgi-bin") || lowered.includes("stok=")) {
       return NextResponse.json({ success: true, skipped: true });
     }
 
     const payload = {
-      path: path || "/",
-      ua: ua || "",
+      path: normalizedPath || "/",
+      ua: normalizedUa,
       ip,
-      country: resolvedCountry,
+      country: resolvedCountry || normalizedCountry,
     };
 
     // Forward to backend with IP

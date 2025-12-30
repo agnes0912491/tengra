@@ -1,6 +1,14 @@
 import SiteShell from "@/components/layout/site-shell";
+import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/page-metadata";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "KVKK Notice | Tengra Studio",
+  description: "Personal data processing notice under the KVKK framework.",
+  path: "/kvkk",
+});
 
 export default function KvkkPage() {
     return (

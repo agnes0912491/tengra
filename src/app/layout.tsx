@@ -28,7 +28,7 @@ const notoOldTurkic = Noto_Sans_Old_Turkic({
 
 export const metadata: Metadata = {
   title: {
-    default: "Tengra Studio — Shaping myth, code, and divine precision",
+    default: "Tengra Studio  Shaping myth, code, and divine precision",
     template: "%s | Tengra Studio",
   },
   description:
@@ -71,7 +71,7 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Tengra Studio — Shaping myth and code",
+    title: "Tengra Studio  Shaping myth and code",
     description:
       "Immersive digital craftsmanship fusing the sacred with technology. We build high-performance web and mobile applications.",
     url: BASE_URL,

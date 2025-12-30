@@ -163,7 +163,7 @@ export default function TwoFactorModal({ tempToken, onSuccess, expirySeconds = 3
                 return;
             }
 
-            // Not successful — show more specific message if server provided one
+            // Not successful  show more specific message if server provided one
             const err = payload?.error ?? payload?.message ?? "Verification failed";
 
             // Map common server-side error codes/messages to friendly texts

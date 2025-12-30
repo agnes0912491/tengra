@@ -1,6 +1,14 @@
 import SiteShell from "@/components/layout/site-shell";
+import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/page-metadata";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "Terms of Use | Tengra Studio",
+  description: "Terms and conditions for using Tengra Studio sites and services.",
+  path: "/terms",
+});
 
 export default function TermsPage() {
   return (

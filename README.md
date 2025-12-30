@@ -72,3 +72,19 @@ npm install
 npm run dev
 ```
 Listens on port **3000**.
+
+## Usage
+See `docs/USAGE.md`.
+
+
+## Configuration
+See `docs/CONFIGURATION.md`.
+
+
+## Testing
+See `docs/TESTING.md`.
+
+
+## Troubleshooting
+See `docs/TROUBLESHOOTING.md`.
+

@@ -8,7 +8,7 @@ type Props = {
   fallback?: ReactNode;
 };
 
-export default function AdminCurrentUserName({ fallback = "—" }: Props) {
+export default function AdminCurrentUserName({ fallback = "" }: Props) {
   const { user } = useAuth();
 
   const displayName = user?.displayName?.trim();

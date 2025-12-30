@@ -36,6 +36,7 @@ async function getAdminTokenFromCookie(cookieHeader: string | null): Promise<str
 }
 
 export async function POST(req: Request) {
+  console.info("[admin:categories]", { method: "POST", path: new URL(req.url).pathname });
   const cookieHeader = req.headers.get("cookie");
   const token = await getAdminTokenFromCookie(cookieHeader);
   if (!token) {
@@ -43,6 +44,10 @@ export async function POST(req: Request) {
   }
 
   try {
+    const contentType = req.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      return NextResponse.json({ error: "Content-Type must be application/json" }, { status: 415 });
+    }
     const body = await req.json();
     const name = typeof body?.name === "string" ? body.name.trim() : "";
     if (!name) return NextResponse.json({ error: "missing_name" }, { status: 400 });
@@ -66,4 +71,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }
-

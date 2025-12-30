@@ -40,6 +40,7 @@ async function isAdminFromCookie(cookieHeader: string | null) {
 
 export async function GET(req: Request) {
   try {
+    console.info("[translations:preview]", { method: "GET", path: new URL(req.url).pathname });
     // Admin-only: verify admin cookie
     const cookieHeader = req.headers.get("cookie");
     const authorized = await isAdminFromCookie(cookieHeader);
@@ -49,11 +50,16 @@ export async function GET(req: Request) {
 
     const url = new URL(req.url);
     const locale = url.searchParams.get("locale");
-    if (!locale) {
+    if (!locale || !/^[a-z]{2}(-[A-Z]{2})?$/.test(locale)) {
       return NextResponse.json({ error: "missing locale" }, { status: 400 });
     }
 
     const filePath = path.join(TRANSLATIONS_DIR, `${locale}.json`);
+    try {
+      await fs.access(filePath);
+    } catch {
+      return NextResponse.json({ error: "missing translation file" }, { status: 404 });
+    }
     const content = await fs.readFile(filePath, "utf8");
 
     return NextResponse.json({ content });

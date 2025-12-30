@@ -342,7 +342,7 @@ export default function UserCard({ user, isCurrentUser, currentUserRole, isSelec
                     </div>
                     <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
                         <Globe className="w-3.5 h-3.5 text-[var(--color-turkish-blue-400)]" />
-                        <span className="text-[var(--text-secondary)]">{user.lastLoginCountry || "—"}</span>
+                        <span className="text-[var(--text-secondary)]">{user.lastLoginCountry || ""}</span>
                         {user.lastLoginCity && <span className="text-[var(--text-muted)]">/ {user.lastLoginCity}</span>}
                     </div>
                 </div>

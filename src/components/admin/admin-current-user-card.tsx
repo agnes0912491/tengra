@@ -17,9 +17,9 @@ export default function AdminCurrentUserCard() {
     router.refresh();
   }, [logout, router]);
 
-  const displayName = user?.displayName || user?.username || "—";
-  const email = user?.email ?? "—";
-  const role = user?.role ?? "—";
+  const displayName = user?.displayName || user?.username || "";
+  const email = user?.email ?? "";
+  const role = user?.role ?? "";
 
   return (
     <div className="flex h-full flex-col justify-between rounded-3xl border border-[rgba(110,211,225,0.16)] bg-[rgba(6,20,27,0.6)]/80 p-6 shadow-[0_25px_70px_rgba(0,0,0,0.45)] backdrop-blur-xl">

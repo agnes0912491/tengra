@@ -4,13 +4,28 @@ export const runtime = 'edge';
 
 export async function GET(request: Request) {
     try {
-        const { searchParams } = new URL(request.url);
+        const { searchParams, pathname } = new URL(request.url);
+        console.info('[og]', { method: 'GET', path: pathname });
+
+        const allowedKeys = new Set(['title']);
+        for (const key of searchParams.keys()) {
+            if (!allowedKeys.has(key)) {
+                return new Response('Unsupported query parameter.', { status: 400 });
+            }
+        }
+
+        const titleValues = searchParams.getAll('title');
+        if (titleValues.length > 1) {
+            return new Response('Multiple title parameters are not supported.', { status: 400 });
+        }
 
         // ?title=<title>
-        const hasTitle = searchParams.has('title');
-        const title = hasTitle
-            ? searchParams.get('title')?.slice(0, 100)
-            : 'Tengra Studio';
+        const rawTitle = titleValues[0];
+        const titleCandidate = rawTitle?.trim();
+        if (titleCandidate && titleCandidate.length > 100) {
+            return new Response('Title is too long.', { status: 400 });
+        }
+        const title = titleCandidate?.length ? titleCandidate : 'Tengra Studio';
 
         return new ImageResponse(
             (

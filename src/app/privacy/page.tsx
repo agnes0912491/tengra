@@ -1,6 +1,14 @@
 import SiteShell from "@/components/layout/site-shell";
+import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/page-metadata";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "Privacy Policy | Tengra Studio",
+  description: "How Tengra Studio collects, uses, and protects your information.",
+  path: "/privacy",
+});
 
 export default function PrivacyPage() {
   return (
