@@ -8,7 +8,7 @@ import { api } from "./api";
 
 // Base API URL for the backend. Use environment variable in production.
 const API_BASE =
-  process.env.NEXT_PUBLIC_BACKEND_API_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
   (typeof window === "undefined" ? "http://127.0.0.1:5000" : "http://localhost:5000");
 // All public content endpoints are served under /api on the backend Router.
 const BLOGS_API_URL = `${API_BASE}/blogs`;

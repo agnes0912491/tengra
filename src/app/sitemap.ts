@@ -100,7 +100,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   // API Route
-  const API_BASE = process.env.NEXT_PUBLIC_BACKEND_API_URL || "https://api.tengra.studio";
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.tengra.studio";
 
   // Blog yazılarını ekle (ISR ile statik)
   try {

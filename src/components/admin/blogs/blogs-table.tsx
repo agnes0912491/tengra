@@ -1,3 +1,5 @@
+"use client";
+
 import type { Blog } from "@/types/blog";
 import { useTranslation } from "@tengra/language";
 

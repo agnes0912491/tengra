@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import Image from "next/image";
 import { useTranslation } from "@tengra/language";
 
-const API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || "https://api.tengra.studio";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.tengra.studio";
 
 interface TwoFactorSettingsProps {
     token: string;

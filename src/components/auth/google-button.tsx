@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useEffect, useRef } from "react"
+import { useEffect, useState, useRef } from "react"
 
 interface GoogleButtonProps {
     onSuccess: (credential: string) => void
@@ -8,61 +8,82 @@ interface GoogleButtonProps {
 }
 
 export function GoogleButton({ onSuccess, onError }: GoogleButtonProps) {
-    const buttonRef = useRef<HTMLDivElement>(null)
+    const [isMounted, setIsMounted] = useState(false);
+    const buttonRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        // Check if script is loaded
-        if (typeof window === "undefined" || !window.google) return
+        setIsMounted(true);
+    }, []);
 
-        const initGoogle = () => {
+    useEffect(() => {
+        if (!isMounted) return;
+
+        const checkGoogle = () => {
+            const google = (window as any).google;
+            if (google?.accounts?.id) {
+                initButton(google);
+                return true;
+            }
+            return false;
+        };
+
+        if (!checkGoogle()) {
+            const timer = setInterval(() => {
+                if (checkGoogle()) {
+                    clearInterval(timer);
+                }
+            }, 500);
+            return () => clearInterval(timer);
+        }
+
+        function initButton(google: any) {
             try {
-                window.google!.accounts.id.initialize({
-                    client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "",
+                const client_id = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+                console.log("[GoogleButton] Initializing with Client ID:", client_id ? "PRESENT" : "MISSING");
+
+                google.accounts.id.initialize({
+                    client_id: client_id,
                     callback: (response: any) => {
+                        console.log("[GoogleButton] Response received:", response);
                         if (response.credential) {
-                            onSuccess(response.credential)
+                            onSuccess(response.credential);
                         } else {
-                            onError?.()
+                            console.error("[GoogleButton] No credential in response - possible error code:", response.error);
+                            onError?.();
                         }
                     },
                     auto_select: false,
                     cancel_on_tap_outside: true,
-                })
+                    ux_mode: 'popup',
+                    context: 'signin',
+                    itp_support: true, // For better Safari/Mobile support
+                });
 
                 if (buttonRef.current) {
-                    // Get width from parent
-                    const width = buttonRef.current.parentElement?.offsetWidth || 350;
-
-                    window.google!.accounts.id.renderButton(buttonRef.current, {
+                    console.log("[GoogleButton] Rendering button...");
+                    google.accounts.id.renderButton(buttonRef.current, {
                         theme: "outline",
                         size: "large",
-                        width: width, // Dynamic pixel width
+                        width: buttonRef.current.offsetWidth || 350,
                         text: "continue_with",
-                        shape: "rectangular",
                         logo_alignment: "left",
-                    })
+                        locale: "tr"
+                    });
                 }
             } catch (e) {
-                console.error("Google Auth Init Failed", e)
-                onError?.()
+                console.error("[GoogleButton] Init Error:", e);
+                onError?.();
             }
-        };
+        }
+    }, [isMounted, onSuccess, onError]);
 
-        // If width is 0 (hidden), wait? No, just run.
-        initGoogle();
-
-        // Handle resize slightly? (Optional, but good for responsiveness)
-        const handleResize = () => initGoogle();
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-
-    }, [onSuccess, onError])
+    if (!isMounted) return <div className="w-full h-[45px] animate-pulse bg-[rgba(15,31,54,0.4)] rounded-xl" />;
 
     return (
-        <div className="w-full flex justify-center h-[40px]">
-            <div ref={buttonRef} className="w-full" />
+        <div className="w-full flex justify-center py-2 min-h-[50px]">
+            <div ref={buttonRef} className="w-full max-w-[400px]" />
         </div>
-    )
+    );
 }
 
 // Add global type for window.google
@@ -73,7 +94,7 @@ declare global {
                 id: {
                     initialize: (config: any) => void
                     renderButton: (parent: HTMLElement, options: any) => void
-                    prompt: () => void
+                    prompt: (callback?: (notification: any) => void) => void
                 }
             }
         }

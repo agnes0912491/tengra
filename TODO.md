@@ -1,92 +1,102 @@
-Tengra Frontend TODO
+# TODO
 
-Kapsam: Admin paneli ve genel site arayüzü (Next.js + TailwindCSS)
-
-- Sidebar
-  - [x] Konteyneri `relative` konuma al ve iç overlay taşmasını engelle.
-  - [x] Navigasyon alanını `overflow-y-auto` yaparak küçük ekranlarda kaydırılabilir hale getir.
-  - [x] Aktif link için daha belirgin durum: ince yan çizgi + arka plan/kenarlık parlaklığı.
-  - [x] İkon seti ekle (lucide-react); her madde için anlamlı ikon tanımla.
-  - [x] Genişlik varyantları: `w-72` (default) ve `xl:w-80`.
-  - [x] `SidebarItem` bileşenine ayrıldı.
-
-- Tipografi ve hissiyat
-  - Başlıklarda `font-display` ve tracking ayarlarını uyumlu kullan.
-  - Cam efekti/kenarlık opasitelerini %5–10 aralığında tut, çok parlaklıkten kaçın.
-  - Koyu temada kontrastı “okunabilir ama sert değil” seviyesinde ayarla.
-
-- Hareket/etkileşim
-  - [x] Hover/aktif geçişleri 150–220ms aralığında.
-  - [x] Kartlarda micro-shadow (mevcut sınıflar ile).
-
-- Metrics sayfası
-  - [x] Kart ızgarasında hizalama ve başlıklar standardize edildi (`StatCard`/`ChartCard`).
-  - [x] Skeleton/boş durum: `EmptyState` ve `Skeleton` eklendi.
-  - [x] Grafikleri `ChartCard` bileşenine çıkarıldı.
-  - [x] Ülke dağılımı ve globe eklendi.
-
-- Erişilebilirlik
-  - [x] `aria-current="page"`, `role="navigation"` uygulandı.
-  - [ ] Klavye gezinme sırası ve `:focus-visible` özel stilleri (gerekirse düzenlenir).
-
-- Temiz kod
-  - [x] `SidebarItem` bileşeni eklendi.
-  - [ ] Renkleri değişkenleştir (gerekirse ayrı bir tema geçişinde).
-
-- Test/kalite
-  - [ ] Basit görsel regresyon (lokalde çalıştırılabilir).
-  - [ ] Lint ve type check: `npm run lint` / `tsc --noEmit`.
-
-Ek: Proje Ekleme
-- [x] Yeni proje modaline drag&drop image upload (Dropzone) ve `logoUrl` alanı eklendi.
-
-Ek: Lokasyon Analitiği
-- [x] Backend: `/analytics/countries/top` uç noktası eklendi.
-- [x] Backend: `page/increment` çağrısında ülke sayımı (body.country veya CF/Vercel başlığından enjekte).
-- [x] Frontend: AnalyticsTracker ülke tahmini (navigator.language) + isteğe eklenmesi.
-Next.js build speed tips (CI-ready)
-
-- Use ISR for server fetches
-  - Prefer `fetch(url, { next: { revalidate: 60 } })` over `cache: 'no-store'` in app routes that can be cached.
-  - Already applied: `app/sitemap.ts` now uses ISR instead of dynamic no-store.
-
-- Turn off heavy build artifacts
-  - `productionBrowserSourceMaps: false` (set in `next.config.ts`).
-
-- Dynamic import large UI bundles
-  - Keep heavy libs (e.g., markdown editor, globe, charts) loaded via `dynamic(() => import('...'), { ssr: false })` only where needed.
-
-- CI caching (GitHub Actions sketch)
-  - Cache `~/.npm`, `node_modules`, and `.next/cache`.
-
-  ```yaml
-  - name: Use Node 20
-    uses: actions/setup-node@v4
-    with:
-      node-version: 20
-      cache: 'npm'
-
-  - name: Cache Next.js build cache
-    uses: actions/cache@v4
-    with:
-      path: |
-        frontend/.next/cache
-      key: next-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
-
-  - name: Install deps
-    working-directory: frontend
-    run: npm ci
-
-  - name: Lint & typecheck
-    working-directory: frontend
-    run: |
-      npm run lint
-      # tsc --noEmit (if you keep separate TS step)
-
-  - name: Build
-    working-directory: frontend
-    run: npm run build
-  ```
-
-- Trim global work
-  - Avoid heavy async in root layouts or generateMetadata. Defer to page-level with ISR.
+- [ ] Document configuration keys used in `.github/workflows/ci.yml`.
+- [ ] Update and verify usage docs in `API_DOCS.md`.
+- [ ] Add examples and edge cases to `FAQ.md`.
+- [ ] Update and verify usage docs in `README.md`.
+- [ ] Add schema validation for `components.json`.
+- [ ] Review `envConfig.ts` for dead code and remove if unused.
+- [ ] Add tests or coverage notes for `eslint.config.mjs`.
+- [ ] Review `next-env.d.ts` for dead code and remove if unused.
+- [ ] Add tests or coverage notes for `next.config.ts`.
+- [ ] Audit defaults and environment overrides in `package.json`.
+- [ ] Review `postcss.config.mjs` for dead code and remove if unused.
+- [ ] Document configuration keys used in `public/manifest.json`.
+- [ ] Add tests or coverage notes for `public/sw.js`.
+- [ ] Review `public/tengra-analytics.js` for dead code and remove if unused.
+- [ ] Add input validation and safe defaults in `run_frontend.sh`.
+- [ ] Add metadata/SEO for `src/app/ClientUserProvider.tsx`.
+- [ ] Add skeleton loading UI for `src/app/about/layout.tsx`.
+- [ ] Add error boundary for `src/app/about/page.tsx`.
+- [ ] Add analytics events for `src/app/admin/analytics/page.tsx`.
+- [ ] Verify responsive layout for `src/app/admin/dashboard/audit/page.tsx`.
+- [ ] Add metadata/SEO for `src/app/admin/dashboard/blogs/[id]/edit/page.tsx`.
+- [ ] Add skeleton loading UI for `src/app/admin/dashboard/blogs/new/page.tsx`.
+- [ ] Add error boundary for `src/app/admin/dashboard/blogs/page.tsx`.
+- [ ] Add analytics events for `src/app/admin/dashboard/contact/page.tsx`.
+- [ ] Verify responsive layout for `src/app/admin/dashboard/design/page.tsx`.
+- [ ] Add metadata/SEO for `src/app/admin/dashboard/faq/page.tsx`.
+- [ ] Add skeleton loading UI for `src/app/admin/dashboard/forum/page.tsx`.
+- [ ] Add error boundary for `src/app/admin/dashboard/goals/page.tsx`.
+- [ ] Add analytics events for `src/app/admin/dashboard/homepage/page.tsx`.
+- [ ] Verify responsive layout for `src/app/admin/dashboard/layout.tsx`.
+- [ ] Add metadata/SEO for `src/app/admin/dashboard/page.tsx`.
+- [ ] Add skeleton loading UI for `src/app/admin/dashboard/projects/[id]/page.tsx`.
+- [ ] Add error boundary for `src/app/admin/dashboard/projects/page.tsx`.
+- [ ] Add analytics events for `src/app/admin/dashboard/projects/stats/page.tsx`.
+- [ ] Verify responsive layout for `src/app/admin/dashboard/users/page.tsx`.
+- [ ] Add metadata/SEO for `src/app/admin/dashboard/videos/page.tsx`.
+- [ ] Add skeleton loading UI for `src/app/admin/layout.tsx`.
+- [ ] Add error boundary for `src/app/admin/login/page.tsx`.
+- [ ] Add analytics events for `src/app/admin/notifications/page.tsx`.
+- [ ] Verify responsive layout for `src/app/admin/page.tsx`.
+- [ ] Add metadata/SEO for `src/app/admin/system/page.tsx`.
+- [ ] Add skeleton loading UI for `src/app/admin/users/page.tsx`.
+- [ ] Add request validation and error mapping for `src/app/api/admin/blogs/categories/route.ts`.
+- [ ] Add auth/permission checks for `src/app/api/admin/homepage/route.ts`.
+- [ ] Add rate limiting and abuse protection for `src/app/api/analytics/track/route.ts`.
+- [ ] Add integration tests for `src/app/api/google-auth/route.ts`.
+- [ ] Add structured logging and correlation IDs for `src/app/api/hello/route.ts`.
+- [ ] Add response caching where safe in `src/app/api/homepage/route.ts`.
+- [ ] Add request validation and error mapping for `src/app/api/messages/[locale]/route.ts`.
+- [ ] Add auth/permission checks for `src/app/api/og/route.tsx`.
+- [ ] Add rate limiting and abuse protection for `src/app/api/translations/preview/route.ts`.
+- [ ] Add error boundary for `src/app/blog/page.tsx`.
+- [ ] Add analytics events for `src/app/blogs/BlogsClient.tsx`.
+- [ ] Verify responsive layout for `src/app/blogs/[id]/page.tsx`.
+- [ ] Add metadata/SEO for `src/app/blogs/blogs-page-client.tsx`.
+- [ ] Add skeleton loading UI for `src/app/blogs/page.tsx`.
+- [ ] Add error boundary for `src/app/careers/page.tsx`.
+- [ ] Add analytics events for `src/app/contact/page.tsx`.
+- [ ] Verify responsive layout for `src/app/docs/page.tsx`.
+- [ ] Add metadata/SEO for `src/app/forgot-password/page.tsx`.
+- [ ] Add skeleton loading UI for `src/app/forum/c/[slug]/page.tsx`.
+- [ ] Add error boundary for `src/app/forum/new/page.tsx`.
+- [ ] Add analytics events for `src/app/forum/page.tsx`.
+- [ ] Verify responsive layout for `src/app/forum/t/[id]/page.tsx`.
+- [ ] Audit responsive breakpoints in `src/app/globals.css`.
+- [ ] Add metadata/SEO for `src/app/kvkk/page.tsx`.
+- [ ] Add skeleton loading UI for `src/app/layout.tsx`.
+- [ ] Add error boundary for `src/app/login/LoginForm.tsx`.
+- [ ] Add analytics events for `src/app/login/page.tsx`.
+- [ ] Verify responsive layout for `src/app/not-found.tsx`.
+- [ ] Add metadata/SEO for `src/app/offline/page.tsx`.
+- [ ] Add skeleton loading UI for `src/app/page.tsx`.
+- [ ] Add error boundary for `src/app/privacy/page.tsx`.
+- [ ] Add analytics events for `src/app/projects/page.tsx`.
+- [ ] Verify responsive layout for `src/app/register/RegisterForm.tsx`.
+- [ ] Add metadata/SEO for `src/app/register/page.tsx`.
+- [ ] Add skeleton loading UI for `src/app/reset-password/page.tsx`.
+- [ ] Add tests or coverage notes for `src/app/robots.ts`.
+- [ ] Add error boundary for `src/app/services/cloud-infrastructure/layout.tsx`.
+- [ ] Add analytics events for `src/app/services/cloud-infrastructure/page.tsx`.
+- [ ] Verify responsive layout for `src/app/services/design/layout.tsx`.
+- [ ] Add metadata/SEO for `src/app/services/design/page.tsx`.
+- [ ] Add skeleton loading UI for `src/app/services/mobile-apps/layout.tsx`.
+- [ ] Add error boundary for `src/app/services/mobile-apps/page.tsx`.
+- [ ] Add analytics events for `src/app/services/web-development/layout.tsx`.
+- [ ] Verify responsive layout for `src/app/services/web-development/page.tsx`.
+- [ ] Add metadata/SEO for `src/app/settings/page.tsx`.
+- [ ] Review `src/app/sitemap.ts` for dead code and remove if unused.
+- [ ] Add skeleton loading UI for `src/app/team/page.tsx`.
+- [ ] Add error boundary for `src/app/terms/page.tsx`.
+- [ ] Add unit tests for `src/components/admin/admin-current-user-card.tsx`.
+- [ ] Audit accessibility and aria labels in `src/components/admin/admin-current-user-name.tsx`.
+- [ ] Add loading/empty/error states in `src/components/admin/admin-page-header.tsx`.
+- [ ] Memoize expensive renders in `src/components/admin/admin-shell.tsx`.
+- [ ] Add keyboard navigation support in `src/components/admin/admin-stat-card.tsx`.
+- [ ] Add unit tests for `src/components/admin/analytics/realtime-analytics-dashboard.tsx`.
+- [ ] Audit accessibility and aria labels in `src/components/admin/analytics/user-activity-heatmap.tsx`.
+- [ ] Add loading/empty/error states in `src/components/admin/backup/backup-scheduling-dashboard.tsx`.
+- [ ] Memoize expensive renders in `src/components/admin/blogs/blog-create-cta.tsx`.
+- [ ] Add keyboard navigation support in `src/components/admin/blogs/blog-edit-modal.tsx`.

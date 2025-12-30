@@ -109,11 +109,13 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "https://cdn.tengra.studio/uploads/tengra_without_text.png", sizes: "32x32" },
-      { url: "https://cdn.tengra.studio/uploads/tengra_without_text.png", sizes: "16x16" }
+      { url: "https://cdn.tengra.studio/uploads/tengra_without_text.png", sizes: "any" },
+      { url: "https://cdn.tengra.studio/uploads/tengra_without_text.png", sizes: "32x32", type: "image/png" },
+      { url: "https://cdn.tengra.studio/uploads/tengra_without_text.png", sizes: "16x16", type: "image/png" }
     ],
+    shortcut: ["https://cdn.tengra.studio/uploads/tengra_without_text.png"],
     apple: [
-      { url: "https://cdn.tengra.studio/uploads/tengra_without_text.png", sizes: "180x180" }
+      { url: "https://cdn.tengra.studio/uploads/tengra_without_text.png", sizes: "180x180", type: "image/png" }
     ],
   },
   manifest: "/manifest.json",

@@ -21,7 +21,7 @@ const tabs = [
     { id: "accounts", label: "Bağlı Hesaplar", icon: Link2 },
     { id: "general", label: "Genel", icon: Settings },
 ];
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:5000";
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function SettingsPage() {
     const { user, logout, refreshAuth } = useAuth();

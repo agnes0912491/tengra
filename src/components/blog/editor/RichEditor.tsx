@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import DOMPurify from "isomorphic-dompurify";
 import { uploadPostImage } from "@/lib/cdn";
 
 interface RichEditorProps {
@@ -35,7 +36,9 @@ export default function RichEditor({
             },
         },
         onUpdate: ({ editor }) => {
-            onChange(editor.getHTML());
+            const rawHtml = editor.getHTML();
+            const sanitizedHtml = DOMPurify.sanitize(rawHtml);
+            onChange(sanitizedHtml);
         },
     });
 

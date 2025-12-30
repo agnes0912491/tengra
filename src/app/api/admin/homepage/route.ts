@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:5000";
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 const ADMIN_COOKIE_NAMES = ["admin_session", "authToken", "auth_token"];
 
 function parseCookie(header: string | null, name: string): string | undefined {

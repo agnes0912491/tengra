@@ -3,7 +3,7 @@ import { ForumCategory, ForumOnlineUser, ForumPost, ForumThread, ForumUser } fro
 const API_BASE =
   typeof window === "undefined"
     ? "http://127.0.0.1:5000"
-    : process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:5000";
+    : process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const FORUM_API_URL = `${API_BASE}/forum`;
 const FRONTEND_FORUM_KEY = process.env.NEXT_PUBLIC_FORUM_FRONTEND_KEY || "";

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "react-toastify";
+import DOMPurify from "isomorphic-dompurify";
 import { motion } from "framer-motion";
 import { useTranslation } from "@tengra/language";
 import {
@@ -428,7 +429,7 @@ export default function BlogEditor({ mode, initialBlog }: BlogEditorProps) {
                                     )}
                                     <div
                                         className="prose prose-slate max-w-none"
-                                        dangerouslySetInnerHTML={{ __html: draft.content || `<p>${t("editor.previewContentPlaceholder")}</p>` }}
+                                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(draft.content) || `<p>${t("editor.previewContentPlaceholder")}</p>` }}
                                     />
                                 </article>
                             </div>

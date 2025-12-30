@@ -18,7 +18,7 @@ import { safeJsonLd } from "@/lib/jsonld";
 import { cn, slugify } from "@/lib/utils";
 import { resolveCdnUrl } from "@/lib/constants";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "";
 
 type TocItem = {
   id: string;

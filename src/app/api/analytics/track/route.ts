@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const ANALYTICS_API_URL =
-  process.env.NEXT_PUBLIC_BACKEND_API_URL
-    ? `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/analytics`
+  process.env.NEXT_PUBLIC_API_URL
+    ? `${process.env.NEXT_PUBLIC_API_URL}/analytics`
     : "http://127.0.0.1:5000/analytics";
 
 /**
@@ -23,12 +23,12 @@ export async function POST(request: NextRequest) {
     const cfConnectingIp = request.headers.get("cf-connecting-ip");
     const xForwardedFor = request.headers.get("x-forwarded-for");
     const xRealIp = request.headers.get("x-real-ip");
-    
+
     // Use first IP if X-Forwarded-For contains multiple
-    const ip = cfConnectingIp || 
-               (xForwardedFor ? xForwardedFor.split(",")[0].trim() : null) ||
-               xRealIp ||
-               "";
+    const ip = cfConnectingIp ||
+      (xForwardedFor ? xForwardedFor.split(",")[0].trim() : null) ||
+      xRealIp ||
+      "";
 
     // Get country from Cloudflare header if available
     const cfCountry = request.headers.get("cf-ipcountry");
